@@ -1,0 +1,165 @@
+Menu="Docker"
+Title="Docker Service Settings"
+Cond="($var['fsState'] == 'Started')"
+---
+<script type="text/javascript">
+var isError;
+$.ajaxSetup({ async: false });
+$(document).ready(function() {
+  $("#startBtn ").click(function(event){
+    isError = false;
+    var size = $("input[name='DOCKER_IMAGE_SIZE']").val();
+    var target = $("#SIZE_ERROR");
+    if (! $.isNumeric( size )){
+      target.html('Error: value must be a number.');
+      target.css('color','#EF3D47');
+      isError = true;   
+    } else {
+      target.html('');
+    }
+    var image = $("#DOCKER_IMAGE_FILE").val();
+    var target = $("#IMAGE_ERROR");
+    $.getJSON( "/plugins/dynamix.docker.manager/update_cfg.php?is_dir=" + image).done(function( json ) {
+      if (json.is_dir == true){
+        target.html('Error: must be a file; directory provided.');
+        target.css('color','#EF3D47');
+        isError = true;
+      } else {
+        target.html('');
+      }
+    });
+
+    if (!isError) {$("#settingsForm").submit();}
+  }); 
+}); 
+</script>
+<?PHP
+// Add the Docker JSON client
+include_once("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerClient.php");
+$docker          = new DockerClient();
+$DockerUpdate    = new DockerUpdate();
+$DockerTemplates = new DockerTemplates();
+
+// Autostart file
+$autostart_file = $dockerManPaths['autostart-file'];
+
+// Repos file
+$template_repos = $dockerManPaths['template-repos'];
+
+// Docker configuration file
+$cfgfile = "/boot/config/docker.cfg";
+
+if (!file_exists($cfgfile)) {
+  echo "<p class='notice'>Missing docker.cfg file!</p>";
+  return;
+}
+$dockercfg = parse_ini_file($cfgfile);
+?>
+<?if (pgrep('docker') === false):?>
+
+<form id="settingsForm" markdown="1" method="POST" action="/update.php" target="progressFrame">
+<input type="hidden" name="#file" value="<?=$cfgfile;?>" />
+<input type="hidden" name="#command" value="/etc/rc.d/rc.docker start" />  
+
+Service Status:
+: **Stopped**
+
+> Before you can start the Docker service for the first time, please specify an image
+> file for Docker to install to.  Once started, Docker will always automatically start 
+> after the array has been started.
+
+Docker image:
+: <input type="text" name="DOCKER_IMAGE_FILE" id="DOCKER_IMAGE_FILE" value="<?=$dockercfg['DOCKER_IMAGE_FILE'];?>" placeholder="/mnt/disk1/docker.img" />
+
+> You must specify an image file for Docker.  The system will automatically
+> create this file when the Docker service is first started.  If you do not want Docker
+> to run at all, set this field blank and click **Start**.
+
+Default image size:
+: <input type="text" name="DOCKER_IMAGE_SIZE" value="<?=$dockercfg['DOCKER_IMAGE_SIZE'];?>" />GB
+
+> If the system needs to create a new docker image file, this is the default size to use
+> specified in GB.
+>
+> To resize an existing image file, specify the new size here.  Next time the Docker service is
+> started the file (and file system) will increased to the new size (but never decreased).
+
+&nbsp;
+: <input type="button" value="Start" id="startBtn"/>
+</form>
+
+<?else:?>
+
+Service Status:
+: **Started**
+
+> Stopping the Docker service will first stop all the running containers.
+
+Docker image:
+: <?=$dockercfg['DOCKER_IMAGE_FILE'];?>
+
+> This is the docker volume.
+
+Docker volume info:
+: <?echo "<pre>".shell_exec("btrfs filesystem show /var/lib/docker")."</pre>";?>
+
+> This is the output of *btrfs filesystem show /var/lib/docker*.
+
+<?$cmd="btrfs scrub start /var/lib/docker";?>
+
+<?if (pgrep("-f '$cmd'") !== false):?>
+
+<form markdown="1" method="POST" action="/update.htm" target="progressFrame">
+
+&nbsp;
+: <input type="submit" value="Scrub" disabled /> *Running*
+
+> If you want to Cancel the operation, close the window where it is running and then Refresh this page.
+
+&nbsp;
+: <input type="submit" value="Stop" disabled />
+</form>
+
+<?else:?>
+
+<form markdown="1" method="POST" action="/update.htm" target="progressFrame">
+&nbsp;
+: <input type="button" value="Scrub" onclick="openBox('<?=$cmd;?> '+document.getElementById('scrub_options').value,'Scrub',490,430)">
+  <input type="text" id="scrub_options" maxlength="256" value="-B -R -d -r"> Options (see Help)
+
+> **Scrub** will open a window and run the *btrfs scrub* program to check file system integrity.
+>
+> The *Options* field is initialized to include *-r* which specifies read-only.  If repair is needed, you should run
+> a second Scrub pass, removing the *-r* option; this will permit *btrfs scrub* to fix the file system.
+>
+> After starting a Scrub, you should monitor the newly opened window for progress and status.  Closing the
+> window before completion will Cancel the operation, but is not recommended - you should let it finish.  Depending on
+> how large the file system is, and what errors might be present, the operation can take **a long time** to finish (hours).
+> Not much info is printed in the window, but you can verify the operation is running by observing the read/write counters
+> increasing for the device on the Main page.
+
+</form>
+
+<form markdown="1" method="POST" action="/update.php" target="progressFrame">
+<input type="hidden" name="#command" value="/etc/rc.d/rc.docker stop" />
+&nbsp;
+: <input type="submit" value="Stop" />
+</form>
+
+<?endif;?>
+<?endif;?>
+
+<form markdown="1" method="POST" action="/plugins/dynamix.docker.manager/update_cfg.php" target="progressFrame">
+<input type="hidden" name="#action" value="templates" />
+
+Template repositories:
+: <textarea name="template_repos" rows="10" cols="100"><?=@file_get_contents($template_repos);?></textarea>
+
+> Use this field to add template repositories. 
+> Docker templates are used to facilitate the creation and re-creation of Docker containers.
+>
+> Please setup one per line.
+
+&nbsp;
+: <input type="submit" value="Save" />
+</form>

@@ -1,0 +1,37 @@
+Menu="Xen"
+Title="Install Xen VM"
+Cond="($var['fsState']=='Started')"
+---
+<?PHP
+/* Copyright 2014, Lime Technology
+ * Copyright 2014, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+> This page is used to install virtual machines.
+
+<script>
+function installDomain(name) {
+  var file = name.trim();
+  if (file) openBox('/usr/local/sbin/plugin install '+file,'Install Xen VM',600,900,true);
+}
+</script>
+**Enter URL of remote domain image or local domain image**
+
+<form name="domain_install" method="POST" target="progressFrame">
+<input type="text" name="file" id="domain_file" maxlength="1024" value="" style="width:33%">
+<input type="button" value="Install" onclick="installDomain(this.form.file.value)">
+</form>
+
+> To download and install a new VM, enter the image plg URL and click **Install**.  A window will open
+> that displays install progress.  Do not close this window until install has completed.  You may also specify
+> the local file name of an extension.
+
+**Select local domain image**
+<div id="plugin_tree"></div>

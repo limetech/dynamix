@@ -1,0 +1,62 @@
+Menu="SystemInformation"
+Title="Disk Health"
+Icon="disk.health.png"
+---
+<?PHP
+/* Copyright 2014, Lime Technology
+ * Copyright 2014, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<link type="text/css" rel="stylesheet" href="/webGui/styles/disk.health.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.stylesidebar.css">
+<script type="text/javascript" src="/webGui/scripts/jquery.stylesidebar.js"></script>
+<?
+foreach ($disks as $disk) {
+  $name = $disk['name'];
+  $dev = $disk['device'];
+  if ($name!='flash' && $dev) {
+    if (!isset($port)) $port = $dev;
+    $spin = exec("hdparm -C /dev/$dev|grep 'active'") ? "on" : "off";
+    echo "<div class='".($port==$dev ? "disk_sel" : "disk_add")."'>";
+    echo "<center><a href='/$path?port=$dev'><img src='/webGui/images/disk.png' id='$dev' class='$spin'><br>".my_disk($name)."</a></center></div>";
+  }
+}
+?>
+<br>
+<div id="menuDiv" style="overflow:hidden">
+<ul id="SystemProfilerStyleSidebar">
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=IDENTITY&port=<?=$port?>">Disk identity</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=ATTRIBUTES&port=<?=$port?>">Disk attributes</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=CAPABILITIES&port=<?=$port?>">Disk capabilities</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=TESTLOG&port=<?=$port?>">Disk self-test log</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=ERRORLOG&port=<?=$port?>">Disk error log</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=SELFTEST&port=<?=$port?>">Run disk self-test</a></li>
+</ul>
+<div id="mainContent"><!-- content  --></div>
+</div>
+<script>
+function updater(){
+<?foreach ($disks as $disk):
+  $name = $disk['name'];
+  $dev = $disk['device'];
+  if ($name!='flash' && $dev):
+?>$.ajax({url:'/webGui/include/Run.php', data:{cmd:'health',port:'<?=$dev?>',poll:'<?=$disk_health['poll']?>'}, success:function(data){$('#<?=$dev?>').removeClass().addClass(data);}});
+<?endif;
+  endforeach;
+?>
+<?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
+  setTimeout(updater,<?=max(10000,abs($display['refresh']))?>);
+<?endif;?>
+}
+$(function(){
+  $(function(){$('li').StyleSidebar({displayDivId:'mainContent'});});
+  setTimeout(updater,1000);
+});
+</script>

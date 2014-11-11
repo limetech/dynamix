@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Shutdown Docker.io
+if [ -x /etc/rc.d/rc.docker ]; then
+  logger "Stopping docker.io"
+  /etc/rc.d/rc.docker stop | logger
+fi

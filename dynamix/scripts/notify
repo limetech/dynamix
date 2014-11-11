@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# tomm - for now hardcode $path to "/tmp/notifications".
+# Problem is that a script cannot assume the config file is present and valid.  Instead, either path should be passed to
+# this script or script should be written in php in order to use parse_plugin_cfg().
+# We'll fix this later...
+path="/tmp/notifications"
+
+# Help function
+usage() {
+  echo 'Notify.sh -e "event" -s "subject" -d "description" -i "normal|warning|alert" -x'
+  echo 'use -x to create a single notification ticket'
+  echo 'Notifications may include HTML tags like <br>'
+}
+
+# Read setting from config file
+get_param() {
+  awk '$1=="["s"]"{f++}f&&$1~p{split($1,a,m);gsub("[\t ]*$","",a[2]);print a[2];exit}' s="$2" p="^[\t ]*$3" m="^[\t ]*$3[\t ]*=[\t ]*" FS="\$^" "$1"
+}
+
+# Preset parameters
+event="unRAID Status"
+subject="Notification"
+description="No description"
+importance="normal"
+timestamp=$(date +%s)
+ticket=$timestamp
+
+# Get parameters
+while getopts ":e:s:d:i:x" opt; do
+  case $opt in
+  e ) event=$OPTARG ;;         # first line in notification with name of the event
+  s ) subject=$OPTARG ;;       # second line in the notification with the subject of the event
+  d ) description=$OPTARG ;;   # third line in the notification with more details about the event
+  i ) importance=$OPTARG ;;    # normal (green), warning (orange), or alert (red) background color
+  x ) ticket="ticket" ;;       # if set handle events with the same name as one otherwise events are repeated
+  \?) usage >&2 ; exit 1 ;;
+  esac
+done
+
+# Set save path
+#cfg="/boot/config/plugins/dynamix/dynamix.cfg"
+#path=$(get_param $cfg notify path)
+path=$(echo "$path/unread"|sed 's/"//g')
+file=$(echo "$path/$event-$ticket.notify"|sed 's/"//g')
+
+# Create directory as needed
+mkdir -p "$path"
+
+# Write results to notification file
+echo -e "timestamp = $timestamp\nevent = $event\nsubject = $subject\ndescription = $description\nimportance = $importance" > "$file"
+exit 0

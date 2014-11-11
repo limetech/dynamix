@@ -1,0 +1,57 @@
+Menu="UserList"
+Title="Add User"
+---
+<?PHP
+/* Copyright 2014, Lime Technology
+ * Copyright 2014, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<script>
+function checkUsername(userName) {
+  if (!userName) {
+    alert('Please enter a user name');
+    return false;
+  }
+  if (userName.match('[A-Z]| ')) {
+    alert('Invalid user name specified\nDo not use uppercase or space characters.');
+    return false;
+  }
+  if (userName.match('^disk[0-9]+$')) {
+    alert('Invalid user name specified\nDo not use reserved names.');
+    return false;
+  }
+  return true;
+}
+</script>
+
+<form markdown="1" method="POST" action="/update.htm" target="progressFrame" onsubmit="return checkUsername(this.userName.value)">
+User name:
+: <input type="text" name="userName" maxlength="32">
+
+> Usernames may be up to 32 characters long and must start with a **lower case letter** or an underscore,
+> followed by **lower case letters**, digits, underscores, or dashes. They can end with a dollar sign.
+> In regular expression terms: `[a-z_][a-z0-9_-]*[$]?`
+  
+Description:
+: <input type="text" name="userDesc" maxlength="64">
+
+> Up to 64 characters.
+
+Password:
+: <input type="password" name="userPassword" maxlength="40" onKeyUp="this.form.cmdUserEdit.disabled = (this.form.userPassword.value != this.form.userPasswordConf.value);">
+
+> Up to 40 characters.
+
+Retype password:
+: <input type="password" name="userPasswordConf" maxlength="40" onKeyUp="this.form.cmdUserEdit.disabled = (this.form.userPassword.value != this.form.userPasswordConf.value);">
+
+&nbsp;
+: <input type="submit" name="cmdUserEdit" value="Add"><button type="button" onClick="done();">Done</button>
+</form>

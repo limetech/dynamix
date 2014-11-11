@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Start Docker.io
+if [ -x /etc/rc.d/rc.docker ]; then
+  logger "Starting docker.io"
+  /etc/rc.d/rc.docker start | logger
+fi

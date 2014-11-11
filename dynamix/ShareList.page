@@ -1,0 +1,91 @@
+Menu="Shares"
+Title="User Shares"
+---
+<?PHP
+/* Copyright 2014, Lime Technology
+ * Copyright 2014, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+// User share data exists only if array is Started
+if ($var['fsState']!="Started") {
+  echo "<p class='notice'>Array must be <strong><big>started</big></strong> to view User Shares.</p>";
+  return;
+}
+// Share size per disk
+$preserve = $path==$prev;
+$ssz = array();
+foreach (glob("state/webGui/*.ssz", GLOB_NOSORT) as $entry) {
+  if ($preserve) {
+    $ssz[basename($entry, ".ssz")] = parse_ini_file($entry);
+  } else {
+    unlink($entry);
+  }
+}
+?>
+<script>
+$(function() {
+  if (window.innerWidth>1590) $('span').addClass('left');
+});
+</script>
+
+<table class="share_status <?=$display['view']?>">
+<thead><tr><td>Name</td><td>Comment</td><?if ($var['shareSMBEnabled']=='yes'):?><td>SMB</td><?endif;?><?if ($var['shareNFSEnabled']=='yes'):?><td>NFS</td><?endif;?><?if ($var['shareAFPEnabled']=='yes'):?><td>AFP</td><?endif;?><td>Export</td><td>Size</td><td>Free</td><td>View</td></tr></thead>
+<tbody>
+<?
+$row = 0;
+foreach ($shares as $name => $share):
+?><tr class="tr_row<?=$row^=1?>">
+  <td><a href='#' class='info nohand' onclick='return false'>
+  <img src='/webGui/images/<?=$share['color']?>.png' class='icon'><span>
+  <img src='/webGui/images/green-on.png' class='icon'>All files on array<br>
+  <img src='/webGui/images/yellow-on.png' class='icon'>Cache contains files<br>
+  <img src='/webGui/images/red-on.png' class='icon'>All files remain on cache<br>
+  </span></a><a href="<?=$path?>/Share?name=<?=urlencode($name)?>"><?=$share['name']?></a></td>
+  <td><?=$share['comment']?></td>
+  <?if ($var['shareSMBEnabled']=='yes'):?><td><?=$sec[$name]['security']?></td><?endif;?>
+  <?if ($var['shareNFSEnabled']=='yes'):?><td><?=$sec_nfs[$name]['security']?></td><?endif;?>
+  <?if ($var['shareAFPEnabled']=='yes'):?><td><?=$sec_afp[$name]['security']?></td><?endif;?>
+  <td><?=$sec[$name]['export']=='-'?'':($sec[$name]['export']=='e'?'SMB ':'smb ')?><?=$sec_nfs[$name]['export']=='-'?'':($sec_nfs[$name]['export']=='e'?'NFS ':'nfs ')?><?=$sec_afp[$name]['export']=='-'?'':($sec_afp[$name]['export']=='e'?'AFP':'afp')?></td>
+<?if (array_key_exists("{$share['name']}", $ssz)):?>
+  <td><?=my_scale($ssz[$share['name']]['total']*1024, $unit).' '.$unit?></td>
+  <td><?=my_scale($share['free']*1024, $unit).' '.$unit?></td>
+  <td><a href="<?=$path?>/Browse?dir=/mnt/user/<?=urlencode($share['name'])?>"><img src="/webGui/images/explore.png" title="Browse /mnt/user/<?=urlencode($share['name'])?>"></a></td>
+  </tr>
+<?foreach ($ssz[$share['name']] as $disk_name => $disk_size):
+    if ($disk_name!="total"):
+?>  <tr class="share_status_size tr_row<?=$row^=1?>">
+    <td><?=my_disk($disk_name)?>:</td>
+    <td></td>
+	<?if ($var['shareSMBEnabled']=='yes'):?><td></td><?endif;?>
+	<?if ($var['shareNFSEnabled']=='yes'):?><td></td><?endif;?>
+	<?if ($var['shareAFPEnabled']=='yes'):?><td></td><?endif;?>
+    <td></td>
+    <td><?=my_scale($disk_size*1024, $unit).' '.$unit?></td>
+    <td><?=my_scale($disks[$disk_name]['fsFree']*1024, $unit).' '.$unit?></td>
+    <td></td>
+    </tr>
+<?  endif;
+  endforeach;
+  else:
+  $cmd="$docroot/webGui/scripts/share_size '$name' /var/local/emhttp/webGui/'$name.ssz'";
+?><td><a href="/update.htm?cmd=<?=$cmd?>&runCmd=Start" target="progressFrame">Compute...</a></td>
+  <td><?=my_scale($share['free']*1024, $unit).' '.$unit?></td>
+  <td><a href="<?=$path?>/Browse?dir=/mnt/user/<?=urlencode($share['name'])?>"><img src="/webGui/images/explore.png" title="Browse /mnt/user/<?=urlencode($share['name'])?>"></a></td>
+  </tr>
+<?endif;
+endforeach;
+?>
+</tbody>
+</table>
+<form method="GET" action="<?=$path?>/Share">
+<input type="hidden" name="name" value="">
+<p class="centered"><input type="submit" value="Add Share"<?=$var['shareUser']=='e'?'>':' disabled>User shares must be <strong>enabled</strong> to add shares.'?></p>
+</form>

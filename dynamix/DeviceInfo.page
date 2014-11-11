@@ -1,0 +1,228 @@
+Menu="Parity Data Cache"
+Title="{$func(my_disk($name))} Device Settings"
+Cond="($disks[$name]['status']!='DISK_NP')&&($disks[$name]['status']!='DISK_NP_OK')"
+---
+<?PHP
+/* Copyright 2014, Lime Technology
+ * Copyright 2014, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?$disk = $disks[$name]?>
+
+<form markdown="1" method="POST" action="/update.htm" target="progressFrame">
+Partition size:
+: <?=my_number($disk['size'])?> KB (K=1024)
+
+Partition format:
+: <?=$disk['format']?>
+
+<?if ($disk['type']=="Data" || ($disk['type']=="Cache" && $var['SYS_CACHE_SLOTS']==1)):?>
+<?if ($var['fsState']=="Stopped"):?>
+File system type:
+: <select name="diskFsType.<?=$disk['idx'];?>" size="1">
+  <?=mk_option($disk['fsType'], "auto", "auto")?>
+  <?=mk_option($disk['fsType'], "btrfs", "btrfs")?>
+  <?=mk_option($disk['fsType'], "reiserfs", "reiserfs")?>
+  <?=mk_option($disk['fsType'], "xfs", "xfs")?>
+  </select>
+<?else:?>
+File system type:
+: <select name="diskFsType.<?=$disk['idx'];?>" size="1" disabled>
+  <?=mk_option($disk['fsType'], "auto", "auto")?>
+  <?=mk_option($disk['fsType'], "btrfs", "btrfs")?>
+  <?=mk_option($disk['fsType'], "reiserfs", "reiserfs")?>
+  <?=mk_option($disk['fsType'], "xfs", "xfs")?>
+  </select> Array must be stopped to change
+<?endif;?>
+<?elseif ($disk['type']=="Cache" && $var['SYS_CACHE_SLOTS']>1):?>
+File system type:
+: <?=$disk['fsType'];?>&nbsp;
+<?endif;?>
+
+Spin down delay:</td>
+: <select name="diskSpindownDelay.<?=$disk['idx']?>" size="1">
+  <?=mk_option($disk['spindownDelay'], "-1", "Use default")?>
+  <?=mk_option($disk['spindownDelay'], "0",  "Never")?>
+  <?=mk_option($disk['spindownDelay'], "15", "15 minutes")?>
+  <?=mk_option($disk['spindownDelay'], "30", "30 minutes")?>
+  <?=mk_option($disk['spindownDelay'], "45", "45 minutes")?>
+  <?=mk_option($disk['spindownDelay'], "1",  "1 hour")?>
+  <?=mk_option($disk['spindownDelay'], "2",  "2 hours")?>
+  <?=mk_option($disk['spindownDelay'], "3",  "3 hours")?>
+  <?=mk_option($disk['spindownDelay'], "4",  "4 hours")?>
+  <?=mk_option($disk['spindownDelay'], "5",  "5 hours")?>
+  <?=mk_option($disk['spindownDelay'], "6",  "6 hours")?>
+  <?=mk_option($disk['spindownDelay'], "7",  "7 hours")?>
+  <?=mk_option($disk['spindownDelay'], "8",  "8 hours")?>
+  <?=mk_option($disk['spindownDelay'], "9",  "9 hours")?>
+  </select>
+
+<?if (($var['spinupGroups']=="yes")&&($disk['name']!="cache")):?>
+Spinup group(s):
+: <input type="text" name="diskSpinupGroup.<?=$disk['idx'];?>" maxlength="256" value="<?=$disk['spinupGroup']?>">
+<?endif;?>
+
+&nbsp;
+: <input type="submit" name="changeDisk" value="Apply"><button type="button" onclick="done()">Done</button>
+</form>
+
+<?if ($disk['fsType']=="btrfs"):?>
+<?$cmd="btrfs scrub start /dev/{$disk['deviceSb']}";?>
+<form markdown="1" method="POST" action="/update.htm" target="progressFrame">
+<?if ($var['fsState']=="Started" && $var['startMode']!='Maintenance'):?>
+&nbsp;
+: <input type="button" value="Scrub" onclick="openBox('<?=$cmd?> '+document.getElementById('scrub_options').value,'Scrub',600,900)"><input type="text" id="scrub_options" maxlength="256" value="-B -R -d -r"> Options (see Help)
+
+> **Scrub** will open a window and run the *btrfs scrub* program to check file system integrity device.
+>
+> The *Options* field is initialized to include *-r* which specifies read-only.  If repair is needed, you should run
+> a second Scrub pass, removing the *-r* option; this will permit *btrfs scrub* to fix the file system.
+>
+> After starting a Scrub, you should monitor the newly opened window for progress and status.  Closing the
+> window before completion will Cancel the operation, but is not recommended - you should let it finish.  Depending on
+> how large the file system is, and what errors might be present, the operation can take **a long time** to finish (hours).
+> Not much info is printed in the window, but you can verify the operation is running by observing the read/write counters
+> increasing for the device on the Main page.
+
+<?else:?>
+
+&nbsp;
+: <input type="button" value="Scrub" disabled>
+
+> **Scrub** is only available when array is Started normally (non-Maintenance mode)
+
+<?endif;?>
+
+</form>
+
+<?endif;?>
+
+<?if ($name=="cache" && $var['SYS_CACHE_SLOTS']>1):?>
+
+Pool info:
+: <?echo "<pre>".shell_exec('btrfs filesystem show /mnt/cache')."</pre>";?>
+
+> This is the output of *btrfs filesystem show /mnt/cache*.
+
+<form markdown="1" method="POST" action="/update.htm" target="progressFrame">
+<?$cmd="btrfs balance start /mnt/cache";?>
+<?if (pgrep("-f '$cmd'") !== FALSE):?>
+
+&nbsp;
+: <input type="submit" value="Balance" disabled> *Running*
+
+> If you want to Cancel the operation, close the window where it is running and then Refresh this page.
+
+<?elseif ($var['fsState']=="Started" && $var['startMode']!='Maintenance'):?>
+
+&nbsp;
+: <input type="button" value="Balance" onclick="openBox('<?=$cmd;?> '+document.getElementById('balance_options').value,'Balance',600,900)">
+  <input type="text" id="balance_options" maxlength="256" value="-dconvert=raid1 -mconvert=raid1"> Options (see Help)
+
+> **Balance** will open a window and run the *btrfs balance* program to restripe the extents across all pool devices.
+>
+> The default *Options* are appropriate for btrfs-raid1.  Do not change this unless you know what you are doing!
+>
+> After starting a Balance, you should monitor the newly opened window for progress and status.  Closing the
+> window before completion will Cancel the operation, but is not recommended - you should let it finish.  Depending on
+> how large the file system is, and what errors might be present, the operation can take **a long time** to finish (hours).
+> Not much info is printed in the window, but you can verify the operation is running by observing the read/write counters
+> increasing for the device on the Main page.
+
+<?else:?>
+
+&nbsp;
+: <input type="submit" value="Balance" disabled>
+
+> **Balance** is only available when array is Started normally (non-Maintenance mode)
+
+<?endif;?>
+
+</form>
+
+<?endif;?>
+
+<?if ($disk['fsType']=="reiserfs"):?>
+<form markdown="1" method="POST" action="/update.htm" target="progressFrame">
+<?$cmd="reiserfsck -yq /dev/{$disk['deviceSb']}";?>
+<?if (pgrep("-f '$cmd'") !== FALSE):?>
+
+&nbsp;
+: <input type="submit" value="Check Filesystem" disabled> *Running*
+
+> If you want to Cancel the operation, close the window where it is running and then Refresh this page.
+
+<?elseif ($var['fsState']=="Started" && $var['startMode']=='Maintenance'):?>
+
+&nbsp;
+: <input type="button" value="Check Filesystem" onclick="openBox('<?=$cmd;?> '+document.getElementById('check_filesystem_options').value,'Check Filesystem',600,900)">
+  <input type="text" id="check_filesystem_options" maxlength="256"> Options (see Help)
+
+> **Check Filesystem** will open a window and run the *reiserfsck* program to check file system integrity on this device.
+>
+> The *Options* field may be filled in with specific options used to fix problems in the file system. Typically, you
+> first run a Check Filesytem pass leaving *Options* blank.  Upon completion, if *reiserfsck* finds any problems, you must
+> run a second Check Filesystem pass, using a specific option as instructed by the first *reiserfsck* pass.
+>
+> After starting a Check Filesystem, you should monitor the newly opened window for progress and status.  Closing the
+> window before completion will Cancel the operation, but is not recommended - you should let it finish.  Depending on
+> how large the file system is, and what errors might be present, the operation can take **a long time** to finish (hours).
+> Not much info is printed in the window, but you can verify the operation is running by observing the read/write counters
+> increasing for the device on the Main page.
+
+<?else:?>
+
+&nbsp;
+: <input type="submit" value="Check Filesystem" disabled>
+
+> **Check Fileystem** is only available when array is Started in **Mainenance** mode.
+
+<?endif;?>
+
+</form>
+
+<?endif;?>
+
+<?if ($disk['fsType']=="xfs"):?>
+<form markdown="1" method="POST" action="/update.htm" target="progressFrame">
+<?$cmd="xfs_repair /dev/{$disk['deviceSb']}";?>
+<?if (pgrep("-f '$cmd'") !== FALSE):?>
+&nbsp;
+: <input type="submit" value="Check Filesystem" disabled> *Running*
+
+> If you want to Cancel the operation, close the window where it is running and then Refresh this page.
+
+<?elseif ($var['fsState']=="Started" && $var['startMode']=='Maintenance'):?>
+&nbsp;
+: <input type="button" value="Check Filesystem" onclick="openBox('<?=$cmd;?> '+document.getElementById('check_filesystem_options').value,'Check Filesystem',600,900)">
+  <input type="text" id="check_filesystem_options" maxlength="256" value="-n"> Options (see Help)
+
+> **Check Filesystem** will open a window and run the *xfs_repair* program to check file system integrity on this device.
+>
+> The *Options* field is initialized with *-n* which specifies check-only.  If repair is needed, you should run
+> a second Check Filesystem pass, setting the *Options* blank; this will permit *xfs_repair* to fix the file system.
+>
+> After starting a Check Filesystem, you should monitor the newly opened window for progress and status.  Closing the
+> window before completion will Cancel the operation, but is not recommended - you should let it finish.  Depending on
+> how large the file system is, and what errors might be present, the operation can take **a long time** to finish (hours).
+> Not much info is printed in the window, but you can verify the operation is running by observing the read/write counters
+> increasing for the device on the Main page.
+
+<?else:?>
+&nbsp;
+: <input type="submit" value="Check Filesystem" disabled>
+
+> **Check Fileystem** is only available when array is Started in **Mainenance** mode.
+
+<?endif;?>
+
+</form>
+
+<?endif;?>

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# Start xendomains
+if [ -d /proc/xen ]; then
+  /usr/local/sbin/xenman autostart
+  if [ -x /etc/rc.d/rc.xendomains ]; then
+    logger "Starting XEN domains:  /etc/rc.d/rc.xendomains"
+    /etc/rc.d/rc.xendomains start
+  fi
+fi

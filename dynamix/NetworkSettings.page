@@ -1,0 +1,154 @@
+Menu="OtherSettings"
+Title="Network Settings"
+Icon="network-settings.png"
+---
+<?PHP
+/* Copyright 2014, Lime Technology
+ * Copyright 2014, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<script>
+function checkNetworkSettings() {
+  var form = document.network_settings;
+  form.BONDING_MODE.disabled = (form.BONDING.value != "yes");
+  form.BRNAME.disabled = (form.BRIDGING.value != "yes");
+  form.BRSTP.disabled = (form.BRIDGING.value != "yes");
+  form.IPADDR.disabled = (form.USE_DHCP.value == "yes");
+  form.NETMASK.disabled = (form.USE_DHCP.value == "yes");
+  form.GATEWAY.disabled = (form.USE_DHCP.value == "yes");
+  form.DHCP_KEEPRESOLV.disabled = (form.USE_DHCP.value != "yes");
+  if (form.USE_DHCP.value != "yes") form.DHCP_KEEPRESOLV.value = "yes";
+  form.DNS_SERVER1.disabled = (form.DHCP_KEEPRESOLV.value != "yes");
+  form.DNS_SERVER2.disabled = (form.DHCP_KEEPRESOLV.value != "yes");
+  form.DNS_SERVER3.disabled = (form.DHCP_KEEPRESOLV.value != "yes");
+}
+function checkBondingSettings() {
+  var form = document.network_settings;
+  var mode=form.BONDING_MODE.value;
+  if (mode==1 || mode>4 || form.BONDING.value=="no") {$('#attention').hide();} else {$('#attention').show();}
+}
+$(checkNetworkSettings);
+$(checkBondingSettings);
+</script>
+
+<form markdown="1" name="network_settings" method="POST" action="/update.htm" target="progressFrame">
+MAC address:
+: <?=$var['HWADDR'];?>
+
+Enable bonding:
+: <select name="BONDING" size="1" onchange="checkNetworkSettings()">
+  <?=mk_option($var['BONDING'], "no", "No");?>
+  <?=mk_option($var['BONDING'], "yes", "Yes");?>
+  </select>
+
+> Bonding is a feature that combines all of your physical Ethernet interfaces into a
+> single *bond* interface named **bond0**.  This lets you connect
+> all of your ethernet ports to the same switch.
+
+Bonding mode:
+: <select name="BONDING_MODE" size="1" onchange="checkBondingSettings()">
+  <?=mk_option($var['BONDING_MODE'], "0", "balance-rr (0)");?>
+  <?=mk_option($var['BONDING_MODE'], "1", "active-backup (1)");?>
+  <?=mk_option($var['BONDING_MODE'], "2", "balance-xor (2)");?>
+  <?=mk_option($var['BONDING_MODE'], "3", "broadcast (3)");?>
+  <?=mk_option($var['BONDING_MODE'], "4", "802.3ad (4)");?>
+  <?=mk_option($var['BONDING_MODE'], "5", "balance-tlb (5)");?>
+  <?=mk_option($var['BONDING_MODE'], "6", "balance-alb (6)");?>
+  </select><span id="attention" style="display:none;color:red"><b>Attention:</b> this mode requires a switch with proper setup and support...</span>
+
+> Mode 1 (active-backup) is the recommended default.  Other modes may require switch support.
+
+Setup bridge:
+: <select name="BRIDGING" size="1" onchange="checkNetworkSettings()">
+  <?=mk_option($var['BRIDGING'], "no", "No");?>
+  <?=mk_option($var['BRIDGING'], "yes", "Yes");?>
+  </select>
+
+> Bridging is a feature that combines all of your physical Ethernet interfaces into
+> a single logical network segment.  If **bonding** is also enabled, the bridge sits
+> on top of the bond; this is useful for Xen configurations.
+>
+> **Caution:** if bonding is also not enabled, do not connect two or more
+> ethernet ports to the same switch unless you have STP enabled *and* the switch supports STP
+> (most consumer switches **do not**).
+>
+> Doing so will cause an "ARP broadcast storm" and can bring down your
+> entire network (unplugging all sever ethernet ports except one
+> typically will restore your network).
+
+Bridge name:
+: <input type="text" name="BRNAME" maxlength="80" value="<?=$var['BRNAME']?>">
+
+> This is the name of the bridge interface.  If left blank, the name of the bridge will be **br0**.
+> If running as a Xen dom0 we recommend setting this to **xenbr0**.
+
+Enable STP:
+: <select name="BRSTP" size="1" onchange="checkNetworkSettings()">
+  <?=mk_option($var['BRSTP'], "yes", "Yes");?>
+  <?=mk_option($var['BRSTP'], "no", "No");?>
+  </select>
+
+> STP (Spanning Tree Protocol) prevents loops in multi-NIC bridges.  This is enabled by default but
+> can cause delays upon network setup; in most configurations it would be safe to disable.  If unsure
+> however, leave this set to **Yes**.
+
+Obtain IP Address Automatically:
+: <select name="USE_DHCP" size="1" onchange="checkNetworkSettings()">
+  <?=mk_option($var['USE_DHCP'], "yes", "Yes");?>
+  <?=mk_option($var['USE_DHCP'], "no", "No");?>
+  </select>
+
+> If set to 'Yes' the server will attempt to obtain its IP address from the local DHCP server.
+
+IP Address:
+: <input type="text" name="IPADDR" maxlength="40" value="<?=$var['IPADDR']?>">
+
+> Greyed out when using DHCP server.
+
+Netmask:
+: <input type="text" name="NETMASK" maxlength="40" value="<?=$var['NETMASK']?>">
+
+> Greyed out when using DHCP server.
+
+Gateway:
+: <input type="text" name="GATEWAY" maxlength="40" value="<?=$var['GATEWAY']?>">
+
+> Greyed out when using DHCP server.
+
+Obtain DNS Server Address Automatically:
+: <select name="DHCP_KEEPRESOLV" size="1" onchange="checkNetworkSettings()">
+  <?=mk_option($var['DHCP_KEEPRESOLV'], "yes", "No");?>
+  <?=mk_option($var['DHCP_KEEPRESOLV'], "no", "Yes");?>
+  </select>
+
+> If set to 'Yes' the server will use DNS server IP address returned by the local DHCP server.<br>
+> If set to 'No' you may enter your own list.  This is useful in Active Directory configruations where
+> you need to set the first DNS Server entry to the IP address of your AD Domain server.
+
+DNS Server 1:
+: <input type="text" name="DNS_SERVER1" maxlength="80" value="<?=$var['DNS_SERVER1'];?>">
+
+> This is the primary DNS server to use.  Enter a FQDN or an IP address.
+> Note: for *Active Directory* you **must** ensure this is set to the IP address of your
+> AD Domain server.
+
+DNS Server 2:
+: <input type="text" name="DNS_SERVER2" maxlength="80" value="<?=$var['DNS_SERVER2'];?>">
+
+> This is the DNS server to use if DNS Server 1 is down.
+
+DNS Server 3:
+: <input type="text" name="DNS_SERVER3" maxlength="80" value="<?=$var['DNS_SERVER3'];?>">
+
+> This is the DNS server to use if DNS Servers 1 and 2 are both down.
+
+&nbsp;
+: <input type="submit" name="changeNetwork" value="Apply"><button type="button" onclick="done()">Done</button>
+</form>

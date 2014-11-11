@@ -1,0 +1,47 @@
+Menu="Flash"
+Title="Flash Device Settings"
+---
+<?PHP
+/* Copyright 2014, Lime Technology
+ * Copyright 2014, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+Flash Vendor:
+: <?=$var['flashVendor'];?>&nbsp;
+
+Flash Product:
+: <?=$var['flashProduct'];?>&nbsp;
+
+Flash GUID:
+: <?=$var['flashGUID'];?>&nbsp;
+
+<?if ($var['regTy']=="Basic" && strlen($var['regGUID'])):?>
+Registered GUID:
+: <?=$var['regGUID'];?> <strong>Wrong</strong>
+<?endif;?>
+
+Registered to:
+: <?=$var['regTo'] ? $var['regTo'] : 'unregistered'?>
+
+Registration date:
+: <?=strlen(my_key()) ? my_key() : '---'?>
+
+<?if ($var['regTy']=="Basic" && !strlen($var['regGUID'])):?>
+&nbsp;
+: [Upgrade to ***Plus*** or go ***Pro***](http://lime-technology.com/registration-keys?BasicGUID=<?=$var['flashGUID'];?>)
+<?endif;?>
+
+<?if ($var['regTy']=="Plus"):?>
+&nbsp;
+: [Upgrade to ***Pro***](http://lime-technology.com/registration-keys?PlusGUID=<?=$var['flashGUID'];?>)
+<?endif;?>
+
+&nbsp;
+: <button type="button" onClick="done()">Done</button>

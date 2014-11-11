@@ -1,0 +1,147 @@
+Menu="Xen"
+Title="Xen Domains"
+---
+<?PHP
+/* Copyright 2014, Lime Technology
+ * Copyright 2014, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<link type="text/css" rel="stylesheet" href="/plugins/dynamix.xen.manager/styles/xenman.css">
+<link type="text/css" rel="stylesheet" href="/plugins/plugin.manager/styles/fileTree.css">
+
+<script type="text/javascript" src="/plugins/plugin.manager/scripts/fileTree.js"></script>
+<script>
+$(function() {
+  $('#domain_table').tablesorter({headers:{0:{sorter:false}}});
+  $('#plugin_tree').fileTree({root:'/boot/',filter:'',script:'/plugins/plugin.manager/include/FileTree.php',multiFolder:false}, function(file) {$('#domain_file').val(file);});
+});
+</script>
+
+<?PHP
+// array must be started since that's where we store domains
+//
+if ($var['fsState'] != "Started") {
+  echo "<p class=\"notice\">Array must be <strong><big>started</big></strong> to view Domains.</p>";
+  return;
+}
+function domid($domname) {
+  $domid = exec("xl domid $domname 2>&1", $output, $retval);
+  if ($retval != 0) $domid = false;
+  return $domid;
+}
+function dominfo($domid) {
+  exec("xl list $domid", $output, $retval);
+  return preg_split('/[\ ]+/', $output[1]);
+}
+function parse_configfile($configfile) {
+  return json_decode(shell_exec("xl -N create $configfile | tail -n +2"), true);
+}
+echo "<table class='tablesorter xenman".($display['tabs']==1?" shift'":"'")." id='domain_table'><thead>";
+echo "<tr><th></th><th>Name</th><th>ID</th><th>Mem(MB)</th><th>VCPUs</th><th>State</th><th>Time(s)</th><th>Autostart</th></tr>";
+echo "</thead><tbody>";
+
+// output a row for Domain-0
+$info = dominfo(0);
+$desc = Markdown("**Domain-0**\n\nunRAID Server OS");
+echo "<tr>";
+echo "<td><img src='/plugins/dynamix.xen.manager/images/Domain-0.png'></td>";
+echo "<td>$desc</td>";
+echo "<td>{$info[1]}</td>";
+echo "<td>{$info[2]}</td>";
+echo "<td>{$info[3]}</td>";
+echo "<td><span style='font-family:bitstream'>{$info[4]}</span></td>";
+echo "<td>{$info[5]}</td>";
+echo "<td></td>";
+echo "</tr>";
+
+$domains = "/boot/config/domains";
+
+foreach (glob("$domains/*.cfg", GLOB_NOSORT) as $domcfgfile) {
+  $icon = basename($domcfgfile, ".cfg").".png";
+  if (file_exists("$domains/$icon"))
+    exec("ln -sf $domains/$icon $pageroot/images/$icon");
+  else
+    $icon = "dynamix.xen.manager.png";
+
+  $domcfg = parse_ini_file("$domcfgfile");
+  $configfile = $domcfg['configfile'];
+  $autostart = $domcfg['autostart'];
+
+  $config = parse_configfile($configfile);
+  $domname = $config['config']['c_info']['name'];
+
+  $domain = dirname($configfile);
+  $readmefile = "$domain/README.md";
+
+  // desc
+  $desc = Markdown("**[$domname](/Domains/Domain?name=$domname)**\n\n" . @file_get_contents($readmefile));
+
+  // state
+  $domid = domid($domname);
+  if ($domid) {
+    $info = dominfo($domid);
+    $state = $info[4];
+  }
+  else {
+    unset($info);
+    $state = "Shutdown";
+  }
+
+  // output row
+  echo "<tr>";
+  echo "<td><img src='/plugins/dynamix.xen.manager/images/{$icon}' width='48px'></td>";
+  echo "<td>$desc</td>";
+  echo "<td>{$info[1]}</td>";
+  echo "<td>{$info[2]}</td>";
+  echo "<td>{$info[3]}</td>";
+  echo "<td><span style='font-family:bitstream'>{$state}</span></td>";
+  echo "<td>{$info[5]}</td>";
+  echo "<td>{$autostart}</td>";
+  echo "</tr>";
+}
+
+echo "</tbody></table>";
+?>
+> This page lists all registered domains (Xen virtual machines).
+>
+> **Name** displays the name of the domain along with the content of the README.md file. **Autostart** indicates if the domain will
+> be automatically started upon Array Start. **ID** the numeric domain id. **Mem** is the desired amount of memory in MBs to allocate
+> to the domain (although it may not be the currently allocated that amount). **VCPUs** is the number of virtual CPUs allocated to
+> the domain. **State** is the run state (see below). **Time** is the total run time of the domain in seconds as accounted for by Xen.
+>
+> The **State** field lists 6 states for a Xen domain, and which ones the current domain is in.
+>
+> r - running
+>
+>     The domain is currently running on a CPU.
+>
+> b - blocked
+>
+>     The domain is blocked, and not running or runnable. This can be caused because the domain is waiting on IO (a traditional wait state) or has gone to sleep because there was nothing else for it to do.
+>
+> p - paused
+>
+>     The domain has been paused, usually occurring through the administrator running xl pause. When in a paused state the domain will still consume allocated resources like memory, but will not be eligible for scheduling by the Xen hypervisor.
+>
+> s - shutdown
+>
+>     The guest OS has shut down (SCHEDOP_shutdown has been called) but the domain is not dying yet.
+>
+> c - crashed
+>
+>     The domain has crashed, which is always a violent ending. Usually this state can only occur if the domain has been configured not to restart on crash. See xl.cfg(5) for more info.
+>
+> d - dying
+>
+>     The domain is in process of dying, but has not completely shutdown or crashed.
+>
+> If the domain is not created we simply display `Shutdown`.
+>
+> The **Time** column is deceptive. Virtual IO (network and block devices) used by domains requires coordination by Domain-0, which means that Domain0 is actually charged for much of the time that a DomainU is doing IO. Use of this time value to determine relative utilizations by domains is thus very suspect, as a high IO workload may show as less utilized than a high CPU workload.

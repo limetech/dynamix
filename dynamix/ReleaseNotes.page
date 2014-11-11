@@ -1,0 +1,19 @@
+Menu="About"
+Title="Release Notes"
+---
+<?PHP
+/* Copyright 2014, Lime Technology
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?PHP
+$file = "/boot/readme.txt";
+if (file_exists($file)) echo Markdown(file_get_contents($file)); else echo Markdown("** No release notes! **");
+?>
+<button type="button" onclick="done()">Done</button>

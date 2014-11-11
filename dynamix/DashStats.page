@@ -1,0 +1,366 @@
+Menu="Dashboard"
+Title="Statistics"
+---
+<?PHP
+/* Copyright 2014, Bergware International.
+ * Copyright 2014, Lime Technology
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+*/
+?>
+<?
+$cores = exec('nproc');
+$group = $var['shareSMBEnabled']=='yes' | $var['shareAFPEnabled']=='yes' | $var['shareNFSEnabled']=='yes';
+$names = "";
+$url   = "/webGui/include/DashUpdate.php";
+
+foreach ($shares as $share) {
+  if ($names) $names .= ',';
+  $names .= $share['name'];
+}
+
+exec("awk '/^MemTotal/{print $2*1024/1.048576}' /proc/meminfo",$total);
+exec("dmidecode -q -t memory|awk '/Maximum Capacity:/{print $3,$4};/Size:/{total+=$2;unit=$3} END{print total,unit}'",$memory);
+exec("ifconfig -s|awk '/^(bond|eth|lo)/{print $1}'",$ports);
+
+function parity_status() {
+  global $var;
+  if ($var['mdNumInvalid']==0) {
+    echo "<tr><td colspan='2'><span class='green p0'><strong>Parity is valid</strong></span></td></tr>";
+    if ($var['sbSynced']==0) {
+      echo "<tr><td><em>Parity has not been checked yet.<em></td><td id='parity'></td></tr>";
+    } else {
+      unset($time);
+      exec("awk '/sync completion/ {gsub(\"(time=|sec)\",\"\",x);print x;print \$NF};{x=\$NF}' /var/log/syslog|tail -2", $time);
+      if (!count($time)) $time = array_fill(0,2,0);
+      if ($time[1]==0) {
+        echo "<tr><td>Last checked on <strong>".my_time($var['sbSynced']).day_count($var['sbSynced'])."</strong>, finding <strong>{$var['sbSyncErrs']}</strong> error".($var['sbSyncErrs']==1?'.':'s.');
+        echo "<br><em>Duration: ".my_check($time[0])."</em></td><td id='parity'></td></tr>";
+      } else {
+        echo "<tr><td>Last check incomplete on <strong>".my_time($var['sbSynced']).day_count($var['sbSynced'])."</strong>, finding <strong>{$var['sbSyncErrs']}</strong> error".($var['sbSyncErrs']==1?'.':'s.');
+        echo "<br><em>Error code: ".my_error($time[1])."</em></td><td id='parity'></td></tr>";
+      }
+    }
+  } else {
+    if ($var['mdInvalidDisk']==0) {
+      echo "<tr><td colspan='2'><span class='red p0'><strong>Parity is invalid</strong></span></td></tr>";
+    } else {
+      echo "<tr><td colspan='2'><span class='red p0'><strong>Data is invalid</strong></span></td></tr>";
+    }
+  }
+}
+function truncate($string,$len) {
+  return strlen($string) < $len ? $string : substr($string,0,$len-3).'...';
+}
+?>
+<script>
+var timer2,timer30;
+
+function changeMode(item) {
+<?if ($var['shareSMBEnabled']=='yes'):?>
+  if (item==0) $('.smb').show(); else $('.smb').hide();
+<?endif;?>
+<?if ($var['shareAFPEnabled']=='yes'):?>
+  if (item==1) $('.afp').show(); else $('.afp').hide();
+<?endif;?>
+<?if ($var['shareNFSEnabled']=='yes'):?>
+  if (item==2) $('.nfs').show(); else $('.nfs').hide();
+<?endif;?>
+}
+function changeView(item) {
+  if (item==0) $('.view1').show(); else $('.view1').hide();
+  if (item==1) $('.view2').show(); else $('.view2').hide();
+  if (item==2) $('.view3').show(); else $('.view3').hide();
+  clearTimeout(timer30);
+  update30();
+}
+function update5() {
+  var tag = $('.smb').is(':visible') ? 'smb' : $('.afp').is(':visible') ? 'afp' : $('.nfs').is(':visible') ? 'nfs' : '';
+<?if ($var['fsState']=='Started'):?>
+  $.ajax({url:'<?=$url?>',type:'post',data:{cmd:'shares',com:tag,names:'<?=$names?>'},success:function(data) {
+    if (data) $.each(data.split('#'),function(k,v) {$('#share'+(k+1)).html(v);});
+  }});
+<?endif;?>
+  $.ajax({url:'<?=$url?>',type:'post',data:{cmd:'sys'},success:function(data) {
+    if (data) $.each(data.split('#'),function(k,v) {$('#sys'+k).animate({width:v}).text(v);});
+  }});
+  $.ajax({url:'<?=$url?>',type:'post',data:{cmd:'cpu'},success:function(data) {
+    if (data) $.each(data.split('#'),function(k,v) {$('#cpu'+k).html(v);});
+<?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
+    setTimeout(update5,<?=abs($display['refresh'])<5000 ? 5000 : abs($display['refresh'])?>);
+<?endif;?>
+  }});
+}
+function update30() {
+  var tag = $('.view1').is(':visible') ? 'main' : $('.view2').is(':visible') ? 'port' : $('.view3').is(':visible') ? 'link' : '';
+  $.ajax({url:'<?=$url?>',type:'post',data:{cmd:'port',view:tag,ports:'<?=implode(',',$ports)?>'},success:function(data) {
+    if (data) $.each(data.split('#'),function(k,v) {$('#'+tag+k).html(v);});
+  }});
+  $.ajax({url:'<?=$url?>',type:'post',data:{cmd:'disk',hot:'<?=$display['hot']?>',max:'<?=$display['max']?>',unit:'<?=$display['unit']?>'},success:function(data) {
+    if (data) $('#dash1').html(data);
+	  clearTimeout(timer2);
+	  timer2 = setTimeout(heatAlarm,2000);
+<?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
+    timer30 = setTimeout(update30,<?=abs($display['refresh'])<30000 ? 30000 : abs($display['refresh'])?>);
+<?endif;?>
+  }});
+}
+function update60() {
+<?if ($var['mdNumInvalid']==0 && $var['mdResync']>0):?>
+  $.ajax({url:'<?=$url?>',type:'post',data:{cmd:'parity'},success:function(data) {
+    if (data) $('#parity').html(data);
+<?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
+    setTimeout(update60,<?=abs($display['refresh'])<60000 ? 60000 : abs($display['refresh'])?>);
+<?endif;?>
+  }});
+<?endif;?>
+}
+function heatAlarm() {
+  if ($('.heat-img').length) {
+    if ($('.heat-text').is(':visible')) {$('.heat-text').hide(); $('.heat-img').show();} else {$('.heat-img').hide(); $('.heat-text').show();}
+  }
+  timer2 = setTimeout(heatAlarm,2000);
+}
+$(update5);
+$(update60);
+$(update30);
+<?if ($display['refresh']==0 || ($display['refresh']<0 && $var['mdResync']>0)):?>
+$('.tabs').append("<span class='status vhshift'><input type='button' value='Refresh' onclick='refresh()'></span>");
+<?endif;?>
+</script>
+
+<table class='share_status fixed'>
+<thead><tr>
+<?
+$row0 = array_fill(0,25,"<td>-</td>"); $i = 1;
+foreach ($disks as $disk):
+  switch ($disk['type']):
+  case 'Parity':
+    $row0[0] = '<td>Parity<br>0</td>';
+  break;
+  case 'Data':
+  case 'Cache':
+    if ($disk['status']!='DISK_NP') $row0[$i++] = "<td>{$disk['type']}<br>{$disk['idx']}</td>";
+  break;
+  endswitch;
+endforeach;
+echo "<td>Array Status</td>".implode('',$row0);
+?>
+</tr></thead>
+<tbody id='dash1'>
+<tr><td class='td_col0'>Active</td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td></tr>
+<tr><td class='td_col0'>Inactive</td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td></tr>
+<tr><td class='td_col0'>Unassigned</td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td></tr>
+<tr><td class='td_col0'>Faulty</td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td></tr>
+<tr><td class='td_col0'>Heat alarm</td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td></tr>
+<tr><td class='td_col0'>SMART status</td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td></tr>
+<tr><td class='td_col0'>Utilization</td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td></tr>
+</tbody>
+</table>
+<table class='share_status table'>
+<thead><tr><td colspan='2'>Parity Status</td></tr></thead>
+<tbody><?=parity_status()?></tbody>
+</table>
+<table class='share_status dash line'>
+<thead><tr><td colspan='3'>System Status</td><td>
+<select name="enter_view" size="1" onchange="changeView(this.value);">
+<?=mk_option("", "0", "General")?>
+<?=mk_option("", "1", "Counters")?>
+<?=mk_option("", "2", "Errors")?>
+</select>
+</td></tr><tr><td colspan='4'><center>Load Statistics</center></td></tr></thead>
+<tbody>
+<tr class='wide'><td>CPU utilization</td><td colspan='3'><div class='usage-disk sys'><span id='sys0' style='width:0'></span></div></td></tr>
+<?if ($cores>2):?><tr><td rowspan='<?=ceil($cores/2)?>'><?else:?><tr class='wide'><td><?endif;?>CPU speed</td>
+<?
+for ($c=0; $c<$cores; $c+=2):
+  if ($c) echo "<tr>";
+  if ($c+1<$cores)
+    echo "<td>core ".($c+1)." / ".($c+2)."</td><td class='blue' id='cpu{$c}'>"."</td><td class='blue' id='cpu".($c+1)."'></td>";
+  else
+    echo "<td>core ".($c+1)."</td><td colspan='2' class='blue' id='cpu{$c}'>";
+  echo "</tr>";
+endfor;
+$scale = $display['scale'];
+$display['scale'] = 2;
+?>
+<tr class='wide'><td>Memory usage</td><td colspan='3'><div class='usage-disk sys'><span id='sys1' style='width:0'></span></div></td></tr>
+<tr><td rowspan='2'>Memory size</td><td>allocated</td><td colspan='2' class='blue'><?=my_scale($total[0],$unit,0)." $unit"?></td></tr>
+<tr><td>installed</td><td colspan='2' class='blue'><?="{$memory[1]} (max. {$memory[0]})"?></td></tr>
+<?if (count($ports)>1):?><tr class='view1'><td rowspan='<?=count($ports)?>'><?else:?><tr class='view1 wide'><td><?endif;?>Network</td>
+<?
+$display['scale'] = $scale;
+$c = 0;
+foreach ($ports as $port):
+  if ($c) echo "<tr class='view1'>";
+  echo "<td>$port</td><td colspan='2' class='blue' id='main".($c++)."'></td></tr>";
+endforeach;
+?>
+<tr class='view2' style='display:none'><td rowspan='<?=count($ports)+1?>'>Network</td><td><i>Interface</i></td><td><i>Receive pkts</i></td><td><i>Transmit pkts</i></td></tr>
+<?
+$c = 0;
+foreach ($ports as $port):
+  echo "<tr class='view2' style='display:none'><td>$port</td><td class='blue' id='port{$c}'></td><td id='port".($c+1)."' class='blue'></td></tr>";
+  $c += 2;
+endforeach;
+?>
+<tr class='view3' style='display:none'><td rowspan='<?=count($ports)+1?>'>Network</td><td><i>Interface</i></td><td><i>Receive</i></td><td><i>Transmit</i></td></tr>
+<?
+$c = 0;
+foreach ($ports as $port):
+  echo "<tr class='view3' style='display:none'><td>$port</td><td class='blue' id='link{$c}'></td><td id='link".($c+1)."' class='blue'></td></tr>";
+  $c += 2;
+endforeach;
+?>
+</tbody>
+</table>
+<table class='share_status dash m0'>
+<thead><tr><td colspan='4'>Users List</td></tr><tr><td>Name</td><td>Description</td><td>Write</td><td>Read</td></tr></thead>
+<?if ($var['shareSMBEnabled']=='yes'):?>
+<tbody class='smb'>
+<?
+$i = 0;
+foreach ($users as $user):
+  $list = truncate($user['name'],12);
+  $desc = truncate($user['desc'],28);
+  if ($list=='root'):
+    $write = '-'; $read = '-';
+  else:
+    $write = 0; $read = 0;
+    foreach ($shares as $share):
+      if (strpos($sec[$share['name']]['writeList'],$list)!==false) $write++;
+      if (strpos($sec[$share['name']]['readList'],$list)!==false) $read++;
+    endforeach;
+  endif;
+  echo "<tr class='tr_row".($i++%2)."'><td>$list</td><td>$desc</td><td>$write</td><td>$read</td></tr>";
+endforeach;
+?>
+</tbody>
+<?endif;?>
+<?if ($var['shareAFPEnabled']=='yes'):?>
+<tbody class='afp'<?if ($var['shareSMBEnabled']=='yes'):?> style='display:none'<?endif;?>>
+<?
+$i = 0;
+foreach ($users as $user):
+  $list = truncate($user['name'],12);
+  $desc = truncate($user['desc'],28);
+  if ($list=='root'):
+    $write = '-'; $read = '-';
+  else:
+    $write = 0; $read = 0;
+    foreach ($shares as $share):
+      if (strpos($sec_afp[$share['name']]['writeList'],$list)!==false) $write++;
+      if (strpos($sec_afp[$share['name']]['readList'],$list)!==false) $read++;
+    endforeach;
+  endif;
+  echo "<tr class='tr_row".($i++%2)."'><td>$list</td><td>$desc</td><td>$write</td><td>$read</td></tr>";
+endforeach;
+?>
+</tbody>
+<?endif;?>
+<?if ($var['shareNFSEnabled']=='yes'):?>
+<tbody class='nfs'<?if ($var['shareSMBEnabled']=='yes'||$var['shareAFPEnabled']=='yes'):?> style='display:none'<?endif;?>>
+<?
+$i = 0;
+foreach ($users as $user):
+  $list = truncate($user['name'],12);
+  $desc = truncate($user['desc'],28);
+  $write = '-'; $read = '-';
+  echo "<tr class='tr_row".($i++%2)."'><td>$list</td><td>$desc</td><td>$write</td><td>$read</td></tr>";
+endforeach;
+?>
+</tbody>
+<?endif;?>
+<?if (!$group):?>
+<tbody>
+<?
+$i = 0;
+foreach ($users as $user):
+  $list = truncate($user['name'],12);
+  $desc = truncate($user['desc'],28);
+  echo "<tr class='tr_row".($i++%2)."'><td>$list</td><td>$desc</td><td>-</td><td>-</td></tr>";
+endforeach;
+?>
+</tbody>
+<?endif;?>
+</table>
+<table class='share_status dash m36'>
+<thead><tr><td colspan='4'>Shares List</td><td>
+<?if ($group):?>
+<select name="enter_share" size="1" onchange="changeMode(this.value);">
+<?if ($var['shareSMBEnabled']=='yes'):?>
+<?=mk_option("", "0", "SMB")?>
+<?endif;?>
+<?if ($var['shareAFPEnabled']=='yes'):?>
+<?=mk_option("", "1", "AFP")?>
+<?endif;?>
+<?if ($var['shareNFSEnabled']=='yes'):?>
+<?=mk_option("", "2", "NFS")?>
+<?endif;?>
+</select>
+<?endif;?>
+</td></tr><tr><td>Name</td><td>Description</td><td>Security</td><td>Export</td><td>Streams</td></tr></thead>
+<?if ($var['shareSMBEnabled']=='yes'):?>
+<tbody class='smb'>
+<?
+$i = 0;
+foreach ($shares as $name => $share):
+  $list = truncate($name,12);
+  $comment = truncate($share['comment'],28);
+  $security = ucfirst($sec[$name]['security']);
+  $visible = $sec[$name]['export']=='-' ? 'No' : ($sec[$name]['export']=='e' ? 'Yes' : 'Hidden');
+  echo "<tr class='tr_row".($i++%2)."'><td>$list</td><td>$comment</td><td>$security</td><td>$visible</td><td class='blue' id='share{$i}'>0</td></tr>";
+endforeach;
+if (!$i) echo "<tr class='tr_row0'><td colspan='5'><center>No shares present</center></td></tr>";
+?>
+</tbody>
+<?endif;?>
+<?if ($var['shareAFPEnabled']=='yes'):?>
+<tbody class='afp'<?if ($var['shareSMBEnabled']=='yes'):?> style='display:none'<?endif;?>>
+<?
+$i = 0;
+foreach ($shares as $name => $share):
+  $list = truncate($name,12);
+  $comment = truncate($share['comment'],28);
+  $security = ucfirst($sec_afp[$name]['security']);
+  $visible = $sec_afp[$name]['export']=='-' ? 'No' : ($sec_afp[$name]['export']=='e' ? 'Yes' : 'Hidden');
+  echo "<tr class='tr_row".($i++%2)."'><td>$list</td><td>$comment</td><td>$security</td><td>$visible</td><td>-</td></tr>";
+endforeach;
+if (!$i) echo "<tr class='tr_row0'><td colspan='5'><center>No shares present</center></td></tr>";
+?>
+</tbody>
+<?endif;?>
+<?if ($var['shareNFSEnabled']=='yes'):?>
+<tbody class='nfs'<?if ($var['shareSMBEnabled']=='yes'||$var['shareAFPEnabled']=='yes'):?> style='display:none'<?endif;?>>
+<?
+$i = 0;
+foreach ($shares as $name => $share):
+  $list = truncate($name,12);
+  $comment = truncate($share['comment'],28);
+  $security = ucfirst($sec_nfs[$name]['security']);
+  $visible = $sec_nfs[$name]['export']=='-' ? 'No' : ($sec_nfs[$name]['export']=='e' ? 'Yes' : 'Hidden');
+  echo "<tr class='tr_row".($i++%2)."'><td>$list</td><td>$comment</td><td>$security</td><td>$visible</td><td>-</td></tr>";
+endforeach;
+if (!$i) echo "<tr class='tr_row0'><td colspan='5'><center>No shares present</center></td></tr>";
+?>
+</tbody>
+<?endif;?>
+<?if (!$group):?>
+<tbody>
+<?
+$i = 0;
+foreach ($shares as $name => $share):
+  $list = truncate($name,12);
+  $comment = truncate($share['comment'],28);
+  echo "<tr class='tr_row".($i++%2)."'><td>$list</td><td>$comment</td><td>-</td><td>-</td><td>-</td></tr>";
+endforeach;
+if (!$i) echo "<tr class='tr_row0'><td colspan='5'><center>No shares present</center></td></tr>";
+?>
+</tbody>
+<?endif;?>
+</table>

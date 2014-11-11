@@ -1,0 +1,20 @@
+Menu="About"
+Title="Credits"
+---
+**unRAID webGUI** Copyright 2005-2014 Lime Technology.
+
+**Simple Features** Copyright 2012, Andrew Hamer-Adams. 
+
+**Dynamix** Copyright 2012, 2014, Bergware International.
+
+The Software comprising the unRAID webGui, which is all files within this repository except for
+files listed below, is licensed under GPL version 2.
+
+* The Lime Technology logo file(s) `webGui/images/logo.*` are property of Lime Technology
+and may not be used in any other project without written permission from Lime Technology.
+
+unRAID is a registered trademark of [Lime Technology](http://lime-technology.com).
+
+This file shall be included in all copies or substantial portions of the Software.
+
+<button type="button" onclick="done()">Done</button>

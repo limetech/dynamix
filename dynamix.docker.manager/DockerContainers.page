@@ -1,0 +1,251 @@
+Menu="Docker"
+Title="Docker Containers"
+Cond="(pgrep('docker')!==false)"
+---
+<link type="text/css" rel="stylesheet" href="/plugins/dynamix.docker.manager/assets/gh-buttons.css">
+<link type="text/css" rel="stylesheet" href="/plugins/dynamix.docker.manager/assets/font-awesome-4.2.0/css/font-awesome.min.css">
+<link type="text/css" rel="stylesheet" href="/plugins/dynamix.docker.manager/assets/jquery-ui/jquery-ui.min.css">
+<link type="text/css" rel="stylesheet" href="/plugins/dynamix.docker.manager/assets/jquery-ui/jquery-ui.structure.min.css">
+<link type="text/css" rel="stylesheet" href="/plugins/dynamix.docker.manager/assets/jquery-ui/jquery-ui.theme.min.css">
+
+<script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/jquery-ui/jquery-ui.min.js"></script>
+<script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/docker.js"></script>
+<?php
+// Add the Docker JSON client
+include_once("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerClient.php");
+$docker          = new DockerClient();
+$DockerUpdate    = new DockerUpdate();
+$DockerTemplates = new DockerTemplates();
+?>
+<style>
+	body { -webkit-overflow-scrolling: touch;}
+	a.log{cursor:zoom-in;}
+	a.exec{cursor:pointer;}
+	.menu {
+		background: #545454;
+		color:#fff;
+		font-weight: normal;
+		background: -moz-linear-gradient(top,  #545454 0%, #3f3f3f 100%);
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#545454), color-stop(100%,#3f3f3f));
+		background: -webkit-linear-gradient(top,  #545454 0%,#3f3f3f 100%);
+		background: -o-linear-gradient(top,  #545454 0%,#3f3f3f 100%);
+		background: -ms-linear-gradient(top,  #545454 0%,#3f3f3f 100%);
+		background: linear-gradient(to bottom,  #545454 0%,#3f3f3f 100%);
+		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#545454', endColorstr='#3f3f3f',GradientType=0 );
+		border-top: 1px solid #6d6d6d;
+		line-height: 20px;
+		border-radius: 5px;
+	}
+	.fa-custom{font-size: 1.3em;}
+</style>
+<script type="text/javascript" charset="utf-8">
+
+$(document).ready(function() {
+	$("#docker_containers").tablesorter( {sortList: [[2,0]], headers: {0: {sorter: false }}});
+	$('#docker_containers tr:even').addClass('odd');
+	$("#docker_images").tablesorter( {sortList: [[1,0]], headers: {0: {sorter: false }}});
+	$('#docker_images tr:even').addClass('odd');
+
+	$('.selectCT').click (function () { selectAllCT(false); });
+	$('.selectIMG').click (function () { selectAllIMG(false); });
+
+	$('.autostart').click (function () {
+		$.post( "/plugins/dynamix.docker.manager/update_cfg.php", { action: "autostart", container: $(this).attr('container'), response: "json" }, function( data ) {
+			$(this).prop('checked', data.autostart );
+		}, "json");
+	});
+});
+
+function selectAllCT(checkAll) {
+	var state = false;
+	if ( ! $('.selectCT').length ) return false;
+	$('.selectCT').each( function () {
+		if ( $( this ).prop('checked') ){
+			state = true;
+		}
+	});
+	if (checkAll){
+		state = (state) ? false : true;
+		$(':checkbox[class=selectCT]').prop('checked', state);
+	}
+  $("#ctSelect").prop('checked', state);
+};
+
+function selectAllIMG(checkAll) {
+	var state = false;
+	if ( ! $('.selectIMG').length ) return false;
+	$('.selectIMG').each( function () {
+		if ( $( this ).prop('checked') ){
+			state = true;
+		}
+	});
+	if (checkAll){
+		state = (state) ? false : true;
+		$(':checkbox[class=selectIMG]').prop('checked', state);
+	}
+  $("#imgSelect").prop('checked', state);
+};
+
+function startContainers(containers) {
+	var ctCmd = "";
+	if (typeof containers === "object") {
+		for (var i = 0; i < containers.length; i++) {
+			ctCmd  += "/usr/bin/docker start " + containers[i] + ";";
+		};
+	} else {
+		ctCmd  += "/usr/bin/docker start " + containers + ";";
+	}
+	document.getElementById("#cmdStartStop").value = ctCmd;
+	document.forms["formStartStop"].submit();
+}
+
+function stopContainers(containers) {
+	var ctCmd = "";
+	if (typeof containers === "object") {
+		for (var i = 0; i < containers.length; i++) {
+			ctCmd  += "/usr/bin/docker stop " + containers[i] + ";";
+		};
+	} else {
+		ctCmd  += "/usr/bin/docker stop " + containers + ";";
+	}
+	document.getElementById("#cmdStartStop").value = ctCmd;
+	document.forms["formStartStop"].submit();
+}
+
+function containerControl(container, action){
+	document.getElementById("#cmdStartStop").value = "/usr/bin/docker " + action + " " + container;
+	document.forms["formStartStop"].submit();
+};
+
+function multiContainers(fnc){
+	var fn = window[fnc];
+	var containers = [];
+	var images = [];
+	$('.selectCT').each(function(index, value){
+		if ( $(this).prop( 'checked' )) {
+			containers.push( $(this).attr('container') );
+			images.push( $(this).attr('image') );
+		}
+	});
+	if (! images.length ) return false;
+	if (typeof fn === "function") fn.apply(null, [containers, images]);
+}
+
+function multiImages(fnc){
+	var fn = window[fnc];
+	var images = [];
+	var imgNames = [];
+	$('.selectIMG').each(function(index, value){
+		if ( $(this).prop( 'checked' )) {
+			images.push( $(this).attr('image') );
+			imgNames.push( $(this).attr('imageName') );
+		}
+	});
+	if (! images.length ) return false;
+	if (typeof fn === "function") fn.apply(null, [images, imgNames]);
+}
+</script>
+<form markdown="1" id="formAutostart" method="POST" action="/plugins/dynamix.docker.manager/update_cfg.php" target="progressFrame">
+<input type="hidden" name="action" value="autostart" />
+<input type="hidden" name="container" value="none" />
+</form>
+<form method="POST" id="formStartStop" action="/update.php" target="progressFrame">
+<input type="hidden" id="#cmdStartStop" name="#command" value="" />
+</form>
+<table class="tablesorter shift" id="docker_containers">
+	<thead>
+		<tr>
+		<th style="width:10px;"><input type="checkbox" id="ctSelect" onclick="selectAllCT(true)"></th>
+		<th>Control</th>
+		<th>Name</th><th>Image</th>
+		<th>Created</th>
+		<th>Status / Log&nbsp;&nbsp;&nbsp;</th>
+		<th>Ports</th><th>Volume Mappings</th>
+		<th>Container ID</th>
+		<th>Autostart</th>
+		<th>Status</th></tr>
+	</thead>
+	<tbody>
+		<?
+		$all_containers = $docker->getDockerContainers();
+		if ( ! $all_containers) { $all_containers = array(); }
+		$info = $DockerTemplates->getAllInfo();
+
+		$IP = $var["IPADDR"];
+		foreach($all_containers as $ct){
+			$autostart = $info[$ct['Name']]['autostart'] ? "checked" : "";
+			$ports = array();
+			foreach ($ct['Ports'] as $p) {
+				if (strlen($p['PublicPort'])){
+					$ipAddr    = sprintf("%s:%s", $IP, $p['PublicPort']);
+					$outFormat = sprintf("<a href=\"http://%s\" target=\"_blank\">%s->%s/%s</a>", $ipAddr, $ipAddr, $p['PrivatePort'], $p['Type']);
+				} else {
+					$outFormat = sprintf("%s/%s", $p['PrivatePort'], $p['Type']);
+				}
+				$ports[] = $outFormat;
+			}
+			$paths = array();
+			if (count($ct['Volumes'])){
+				foreach ($ct['Volumes'] as $value) {
+					if (preg_match('/localtime/', $value) == TRUE){ continue; }
+					preg_match('/([^:]+)/', $value, $match);
+					$paths[] = sprintf('<a href="/Shares/Browse?dir=%s" target="_blank">%s</a>', $match[1], $value);
+				}
+			}
+			?>
+		<tr>
+			<td>
+				<input type="checkbox" class="selectCT" container="<?=$ct['Name'];?>" image="<?=$ct['ImageId'];?>">
+			</td>
+			<td>
+			<?
+				print $ct["Running"] ?
+				"<button style=\"color:#FF2400;font-weight:bold;width: 4em;\" onclick=\"containerControl('".$ct['Name']."','stop'); return true;\">Stop</button>":
+				"<button style=\"color:#52D017;font-weight:bold;width: 4em;\" onclick=\"containerControl('".$ct['Name']."','start'); return true;\">Start</button>";
+				?>
+			</td>
+			<td><a class="exec" onclick="addContainer('<?=$ct['Name'];?>','<?=$info[$ct['Name']]['template'];?>');"><?=$ct['Name'];?></a></td>
+			<td>
+				<?
+				$Registry = $info[$ct['Name']]['registry'];
+				if ($Registry){
+					printf("<a href=\"%s\" target=\"_blank\">%s</a>", $Registry, $ct['Image'] );
+				} else {
+					echo $ct['Image'];
+				}
+				?>
+			</td>
+			<td><?=$ct['Created'];?></td>
+			<td><a class="log" onclick="containerLogs('<?=$ct['Name'];?>','Log for <?=$ct['Name'];?>', false, false)"><?=$ct['Status'];?></a></td>
+			<td><?=implode("<br>", $ports);?></td>
+			<td><?=implode("<br>", $paths);?></td>
+			<td><?=$ct['Id'];?></td>
+			<td><input type="checkbox" class="autostart" container="<?=$ct['Name'];?>"  <?=$autostart;?>></td>
+			<td>
+				<? $updateStatus = $info[$ct['Name']]['updated'];
+				if ($updateStatus == "false"){
+					$updateTxt = "<span style=\"color:#52D017;font-weight:bold;\">Update</span>";
+				} else if ($updateStatus == "true"){
+					$updateTxt = "<span>Updated</span>";
+				} else {
+					$updateTxt = "<span style=\"color:#FF2400;\">N/A</span>";
+				}
+				printf("<a class=\"exec\" onclick=\"updateContainer('%s');\">%s</a>", $ct["Name"], $updateTxt);
+				?>
+			</td>
+		</tr>
+		<?};?>
+	</tbody>
+</table>
+<div class="button-group" style="position:relative;">
+	<i class="button green" onclick="multiContainers('startContainers');" title="Start"><i class="fa fa-play fa-custom">&nbsp;&nbsp;Start</i></i>
+	<i class="button danger" onclick="multiContainers('stopContainers');" title="Stop"><i class="fa fa-stop fa-custom"Stop>&nbsp;&nbsp;Stop</i></i>
+	<i class="button blue" onclick="multiContainers('updateContainer');" title="Update"><i class="fa  fa-arrow-down fa-custom">&nbsp;&nbsp;Update</i></i>
+	<i class="button" onclick="multiContainers('rmContainer');" title="Remove"><i class="fa fa-trash fa-custom">&nbsp;&nbsp;Remove</i></i>
+	<div class="button-group" style="position:relative;">
+		<i class="button"  onclick="reloadUpdate();" title="Reload"><i id="refreshToggle" class="fa fa-refresh fa-custom"></i><i class="fa fa-custom">&nbsp;&nbsp;Reload info</i></i>
+	</div>
+	<div class="button-group" style="position:relative;">
+		<i class="button green" onclick="addContainer();" title="Add Container"><i class="fa fa-plus-circle fa-custom">&nbsp;&nbsp;Add container</i></i>
+	</div>
+</div>

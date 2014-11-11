@@ -1,0 +1,45 @@
+Menu="Notifications"
+Title="Archived Notifications"
+---
+<?PHP
+/* Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
+ * Copyright 2014, Lime Technology
+ * Copyright 2014, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+$files = glob("{$notify['path']}/archive/*.notify");
+usort($files, create_function('$a,$b', 'return filemtime($b)-filemtime($a);'));
+?>
+<script>
+function askConfirmation() {
+  return confirm('This will delete all notification files!\n\nAre you sure?');
+}
+</script>
+
+<table class="share_status small<?if ($display['tabs']==0):?> shift<?endif;?>">
+<thead><tr><td>Time</td><td>Event</td><td>Subject</td><td>Description</td><td style='width:7%'>Importance</td><td style='width:5%;text-align:center'>Delete<?if (count($files)>1):?> <a href='/webGui/include/DeleteLogFile.php?log=<?=$path?>' target='progressFrame' onclick='return askConfirmation()' title='Delete all notifications'>[x]</a><?endif;?></td></tr></thead>
+<tbody>
+<?
+foreach ($files as $file) {
+  $fields = preg_split('/\n/', file_get_contents($file));
+  $c = 0;
+  foreach ($fields as $field) {
+    if (!$field) continue;
+    $item = explode('=', $field);
+    if (!$c++) echo "<tr><td>".date("{$notify['date']} {$notify['time']}", $item[1])."</td>"; else echo "<td>{$item[1]}</td>";
+  }
+  echo "<td style='text-align:center'><a href='/webGui/include/DeleteLogFile.php?log=$file' target='progressFrame'><img src='/webGui/images/delete.png' title='Delete notification'></a></td></tr>";
+}
+if (empty($files)) echo "<tr><td colspan='6' style='text-align:center'><em>No notifications available</em></td></tr>";
+?>
+</tbody>
+</table>
+<button type="button" onclick="done()">Done</button>

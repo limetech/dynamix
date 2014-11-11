@@ -1,0 +1,24 @@
+Menu="Tasks:70"
+Type="xmenu"
+Cond="(is_dir('/proc/xen'))"
+Tabs="true"
+---
+<?PHP
+/* Copyright 2014, Lime Technology
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?PHP
+// array must be started since that's where we store the domains
+
+if ($var['fsState'] != "Started") {
+  echo "<p class='notice'>Array must be Started to manage Xen Domains.</p>";
+  return;
+}
+?>
