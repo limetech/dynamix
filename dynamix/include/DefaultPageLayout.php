@@ -16,6 +16,7 @@
 <title><?=$var['NAME']?>/<?=$myPage['name']?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta http-equiv="MSThemeCompatible" content="no">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="robots" content="noindex">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/default-fonts.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/default-<?=$display['theme']?>.css">
@@ -39,6 +40,22 @@ var uptime = <?=strtok(exec("cat /proc/uptime"),' ')?>;
 // Page refresh timer
 var update = <?=abs($display['refresh'])/1000?>;
 var counting = update;
+
+// page timer events
+var timers = {};
+
+function pauseEvents(){
+  $.each(timers, function(i, timer) {
+    clearTimeout(timer);
+  });
+}
+function resumeEvents(){
+  var startDelay = 50;
+  $.each(timers, function(i, timer) {
+    timers[i] = setTimeout(i + '()', startDelay);
+    startDelay += 50;
+  });
+}
 
 function plus(value, label, last) {
   return value>0 ? (value+' '+label+(value!=1?'s':'')+(last?'':', ')) : '';
@@ -69,7 +86,7 @@ function settab(tab) {
 <?endif;?>
 <?break;?>
 <?case'Cache':case'Data':case'Flash':case'Parity':?>
-  $.cookie('one',tab,{path:'/'});  
+  $.cookie('one',tab,{path:'/'});
 <?break;?>
 <?default:?>
   $.cookie($.cookie('one')==null?'tab':'one',tab,{path:'/'});
@@ -88,7 +105,7 @@ function chkDelete(form, button) {
 function openBox(cmd,title,height,width,load) {
   // open shadowbox window (run in foreground)
   var run = cmd.split('?')[0].substr(-4)=='.php' ? cmd : '/logging.htm?cmd='+cmd;
-  var options = load ? {modal:true,onClose:function(){location=location;}} : {modal:true}; 
+  var options = load ? {modal:true,onClose:function(){location=location;}} : {modal:true};
   Shadowbox.open({content:run, player:'iframe', title:title, height:height, width:width, options:options});
 }
 function openWindow(cmd,title,height,width) {
@@ -100,47 +117,51 @@ function openWindow(cmd,title,height,width) {
   window.open(run, '', options);
 }
 function showStatus(name) {
-  $.ajax({url:'/webGui/include/ProcessStatus.php',type:'post',data:{name:name},success:function(status){$(".tabs").append(status);}});
+  $.post('/webGui/include/ProcessStatus.php',{name:name},function(status){$(".tabs").append(status);});
 }
 function notifier() {
-  $.ajax({url:'/webGui/include/Notify.php',type:'post',data:{cmd:'get'},success:function(data) {
-  if (data) {
-    var json = $.parseJSON(data);
-    $.each(json, function(i, object) {
-     var notify = $.parseJSON(object);
-     $.jGrowl(notify.subject+'<br>'+notify.description, {
-      sticky: true,
-      position: '<?=$notify['position']?>',
-      header: notify.event+': '+notify.timestamp,
-      theme: notify.importance+' '+notify.file,
-      beforeOpen: function(e,m,o) {if ($('.jGrowl-notify').hasClass(notify.file)) {return(false);}},
-      close: function(e,m,o) {$.post('/webGui/include/Notify.php',{cmd:'archive',file:notify.file}); return(false);}
-     });
-    });
-  }}});
+  $.post('/webGui/include/Notify.php',{cmd:'get'},function(data) {
+    if (data) {
+      var json = $.parseJSON(data);
+      $.each(json, function(i, object) {
+        var notify = $.parseJSON(object);
+        $.jGrowl(notify.subject+'<br>'+notify.description, {
+          sticky: true,
+          position: '<?=$notify['position']?>',
+          header: notify.event+': '+notify.timestamp,
+          theme: notify.importance+' '+notify.file,
+          beforeOpen: function(e,m,o) {if ($('.jGrowl-notify').hasClass(notify.file)) {return(false);}},
+          close: function(e,m,o) {$.post('/webGui/include/Notify.php',{cmd:'archive',file:notify.file}); return(false);}
+        });
+      });
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
-  setTimeout(notifier,<?=max(5000,abs($display['refresh']))?>);
+      timers.notifier = setTimeout(notifier,<?=max(5000,abs($display['refresh']))?>);
 <?endif;?>
+    }
+  });
 }
 function monitor() {
-  $.post('/webGui/include/Monitor.php',{hot:<?=$display['hot']?>,max:<?=$display['max']?>});
+  $.post('/webGui/include/Monitor.php',{hot:<?=$display['hot']?>,max:<?=$display['max']?>},function(data) {
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
-  setTimeout(monitor,<?=max(60000,abs($display['refresh']))?>);
+    timers.monitor = setTimeout(monitor,<?=max(60000,abs($display['refresh']))?>);
 <?endif;?>
+  });
 }
 function watchdog() {
-  $.ajax({url:'/webGui/include/Watchdog.php',type:'post',data:{mode:<?=$display['refresh']?>,dot:'<?=substr($display['number'],0,1)?>'},success:function(data) {
-  if (data) {$.each(data.split('#'),function(k,v) {
+  $.post('/webGui/include/Watchdog.php',{mode:<?=$display['refresh']?>,dot:'<?=substr($display['number'],0,1)?>'},function(data) {
+    if (data) {
+      $.each(data.split('#'),function(k,v) {
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
-    if (v!='stop') $('#statusbar').html(v); else setTimeout(refresh,0);});}
-    setTimeout(watchdog,<?=abs($display['refresh'])?>);
+        if (v!='stop') $('#statusbar').html(v); else setTimeout(refresh,0);
+      });
+      timers.watchdog = setTimeout(watchdog,<?=abs($display['refresh'])?>);
 <?else:?>
-    if (v!='stop') $('#statusbar').html(v);});}
+        if (v!='stop') $('#statusbar').html(v);
+      });
 <?endif;?>
-  }});
+    }
+  });
 }
-setTimeout(watchdog,50);
-
 function countDown() {
   counting--;
   if (counting==0) counting = update;
@@ -157,12 +178,13 @@ $(function() {
 <?endif;?>
   updateTime();
   $.jGrowl.defaults.closer = false;
-  $.ajax({url:'/webGui/include/Notify.php',type:'post',data:{cmd:'init'},success:function(x){setTimeout(notifier,0);}});
+  $.post('/webGui/include/Notify.php',{cmd:'init'},function(x){timers.notifier = setTimeout(notifier,0);});
   Shadowbox.setup('a.sb-enable', {modal:true});
 <?if ($confirm['warn']):?>
   $('form').find('select,input[type=text],input[type=password]').each(function() {$(this).change(function() {$.jGrowl('You have uncommitted form changes',{sticky:false,theme:'bottom',position:'bottom',life:5000});});});
 <?endif;?>
-  setTimeout(monitor,<?=max(60000,abs($display['refresh']))?>);
+  timers.monitor = setTimeout(monitor,100);
+  timers.watchdog = setTimeout(watchdog,50);
 });
 
 var mobiles=['ipad','iphone','ipod','android'];
