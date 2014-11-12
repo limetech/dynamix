@@ -1,5 +1,7 @@
 
 function popupWithIframe( title, cmd, reload) {
+  pauseEvents();
+
   $( "#iframe-popup" ).html('<iframe id="myIframe" frameborder="0" scrolling="yes" width="100%" height="99%"></iframe>');
   $("#iframe-popup").dialog({
     autoOpen: true,
@@ -22,7 +24,7 @@ function popupWithIframe( title, cmd, reload) {
  });
   $(".ui-dialog .ui-dialog-titlebar").addClass('menu');
   $(".ui-dialog .ui-dialog-content").css('padding','0');
-  $(".ui-dialog .ui-dialog-title").css('text-align','center'); 
+  $(".ui-dialog .ui-dialog-title").css('text-align','center');
   $(".ui-dialog .ui-dialog-title" ).css( 'width', "100%");
   $('.ui-widget-overlay').click(function() { $("#iframe-popup").dialog("close"); });
 };
@@ -128,7 +130,7 @@ function updateContainer(containers){
     }
   });
   $(".ui-dialog .ui-dialog-titlebar").addClass('menu');
-  $(".ui-dialog .ui-dialog-title").css('text-align','center'); 
+  $(".ui-dialog .ui-dialog-title").css('text-align','center');
   $(".ui-dialog .ui-dialog-content").css('padding-top','15px');
   $(".ui-dialog .ui-dialog-content").css('font-weight','bold');
   $(".ui-button-text").css('padding','0px 5px');
@@ -146,7 +148,7 @@ function containerControl(container, action){
 function containerLogs(container){
   var title = 'Log for: ' + container;
   var address = "/plugins/dynamix.docker.manager/exec.php?cmd=/usr/bin/docker logs --tail=350 " + container;
-  popupWithIframe(title, address, false);  
+  popupWithIframe(title, address, false);
 }
 
 
@@ -186,7 +188,7 @@ function rmImage(images, imageName){
     }
   });
   $(".ui-dialog .ui-dialog-titlebar").addClass('menu');
-  $(".ui-dialog .ui-dialog-title").css('text-align','center'); 
+  $(".ui-dialog .ui-dialog-title").css('text-align','center');
   $(".ui-dialog .ui-dialog-content").css('padding-top','15px');
   $(".ui-dialog .ui-dialog-content").css('font-weight','bold');
   $(".ui-button-text").css('padding','0px 5px');
