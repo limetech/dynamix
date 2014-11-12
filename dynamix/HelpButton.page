@@ -16,7 +16,7 @@ Icon="help.png"
 ?>
 <script>
 function HelpButton() {
-  $('.inline_help').fadeToggle();
+  $('.inline_help').toggle('slow');
   $('#nav-item.HelpButton').toggleClass('nav-button-active');
   $.cookie('help')==null ? $.cookie('help','help',{path:'/'}) : $.removeCookie('help',{path:'/'});
 }

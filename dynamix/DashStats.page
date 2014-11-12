@@ -87,7 +87,7 @@ function update5() {
   }});
 <?endif;?>
   $.ajax({url:'<?=$url?>',type:'post',data:{cmd:'sys'},success:function(data) {
-    if (data) $.each(data.split('#'),function(k,v) {$('#sys'+k).animate({width:v}).text(v);});
+    if (data) $.each(data.split('#'),function(k,v) {$('#sys'+k).animate({width:v},{step:function(){$('#sys'+k).css("overflow","visible");}}).text(v);});
   }});
   $.ajax({url:'<?=$url?>',type:'post',data:{cmd:'cpu'},success:function(data) {
     if (data) $.each(data.split('#'),function(k,v) {$('#cpu'+k).html(v);});
