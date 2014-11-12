@@ -35,7 +35,7 @@ function trimLine($text){
 }
 
 function pullImage($image) {
-  readfile("/usr/local/emhttp/plugins/dynamix.docker.manager/assets/log.htm");
+  readfile("/usr/local/emhttp/plugins/dynamix.docker.manager/log.htm");
   echo "<script>addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Pulling image: " . $image . "</legend><p class=\"logLine\" id=\"logBody\"></p></fieldset>');</script>";
   @flush();
 
@@ -69,7 +69,7 @@ function pullImage($image) {
       $total = $cnt['progressDetail']['total'];
       $current = $cnt['progressDetail']['current'];
       $percentage = round(($current/$total) * 100);
-      echo "<script>$('.progress:last').text(' " . $percentage . "% of " . ceil($total/1024/1024) . "MB');</script>\n";
+      echo "<script>show_Prog(' " . $percentage . "% of " . ceil($total/1024/1024) . "MB');</script>\n";
       @flush();
     }
   }
@@ -467,7 +467,7 @@ if($_GET['xmlTemplate']){
 <link type="text/css" rel="stylesheet" href="/webGui/styles/default-fonts.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/default-white.css">
 
-<script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/jquery/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="/webGui/scripts/dynamix.js"></script>
 <script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/jsFileTree/jqueryFileTree.js"></script>
 <script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/addDocker.js"> </script>
 

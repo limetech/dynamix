@@ -1,5 +1,5 @@
 <?PHP
-include_once("/usr/local/emhttp/plugins/dynamix.docker.manager/assets/log.htm");
+readfile("/usr/local/emhttp/plugins/dynamix.docker.manager/log.htm");
 
 if ( isset( $_GET['cmd'] )) {
   $commands = urldecode(($_GET['cmd']));

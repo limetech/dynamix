@@ -1,6 +1,7 @@
 <!DOCTYPE HTML>
+<html>
 <head>
-  <script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/jquery/jquery-1.10.2.min.js"></script>
+  <script type="text/javascript" src="/webGui/scripts/dynamix.js"></script>
   <style type="text/css">
     .logLine {
       font-family: Monospace;
@@ -30,6 +31,10 @@
     function addLog(logLine) {
       $( ".logLine:last" ).append( logLine + "<br>");
       window.scrollTo(0,document.body.scrollHeight);
+    }
+
+    function show_Prog(prog) {
+      $( ".progress:last" ).text(prog);
     }
 
     function newContent(title){
