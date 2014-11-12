@@ -21,6 +21,7 @@ Tabs="true"
 $(function() {
   $('#plugin_table').tablesorter({headers:{0:{sorter:false},5:{sorter:false}}});
   $('#plugin_tree').fileTree({root:'/boot/',filter:'plg',script:'/plugins/dynamix.plugin.manager/include/FileTree.php',multiFolder:false}, function(file) {$('#plugin_file').val(file);});
+  $('.desc_readmore').readmore({maxHeight: 100});
 });
 $('.tabs').append("<span class='status vhshift'><input type='button' value='Check for Updates' onclick='openBox(\"/usr/local/sbin/plugin checkall\",\"Plugin Update Check\",490,430,true)'></span>");
 </script>
@@ -93,15 +94,15 @@ foreach (glob("/var/log/plugins/*.plg", GLOB_NOSORT) as $plugin_link) {
     $desc = Markdown(file_get_contents($readme));
   else
     $desc = Markdown("**{$name}**");
-  
+
   // author
   $author = plugin("author", $plugin_file);
   if ($author === false) $author = "anonymous";
-  
+
   // version
   $version = plugin("version", $plugin_file);
   if ($version === false) $version = "unknown";
-  
+
   // version info
   $version_info = $version;
 
@@ -128,7 +129,7 @@ foreach (glob("/var/log/plugins/*.plg", GLOB_NOSORT) as $plugin_link) {
   // echo our plugin information
   echo "<tr>";
   echo "<td>{$link}</td>";
-  echo "<td>{$desc}</td>";
+  echo "<td class=\"desc_readmore\">{$desc}</td>";
   echo "<td>{$author}</td>";
   echo "<td>{$version_info}</td>";
   echo "<td>{$status_info}</td>";
