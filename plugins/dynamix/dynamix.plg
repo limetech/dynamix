@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2014.11.10">
+<!ENTITY version   "2014.11.13">
 <!ENTITY category  "Core Functionality">
 <!ENTITY pluginURL "https://raw.github.com/limetech/&name;/master/&name;/&name;.plg">
 ]>
@@ -40,20 +40,11 @@ The 'install' script.
 -->
 <FILE Run="/bin/bash">
 <INLINE>
-if [ -d /tmp/plugins/&name; ]; then
-  rm -r /tmp/plugins/&name;
-fi
+rm -r /tmp/plugins/&name;-&version; 2>/dev/null
 tar -xf /boot/config/plugins/&name;/&name;-&version;.tar.gz -C /tmp/plugins
-mkdir -p /tmp/plugins/builtin/&name;
-for Plugin in /tmp/plugins/&name;-&version;/* ; do
-  if [ -d /usr/local/emhttp/plugins/$(basename $Plugin) ]; then
-    if [ ! -d /tmp/plugins/builtin/&name;/$(basename $Plugin) ]; then
-      # preserve existing plugin
-      mv /usr/local/emhttp/plugins/$(basename $Plugin) /tmp/plugins/builtin/&name;/$(basename $Plugin)
-    else
-      rm -r /usr/local/emhttp/plugins/$(basename $Plugin)
-    fi
-  fi
+mv /tmp/plugins/&name;-&version;/* /usr/local/emhttp 2>/dev/null
+for Plugin in /tmp/plugins/&name;-&version;/plugins/* ; do
+  rm -r /usr/local/emhttp/plugins/$(basename $Plugin) 2>/dev/null
   mv $Plugin /usr/local/emhttp/plugins/$(basename $Plugin)
 done
 rm -r /tmp/plugins/&name;-&version;
@@ -66,14 +57,7 @@ The 'remove' script.
 -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
-if [ -d /tmp/plugins/builtin/&name; ]; then
-  for Plugin in /tmp/plugins/builtin/&name;/* ; do
-    rm -r /usr/local/emhttp/plugins/$(basename $Plugin)
-    mv $Plugin /usr/local/emhttp/plugins
-  done
-  rm -r /tmp/plugins/builtin/&name;
-  ln -sf /usr/local/emhttp/plugins/&name;/&name;.plg /var/log/plugins
-fi;
+echo "Please reboot server."
 </INLINE>
 </FILE>
 
