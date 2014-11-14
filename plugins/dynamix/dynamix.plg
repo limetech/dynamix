@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2014.11.13">
+<!ENTITY version   "2014.11.14">
 <!ENTITY category  "Core Functionality">
 <!ENTITY pluginURL "https://raw.github.com/limetech/&name;/master/plugins/&name;/&name;.plg">
 ]>
@@ -40,11 +40,11 @@ The 'install' script.
 -->
 <FILE Run="/bin/bash">
 <INLINE>
-rm -r /tmp/plugins/&name;-&version; 2>/dev/null
+rm -r /tmp/plugins/&name;-&version; 2&gt;/dev/null
 tar -xf /boot/config/plugins/&name;/&name;-&version;.tar.gz -C /tmp/plugins
-mv /tmp/plugins/&name;-&version;/* /usr/local/emhttp 2>/dev/null
+mv /tmp/plugins/&name;-&version;/* /usr/local/emhttp 2&gt;/dev/null
 for Plugin in /tmp/plugins/&name;-&version;/plugins/* ; do
-  rm -r /usr/local/emhttp/plugins/$(basename $Plugin) 2>/dev/null
+  rm -r /usr/local/emhttp/plugins/$(basename $Plugin) 2&gt;/dev/null
   mv $Plugin /usr/local/emhttp/plugins/$(basename $Plugin)
 done
 rm -r /tmp/plugins/&name;-&version;
@@ -57,7 +57,10 @@ The 'remove' script.
 -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
+rm -r /boot/config/plugins/&name;/&name;-&version;.tar.gz 2&gt;/dev/null
+echo "*********************"
 echo "Please reboot server."
+echo "*********************"
 </INLINE>
 </FILE>
 
