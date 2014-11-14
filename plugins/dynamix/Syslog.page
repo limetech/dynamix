@@ -18,10 +18,10 @@ echo "<pre class='up'>".shell_exec('cat /var/log/syslog')."</pre>";
 ?>
 <script>
 function syslog() {
-  $.ajax({url:'/webGui/include/Download.php',type:'post',data:{cmd:'save',root:'<?=$docroot?>',file:'/var/log/syslog'},success:function(data) {
+  $.post('/webGui/include/Download.php',{cmd:'save',root:'<?=$docroot?>',file:'/var/log/syslog'},function(data) {
     window.location.href = data;
-//  $.post('/webGui/include/Download.php',{cmd:'del',root:'<?=$docroot?>',zip:'syslog.zip'});
-  }});
+//$.post('/webGui/include/Download.php',{cmd:'del',root:'<?=$docroot?>',zip:'syslog.zip'});
+  });
 }
 </script>
 <button type="button" onclick="syslog()">Download</button><button type="button" onclick="done()">Done</button>
