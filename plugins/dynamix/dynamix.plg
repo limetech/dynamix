@@ -5,7 +5,7 @@
 <!ENTITY author    "Bergware">
 <!ENTITY version   "2014.11.13">
 <!ENTITY category  "Core Functionality">
-<!ENTITY pluginURL "https://raw.github.com/limetech/&name;/master/&name;/&name;.plg">
+<!ENTITY pluginURL "https://raw.github.com/limetech/&name;/master/plugins/&name;/&name;.plg">
 ]>
 
 <PLUGIN  name="&name;"
