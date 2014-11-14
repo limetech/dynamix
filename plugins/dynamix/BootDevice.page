@@ -15,7 +15,7 @@ Title="Boot Device"
 ?>
 <script>
 function boot_status() {
-  $.ajax({url:'/webGui/include/DeviceList.php',type:'post',data:{path:'<?=$path?>',device:'flash',width:window.innerWidth,timer:timer},success:function(data) {
+  $.post('/webGui/include/DeviceList.php',{path:'<?=$path?>',device:'flash',width:window.innerWidth,timer:timer},function(data) {
     if (data) $('#boot_device').html(data);
 <?if (($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)) && $var['fsState']=='Started'):?>
 <?if ($display['tabs']==0):?>
@@ -24,7 +24,7 @@ function boot_status() {
     setTimeout(boot_status,<?=abs($display['refresh'])?>);
 <?endif;?>
 <?endif;?>
-  }});
+  });
 }
 <?if (($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)) && $var['fsState']=='Started' && $display['tabs']==0):?>
 $('#tab3').bind({click:function() {clearTimeout(timer); boot_status();}});

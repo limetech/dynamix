@@ -14,6 +14,7 @@
 $start = 'Start Test';
 $stop  = 'Cancel Test';
 $check = 'Checking...';
+$run   = '/webGui/include/Run.php';
 
 $port = $_GET['port'];
 $spin = exec("hdparm -C /dev/$port|grep 'active'");
@@ -116,43 +117,43 @@ var start = '<?=$start?>';
 var stop = '<?=$stop?>';
 var refresh = null;
 
+function showProgress(){
+  $.get('<?=$run?>',{cmd:'update',port:'<?=$port?>'},function(data){
+    $('#update').html(data).trigger('smart');
+    refresh=setTimeout(showProgress,3000);
+  });
+}
 $(function(){
   $('#short').click(function(){
     if ($(this).val()==start){
       $(this).val(stop).attr('disabled',true);
       $('#long').attr('disabled',true);
-      $.ajax({url:'/webGui/include/Run.php',data:'cmd=short&port=<?=$port?>'});
-      refresh = setInterval(function(){
-        $.ajax({url:'/webGui/include/Run.php',data:'cmd=update&port=<?=$port?>',success:function(data){$('#update').html(data).trigger('smart');}});
-      }, 4000);
+      $.get('<?=$run?>',{cmd:'short',port:'<?=$port?>'},function(){setTimeout(showProgress,0);});
     } else {
       $(this).attr('disabled',true);
-      $.ajax({url:'/webGui/include/Run.php',data:'cmd=stop&port=<?=$port?>'});
+      $.get('<?=$run?>',{cmd:'stop',port:'<?=$port?>'});
     }
   });
   $('#long').click(function(){
     if ($(this).val()==start){
       $(this).val(stop).attr('disabled',true);
       $('#short').attr('disabled',true);
-      $.ajax({url:'/webGui/include/Run.php',data:'cmd=long&port=<?=$port?>'});
-      refresh = setInterval(function(){
-        $.ajax({url:'/webGui/include/Run.php',data:'cmd=update&port=<?=$port?>',success:function(data){$('#update').html(data).trigger('smart');}});
-      }, 4000);
+      $.get('<?=$run?>',{cmd:'long',port:'<?=$port?>'},function(){setTimeout(showProgress,0);});
     } else {
       $(this).attr('disabled',true);
-      $.ajax({url:'/webGui/include/Run.php',data:'cmd=stop&port=<?=$port?>'});
+      $.get('<?=$run?>',{cmd:'stop',port:'<?=$port?>'});
     }
   });
   $('#update').bind('smart', function(){
     if ($(this).html().search('%')<0){
       $('#short').val(start).attr('disabled',false);
       $('#long').val(start).attr('disabled',false);
-      clearInterval(refresh);
+      clearTimeout(refresh);
     } else {
       if ($('#short').val()==stop) $('#short').attr('disabled',false);
       if ($('#long').val()==stop) $('#long').attr('disabled',false);
     }
   });
-  $('#update').load('/webGui/include/Run.php','cmd=update&port=<?=$port?>');
+  $.get('<?=$run?>',{cmd:'update',port:'<?=$port?>'},function(data){$('#update').html(data);});
 });
 </script>
