@@ -16,7 +16,7 @@ Cond="((count($devs)>0)&&($var['fsState']=='Started'))"
 ?>
 <script>
 function open_status() {
-  $.post('/webGui/include/DeviceList.php',{path:'<?=$path?>',device:'open',width:window.innerWidth,timer:timer},function(data) {
+  $.ajax({url:'/webGui/include/DeviceList.php',type:'post',data:{path:'<?=$path?>',device:'open',width:window.innerWidth,timer:timer},success:function(data) {
     if (data) $('#open_devices').html(data);
 <?if (($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)) && $var['fsState']=='Started'):?>
 <?if ($display['tabs']==0):?>
@@ -25,7 +25,7 @@ function open_status() {
     setTimeout(open_status,<?=abs($display['refresh'])?>);
 <?endif;?>
 <?endif;?>
-  });
+  }});
 }
 <?if (($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)) && $var['fsState']=='Started' && $display['tabs']==0):?>
 $('#tab4').bind({click:function() {clearTimeout(timer); open_status();}});

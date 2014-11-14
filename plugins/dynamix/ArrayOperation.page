@@ -28,7 +28,7 @@ function tab0() {
   $.cookie('tab','tab0',{path:'/'});
 }
 function parity_status() {
-  $.post('/webGui/include/DeviceList.php',{path:'<?=$path?>',device:'parity',timer:timer},function(data) {
+  $.ajax({url:'/webGui/include/DeviceList.php',type:'post',data:{path:'<?=$path?>',device:'parity',timer:timer},success:function(data) {
     if (data) {$.each(data.split(';'),function(k,v) {if ($('#line'+k).length>0) $('#line'+k).html(v);});}
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
 <?if ($display['tabs']==0):?>
@@ -42,7 +42,7 @@ function parity_status() {
       $('#line4').html('completed');
     }
 <?endif;?>
-  });
+  }});
 }
 parity_status();
 
@@ -52,7 +52,7 @@ $('#tab'+$('input[name$="tabs"]').length).bind({click:function() {clearTimeout(t
 <?endif;?>
 <?if (substr($var['fsState'],-3)=='ing'):?>
 function reload_page() {
-  $.get('/webGui/include/ReloadPage.php',function(data) {
+  $.ajax({url:'/webGui/include/ReloadPage.php',success:function(data) {
     switch (data) {
     case 'wait':
       setTimeout(reload_page,10000);
@@ -65,7 +65,7 @@ function reload_page() {
       setTimeout(reload_page,<?=abs($display['refresh'])?>);
     break;
     }
-  });
+  }});
 }
 reload_page();
 <?endif;?>

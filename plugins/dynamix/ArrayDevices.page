@@ -17,7 +17,7 @@ Title="Array Devices"
 var timer = null;
 
 function array_status() {
-  $.post('/webGui/include/DeviceList.php',{path:'<?=$path?>',device:'array',width:window.innerWidth,timer:timer},function(data) {
+  $.ajax({url:'/webGui/include/DeviceList.php',type:'post',data:{path:'<?=$path?>',device:'array',width:window.innerWidth,timer:timer},success:function(data) {
     if (data) $('#array_devices').html(data);
 <?if (($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)) && $var['fsState']=='Started'):?>
 <?if ($display['tabs']==0):?>
@@ -26,7 +26,7 @@ function array_status() {
     setTimeout(array_status,<?=abs($display['refresh'])?>);
 <?endif;?>
 <?endif;?>
-  });
+  }});
 }
 <?if (($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)) && $var['fsState']=='Started' && $display['tabs']==0):?>
 $('#tab1').bind({click:function() {clearTimeout(timer); array_status();}});
