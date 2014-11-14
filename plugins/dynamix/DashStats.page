@@ -82,42 +82,42 @@ function changeView(item) {
 function update5() {
   var tag = $('.smb').is(':visible') ? 'smb' : $('.afp').is(':visible') ? 'afp' : $('.nfs').is(':visible') ? 'nfs' : '';
 <?if ($var['fsState']=='Started'):?>
-  $.ajax({url:'<?=$url?>',type:'post',data:{cmd:'shares',com:tag,names:'<?=$names?>'},success:function(data) {
+  $.post('<?=$url?>',{cmd:'shares',com:tag,names:'<?=$names?>'},function(data) {
     if (data) $.each(data.split('#'),function(k,v) {$('#share'+(k+1)).html(v);});
-  }});
+  });
 <?endif;?>
-  $.ajax({url:'<?=$url?>',type:'post',data:{cmd:'sys'},success:function(data) {
+  $.post('<?=$url?>',{cmd:'sys'},function(data) {
     if (data) $.each(data.split('#'),function(k,v) {$('#sys'+k).animate({width:v},{step:function(){$('#sys'+k).css("overflow","visible");}}).text(v);});
-  }});
-  $.ajax({url:'<?=$url?>',type:'post',data:{cmd:'cpu'},success:function(data) {
+  });
+  $.post('<?=$url?>',{cmd:'cpu'},function(data) {
     if (data) $.each(data.split('#'),function(k,v) {$('#cpu'+k).html(v);});
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
-    setTimeout(update5,<?=abs($display['refresh'])<5000 ? 5000 : abs($display['refresh'])?>);
+    setTimeout(update5,<?=max(abs($display['refresh']),5000)?>);
 <?endif;?>
-  }});
+  });
 }
 function update30() {
   var tag = $('.view1').is(':visible') ? 'main' : $('.view2').is(':visible') ? 'port' : $('.view3').is(':visible') ? 'link' : '';
-  $.ajax({url:'<?=$url?>',type:'post',data:{cmd:'port',view:tag,ports:'<?=implode(',',$ports)?>'},success:function(data) {
+  $.post('<?=$url?>',{cmd:'port',view:tag,ports:'<?=implode(',',$ports)?>'},function(data) {
     if (data) $.each(data.split('#'),function(k,v) {$('#'+tag+k).html(v);});
-  }});
-  $.ajax({url:'<?=$url?>',type:'post',data:{cmd:'disk',hot:'<?=$display['hot']?>',max:'<?=$display['max']?>',unit:'<?=$display['unit']?>'},success:function(data) {
+  });
+  $.post('<?=$url?>',{cmd:'disk',hot:'<?=$display['hot']?>',max:'<?=$display['max']?>',unit:'<?=$display['unit']?>'},function(data) {
     if (data) $('#dash1').html(data);
 	  clearTimeout(timer2);
 	  timer2 = setTimeout(heatAlarm,2000);
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
-    timer30 = setTimeout(update30,<?=abs($display['refresh'])<30000 ? 30000 : abs($display['refresh'])?>);
+    timer30 = setTimeout(update30,<?=max(abs($display['refresh']),30000)?>);
 <?endif;?>
-  }});
+  });
 }
 function update60() {
 <?if ($var['mdNumInvalid']==0 && $var['mdResync']>0):?>
-  $.ajax({url:'<?=$url?>',type:'post',data:{cmd:'parity'},success:function(data) {
+  $.post('<?=$url?>',{cmd:'parity'},function(data) {
     if (data) $('#parity').html(data);
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
-    setTimeout(update60,<?=abs($display['refresh'])<60000 ? 60000 : abs($display['refresh'])?>);
+    setTimeout(update60,<?=max(abs($display['refresh']),60000)?>);
 <?endif;?>
-  }});
+  });
 <?endif;?>
 }
 function heatAlarm() {
