@@ -129,7 +129,7 @@ foreach (glob("/var/log/plugins/*.plg", GLOB_NOSORT) as $plugin_link) {
   // echo our plugin information
   echo "<tr>";
   echo "<td>{$link}</td>";
-  echo "<td class=\"desc_readmore\">{$desc}</td>";
+  echo "<td><span class=\"desc_readmore\">{$desc}</span></td>";
   echo "<td>{$author}</td>";
   echo "<td>{$version_info}</td>";
   echo "<td>{$status_info}</td>";
