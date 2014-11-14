@@ -47,12 +47,12 @@ function updater(){
   $name = $disk['name'];
   $dev = $disk['device'];
   if ($name!='flash' && $dev):
-?>$.ajax({url:'/webGui/include/Run.php', data:{cmd:'health',port:'<?=$dev?>',poll:'<?=$disk_health['poll']?>'}, success:function(data){$('#<?=$dev?>').removeClass().addClass(data);}});
+?>$.get('/webGui/include/Run.php',{cmd:'health',port:'<?=$dev?>',poll:'<?=$disk_health['poll']?>'},function(data){$('#<?=$dev?>').removeClass().addClass(data);});
 <?endif;
   endforeach;
 ?>
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
-  setTimeout(updater,<?=max(10000,abs($display['refresh']))?>);
+  setTimeout(updater,<?=max(abs($display['refresh']),10000)?>);
 <?endif;?>
 }
 $(function(){
