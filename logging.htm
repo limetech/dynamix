@@ -1,0 +1,19 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<link type="text/css" rel="stylesheet" href="/webGui/styles/default-fonts.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/default-white.css">
+
+<script>
+parent.document.getElementById('progressFrame').style.zIndex = 10;
+function addLog(logLine) {
+  document.body.innerHTML += logLine;
+  window.scrollTo(0,document.body.scrollHeight);
+}
+function addCloseButton() {
+  addLog("<br><center><button class='logLine' type='button' onclick='top.Shadowbox.close()'>Done</button></center>");
+}
+</script>
+</head>
+<body class="logLine spacing" onload="addCloseButton()"></body>
+</html>

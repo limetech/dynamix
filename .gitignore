@@ -1,3 +1,6 @@
+# For development
+!plugins/dynamix*
+
 # Numerous always-ignore extensions
 *.diff
 *.err

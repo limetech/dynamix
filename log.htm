@@ -1,0 +1,47 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<link type="text/css" rel="stylesheet" href="/webGui/styles/default-fonts.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/default-white.css">
+
+<script type="text/javascript" src="/webGui/scripts/dynamix.js"></script>
+
+<style type="text/css">
+.logLine {font-family:bitstream;font-size:11px;}
+legend {font-size:12px;font-weight:bold;}
+</style>
+
+<script>
+var dots = [];
+var span = [];
+function show_Wait(id){
+  span[id] = document.getElementById("wait" + id);
+  dots[id] = setInterval(function() {
+  if ((span[id].innerHTML += '.').length == 18) {
+    span[id].innerHTML = 'Please wait ';
+  }}, 500);
+}
+
+function stop_Wait(id){
+  span[id].innerHTML = '';
+  clearInterval( dots[id] );
+}
+
+function addLog(logLine) {
+  $(".logLine:last").append(logLine + "<br>");
+  window.scrollTo(0,document.body.scrollHeight);
+}
+
+function show_Prog(prog) {
+  $( ".progress:last" ).text(prog);
+}
+
+function newContent(title){
+  $('#content').append('<fieldset style="margin-top:1px;" class="CMD"><legend>' + title + '</legend><p class="logLine"></p></fieldset>');
+}
+</script>
+</head>
+<body>
+<div style="margin:10;padding:0" id="content"><p class="logLine" id="logBody"></p></div>
+</body>
+</html>
