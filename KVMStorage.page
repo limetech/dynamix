@@ -110,7 +110,7 @@ $(function() {
 					<tr>
 						<thead>
 						<th><a href='?paction=pool-create' title='create new storage pool'><i class='glyphicon glyphicon-plus green'></i></a></th>
-						<th class='header'><a href='#' onClick='window.location.reload()'>Name</a></th>
+						<th class='header'><a href='#' onClick='window.location.reload()'>Pool</a></th>
 						<th class='header'>Disks</th>
 						<th class='header'>Capacity</th>
 						<th class='header'>Allocation</th>
