@@ -13,9 +13,10 @@
  * The $_POST variable contains a list of key/value parameters to be updated in the file.
  * There are a number of special parameters prefixed with a hash '#' character:
  *
- * #file    : the path+name of the file to be updated. It does not need to previously exist.
- *            the configuration file is always placed under folder '/boot/config'.
- *            this parameter may be omitted to perform a command execution only (see #command).
+ * #file    : the pathname of the file to be updated. It does not need to previously exist.
+ *            If pathname is relative (no leading '/'), the configuration file will placed
+ *            placed under '/boot/config/plugins'.
+ *            This parameter may be omitted to perform a command execution only (see #command).
  * #section : if present, then the ini file consists of a set of named sections, and all of the
  *            configuration parameters apply to this one particular section.
  *            if omitted, then it's just a flat ini file without sections.
