@@ -27,7 +27,7 @@ Tabs="true"
 </script>
 
 <?php
-   //error_reporting(0);
+   error_reporting(0);
    require('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php');
 	$uri = 'qemu:///system';
    $lv = new Libvirt($uri, null, null, false);
