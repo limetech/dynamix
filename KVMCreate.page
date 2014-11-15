@@ -202,7 +202,7 @@ Title="Create VM"
 <tr id="setup_network" style="display: none">
     <td>&nbsp;</td>
     <td>
-        <table>
+        <table class="tablesorter"  style="margin-top:0px;margin-left:-33px">
 			<tr>
 		   	<td align="right">MAC:&nbsp;</td>
    			<td>
@@ -243,7 +243,7 @@ Title="Create VM"
 <tr id="setup_disk" style="display: table-row">
     <td>&nbsp;</td>
     <td>
-        <table>
+        <table class="tablesorter"  style="margin-top:0px;margin-left:-72px">
 <tr>
 	<td align="right">Disk image:&nbsp;</td>
 	<td>
@@ -296,16 +296,17 @@ Title="Create VM"
 <tr id="setup_usb" style="display: none">
     <td>&nbsp;</td>
     <td>
-        <table>
-
+        <table class="tablesorter" style="margin-top:0px;margin-left:96px">
 <tr>
 	<td align="left">
 <?php
 	$tmp = $lv->get_node_devices('usb_device');
 	for ($i = 0; $i < sizeof($tmp); $i++) {
 		$tmp2 = $lv->get_node_device_information($tmp[$i]);
+		$vendor = $tmp2['vendor_id'];
+		$product = $tmp2['product_id'];
 		if (array_key_exists('vendor_id', $tmp2) && array_key_exists('product_id', $tmp2) && array_key_exists('product_name', $tmp2))
-			echo '<input class="checkbox" type="checkbox" value="'.$tmp2['vendor_id'].','.$tmp2['product_id'].'" name="usb['.$i.']" />'.$tmp2['product_name'].'<br />';
+			echo '<input class="checkbox" type="checkbox" value="'.$vendor.','.$product.'" name="usb['.$i.']" />'.$vendor.':'.$product.'&nbsp;&nbsp;'.$tmp2['product_name'].'<br />';
     }
 ?>
   	</td>
@@ -327,7 +328,7 @@ Title="Create VM"
 <tr id="setup_shares" style="display: none">
     <td>&nbsp;</td>
     <td>
-        <table>
+        <table class="tablesorter"  style="margin-top:0px;margin-left:-96px">
 <tr>
 	<td align="right">unRAID share:&nbsp;</td>
 	<td>
