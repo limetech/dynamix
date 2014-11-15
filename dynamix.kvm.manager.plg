@@ -1,0 +1,55 @@
+<?xml version='1.0' standalone='yes'?>
+
+<!DOCTYPE PLUGIN [
+<!ENTITY name      "dynamix.kvm.manager">
+<!ENTITY author    "dmacias72">
+<!ENTITY version   "2014.11.15">
+<!ENTITY pluginURL "https://github.com/dmacias72/&name;/raw/master/&name;.plg">
+<!ENTITY plugin	   "/boot/config/plugins/&name;">
+<!ENTITY emhttp	   "/usr/local/emhttp/plugins/&name;">
+]>
+
+<PLUGIN  name="&name;"
+         author="&author;"
+         version="&version;"
+         pluginURL="&pluginURL;"
+	 plugin="&plugin;"
+	 emhttp="&emhttp;">
+
+<!--
+This plugin installs an a virtual machine management interface
+-->
+
+<!--
+get from github as tarball
+-->
+<FILE Name="&plugin;/&name;-&version;.tar.gz">
+<URL>"https://github.com/&author;/&name;/archive/&version;.tar.gz"</URL>
+</FILE>
+
+<!--
+The 'install' script.
+-->
+<FILE Run="/bin/bash" Method="install">
+<INLINE> 
+if [ ! -d &emhttp; ]; then
+ 	mkdir -p &emhttp;
+fi 
+
+tar -zxf &plugin;/&name;-&version;.tar.gz --strip=1 -C &emhttp;/
+find &plugin; -type f -iname "*.tar.gz" ! -iname "&name;-&version;.tar.gz" -delete
+
+</INLINE>
+</FILE>
+
+<!--
+The 'remove' script.
+-->
+<FILE Run="/bin/bash" Method="remove">
+<INLINE>
+rm -rf &emhttp;
+
+</INLINE>
+</FILE>
+
+</PLUGIN>

@@ -1,0 +1,204 @@
+Menu="KVM"
+Title="Storage"
+---
+<div class="wrap">
+	<div class="list">
+<script type="text/javascript">
+$(function() {
+  $('#storage-pool_table').tablesorter({headers:{0:{sorter:false},6:{sorter:false},7:{sorter:false}}});
+  $('#storage-vol_table').tablesorter({headers:{0:{sorter:false},6:{sorter:false},7:{sorter:false}}});
+  $('#stroage_tree').fileTree({root:'/boot/',filter:'plg',script:'/plugins/dynamix.kvm.manager/include/FileTree.php',multiFolder:false}, function(file) {$('#storage_file').val(file);});
+});
+</script>
+	<?php
+	$msg = false;
+	$clear = false;
+	if ($paction) {
+		if ($paction == 'volume-create') {
+			include('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/createvol.php');
+		}
+		elseif ($paction == 'pool-create') {
+			include('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/createpool.php');
+		}
+	}else{
+		if ($psubaction) {
+			if ($psubaction == 'volume-delete') {
+				$msg = $lv->storagevolume_delete( base64_decode($_GET['vpath']) ) ? 
+					'Volume has been successfully deleted' : 
+					'Cannot delete volume '.$lv->get_last_error();
+			}
+			elseif ($psubaction == 'volume-save') {
+				if (array_key_exists('sent', $_POST)) {
+					$disk = $_POST['disk'];
+					$msg = $lv->storagevolume_create($_GET['pool'], $disk['name'], $disk['capacity'], $disk['allocation'], $disk['driver']) ?
+						'Volume has been successfully created' : 
+						'Cannot create volume '.$lv->get_last_error();
+				}
+			}
+			elseif ($psubaction == 'pool-autostart') {
+				$pool = $_GET['pool'];
+		 		if ($lv->storagepool_get_autostart($pool)) {
+	 				$msg = $lv->storagepool_set_autostart($pool, false) ? "Storage Pool $pool has been successfully removed from autostart" :
+	 					'Error while removing storage pool from autostart: '.$lv->get_last_error();
+	 			}else{
+		 			$msg = $lv->storagepool_set_autostart($pool, true) ? "Storage Pool $pool has been successfully added to autostart" :
+      	 			'Error while setting storage pool to autostart: '.$lv->get_last_error(); 
+				}
+			}
+  			elseif ($psubaction == 'pool-refresh') {
+					$pool = $_GET['pool'];
+					$msg = $lv->storagepool_refresh($pool) ? 
+						"Storage pool $pool has been successfully refreshed" : 
+						"Cannot refresh storage pool $pool ".$lv->get_last_error();
+			}
+  			elseif ($psubaction == 'pool-remove') {
+					$pool = $_GET['pool'];
+					if ($lv->storagepool_is_active($pool)) 
+						$lv->storagepool_destroy($pool);
+					$msg = $lv->storagepool_undefine($pool) ? 
+						"Storage pool $pool has been successfully removed" : 
+						"Cannot remove storage pool $pool ".$lv->get_last_error();
+			}
+	  		elseif ($psubaction == 'pool-stop') {
+				$pool = $_GET['pool'];
+				$msg = $lv->storagepool_destroy($pool) ? 
+					"Storage pool $pool has been successfully stopped" : 
+					"Cannot stop storage pool $pool ".$lv->get_last_error();
+			}
+			elseif ($psubaction == 'pool-start') {
+				if (array_key_exists('sent', $_POST)) {
+					//storage pool create
+					$pool = $_POST['pool'];
+					$ppath = $pool['path'];
+					$pool = $pool['name'];
+					if (!is_dir($ppath))
+						mkdir($ppath);
+						$puuid = $lv->storagepool_generate_uuid();
+						$xml = "<pool type='dir'>
+							<name>$pool</name>
+							<uuid>$puuid</uuid>
+							<capacity unit='bytes'>0</capacity>
+							<allocation unit='bytes'>0</allocation>
+							<available unit='bytes'>0</available>
+							<source>
+							</source>
+							<target>
+								<path>$ppath</path>
+									<permissions>
+										<mode>0755</mode>
+										<owner>-1</owner>
+										<group>-1</group>
+									</permissions>
+							</target>
+						</pool>";						
+					$res = $lv->storagepool_define_xml($xml);
+					$msg = $lv->storagepool_create($res) ?
+						"Storage pool $pool has been created successfully" : 
+						"Cannot create storage pool $pool ".$lv->get_last_error();
+				} else {
+					//storage pool start
+					$pool = $_GET['pool'];
+					$res = $lv->get_storagepool_res($pool);
+					$msg = $lv->storagepool_create($res) ?
+						"Storage pool $pool has been successfully started" : 
+						"Cannot start storage pool $pool ".$lv->get_last_error();
+				}
+			}
+			$clear = true;
+		}
+				echo "<table class='tablesorter storage-pool".($display['tabs']==1?" shift'":"'")." id='storage-pool_table'>
+					<tr>
+						<thead>
+						<th><a href='?paction=pool-create' title='create new storage pool'><i class='glyphicon glyphicon-plus green'></i></a></th>
+						<th class='header'><a href='#' onClick='window.location.reload()'>Name</a></th>
+						<th class='header'>Disks</th>
+						<th class='header'>Capacity</th>
+						<th class='header'>Allocation</th>
+						<th class='header'>Available</th>
+						<th class='header'>Path</th>
+						<th class='header'>Auto</th>
+						<th class='header'>Actions</th><th class='header'></th><th class='header'></th>
+						</thead>
+						<tbody>
+		      	</tr>";
+				$pools = $lv->get_storagepools();
+			if(!$pools) 
+				$msg = "No storage pools defined. Create from template or add XML description.";
+			else {
+				for ($i = 0; $i < sizeof($pools); $i++) {
+					$pool = $pools[$i];
+					$info = $lv->get_storagepool_info($pool);
+					$auto = $lv->storagepool_get_autostart($pool) ? 'checked="checked"':"";
+					 if ($lv->translate_storagepool_state($info['state']) == 'Running')
+		 	    		$scolor = 'green';
+		   		else
+		     			$scolor = 'red';
+		     		$act = $info['active'] ? 'Active' : 'Inactive';
+					echo "<tr>
+							<td><img src='/plugins/dynamix/images/".$scolor."-on.png'></td>
+							<td><a href='#' onclick=\"toggle_id('pool$i')\">$pool</a></td>
+							<td>{$info['volume_count']}</td>
+							<td>{$lv->format_size($info['capacity'], 2)}</td>
+  	  	      	      <td>{$lv->format_size($info['allocation'], 2)}</td>
+  		 	      	   <td>{$lv->format_size($info['available'], 2)}</td>
+							<td>{$info['path']}</td>
+							<td><input class='checkbox' type='checkbox' title='Toggle VM auostart' $auto onClick=\"javascript:location.href='?psubaction=pool-autostart&amp;pool=$pool'\" ></td>
+							<td>";
+						if ($act == "Active") {
+							echo "<a href='?psubaction=pool-stop&amp;pool=$pool' title='stop storage pool'
+									onclick=\"return confirm('All volumes will remain. Stop $pool storage pool?')\"><i class='glyphicon glyphicon-stop red'></i></a> | ".
+									"<a href='?psubaction=pool-refresh&amp;pool=$pool' title='refresh storage pool'>
+									<i class='glyphicon glyphicon-refresh blue'></i></a> | ".
+									"<a href='?action=volume-create&amp;pool=$pool' title='add new storage volume'>
+									<i class='glyphicon glyphicon-plus green'></i></a> | ";
+						}else{						
+							echo "<a href='?psubaction=pool-start&amp;pool=$pool' title='start storage pool'
+									><i class='glyphicon glyphicon-play green'></i></a> | ";
+						}
+						echo "<a href='?psubaction=pool-remove&amp;pool=$pool' title='remove storage pool but not storage volumes'
+									onclick=\"return confirm('All volumes will remain. Remove $pool storage pool?')\"><i class='glyphicon glyphicon-remove red'></i></a>
+							</td><td>&nbsp;</td>
+  	       	      </tr>";
+	
+					if ($info['volume_count'] > 0) {
+						echo "<tr id='pool$i' style='display: none'>
+								<td colspan='10'><table class='tablesorter storage-vol".($display['tabs']==1?" shift'":"'")." id='storage-vol_table'>
+								<tr>
+								<thead>
+								  <th class='header'><i class='glyphicon glyphicon-hdd '></i> Disk Name</th>
+								  <th class='header'>Type</th>
+								  <th class='header'>Capacity</th>
+								  <th class='header'>Allocation</th>
+								  <th class='header'>Actions</th><th class='header'></th>
+								</thead>
+								<tbody>
+								</tr>";
+						$tmp = $lv->storagepool_get_volume_information($pool);
+						$tmp_keys = array_keys($tmp);
+						for ($ii = 0; $ii < sizeof($tmp); $ii++) {
+							$vname = $tmp_keys[$ii];		
+							$vpath = $tmp[$vname]['path'];
+							echo "<tr>
+										<td>$vname</td>
+										<td>{$lv->translate_volume_type($tmp[$vname]['type'])}</td>
+										<td>{$lv->format_size($tmp[$vname]['capacity'], 2)}</td>
+										<td>{$lv->format_size($tmp[$vname]['allocation'], 2)}</td>
+										<td>delete <a href='?psubaction=volume-delete&amp;vpath=".base64_encode($vpath)
+												."' onclick=\"return confirm('You want to permanently delete $vname?')\" title='delete storage volume'><i class='glyphicon glyphicon-remove red'></i></a></td>
+							      </tr>";
+						}	
+
+							echo '</table></td>
+								</tr>';
+					}
+				}
+			}
+				echo '</table>';
+				// remove actions from url
+		if ($clear) echo "<script type='text/javascript'>	window.history.pushState('KVM', 'Title', '/KVM'); </script>";
+		}
+	if($msg)
+		echo "<p><pre style='margin-bottom:20px'>$msg</pre></p>";
+	?>
+	</div>
+</div>
