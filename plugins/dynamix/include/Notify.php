@@ -22,7 +22,7 @@ switch ($_POST['cmd']) {
 case 'init':
   @mkdir($unread,0755,true);
   @mkdir($archive,0755,true);
-  $files = glob("$unread/*.notify"); 
+  $files = glob("$unread/*.notify",GLOB_NOSORT); 
   foreach ($files as $file) if (!is_readable($file)) chmod($file,0666);
   break;
 case 'add':
@@ -56,7 +56,7 @@ case 'add':
 case 'get':
   $output = array();
   $json = array();
-  $files = glob("$unread/*.notify"); 
+  $files = glob("$unread/*.notify",GLOB_NOSORT); 
   usort($files, create_function('$a,$b', 'return filemtime($a)-filemtime($b);'));
   $i = 0;
   foreach ($files as $file) {
