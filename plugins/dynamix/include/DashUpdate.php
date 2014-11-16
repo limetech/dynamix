@@ -62,7 +62,7 @@ case 'disk':
     $n = 0;
     switch ($disk['type']) {
     case 'Parity':
-      $n = 1;
+      if ($disk['status']!='DISK_NP') $n = 1;
     break;
     case 'Data':
     case 'Cache':
@@ -119,7 +119,7 @@ case 'port':
       if ($port=='bond0') {
         $ports[$i++] = exec("awk '/^Bonding Mode/' /proc/net/bonding/$port|cut -d: -f2");
       } else if ($port=='lo') {
-        $ports[$i++] = exec("ethtool $port|awk '/Link detected/{print $3}'");
+        $ports[$i++] = str_replace('yes','loopback',exec("ethtool $port|awk '/Link detected/{print $3}'"));
       } else {
         exec("ethtool $port|awk '/Speed:|Duplex:/{print $2}'",$info);
         $ports[$i++] = $info[0][0]!='U' ? "{$info[0]} - ".strtolower($info[1])." duplex" : "not connected";

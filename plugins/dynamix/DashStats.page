@@ -29,7 +29,11 @@ exec("dmidecode -q -t memory|awk '/Maximum Capacity:/{print $3,$4};/Size:/{total
 exec("ifconfig -s|awk '/^(bond|eth|lo)/{print $1}'",$ports);
 
 function parity_status() {
-  global $var;
+  global $var,$disks;
+  if ($disks['parity']['status']=='DISK_NP') {
+    echo "<tr><td colspan='2'><span class='red p0'><strong>Parity disk not present</strong></span></td></tr>";
+    return;
+  }
   if ($var['mdNumInvalid']==0) {
     echo "<tr><td colspan='2'><span class='green p0'><strong>Parity is valid</strong></span></td></tr>";
     if ($var['sbSynced']==0) {
@@ -141,7 +145,7 @@ $row0 = array_fill(0,25,"<td>-</td>"); $i = 1;
 foreach ($disks as $disk):
   switch ($disk['type']):
   case 'Parity':
-    $row0[0] = '<td>Parity<br>0</td>';
+    if ($disk['status']!='DISK_NP') $row0[0] = '<td>Parity<br>0</td>';
   break;
   case 'Data':
   case 'Cache':
