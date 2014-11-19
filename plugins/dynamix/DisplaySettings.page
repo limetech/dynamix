@@ -74,6 +74,7 @@ function resetDisplay(form) {
   form.banner.selectedIndex = 0;
   form.theme.selectedIndex = 0;
   form.refresh.selectedIndex = 1;
+  form.poll.selectedIndex = 0;
   document.getElementsByName('#passive')[0].checked = false;
   $('#passive').show();
 }
@@ -190,6 +191,12 @@ Temperature unit:
 
 <span id="max">Critical disk temperature threshold (&deg;<?=$display['unit']?>):</span>
 : <input type="text" name="max" class="narrow" maxlength="3" value="<?=$display['unit']=='C'?$display['max']:round(9/5*$display['max']+32)?>" onchange="checkTemp(this.form,false)">
+
+Enable background polling for spun-down disks:
+: <select name="poll" size="1">
+  <?=mk_option($display['poll'], "0", "No")?>
+  <?=mk_option($display['poll'], "1", "Yes")?>
+  </select>
 
 Page update frequency:
 : <select name="refresh" size="1" onchange="presetPassive(this.selectedIndex)">

@@ -1,0 +1,122 @@
+Menu="Notifications"
+Title="Email Settings"
+---
+<?PHP
+/* Copyright 2014, Bergware International.
+ * Copyright 2014, Lime Technology
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<script>
+$(function() {
+  presetMail(document.mail_setup);
+});
+function valideEmail(address) {
+  var email = /\S+@\S+\.\S+/;
+  return email.test(address);
+}
+function presetMail(form) {
+  var disabled = form.service.value==0;
+  for (var i=0,field; field=form.querySelectorAll('input,radio')[i]; i++) field.disabled = (disabled && field.name.substr(0,1)!='#');
+  form.service.disabled = false;
+}
+function checkSMTP(form) {
+  var okay = form.service.value==0 || valideEmail(document.smtp_setup.root.value);
+  if (!okay) alert("Please enter a valid sending email address\n\nSee SMTP settings!");
+  return okay;
+}
+</script>
+<form markdown="1" name="mail_setup" method="POST" action="/update.php" target="progressFrame" onsubmit="return checkSMTP(this)">
+<input type="hidden" name="#file"  value="dynamix/dynamix.cfg">
+<input type="hidden" name="#section" value="email">
+<input type="hidden" name="DisplayFahrenheit"  value="<?=$display['unit']=='F'?'True':'False'?>">
+<input type="hidden" name="MaxDiskTemp"  value="<?=$display['hot']?>">
+<input type="hidden" name="CriticalDiskTemp"  value="<?=$display['max']?>">
+
+Mail notifications function:
+: <select name="service" size="1" onchange="presetMail(this.form);">
+  <?=mk_option($email['service'], "0", "Disabled")?>
+  <?=mk_option($email['service'], "1", "Enabled")?>
+  </select>
+
+Email notification subject:
+: <input type="text" name="Subject" value="<?=$email['Subject']?>">
+
+Append unRAID status to subject:
+: <select name="AppendStatus" size="1">
+  <?=mk_option($email['AppendStatus'], "False", "No")?>
+  <?=mk_option($email['AppendStatus'], "True", "Yes")?>
+  </select>
+
+Email recipients:
+: <input type="text" name="RcptTo" value="<?=$email['RcptTo']?>">
+
+> Recipients of status and error notifications. Separate multiple email addresses with a space, leave empty if you want to receive errors only.
+
+Error recipients:
+: <input type="text" name="ErrorRcptTo" value="<?=$email['ErrorRcptTo']?>">
+
+> Recipients of error only notifications. Separate multiple email addresses with a space.
+
+Priority in header:
+: <select name="SetEmailPriority" size="1">
+  <?=mk_option($email['SetEmailPriority'], "False", "No")?>
+  <?=mk_option($email['SetEmailPriority'], "True", "Yes")?>
+  </select>
+
+> Set email header with high importance, when there is a problem with unRaid.
+
+Include mdcmd:
+: <select name="IncludeMdcmd" size="1">
+  <?=mk_option($email['IncludeMdcmd'], "False", "No")?>
+  <?=mk_option($email['IncludeMdcmd'], "True", "Yes")?>
+  </select>
+
+> Choose whether to include the contents of mdcmd in the status email.
+
+Disk warning temperature:
+: <?=my_temp($display['hot'])?>
+
+Disk critical temperature:
+: <?=my_temp($display['max'])?>
+
+> Disk warning and critical temperatures are set under User Preferences - Display settings. When these values are changed then email settings need to be re-applied too.
+
+Critical temperature command:
+: <input type="text" name="CriticalDiskCommand" value="<?=$email['CriticalDiskCommand']?>">
+
+> Optional COMMAND to execute when one or more disks exceed their critical disk temperature. See "USer Preferences - Display Settings".
+
+Email frequency:
+: <input type="text" name="NotifyDelay" class="narrow"  maxlength="2" value="<?=$email['NotifyDelay']?>">hours
+
+> Interval at which email notifications are sent out.
+
+Check frequency:
+: <input type="text" name="RescanDelay" class="narrow"  maxlength="3" value="<?=$email['RescanDelay']?>">minutes
+
+> Interval at which status checks are done. It must be shorter than the email frequency.
+
+Check delay:
+: <input type="text" name="StartScanDelay" class="narrow"  maxlength="3" value="<?=$email['StartScanDelay']?>">minutes
+
+> Initial delay at system boot up, before the status checks start. This allows for the system and other dependencies to be ready first.
+
+Disk array spun down:
+: <select name="NoReportIfAllSpunDown" size="1">
+  <?=mk_option($email['NoReportIfAllSpunDown'], "False", "No notification")?>
+  <?=mk_option($email['NoReportIfAllSpunDown'], "True", "Send email")?>
+  </select>
+
+> Send an email notification when all disks in the array are in spun down state.
+
+&nbsp;
+: <input type="submit" name="#apply" value="Apply"><button type="button" onclick="done()">Done</button>
+
+</form>

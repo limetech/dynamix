@@ -47,7 +47,7 @@ function updater(){
   $name = $disk['name'];
   $dev = $disk['device'];
   if ($name!='flash' && $dev):
-?>$.get('/webGui/include/Run.php',{cmd:'health',port:'<?=$dev?>',poll:'<?=$disk_health['poll']?>'},function(data){$('#<?=$dev?>').removeClass().addClass(data);});
+?>$.get('/webGui/include/Run.php',{cmd:'health',port:'<?=$dev?>',poll:'<?=$display['poll']?>'},function(data){$('#<?=$dev?>').removeClass().addClass(data);});
 <?endif;
   endforeach;
 ?>

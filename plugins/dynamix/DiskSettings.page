@@ -97,6 +97,11 @@ Force NCQ disabled:
 > If set to 'No' then it is enabled.  Most users find that overall system performance is better with
 > NCQ turned off.
 
+Tunable (poll_spindown):
+: <input type="text" name="poll_spindown" maxlength="10" value="<?=$var['poll_spindown']?>"><?=$var['poll_spindown']?></td>
+
+> This "tunable" defines the disk activity polling interval, in seconds, for determining if disk(s) spindown should occur.
+
 Tunable (md_num_stripes):
 : <input type="text" name="md_num_stripes" maxlength="10" value="<?=$var['md_num_stripes']?>"><?=$var['md_num_stripes_status']?></td>
 

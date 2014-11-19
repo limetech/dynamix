@@ -1,52 +1,208 @@
-#!/bin/bash
-
-# tomm - for now hardcode $path to "/tmp/notifications".
-# Problem is that a script cannot assume the config file is present and valid.  Instead, either path should be passed to
-# this script or script should be written in php in order to use parse_plugin_cfg().
-# We'll fix this later...
-path="/tmp/notifications"
-
-# Help function
-usage() {
-  echo 'Notify.sh -e "event" -s "subject" -d "description" -i "normal|warning|alert" -x'
-  echo 'use -x to create a single notification ticket'
-  echo 'Notifications may include HTML tags like <br>'
+#!/usr/bin/php
+<?PHP
+/* Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
+ * Copyright 2014, Bergware International.
+ * Copyright 2014, Lime Technology
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+function parse_plugin_cfg($plugin, $sections=FALSE) {
+  $keys = parse_ini_file("/usr/local/emhttp/plugins/{$plugin}/default.cfg", $sections);
+  
+  $ini = "/boot/config/plugins/{$plugin}/{$plugin}.cfg";
+  if (is_file($ini))
+    $keys = array_merge($keys, parse_ini_file($ini, $sections));
+  
+  return $keys;
 }
 
-# Read setting from config file
-get_param() {
-  awk '$1=="["s"]"{f++}f&&$1~p{split($1,a,m);gsub("[\t ]*$","",a[2]);print a[2];exit}' s="$2" p="^[\t ]*$3" m="^[\t ]*$3[\t ]*=[\t ]*" FS="\$^" "$1"
+function usage() {
+  echo <<<EOT
+notify [-e "event"] [-s "subject"] [-d "description"] [-i "normal|warning|alert"] [-m "message"] [-x] [add] 
+  create a notification
+  use -e to specify the event
+  use -s to specify a subject
+  use -d to specify a short description
+  use -i to specify the severity
+  use -m to specify a message (long description)
+  use -x to create a single notification ticket
+  all options are optional
+
+notify init
+  Initialize the notification subsystem.
+  
+notify get
+  Output a json-encoded list of all the unread notifications.
+  
+notify archive file
+  Move file from 'unread' state to 'archive' state.
+
+EOT;
+  return 1;
+}
+  
+function ssmtp_init($ssmtp) {
+  $conf   = $array;
+  $conf[] = "# Generated";
+//  $conf[] = "Debug=Yes";
+  $conf[] = "Root={$ssmtp['root']}";
+  $conf[] = "Mailhub={$ssmtp['server']}:{$ssmtp['port']}";
+  $conf[] = "UseTLS={$ssmtp['UseTLS']}";
+  $conf[] = "UseSTARTTLS={$ssmtp['UseSTARTTLS']}";
+  $conf[] = "AuthUser={$ssmtp['AuthUser']}";
+  $conf[] = "AuthPass={$ssmtp['AuthPass']}";
+  $conf[] = "";
+  file_put_contents("/etc/ssmtp/ssmtp.conf", implode("\n", $conf));
 }
 
-# Preset parameters
-event="unRAID Status"
-subject="Notification"
-description="No description"
-importance="normal"
-timestamp=$(date +%s)
-ticket=$timestamp
+function generate_email($event, $subject, $description, $message, $importance, $timestamp) {
+  global $email, $ssmtp;
 
-# Get parameters
-while getopts ":e:s:d:i:x" opt; do
-  case $opt in
-  e ) event=$OPTARG ;;         # first line in notification with name of the event
-  s ) subject=$OPTARG ;;       # second line in the notification with the subject of the event
-  d ) description=$OPTARG ;;   # third line in the notification with more details about the event
-  i ) importance=$OPTARG ;;    # normal (green), warning (orange), or alert (red) background color
-  x ) ticket="ticket" ;;       # if set handle events with the same name as one otherwise events are repeated
-  \?) usage >&2 ; exit 1 ;;
-  esac
-done
+  $priority = $email['SetEmailPriority']=="True" && ($importance == "warning" || $importance == "alert");
 
-# Set save path
-#cfg="/boot/config/plugins/dynamix/dynamix.cfg"
-#path=$(get_param $cfg notify path)
-path=$(echo "$path/unread"|sed 's/"//g')
-file=$(echo "$path/$event-$ticket.notify"|sed 's/"//g')
+  $rcpt = $email['RcptTo'];
+  if ($importance == "warning" || $importance == "alert")
+    $rcpt .= " ".$email['ErrorRcptTo'];
+  $to = implode(",", explode(" ", trim($rcpt)));
+  if (empty($to))
+    return;
 
-# Create directory as needed
-mkdir -p "$path"
+  $subj = $email['Subject'];
+  if ($email['AppendStatus']=="True")
+    $subj .= $subject;
 
-# Write results to notification file
-echo -e "timestamp = $timestamp\nevent = $event\nsubject = $subject\ndescription = $description\nimportance = $importance" > "$file"
-exit 0
+  $headers   = array();
+  $headers[] = "MIME-Version: 1.0";
+  $headers[] = "X-Mailer: PHP/".phpversion();
+  $headers[] = "Content-type: text/plain; charset=iso-8859-1";
+  $headers[] = "From: {$ssmtp['root']}";
+  $headers[] = "Reply-To: {$ssmtp['root']}";
+  if (($importance == "warning" || $importance == "alert") && $email['SetEmailPriority']=="True") {
+    $headers[] = "X-Priority: 1 (highest)";
+    $headers[] = "X-Mms-Priority: High";
+  }
+  $headers[] = "";
+
+  $body      = array();
+  $body[]    = "Event: $event";
+  $body[]    = "Subject: $subject";
+  $body[]    = "Description: $description";
+  $body[]    = "Importance: $importance";
+  $body[]    = "Timestamp: $timestamp";
+  if (!empty($message)) {
+    $body[]    = "";
+    $body[]    = "$message";
+  }
+  $body[]    = "";
+
+  mail($to, $subj, implode("\n", $body), implode("\n", $headers));
+}
+
+// start
+
+if ($argc == 1)
+  exit(usage());
+
+$method = $argv[1];
+if (substr($method, 0, 1) == '-')
+  $method = "add";
+
+extract(parse_plugin_cfg("dynamix",true));
+//echo "notify "; print_r($notify);
+//echo "ssmtp "; print_r($ssmtp);
+//echo "email "; print_r($email);
+
+$notify['service'] = "1"; /* more: add this to dynamix.cfg */
+$unread = "{$notify['path']}/unread";
+$archive = "{$notify['path']}/archive";
+
+switch ($method) {
+case 'init':
+  @mkdir($unread,0755,true);
+  @mkdir($archive,0755,true);
+  $files = glob("$unread/*.notify"); 
+  foreach ($files as $file) if (!is_readable($file)) chmod($file,0666);
+  break;
+
+case 'add':
+  $event = 'unRAID Status';
+  $subject = 'Notification';
+  $description = 'No description';
+  $importance = 'normal';
+  $timestamp = time();
+  $ticket = $timestamp;
+
+  $options = getopt("e:s:d:i:x");
+  foreach ($options as $option => $value) {
+    switch ($option) {
+     case 'e':
+      $event = $value;
+      break;
+     case 's':
+      $subject = $value;
+      break;
+     case 'd':
+      $description = $value;
+      break;
+     case 'i':
+      $importance = $value;
+      break;
+     case 'm':
+      $message = $value;
+      break;
+     case 'x':
+      $ticket = 'ticket';
+      break;}
+  }
+  if ($notify['service']=="1") {
+    $file = "{$unread}/{$event}-{$ticket}.notify";
+    file_put_contents($file,"timestamp = $timestamp\nevent = $event\nsubject = $subject\ndescription = $description\nimportance = $importance\n");
+  }
+  if ($email['service']=="1") {
+    ssmtp_init($ssmtp);
+    generate_email($event, $subject, $description, $message, $importance, $timestamp);
+  }
+  break;
+
+case 'get':
+  $output = array();
+  $json = array();
+  $files = glob("$unread/*.notify"); 
+  usort($files, create_function('$a,$b', 'return filemtime($a)-filemtime($b);'));
+  $i = 0;
+  foreach ($files as $file) {
+    if (!is_readable($file)) continue;
+    $fields = preg_split('/\n/', file_get_contents($file));
+    $time = true;
+    foreach ($fields as $field) {
+      if (!$field) continue;
+      $item = explode('=', $field);
+      if ($time) {$item[1] = date("{$notify['date']} {$notify['time']}", $item[1]); $time = false;}
+      $output[$i][] = '\"'.trim($item[0]).'\":\"'.trim($item[1]).'\"';
+    }
+    $output[$i++][] = '\"file\":\"'.basename($file).'\"';
+    chmod($file,0000);
+  }
+  for ($n=0; $n<$i; $n++) $json[] = '"{'.implode(',', $output[$n]).'}"';
+  echo '['.implode(',', $json).']';
+  break;
+
+case 'archive':
+  if ($argc != 3)
+    exit(usage());
+  $file = $argv[2];
+  $open = "$unread/$file";
+  $closed = "$archive/$file";
+  if (file_exists($open)) {rename($open, $closed); chmod($closed,0666);}
+  break;
+}
+
+exit(0);
+?>

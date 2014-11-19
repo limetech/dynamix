@@ -15,7 +15,8 @@ Title="Archived Notifications"
  */
 ?>
 <?
-$files = glob("{$notify['path']}/archive/*.notify");
+$log = "{$notify['path']}/archive/*.notify";
+$files = glob($log);
 usort($files, create_function('$a,$b', 'return filemtime($b)-filemtime($a);'));
 ?>
 <script>
@@ -25,7 +26,7 @@ function askConfirmation() {
 </script>
 
 <table class="share_status small<?if ($display['tabs']==0):?> shift<?endif;?>">
-<thead><tr><td>Time</td><td>Event</td><td>Subject</td><td>Description</td><td style='width:7%'>Importance</td><td style='width:5%;text-align:center'>Delete<?if (count($files)>1):?> <a href='/webGui/include/DeleteLogFile.php?log=<?=$path?>' target='progressFrame' onclick='return askConfirmation()' title='Delete all notifications'>[x]</a><?endif;?></td></tr></thead>
+<thead><tr><td>Time</td><td>Event</td><td>Subject</td><td>Description</td><td style='width:7%'>Importance</td><td style='width:5%;text-align:center'>Delete<?if (count($files)>1):?> <a href='/webGui/include/DeleteLogFile.php?log=<?=$log?>' target='progressFrame' onclick='return askConfirmation()' title='Delete all notifications'>[x]</a><?endif;?></td></tr></thead>
 <tbody>
 <?
 foreach ($files as $file) {

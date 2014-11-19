@@ -1,0 +1,119 @@
+Menu="Notifications"
+Title="SMTP Settings"
+---
+<?PHP
+/* Copyright 2014, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<script>
+var counter,pid;
+
+$(function() {
+  $('#test').click(function(){
+    $('#testresult').html('Test Result:<span class="orange">Obtaining <span id="counter"></span>...</span>');
+    $(this).val('Sending').attr('disabled',true);
+    counter = 20;
+    mailtest();
+    $.get('/plugins/dynamix/include/SMTPtest.php',function(data){clearTimeout(pid); $('#test').attr('disabled',false).val('Test'); $('#testresult').html(data)});
+  });
+  checkPwd(document.smtp_setup.AuthPass.value);
+  document.smtp_setup.TLSCert.disabled = document.smtp_setup.UseTLSCert.selectedIndex==0;
+});
+function prepareSMTP(form) {
+  if (!valideEmail(form.root.value)) {
+    alert("Please enter a valid sending email address");
+    return false;
+  }
+  return true;
+}
+function checkPwd(string) {
+  if (string.indexOf('#')<0) $('#authpass').hide(); else $('#authpass').show();
+}
+function mailtest() {
+  document.getElementById('counter').innerHTML = '('+counter+' sec)';
+  counter--;
+  if (counter>0) pid=setTimeout(mailtest,1000);
+}
+function tls(form) {
+  form.TLSCert.disabled = form.UseTLSCert.selectedIndex==0;
+}
+</script>
+
+<form markdown="1" name="smtp_setup" method="POST" action="/update.php" target="progressFrame" onsubmit="return prepareSMTP(this)">
+<input type="hidden" name="#file"  value="dynamix/dynamix.cfg">
+<input type="hidden" name="#section" value="ssmtp">
+
+Mail Transfer Agent:
+: <span class="bitstream"><?=exec("/usr/sbin/ssmtp -V 2>&1|awk '{print $1\" version: \"$2}'")?></span>
+
+Sending email address:
+: <input type="text" name="root" value="<?=$ssmtp['root']?>">
+
+> Email address for your mail account. This address is used as sender of the notifications.
+
+Mail server:
+: <input type="text" name="server" value="<?=$ssmtp['server']?>">
+
+Mail server port:
+: <input type="text" name="port" class="narrow"  maxlength="5"  value="<?=$ssmtp['port']?>">
+
+> Specify the name and port of the email server. You may need to verify with your provider to get this information.
+
+Use SSL:
+: <select name="UseTLS" size="1">
+  <?=mk_option($ssmtp['UseTLS'], "NO", "No")?>
+  <?=mk_option($ssmtp['UseTLS'], "YES", "Yes")?>
+  </select>
+
+> Specifies whether ssmtp uses TLS to talk to the SMTP server.
+
+Use start TLS:
+: <select name="UseSTARTTLS" size="1">
+  <?=mk_option($ssmtp['UseSTARTTLS'], "NO", "No")?>
+  <?=mk_option($ssmtp['UseSTARTTLS'], "YES", "Yes")?>
+  </select>
+
+> Specifies whether ssmtp does a EHLO/STARTTLS before starting SSL negotiation - See RFC 2487.
+
+Define a TLS certificate:
+: <select name="UseTLSCert" size="1" onchange="tls(this.form)">
+  <?=mk_option($ssmtp['UseTLSCert'], "NO", "No")?>
+  <?=mk_option($ssmtp['UseTLSCert'], "YES", "Yes")?>
+  </select>
+
+> Select only when you have a certificate which required to for the communication.
+
+TLS certificate location:
+: <input type="text" name="TLSCert" value="<?=$ssmtp['TLSCert']?>">
+
+> The file name of an RSA certificate to use for TLS - as required.
+
+Authentication method:
+: <select name="AuthMethod" size="1">
+  <?=mk_option($ssmtp['AuthMethod'], "none", "None")?>
+  <?=mk_option($ssmtp['AuthMethod'], "cram-md5", "CRAM-MD5")?>
+  <?=mk_option($ssmtp['AuthMethod'], "login", "Login")?>
+  </select>
+
+> Select the correct authentication method for your email server. Use test to verify that access is working properly.
+
+Username:
+: <input type="text" name="AuthUser" value="<?=$ssmtp['AuthUser']?>">
+
+Password:
+: <input type="password" name="AuthPass" value="<?=$ssmtp['AuthPass']?>" onchange="checkPwd(this.value)"><span id='authpass' style='display:none;color:red;font-weight:bold'>Warning: do not use the # character in your password!</span>
+
+> Enter the username and password to login to your email account. Be aware that the password is stored unencrypted in the email configuration file.
+
+&nbsp;
+: <input type="submit" name="#apply" value="Apply"><button type="button" onclick="done();">Done</button>
+  <span id="testresult" style="font-size:13px"><input type="button" id="test" value="Test"><span class="orange"></span></span>
+</form>
+
