@@ -888,7 +888,7 @@
 
 			return $size;
 		}
-
+		//create a storage volume and add file extension
 		function storagevolume_create($pool, $name, $capacity, $allocation, $format) {
 			$pool = $this->get_storagepool_res($pool);
 
@@ -1082,6 +1082,11 @@
 
 		function get_domains() {
 			$tmp = libvirt_list_domains($this->conn);
+			return ($tmp) ? $tmp : $this->_set_last_error();
+		}
+
+		function get_active_domain_ids() {
+			$tmp = libvirt_list_active_domain_ids($this->conn);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
@@ -1364,6 +1369,7 @@
 			$tmp = libvirt_domain_managedsave($dom);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
+		
 		function domain_resume($domain) {
 			$dom = $this->get_domain_object($domain);
 			if (!$dom)
@@ -1743,38 +1749,45 @@
 
 		function domain_get_autostart($domain) {
 			$domain = $this->get_domain_object($domain);
-			return libvirt_domain_get_autostart($domain);
+			$tmp = libvirt_domain_get_autostart($domain);
+			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
 		function domain_set_autostart($res,$flags) {
-			return libvirt_domain_set_autostart($res,$flags);
+			$tmp = libvirt_domain_set_autostart($res,$flags);
+			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
 		function domain_snapshots_list($res) {
-			return libvirt_list_domain_snapshots($res);
+			$tmp = libvirt_list_domain_snapshots($res);
+			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
 		function domain_snapshot_create($domain) {
 			$domain = $this->get_domain_object($domain);
-			return libvirt_domain_snapshot_create($domain);
+			$tmp = libvirt_domain_snapshot_create($domain);
+			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
 		function domain_snapshot_delete($res) {
-				$tmp = libvirt_domain_snapshot_delete($res);
+			$tmp = libvirt_domain_snapshot_delete($res);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
 		function domain_snapshot_lookup_by_name($domain, $name) {
 			$domain = $this->get_domain_object($domain);
-			return libvirt_domain_snapshot_lookup_by_name($domain, $name);
+			$tmp = libvirt_domain_snapshot_lookup_by_name($domain, $name);
+			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
 		function domain_snapshot_revert($res) {
-			return libvirt_domain_snapshot_revert($res);		
+			$tmp = libvirt_domain_snapshot_revert($res);
+			return ($tmp) ? $tmp : $this->_set_last_error();	
 		}
 
 		function domain_is_active($res) {
-			return libvirt_domain_is_active($res);
+			$tmp = libvirt_domain_is_active($res);
+			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
 		//create dropbox options for storage devices
@@ -1793,10 +1806,10 @@
 							$vpath = $tmp[$vname]['path'];
 							$ext = pathinfo($vpath, PATHINFO_EXTENSION);
 							if ($iso) {
-								if ($ext == "iso")
+								if ($ext == "iso" | $ext == "ISO")
 									echo '<option value="'.base64_encode($vpath).'">'.$vname.'</option>';
 							}else{
-								if ($ext != "iso")
+								if ($ext != "iso" && $ext != "ISO")
 									echo '<option value="'.base64_encode($vpath).'">'.$vname.'</option>';
 							}
 						}
