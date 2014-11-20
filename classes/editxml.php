@@ -2,9 +2,9 @@
 	<div class="list">
 	<?php
 	$domName = $lv->domain_get_name_by_uuid($uuid);
- 	$inactive = (!$lv->domain_is_running($res, $name)) ? true : false;
-   $xml = $lv->domain_get_xml($domName, $inactive);
-	if ($view == "readonly") {
+   $xml = $lv->domain_get_xml($domName);
+	if ($_GET['readonly']) {
+		$readonly = 'readonly';
 		$method = "View";
 		$type = "hidden";
 		$return = "Back";
