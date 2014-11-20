@@ -729,6 +729,47 @@ fieldset[disabled] .btn-default.active {
   color: #ffffff;
   background-color: #333333;
 }
+.btn-dynamix {
+  color: inherit;
+  background-color: inherit;
+  border-color: inherit;
+}
+.btn-dynamix:hover,
+.btn-dynamix:focus,
+.btn-dynamix:active,
+.btn-dynamix.active,
+.open > .dropdown-toggle.btn-dynamix {
+  color: inherit;
+  background-color: inherit;
+  border-color: inherit;
+}
+.btn-dynamix:active,
+.btn-dynamix.active,
+.open > .dropdown-toggle.btn-dynamix {
+  background-image: none;
+}
+.btn-dynamix.disabled,
+.btn-dynamix[disabled],
+fieldset[disabled] .btn-dynamix,
+.btn-dynamix.disabled:hover,
+.btn-dynamix[disabled]:hover,
+fieldset[disabled] .btn-dynamix:hover,
+.btn-dynamix.disabled:focus,
+.btn-dynamix[disabled]:focus,
+fieldset[disabled] .btn-dynamix:focus,
+.btn-dynamix.disabled:active,
+.btn-dynamix[disabled]:active,
+fieldset[disabled] .btn-dynamix:active,
+.btn-dynamix.disabled.active,
+.btn-dynamix[disabled].active,
+fieldset[disabled] .btn-dynamix.active {
+  background-color: inherit;
+  border-color: inherit;
+}
+.btn-dynamix .badge {
+  color: inherit;
+  background-color: inherit;
+}
 .btn-primary {
   color: #ffffff;
   background-color: #428bca;
