@@ -66,21 +66,21 @@ Mail server port:
 
 > Specify the name and port of the email server. You may need to verify with your provider to get this information.
 
-Use SSL:
+Use SSL/TLS:
 : <select name="UseTLS" size="1">
   <?=mk_option($ssmtp['UseTLS'], "NO", "No")?>
   <?=mk_option($ssmtp['UseTLS'], "YES", "Yes")?>
   </select>
 
-> Specifies whether ssmtp uses TLS to talk to the SMTP server.
+> Specifies whether to use SSL/TLS to talk to the SMTP server.
 
-Use start TLS:
+Use STARTTLS:
 : <select name="UseSTARTTLS" size="1">
   <?=mk_option($ssmtp['UseSTARTTLS'], "NO", "No")?>
   <?=mk_option($ssmtp['UseSTARTTLS'], "YES", "Yes")?>
   </select>
 
-> Specifies whether ssmtp does a EHLO/STARTTLS before starting SSL negotiation - See RFC 2487.
+> Specifies whether to use STARTTLS before starting SSL negotiation - See RFC 2487.
 
 Define a TLS certificate:
 : <select name="UseTLSCert" size="1" onchange="tls(this.form)">
@@ -88,7 +88,7 @@ Define a TLS certificate:
   <?=mk_option($ssmtp['UseTLSCert'], "YES", "Yes")?>
   </select>
 
-> Select only when you have a certificate which required to for the communication.
+> Select only when you have a certificate which required for communication.
 
 TLS certificate location:
 : <input type="text" name="TLSCert" value="<?=$ssmtp['TLSCert']?>">

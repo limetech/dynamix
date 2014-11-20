@@ -46,7 +46,7 @@ function my_temp($value) {
   global $display;
   $unit = $display['unit'];
   $dot = substr($display['number'],0,1);
-  return is_numeric($value) ? (($unit=='C' ? str_replace('.', $dot, $value) : round(9/5*$value+32))." &deg;$unit") : $value;
+  return is_numeric($value) ? (($unit=='C' ? str_replace('.', $dot, $value) : round(9/5*$value+32))." $unit") : $value;
 }
 function my_disk($name) {
   return ucfirst(preg_replace('/^(disk|cache)([0-9]+)/','$1 $2',$name));

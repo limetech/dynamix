@@ -31,14 +31,7 @@ function PsEnded($pid) {
 function PsKill($pid) {
   exec("kill -9 $pid");
 }
-$smtp = '/usr/sbin/ssmtp';
-$mail = exec("awk -F= '/^Root=/{print $2}' /etc/ssmtp/ssmtp.conf");
-$text = "From: $mail
-To: $mail
-Subject: unRAID SMTP Test
-
-Test message received!
-";
-$success = PsExecute("echo ".escapeshellarg($text)."|$smtp $mail");
+$notify = "/usr/local/emhttp/plugins/dynamix/scripts/notify";
+$success = PsExecute("$notify -s 'unRAID SMTP Test' -d 'Test message received!' -t");
 echo "Test Result:<span class=".($success ? "'green'>Mail sent" : "'red'>Failed")."</span>";
 ?>

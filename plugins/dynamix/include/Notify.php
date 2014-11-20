@@ -21,26 +21,29 @@ case 'add':
   foreach ($_POST as $option => $value) {
     switch ($option) {
      case 'e':
-      $notify .= " -e $value";
+      $notify .= " -e '$value'";
       break;
      case 's':
-      $notify .= " -s $value";
+      $notify .= " -s '$value'";
       $subject = $value;
       break;
      case 'd':
-      $notify .= " -e $value";
+      $notify .= " -e '$value'";
       $description = $value;
       break;
      case 'i':
-      $notify .= " -i $value";
+      $notify .= " -i '$value'";
       $importance = $value;
       break;
      case 'm':
-      $notify .= " -m $value";
+      $notify .= " -m '$value'";
       $importance = $value;
       break;
      case 'x':
       $notify .= " -x";
+      break; 
+     case 't':
+      $notify .= " -t";
       break; 
     }
   }
@@ -50,7 +53,7 @@ case 'get':
   echo shell_exec("$notify get");
   break;
 case 'archive':
-  shell_exec("$notify archive {$_POST['file']}");
+  shell_exec("$notify archive '{$_POST['file']}'");
   break;
 }
 ?>

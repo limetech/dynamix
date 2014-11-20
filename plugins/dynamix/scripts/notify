@@ -25,7 +25,7 @@ function parse_plugin_cfg($plugin, $sections=FALSE) {
 
 function usage() {
   echo <<<EOT
-notify [-e "event"] [-s "subject"] [-d "description"] [-i "normal|warning|alert"] [-m "message"] [-x] [add] 
+notify [-e "event"] [-s "subject"] [-d "description"] [-i "normal|warning|alert"] [-m "message"] [-x] [-t] [add]
   create a notification
   use -e to specify the event
   use -s to specify a subject
@@ -33,6 +33,7 @@ notify [-e "event"] [-s "subject"] [-d "description"] [-i "normal|warning|alert"
   use -i to specify the severity
   use -m to specify a message (long description)
   use -x to create a single notification ticket
+  use -t to force send email only (for testing)
   all options are optional
 
 notify init
@@ -62,7 +63,7 @@ function ssmtp_init($ssmtp) {
   file_put_contents("/etc/ssmtp/ssmtp.conf", implode("\n", $conf));
 }
 
-function generate_email($event, $subject, $description, $message, $importance, $timestamp) {
+function generate_email($event, $subject, $description, $importance, $message) {
   global $email, $ssmtp;
 
   $priority = $email['SetEmailPriority']=="True" && ($importance == "warning" || $importance == "alert");
@@ -95,7 +96,6 @@ function generate_email($event, $subject, $description, $message, $importance, $
   $body[]    = "Subject: $subject";
   $body[]    = "Description: $description";
   $body[]    = "Importance: $importance";
-  $body[]    = "Timestamp: $timestamp";
   if (!empty($message)) {
     $body[]    = "";
     $body[]    = "$message";
@@ -139,7 +139,7 @@ case 'add':
   $timestamp = time();
   $ticket = $timestamp;
 
-  $options = getopt("e:s:d:i:x");
+  $options = getopt("e:s:d:i:xt");
   foreach ($options as $option => $value) {
     switch ($option) {
      case 'e':
@@ -159,15 +159,19 @@ case 'add':
       break;
      case 'x':
       $ticket = 'ticket';
-      break;}
+      break;
+     case 't':
+      $testing_email = true;
+      break;
+    }
   }
-  if ($notify['service']=="1") {
+  if ($notify['service']=="1" && !$testing_email) {
     $file = "{$unread}/{$event}-{$ticket}.notify";
     file_put_contents($file,"timestamp = $timestamp\nevent = $event\nsubject = $subject\ndescription = $description\nimportance = $importance\n");
   }
-  if ($email['service']=="1") {
+  if ($email['service']=="1" || $testing_email) {
     ssmtp_init($ssmtp);
-    generate_email($event, $subject, $description, $message, $importance, $timestamp);
+    generate_email($event, $subject, $description, $importance, $message);
   }
   break;
 
