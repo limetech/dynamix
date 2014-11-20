@@ -64,20 +64,18 @@ function ssmtp_init($ssmtp) {
 }
 
 function generate_email($event, $subject, $description, $importance, $message) {
-  global $email, $ssmtp;
+  global $ssmtp;
 
-  $priority = $email['SetEmailPriority']=="True" && ($importance == "warning" || $importance == "alert");
+  $priority = $ssmtp['SetEmailPriority']=="True" && ($importance == "warning" || $importance == "alert");
 
-  $rcpt = $email['RcptTo'];
+  $rcpt = $ssmtp['RcptTo'];
   if ($importance == "warning" || $importance == "alert")
-    $rcpt .= " ".$email['ErrorRcptTo'];
+    $rcpt .= " ".$ssmtp['ErrorRcptTo'];
   $to = implode(",", explode(" ", trim($rcpt)));
   if (empty($to))
     return;
 
-  $subj = $email['Subject'];
-  if ($email['AppendStatus']=="True")
-    $subj .= $subject;
+  $subj = $ssmtp['Subject'] . $subject;
 
   $headers   = array();
   $headers[] = "MIME-Version: 1.0";
@@ -85,7 +83,7 @@ function generate_email($event, $subject, $description, $importance, $message) {
   $headers[] = "Content-type: text/plain; charset=iso-8859-1";
   $headers[] = "From: {$ssmtp['root']}";
   $headers[] = "Reply-To: {$ssmtp['root']}";
-  if (($importance == "warning" || $importance == "alert") && $email['SetEmailPriority']=="True") {
+  if (($importance == "warning" || $importance == "alert") && $ssmtp['SetEmailPriority']=="True") {
     $headers[] = "X-Priority: 1 (highest)";
     $headers[] = "X-Mms-Priority: High";
   }
@@ -117,9 +115,8 @@ if (substr($method, 0, 1) == '-')
 extract(parse_plugin_cfg("dynamix",true));
 //echo "notify "; print_r($notify);
 //echo "ssmtp "; print_r($ssmtp);
-//echo "email "; print_r($email);
 
-$notify['service'] = "1"; /* more: add this to dynamix.cfg */
+$notify['browser'] = "1"; /* more: make this configurable */
 $unread = "{$notify['path']}/unread";
 $archive = "{$notify['path']}/archive";
 
@@ -165,11 +162,11 @@ case 'add':
       break;
     }
   }
-  if ($notify['service']=="1" && !$testing_email) {
+  if ($notify['browser']=="1" && !$testing_email) {
     $file = "{$unread}/{$event}-{$ticket}.notify";
     file_put_contents($file,"timestamp = $timestamp\nevent = $event\nsubject = $subject\ndescription = $description\nimportance = $importance\n");
   }
-  if ($email['service']=="1" || $testing_email) {
+  if ($notify['email']=="1" || $testing_email) {
     ssmtp_init($ssmtp);
     generate_email($event, $subject, $description, $importance, $message);
   }

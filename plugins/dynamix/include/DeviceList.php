@@ -40,13 +40,8 @@ function device_info($disk) {
   $spin_disk = "";
   $title = "";
   if ($display['spin'] && $var['fsState']=="Started") {
-    if ($href != 'cache' && isset($disk['idx'])) {
-      $cmd = "/root/mdcmd&arg1=spin{$action}&arg2={$disk['idx']}";
-    } else {
-      $cmd = "hdparm&arg1=".($action=='up' ? "-S0" : "-y")."&arg2=/dev/{$disk['device']}";
-    }
-    $a = "<a href='update.htm?cmd={$cmd}&runCmd=Apply' class='info' target='progressFrame'>";
-    $title = "Spin ".ucfirst($action);
+    $a = "<a href='update.htm?cmdSpin{$action}={$href}' class='info' target='progressFrame'>";
+    $title = "Spin $action";
     $spin_disk = "<img src='/webGui/images/$action.png' class='iconwide'>Spin $action disk<br>";
   }
   $ball = "/webGui/images/{$disk['color']}.png";

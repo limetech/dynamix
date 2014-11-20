@@ -477,7 +477,7 @@ $('.tabs').append("<span class='status vhshift'><input type='button' value='Refr
 <?if ($var['fsState']=="Started"):?>
   <tr>
   <td></td>
-  <td><input type="submit" name="cmdSpinDownAll" value="Spin Down"<?=$var['mdResync']==0 ? '':' disabled'?> style="width:80px"><input type="submit" name="cmdSpinUpAll" value="Spin Up"<?=$var['mdResync']==0 ? '':' disabled'?> style="width:80px"></td>
+  <td><input type="submit" name="cmdSpindownAll" value="Spin Down"<?=$var['mdResync']==0 ? '':' disabled'?> style="width:80px"><input type="submit" name="cmdSpinupAll" value="Spin Up"<?=$var['mdResync']==0 ? '':' disabled'?> style="width:80px"></td>
   <td><strong>Spin Down</strong> will immediately spin down all disks.<br><strong>Spin Up</strong> will immediately spin up all disks.</td>
   </tr>
 <?endif;?>

@@ -26,8 +26,12 @@ $(function() {
   checkPwd(document.smtp_setup.AuthPass.value);
   document.smtp_setup.TLSCert.disabled = document.smtp_setup.UseTLSCert.selectedIndex==0;
 });
-function prepareSMTP(form) {
-  if (!valideEmail(form.root.value)) {
+function validEmail(address) {
+  var email = /\S+@\S+\.\S+/;
+  return email.test(address);
+}
+function checkSMTP(form) {
+  if (!validEmail(form.root.value)) {
     alert("Please enter a valid sending email address");
     return false;
   }
@@ -46,7 +50,7 @@ function tls(form) {
 }
 </script>
 
-<form markdown="1" name="smtp_setup" method="POST" action="/update.php" target="progressFrame" onsubmit="return prepareSMTP(this)">
+<form markdown="1" name="smtp_setup" method="POST" action="/update.php" target="progressFrame" onsubmit="return checkSMTP(this)">
 <input type="hidden" name="#file"  value="dynamix/dynamix.cfg">
 <input type="hidden" name="#section" value="ssmtp">
 
@@ -57,6 +61,27 @@ Sending email address:
 : <input type="text" name="root" value="<?=$ssmtp['root']?>">
 
 > Email address for your mail account. This address is used as sender of the notifications.
+
+Email recipients:
+: <input type="text" name="RcptTo" value="<?=$ssmtp['RcptTo']?>">
+
+> Recipients of status and error notifications. Separate multiple email addresses with a space, leave empty if you want to receive errors only.
+
+Error recipients:
+: <input type="text" name="ErrorRcptTo" value="<?=$ssmtp['ErrorRcptTo']?>">
+
+> Recipients of error only notifications. Separate multiple email addresses with a space.
+
+Priority in header:
+: <select name="SetEmailPriority" size="1">
+  <?=mk_option($ssmtp['SetEmailPriority'], "False", "No")?>
+  <?=mk_option($ssmtp['SetEmailPriority'], "True", "Yes")?>
+  </select>
+
+> Set email header with high importance, when there is a problem with unRaid.
+
+Email subject prefix:
+: <input type="text" name="Subject" value="<?=$ssmtp['Subject']?>">
 
 Mail server:
 : <input type="text" name="server" value="<?=$ssmtp['server']?>">
