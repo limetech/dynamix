@@ -25,31 +25,31 @@ $(function() {
 			if ($psubaction == 'volume-delete') {
 				$msg = $lv->storagevolume_delete( base64_decode($_GET['vpath']) ) ? 
 					'Volume has been successfully deleted' : 
-					'Cannot delete volume '.$lv->get_last_error();
+					'Error: '.$lv->get_last_error();
 			}
 			elseif ($psubaction == 'volume-save') {
 				if (array_key_exists('sent', $_POST)) {
 					$disk = $_POST['disk'];
 					$msg = $lv->storagevolume_create($_GET['pool'], $disk['name'], $disk['capacity'], $disk['allocation'], $disk['driver']) ?
 						'Volume has been successfully created' : 
-						'Cannot create volume '.$lv->get_last_error();
+						'Error: '.$lv->get_last_error();
 				}
 			}
 			elseif ($psubaction == 'pool-autostart') {
 				$pool = $_GET['pool'];
 		 		if ($lv->storagepool_get_autostart($pool)) {
 	 				$msg = $lv->storagepool_set_autostart($pool, false) ? "Storage Pool $pool has been successfully removed from autostart" :
-	 					'Error while removing storage pool from autostart: '.$lv->get_last_error();
+	 					'Error: '.$lv->get_last_error();
 	 			}else{
 		 			$msg = $lv->storagepool_set_autostart($pool, true) ? "Storage Pool $pool has been successfully added to autostart" :
-      	 			'Error while setting storage pool to autostart: '.$lv->get_last_error(); 
+      	 			'Error: '.$lv->get_last_error(); 
 				}
 			}
   			elseif ($psubaction == 'pool-refresh') {
 					$pool = $_GET['pool'];
 					$msg = $lv->storagepool_refresh($pool) ? 
 						"Storage pool $pool has been successfully refreshed" : 
-						"Cannot refresh storage pool $pool ".$lv->get_last_error();
+						"Error: ".$lv->get_last_error();
 			}
   			elseif ($psubaction == 'pool-remove') {
 					$pool = $_GET['pool'];
@@ -57,13 +57,13 @@ $(function() {
 						$lv->storagepool_destroy($pool);
 					$msg = $lv->storagepool_undefine($pool) ? 
 						"Storage pool $pool has been successfully removed" : 
-						"Cannot remove storage pool $pool ".$lv->get_last_error();
+						"Error: ".$lv->get_last_error();
 			}
 	  		elseif ($psubaction == 'pool-stop') {
 				$pool = $_GET['pool'];
 				$msg = $lv->storagepool_destroy($pool) ? 
 					"Storage pool $pool has been successfully stopped" : 
-					"Cannot stop storage pool $pool ".$lv->get_last_error();
+					"Error: ".$lv->get_last_error();
 			}
 			elseif ($psubaction == 'pool-start') {
 				if (array_key_exists('sent', $_POST)) {
@@ -94,14 +94,14 @@ $(function() {
 					$res = $lv->storagepool_define_xml($xml);
 					$msg = $lv->storagepool_create($res) ?
 						"Storage pool $pool has been created successfully" : 
-						"Cannot create storage pool $pool ".$lv->get_last_error();
+						"Error: ".$lv->get_last_error();
 				} else {
 					//storage pool start
 					$pool = $_GET['pool'];
 					$res = $lv->get_storagepool_res($pool);
 					$msg = $lv->storagepool_create($res) ?
 						"Storage pool $pool has been successfully started" : 
-						"Cannot start storage pool $pool ".$lv->get_last_error();
+						"Error: ".$lv->get_last_error();
 				}
 			}
 			$clear = true;
@@ -125,6 +125,7 @@ $(function() {
 			if(!$pools) 
 				$msg = "No storage pools defined. Create from template or add XML description.";
 			else {
+				sort($pools);
 				for ($i = 0; $i < sizeof($pools); $i++) {
 					$pool = $pools[$i];
 					$info = $lv->get_storagepool_info($pool);
@@ -135,7 +136,7 @@ $(function() {
 		     			$scolor = 'red';
 		     		$act = $info['active'] ? 'Active' : 'Inactive';
 					echo "<tr>
-							<td><img src='/plugins/dynamix/images/".$scolor."-on.png'></td>
+							<td><img src='/plugins/dynamix.kvm.manager/images/".$scolor."-on.png'></td>
 							<td><a href='#' onclick=\"toggle_id('pool$i')\">$pool</a></td>
 							<td>{$info['volume_count']}</td>
 							<td>{$lv->format_size($info['capacity'], 2)}</td>
@@ -174,6 +175,7 @@ $(function() {
 								<tbody>
 								</tr>";
 						$tmp = $lv->storagepool_get_volume_information($pool);
+						ksort($tmp);
 						$tmp_keys = array_keys($tmp);
 						for ($ii = 0; $ii < sizeof($tmp); $ii++) {
 							$vname = $tmp_keys[$ii];		
@@ -198,7 +200,7 @@ $(function() {
 		if ($clear) echo "<script type='text/javascript'>	window.history.pushState('KVM', 'Title', '/KVM'); </script>";
 		}
 	if($msg)
-		echo "<p><pre style='margin-bottom:20px'>$msg</pre></p>";
+		echo "<script type='text/javascript'>$(function() { $('#countdown').html('".$msg."');}); </script>";
 	?>
 	</div>
 </div>

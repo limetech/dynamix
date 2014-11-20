@@ -14,7 +14,7 @@ Title="Devices"
 				$tmp = $lv->get_node_device_cap_options();
 				echo "<p style='margin-top:-33px'><div class='btn-group btn-group-sm'>";
 				if ($cap)
-					echo "<a class='btn btn-sm btn-default' href='?cap='>all</a>";
+					echo "<a class='btn btn-sm btn-dynamix' href='?cap='>all</a>";
 				else
 					echo "<a class='btn btn-sm btn-primary' href='?cap='>all</a>";
 
@@ -23,7 +23,7 @@ Title="Devices"
 					if ($cap == $tmpcap )			
 						echo "<a class='btn btn-sm btn-primary' href='?cap=$tmpcap'>$tmpcap</a>";
 					else
-						echo "<a class='btn btn-sm btn-default' href='?cap=$tmpcap'>$tmpcap</a>";
+						echo "<a class='btn btn-sm btn-dynamix' href='?cap=$tmpcap'>$tmpcap</a>";
 				}
 				echo '</div></p>';
 				
@@ -80,7 +80,7 @@ Title="Devices"
 				echo '</table>';
 			}
 			if($msg)
-				echo "<p><pre style='margin-bottom:20px'>$msg</pre></p>";
+				echo "<script type='text/javascript'>$(function() { $('#countdown').html('".$msg."');}); </script>";
 			?>
 	</div>
 </div>

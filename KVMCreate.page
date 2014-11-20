@@ -16,7 +16,7 @@ Title="Create VM"
 
 	$tmp = $lv->domain_new($_POST['name'], $_POST['media'], $_POST['drivers'], $_POST['cpu_count'], $feature, $_POST['memory'], $_POST['maxmem'], $_POST['clock_offset'], $_POST['nic'], $_POST['disk'], $_POST['usb'], $_POST['usbtab'], $_POST['shares'], $_POST['setup_persistent']);
 	if (!$tmp)
-		$msg = $lv->get_last_error();
+		$msg = "Error: ".$lv->get_last_error();
 	else {
 		$skip = true;
   		$name = $_POST['name'];
@@ -359,5 +359,5 @@ Title="Create VM"
 <?php
   endif;
   if($msg)
-	echo "<p><pre>$msg</pre></p>";
+	echo "<script type='text/javascript'>$(function() { $('#countdown').html('".$msg."');}); </script>";
 ?>
