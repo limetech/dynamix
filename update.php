@@ -1,11 +1,14 @@
 <?PHP
-/* Copyright 2014, Lime Technology LLC.
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
+/* Copyright 2014, Lime Technology
+ * Copyright 2014, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  */
-/* Program updates made by Bergware International (October 2014) */
 ?>
 <?
 /* UPDATE.PHP is used to update selected name=value variables in a configuration file.
@@ -47,13 +50,13 @@ if ($file) {
   if ($save) {
     $text = "";
     if ($section) {
-      foreach ($_POST as $key => $value) if (substr($key,0,1)!='#') $keys[$section][$key] = $value;
+      foreach ($_POST as $key => $value) if ($key[0]!='#') $keys[$section][$key] = $value;
       foreach ($keys as $section => $block) {
         $text .= "[$section]\n";
         foreach ($block as $key => $value) if (strlen($value) || !$cleanup) $text .= "$key=\"$value\"\n";
       }
     } else {
-      foreach ($_POST as $key => $value) if (substr($key,0,1)!='#') $keys[$key] = $value;
+      foreach ($_POST as $key => $value) if ($key[0]!='#') $keys[$key] = $value;
       foreach ($keys as $key => $value) if (strlen($value) || !$cleanup) $text .= "$key=\"$value\"\n";
     }
     @mkdir(dirname($file));
