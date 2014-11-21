@@ -29,7 +29,12 @@ function device_info($disk) {
   $href = $disk['name'];
   if ($href != 'preclear') {
     $name = my_disk($href);
-    $type = strpos($href,'disk')===false ? $name : "Data";
+    $type = $name;
+    if (strpos($href,'disk') === 0) {
+      $type = "Data";
+    } else if (strpos($href,'cache') === 0) {
+      $type = "Cache";
+    }
   } else {
     $name = $disk['device'];
     $type = 'Preclear';
