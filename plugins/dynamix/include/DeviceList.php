@@ -70,8 +70,7 @@ function device_info($disk) {
     <img src='/webGui/images/green-blink.png' class='icon'>Device spun-down<br>
     <img src='/webGui/images/grey-off.png' class='icon'>No device present<br>
     {$spin_disk}</span></a>";
-  }
-  else {
+  } else {
     $status = "<img src='$ball' class='icon'>";
   }
   $link = strpos($disk['status'], '_NP')===false ? "<a href='$path/$type?name=$href'>$name</a>" : $name;
@@ -111,8 +110,8 @@ function assignment($disk) {
 }
 function render_used_and_free($disk) {
   global $display;
-  if ($disk['name']=="parity" || $disk['fsStatus']=='-') {
-    echo ($display['text']) ? "<td>-</td><td>-</td>" : "<td>&nbsp;</td><td>&nbsp;</td>";
+  if ($disk['name']=='parity') {
+    if ($display['text']) echo "<td>-</td><td>-</td>"; else echo "<td><div class='usage-disk'></div></td><td><div class='usage-disk'></div></td>";
   } else if ($disk['fsStatus']=='Mounted') {
     if ($display['text']) {
       echo "<td>".my_scale($disk['fsUsed']*1024, $unit)." $unit</td>";

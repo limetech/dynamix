@@ -52,7 +52,6 @@ EOT;
 function ssmtp_init($ssmtp) {
   $conf   = $array;
   $conf[] = "# Generated";
-//  $conf[] = "Debug=Yes";
   $conf[] = "Root={$ssmtp['root']}";
   $conf[] = "Mailhub={$ssmtp['server']}:{$ssmtp['port']}";
   $conf[] = "UseTLS={$ssmtp['UseTLS']}";
@@ -109,14 +108,14 @@ if ($argc == 1)
   exit(usage());
 
 $method = $argv[1];
-if (substr($method, 0, 1) == '-')
+if ($method[0] == '-')
   $method = "add";
 
 extract(parse_plugin_cfg("dynamix",true));
 //echo "notify "; print_r($notify);
 //echo "ssmtp "; print_r($ssmtp);
 
-$notify['browser'] = "1"; /* more: make this configurable */
+//$notify['browser'] = "1"; /* Bergware: replaced by $notify['entity'] */
 $unread = "{$notify['path']}/unread";
 $archive = "{$notify['path']}/archive";
 
@@ -135,6 +134,7 @@ case 'add':
   $importance = 'normal';
   $timestamp = time();
   $ticket = $timestamp;
+  $testing_email = false;
 
   $options = getopt("e:s:d:i:xt");
   foreach ($options as $option => $value) {
@@ -162,11 +162,11 @@ case 'add':
       break;
     }
   }
-  if ($notify['browser']=="1" && !$testing_email) {
+  if (($notify['entity'] & 1)==1 && !$testing_email) {
     $file = "{$unread}/{$event}-{$ticket}.notify";
     file_put_contents($file,"timestamp = $timestamp\nevent = $event\nsubject = $subject\ndescription = $description\nimportance = $importance\n");
   }
-  if ($notify['email']=="1" || $testing_email) {
+  if (($notify['entity'] & 2)==2 || $testing_email) {
     ssmtp_init($ssmtp);
     generate_email($event, $subject, $description, $importance, $message);
   }

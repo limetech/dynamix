@@ -53,10 +53,12 @@ Display position:
 Storage path:
 : <input type="text" name="path" value="<?=$notify['path']?>"><?=(exec("echo {$notify['path']}|grep '^/mnt'") ? 'Permanent storage' : 'Temporary storage')?>
 
-Notification email:
-: <select name="email" size="1">
-  <?=mk_option($notify['email'], "0", "Disabled")?>
-  <?=mk_option($notify['email'], "1", "Enabled")?>
+Notification entity:
+: <select name="entity" size="1">
+  <?=mk_option($notify['entity'], "0", "None")?>
+  <?=mk_option($notify['entity'], "1", "Browser")?>
+  <?=mk_option($notify['entity'], "2", "Email")?>
+  <?=mk_option($notify['entity'], "3", "Browser & Email")?>
   </select>
 
 <button type="button" onclick="resetNotify(this.form);">Default</button>

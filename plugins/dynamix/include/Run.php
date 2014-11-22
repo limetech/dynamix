@@ -11,8 +11,7 @@
  */
 ?>
 <?
-$port = isset($_GET['port']) ? $_GET['port'] : '';
-$spin = exec("hdparm -C /dev/$port|grep 'active'");
+$port = $_GET['port'];
 
 switch ($_GET['cmd']):
 case "short":
@@ -27,7 +26,7 @@ case "stop":
 case "update":
   $smart = "SMART self-test progress:";
   $result = "Last SMART test result:";
-  if (!$spin):
+  if (!exec("hdparm -C /dev/$port|grep 'active'")):
     echo "<td>$result</td><td><big>Unavailable</big></td>";
     break;
   endif;
@@ -50,11 +49,6 @@ case "update":
   else:
     echo "<td>$result</td><td><big>Unknown</big></td>";
   endif;
-  break;
-case "health":
-  $poll = $_GET['poll'] ? '' : '-n standby';
-  $smart = exec("smartctl $poll -q errorsonly -H /dev/$port");
-  echo $smart ? ($spin?'fail':'fail off'):($spin?'on':'off');
   break;
 case "status":
   if (exec("smartctl -q errorsonly -H /dev/$port")):

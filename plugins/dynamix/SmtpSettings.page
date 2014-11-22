@@ -1,8 +1,9 @@
-Menu="Notifications"
+Menu="Notifications:2"
 Title="SMTP Settings"
 ---
 <?PHP
 /* Copyright 2014, Bergware International.
+ * Copyright 2014, Lime Technology
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -26,12 +27,9 @@ $(function() {
   checkPwd(document.smtp_setup.AuthPass.value);
   document.smtp_setup.TLSCert.disabled = document.smtp_setup.UseTLSCert.selectedIndex==0;
 });
-function validEmail(address) {
-  var email = /\S+@\S+\.\S+/;
-  return email.test(address);
-}
 function checkSMTP(form) {
-  if (!validEmail(form.root.value)) {
+  var email = /^\S+@\S+\.\S+/;
+  if (!email.test(form.root.value)) {
     alert("Please enter a valid sending email address");
     return false;
   }
@@ -139,6 +137,5 @@ Password:
 
 &nbsp;
 : <input type="submit" name="#apply" value="Apply"><button type="button" onclick="done();">Done</button>
-  <span id="testresult" style="font-size:13px"><input type="button" id="test" value="Test"><span class="orange"></span></span>
+  <span id="testresult" style="font-size:13px"><input type="button" id="test" value="Test"<?if (!$ssmtp['root']):?> disabled<?endif;?>><span class="orange"></span></span>
 </form>
-
