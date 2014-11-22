@@ -16,7 +16,7 @@ Cond="(($var['shareAFPEnabled']=='yes') && (isset($name)?array_key_exists($name,
 ?>
 <script>
 function checkShareSettingsAFP() {
-  var form = document.share_settings_afp;
+  var form = document.afp_security_form;
   form.shareVolsizelimitAFP.disabled = form.shareExportAFP.value!="et";
 }
 $(checkShareSettingsAFP);
@@ -82,7 +82,7 @@ Security:
 > **Secure** When logged into the server as Guest, an OS X user can view and read (but not write) all
 > shares set as Secure.<br>
 > OS X users logged in with a user name/password previously created on the server can also view and
-> read all shares set as Secure.  If their access right is set to read/write for the share on the server, 
+> read all shares set as Secure.  If their access right is set to read/write for the share on the server,
 > they may also write the share.
 >
 > **Private** When logged onto the server as Guest, no Private shares are visible or accessible to any
@@ -90,13 +90,13 @@ Security:
 > OS X users logged in with a user name/password previously created on the server may read or
 > read/write (or have no access) according their access right for the share on the server.
 >
-> Note: Private security is available only with ''Plus'' and ''Pro'' 
+> Note: Private security is available only with ''Plus'' and ''Pro''
 > [registration](http://lime-technology.com/products/registration-keys).
 
 &nbsp;
 : <input type="submit" name="changeShareSecurityAFP" value="Apply"><button type="button" onclick="done()">Done</button>
 </form>
-   
+
 <?if ($sec_afp[$name]['security'] == 'secure'):?>
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="shareName" value="<?=$name;?>">

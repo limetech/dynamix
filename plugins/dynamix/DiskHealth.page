@@ -1,4 +1,4 @@
-Menu="SystemInformation"
+Menu="Parity Data Cache"
 Title="Disk Health"
 Icon="disk.health.png"
 ---
@@ -18,45 +18,31 @@ Icon="disk.health.png"
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.stylesidebar.css">
 <script type="text/javascript" src="/webGui/scripts/jquery.stylesidebar.js"></script>
 <?
-foreach ($disks as $disk) {
-  $name = $disk['name'];
-  $dev = $disk['device'];
-  if ($name!='flash' && $dev) {
-    if (!isset($port)) $port = $dev;
-    $spin = exec("hdparm -C /dev/$dev|grep 'active'") ? "on" : "off";
-    echo "<div class='".($port==$dev ? "disk_sel" : "disk_add")."'>";
-    echo "<center><a href='/$path?port=$dev'><img src='/webGui/images/disk.png' id='$dev' class='$spin'><br>".my_disk($name)."</a></center></div>";
-  }
-}
+$disk = $disks[$name];
+$diskname = my_disk($disk['name']);
+$dev = $disk['device'];
 ?>
-<br>
 <div id="menuDiv" style="overflow:hidden">
 <ul id="SystemProfilerStyleSidebar">
-<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=IDENTITY&port=<?=$port?>">Disk identity</a></li>
-<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=ATTRIBUTES&port=<?=$port?>">Disk attributes</a></li>
-<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=CAPABILITIES&port=<?=$port?>">Disk capabilities</a></li>
-<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=TESTLOG&port=<?=$port?>">Disk self-test log</a></li>
-<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=ERRORLOG&port=<?=$port?>">Disk error log</a></li>
-<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=SELFTEST&port=<?=$port?>">Run disk self-test</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=IDENTITY&amp;disk=<?=$diskname?>&amp;port=<?=$dev?>">Disk identity</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=ATTRIBUTES&amp;disk=<?=$diskname?>&amp;port=<?=$dev?>">Disk attributes</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=CAPABILITIES&amp;disk=<?=$diskname?>&amp;port=<?=$dev?>">Disk capabilities</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=TESTLOG&amp;disk=<?=$diskname?>&amp;port=<?=$dev?>">Disk self-test log</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=ERRORLOG&amp;disk=<?=$diskname?>&amp;port=<?=$dev?>">Disk error log</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=SELFTEST&amp;disk=<?=$diskname?>&amp;port=<?=$dev?>">Run disk self-test</a></li>
 </ul>
 <div id="mainContent"><!-- content  --></div>
 </div>
 <script>
 function updater(){
-<?foreach ($disks as $disk):
-  $name = $disk['name'];
-  $dev = $disk['device'];
-  if ($name!='flash' && $dev):
-?>$.get('/webGui/include/Run.php',{cmd:'health',port:'<?=$dev?>',poll:'<?=$display['poll']?>'},function(data){$('#<?=$dev?>').removeClass().addClass(data);});
-<?endif;
-  endforeach;
-?>
+  $.get('/webGui/include/Run.php',{cmd:'health',port:'<?=$dev?>',poll:'<?=$display['poll']?>'},function(data){$('#<?=$dev?>').removeClass().addClass(data);});
+
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
   setTimeout(updater,<?=max(abs($display['refresh']),10000)?>);
 <?endif;?>
 }
 $(function(){
-  $(function(){$('li').StyleSidebar({displayDivId:'mainContent'});});
+  $(function(){$('li').StyleSidebar({displayDivId:'mainContent',pageMinHeight:'auto'});});
   setTimeout(updater,1000);
 });
 </script>

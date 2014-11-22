@@ -34,15 +34,11 @@ function updateTime() {
 }
 </script>
 
-<body onLoad="updateTime()" style="margin-top:20px">
-<center>
-<img src="/webGui/images/logo-white.png" alt="unRAID" width="169" height="28" border="0" /><br>
-<span style="font-size:18px;color:#6FA239;font-weight:bold">unRAID Server <?=$var['regTy']?></span>
-</center>
-<div style="margin-top:-20px;font-size:12px;line-height:30px;color:#303030;margin-left:40px;">
-<div style="margin-top:20px;"><span style="width:90px;display:inline-block"><strong>Model:</strong></span>
+<body onLoad="updateTime()">
+<div style="margin-top:20px;font-size:12px;line-height:30px;color:#303030;margin-left:40px;">
+<div><span style="width:90px;display:inline-block"><strong>Model:</strong></span>
 <?
-echo "{$var['SYS_MODEL']}";
+echo empty($var['SYS_MODEL']) ? 'N/A' : "{$var['SYS_MODEL']}";
 ?>
 </div>
 <div><span style="width:90px;display:inline-block"><strong>System:</strong></span>

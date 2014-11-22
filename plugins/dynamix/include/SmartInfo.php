@@ -16,11 +16,12 @@ $stop  = 'Cancel Test';
 $check = 'Checking...';
 $run   = '/webGui/include/Run.php';
 
+$disk = $_GET['disk'];
 $port = $_GET['port'];
 $spin = exec("hdparm -C /dev/$port|grep 'active'");
 $output = array();
 
-echo "<div class='label'><span class='left infogap'>Attached to port: $port</span></div>";
+echo "<div class='label'><span class='left infogap'>" . $disk . " attached to port: $port</span></div>";
 echo "<table class='list infogap'>";
 
 switch ($_GET['cmd']):
