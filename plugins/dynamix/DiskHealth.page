@@ -1,6 +1,5 @@
 Menu="Parity Data Cache"
 Title="Disk Health"
-Icon="disk.health.png"
 ---
 <?PHP
 /* Copyright 2014, Lime Technology
@@ -33,16 +32,7 @@ $dev = $disk['device'];
 </ul>
 <div id="mainContent"><!-- content  --></div>
 </div>
+<button type="button" onclick="done()">Done</button>
 <script>
-function updater(){
-  $.get('/webGui/include/Run.php',{cmd:'health',port:'<?=$dev?>',poll:'<?=$display['poll']?>'},function(data){$('#<?=$dev?>').removeClass().addClass(data);});
-
-<?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
-  setTimeout(updater,<?=max(abs($display['refresh']),10000)?>);
-<?endif;?>
-}
-$(function(){
-  $(function(){$('li').StyleSidebar({displayDivId:'mainContent',pageMinHeight:'auto'});});
-  setTimeout(updater,1000);
-});
+$(function(){$('li').StyleSidebar({displayDivId:'mainContent',pageMinHeight:'auto'});});
 </script>
