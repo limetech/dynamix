@@ -110,8 +110,8 @@ function assignment($disk) {
 }
 function render_used_and_free($disk) {
   global $display;
-  if ($disk['name']=='parity') {
-    if ($display['text']) echo "<td>-</td><td>-</td>"; else echo "<td><div class='usage-disk'></div></td><td><div class='usage-disk'></div></td>";
+  if ($disk['name']=='parity' || $disk['fsStatus']=='-') {
+    echo "<td>-</td><td>-</td>";
   } else if ($disk['fsStatus']=='Mounted') {
     if ($display['text']) {
       echo "<td>".my_scale($disk['fsUsed']*1024, $unit)." $unit</td>";
