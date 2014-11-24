@@ -98,7 +98,7 @@ Force NCQ disabled:
 > NCQ turned off.
 
 Tunable (poll_spindown):
-: <input type="text" name="poll_spindown" maxlength="10" value="<?=$var['poll_spindown']?>"><?=$var['poll_spindown']?></td>
+: <input type="text" name="poll_spindown" maxlength="10" value="<?=$var['poll_spindown']?>"><?=$var['poll_spindown_status']?></td>
 
 > This "tunable" defines the disk activity polling interval, in seconds, for determining if disk(s) spindown should occur.
 
