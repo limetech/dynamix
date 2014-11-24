@@ -17,7 +17,7 @@ $hot   = $_POST['hot'];
 $max   = $_POST['max'];
 $disks = parse_ini_file('state/disks.ini',true);
 $saved = @parse_ini_file('state/monitor.ini',true);
-$shell = '/usr/local/emhttp/plugins/dynamix/scripts/notify';
+$shell = '/usr/local/sbin/notify';
 extract(parse_plugin_cfg("dynamix",true));
 
 foreach ($disks as $disk) {

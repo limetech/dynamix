@@ -12,10 +12,13 @@
  */
 ?>
 <?
-$notify = "/usr/local/emhttp/plugins/dynamix/scripts/notify";
+$notify = "/usr/local/sbin/notify";
 switch ($_POST['cmd']) {
 case 'init':
   shell_exec("$notify init");
+  break;
+case 'smtp-init':
+  shell_exec("$notify smtp-init");
   break;
 case 'add':
   foreach ($_POST as $option => $value) {

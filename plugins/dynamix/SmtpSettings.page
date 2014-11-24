@@ -51,6 +51,7 @@ function tls(form) {
 <form markdown="1" name="smtp_setup" method="POST" action="/update.php" target="progressFrame" onsubmit="return checkSMTP(this)">
 <input type="hidden" name="#file"  value="dynamix/dynamix.cfg">
 <input type="hidden" name="#section" value="ssmtp">
+<input type="hidden" name="#command" value="/usr/local/sbin/notify smtp-init" />
 
 Mail Transfer Agent:
 : <span class="bitstream"><?=exec("/usr/sbin/ssmtp -V 2>&1|awk '{print $1\" version: \"$2}'")?></span>

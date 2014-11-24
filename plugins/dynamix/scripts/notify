@@ -39,6 +39,9 @@ notify [-e "event"] [-s "subject"] [-d "description"] [-i "normal|warning|alert"
 notify init
   Initialize the notification subsystem.
   
+notify smtp-init
+  Initialize sendmail configuration (ssmtp in our case).
+  
 notify get
   Output a json-encoded list of all the unread notifications.
   
@@ -99,7 +102,7 @@ function generate_email($event, $subject, $description, $importance, $message) {
   }
   $body[]    = "";
 
-  mail($to, $subj, implode("\n", $body), implode("\n", $headers));
+  return mail($to, $subj, implode("\n", $body), implode("\n", $headers));
 }
 
 // start
@@ -115,7 +118,6 @@ extract(parse_plugin_cfg("dynamix",true));
 //echo "notify "; print_r($notify);
 //echo "ssmtp "; print_r($ssmtp);
 
-//$notify['browser'] = "1"; /* Bergware: replaced by $notify['entity'] */
 $unread = "{$notify['path']}/unread";
 $archive = "{$notify['path']}/archive";
 
@@ -125,6 +127,10 @@ case 'init':
   @mkdir($archive,0755,true);
   $files = glob("$unread/*.notify", GLOB_NOSORT);
   foreach ($files as $file) if (!is_readable($file)) chmod($file,0666);
+  break;
+
+case 'smtp-init':
+  ssmtp_init($ssmtp);
   break;
 
 case 'add':
@@ -167,8 +173,8 @@ case 'add':
     file_put_contents($file,"timestamp = $timestamp\nevent = $event\nsubject = $subject\ndescription = $description\nimportance = $importance\n");
   }
   if (($notify['entity'] & 2)==2 || $testing_email) {
-    ssmtp_init($ssmtp);
-    generate_email($event, $subject, $description, $importance, $message);
+    if (!generate_email($event, $subject, $description, $importance, $message))
+      exit(1);
   }
   break;
 

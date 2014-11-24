@@ -31,7 +31,6 @@ function PsEnded($pid) {
 function PsKill($pid) {
   exec("kill -9 $pid");
 }
-$notify = "/usr/local/emhttp/plugins/dynamix/scripts/notify";
-$success = PsExecute("$notify -s 'unRAID SMTP Test' -d 'Test message received!' -i 'alert' -t");
+$success = PsExecute("/usr/local/sbin/notify -s 'unRAID SMTP Test' -d 'Test message received!' -i 'alert' -t");
 echo "Test Result:<span class=".($success ? "'green'>Mail sent" : "'red'>Failed")."</span>";
 ?>
