@@ -27,10 +27,8 @@ function my_smart(&$source,$device) {
   $smart = exec("smartctl -n standby -q errorsonly -H /dev/$device");
   my_insert($source, $smart ? "<img src=$path/bad.png>" : "<img src=$path/good.png>");
 }
-function my_usage(&$source,$text) {
-  global $path;
-  $used = $text ? $text : 0;
-  my_insert($source,"<div class='usage-disk all'><span style='width:$used'>$text</span></div>");
+function my_usage(&$source,$used) {
+  my_insert($source, $used ? "<div class='usage-disk all'><span style='width:$used'>$used</span></div>" : "-");
 }
 function my_temp($value,$unit) {
   return ($unit=='C' ? $value : round(9/5*$value+32))." &deg;$unit";
