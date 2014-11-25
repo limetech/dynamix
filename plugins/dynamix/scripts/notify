@@ -59,8 +59,11 @@ function ssmtp_init($ssmtp) {
   $conf[] = "Mailhub={$ssmtp['server']}:{$ssmtp['port']}";
   $conf[] = "UseTLS={$ssmtp['UseTLS']}";
   $conf[] = "UseSTARTTLS={$ssmtp['UseSTARTTLS']}";
-  $conf[] = "AuthUser={$ssmtp['AuthUser']}";
-  $conf[] = "AuthPass={$ssmtp['AuthPass']}";
+  if ($ssmtp['AuthMethod'] != "none") {
+    $conf[] = "AuthMethod={$ssmtp['AuthMethod']}";
+    $conf[] = "AuthUser={$ssmtp['AuthUser']}";
+    $conf[] = "AuthPass={$ssmtp['AuthPass']}";
+  }
   $conf[] = "";
   file_put_contents("/etc/ssmtp/ssmtp.conf", implode("\n", $conf));
 }
