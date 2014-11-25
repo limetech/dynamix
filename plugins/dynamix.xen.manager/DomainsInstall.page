@@ -1,6 +1,6 @@
+Cond="($var['fsState']=='Started')"
 Menu="Xen"
 Title="Install Xen VM"
-Cond="($var['fsState']=='Started')"
 ---
 <?PHP
 /* Copyright 2014, Lime Technology
