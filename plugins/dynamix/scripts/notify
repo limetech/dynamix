@@ -71,8 +71,6 @@ function ssmtp_init($ssmtp) {
 function generate_email($event, $subject, $description, $importance, $message) {
   global $ssmtp;
 
-  $priority = $ssmtp['SetEmailPriority']=="True" && ($importance == "warning" || $importance == "alert");
-
   $rcpt = $ssmtp['RcptTo'];
   if ($importance == "warning" || $importance == "alert")
     $rcpt .= " ".$ssmtp['ErrorRcptTo'];
