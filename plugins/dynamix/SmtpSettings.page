@@ -13,21 +13,24 @@ Title="SMTP Settings"
  * all copies or substantial portions of the Software.
  */
 ?>
+<?
+$incomplete = strlen($ssmtp['root'])==0 || strlen($ssmtp['server'])==0 || strlen($ssmtp['port'])==0 || ((strlen($ssmtp['AuthUser'])==0 || strlen($ssmtp['AuthPass'])==0) && $ssmtp['AuthMethod']!='none');
+?>
 <script>
 var counter,pid;
 
 $(function() {
-  $('#test').click(function(){
-    $('#testresult').html('Test Result:<span class="orange">Obtaining <span id="counter"></span>...</span>');
-    $(this).val('Sending').attr('disabled',true);
+  $('#testbutton').click(function(){
+    $('#testresult').html('Test running:<span class="orange">obtaining <span id="testcounter"></span>...</span>');
     counter = 20;
     mailtest();
-    $.get('/plugins/dynamix/include/SMTPtest.php',function(data){clearTimeout(pid); $('#test').attr('disabled',false).val('Test'); $('#testresult').html(data)});
+    $.get('/webGui/include/SMTPtest.php',function(data){clearTimeout(pid); $('#testresult').html(data)});
   });
-  checkPwd(document.smtp_setup.AuthPass.value);
-  document.smtp_setup.TLSCert.disabled = document.smtp_setup.UseTLSCert.selectedIndex==0;
+  passcheck(document.smtp_setup);
+  tls(document.smtp_setup);
+  pwd(document.smtp_setup);
 });
-function checkSMTP(form) {
+function mailcheck(form) {
   var email = /^\S+@\S+\.\S+/;
   if (!email.test(form.root.value)) {
     alert("Please enter a valid sending email address");
@@ -35,26 +38,71 @@ function checkSMTP(form) {
   }
   return true;
 }
-function checkPwd(string) {
-  if (string.indexOf('#')<0) $('#authpass').hide(); else $('#authpass').show();
+function passcheck(form) {
+  if (form.AuthPass.value.indexOf('#')<0) $('#authpass').hide(); else $('#authpass').show();
 }
 function mailtest() {
-  document.getElementById('counter').innerHTML = '('+counter+' sec)';
+  document.getElementById('testcounter').innerHTML = '('+counter+' sec)';
   counter--;
   if (counter>0) pid=setTimeout(mailtest,1000);
 }
 function tls(form) {
   form.TLSCert.disabled = form.UseTLSCert.selectedIndex==0;
 }
+function pwd(form) {
+  form.AuthUser.disabled = form.AuthMethod.selectedIndex==0;
+  form.AuthPass.disabled = form.AuthMethod.selectedIndex==0;
+}
+function disableTest() {
+  document.getElementById('testbutton').disabled = true;
+}
+function settings(form, data) {
+  var item = data.split(':');
+  form.server.value = item[0];
+  form.port.value = item[1];
+  form.UseTLS.value = item[2];
+  form.UseSTARTTLS.value = item[3];
+  form.AuthMethod.value = item[4];
+  disableTest();
+}
 </script>
 
-<form markdown="1" name="smtp_setup" method="POST" action="/update.php" target="progressFrame" onsubmit="return checkSMTP(this)">
+<form markdown="1" name="smtp_setup" method="POST" action="/update.php" target="progressFrame" onsubmit="return mailcheck(this)" onchange="disableTest()">
 <input type="hidden" name="#file"  value="dynamix/dynamix.cfg">
 <input type="hidden" name="#section" value="ssmtp">
-<input type="hidden" name="#command" value="/usr/local/sbin/notify smtp-init" />
+<input type="hidden" name="#command" value="/usr/local/sbin/notify smtp-init">
 
-Mail Transfer Agent:
-: <span class="bitstream"><?=exec("/usr/sbin/ssmtp -V 2>&1|awk '{print $1\" version: \"$2}'")?></span>
+Preset service:
+: <select name="service" size="1" onchange="settings(this.form,this.value)">
+<?=mk_option($ssmtp['service'], "smtp.gmail.com:465:YES:NO:login", "Gmail")?>
+<?=mk_option($ssmtp['service'], "smtp.gmail.com:587:YES:YES:login", "Gmail with TLS")?>
+<?=mk_option($ssmtp['service'], "smtp.live.com:587:YES:YES:login", "Outlook")?>
+<?=mk_option($ssmtp['service'], "smtp.live.com:465:YES:NO:login", "Hotmail")?>
+<?=mk_option($ssmtp['service'], "smtp.office365.com:587:YES:YES:login", "Office365")?>
+<?=mk_option($ssmtp['service'], "smtp.mail.yahoo.com:465:YES:NO:login", "Yahoo")?>
+<?=mk_option($ssmtp['service'], "plus.smtp.mail.yahoo.com:465:YES:NO:login", "Yahoo Plus")?>
+<?=mk_option($ssmtp['service'], "smtp.mail.yahoo.co.uk:465:YES:NO:login", "Yahoo UK")?>
+<?=mk_option($ssmtp['service'], "smtp.mail.yahoo.com.au:465:YES:NO:login", "Yahoo AU/NZ")?>
+<?=mk_option($ssmtp['service'], "smtp.o2.ie:25:NO:NO:login", "O2")?>
+<?=mk_option($ssmtp['service'], "smtp.o2.co.uk:25:NO:NO:login", "O2 UK")?>
+<?=mk_option($ssmtp['service'], "smtp.o2online.de:25:NO:NO:login", "O2 Online Deutschland")?>
+<?=mk_option($ssmtp['service'], "securesmtp.t-online.de:587:YES:YES:login", "T-Online Deutschland")?>
+<?=mk_option($ssmtp['service'], "smtp.1and1.com:587:YES:YES:login", "1&1")?>
+<?=mk_option($ssmtp['service'], "smtp.1und1.de:587:YES:YES:login", "1&1 Deutschland")?>
+<?=mk_option($ssmtp['service'], "smtp.att.yahoo.com:465:YES:NO:login", "AT&T")?>
+<?=mk_option($ssmtp['service'], "smtp.ntlworld.com:465:YES:NO:login", "NTL")?>
+<?=mk_option($ssmtp['service'], "mail.btopenworld.com:25:NO:NO:login", "BT Openworld")?>
+<?=mk_option($ssmtp['service'], "mail.btinternet.com:25:NO:NO:login", "BT Internet")?>
+<?=mk_option($ssmtp['service'], "smtp.comcast.net:465:YES:NO:login", "Comcast")?>
+<?=mk_option($ssmtp['service'], "outgoing.verizon.net:465:YES:NO:login", "Verizon")?>
+<?=mk_option($ssmtp['service'], "outgoing.yahoo.verizon.net:587:NO:NO:login", "Verizon (Yahoo hosted)")?>
+<?=mk_option($ssmtp['service'], "smtp.mail.com:465:YES:NO:login", "Mail.com")?>
+<?=mk_option($ssmtp['service'], "smtp.gmx.com:465:YES:NO:login", "GMX.com")?>
+<?=mk_option($ssmtp['service'], "smtp.zoho.com:465:YES:NO:login", "zoho Mail")?>
+<?=mk_option($ssmtp['service'], "::NO:NO:none", "Custom")?>
+</select>
+
+> Select a preset service to set the basic service settings.
 
 Sending email address:
 : <input type="text" name="root" value="<?=$ssmtp['root']?>">
@@ -82,13 +130,17 @@ Priority in header:
 Email subject prefix:
 : <input type="text" name="Subject" value="<?=$ssmtp['Subject']?>">
 
+> Set a prefix for easy recognition of unRAID messages.
+
 Mail server:
 : <input type="text" name="server" value="<?=$ssmtp['server']?>">
+
+> Specify the name of the email server. Use the preset service selection to have this filled-in automatically.
 
 Mail server port:
 : <input type="text" name="port" class="narrow"  maxlength="5"  value="<?=$ssmtp['port']?>">
 
-> Specify the name and port of the email server. You may need to verify with your provider to get this information.
+> Specify the port of the email server. Use the preset service selection to have this filled-in automatically.
 
 Use SSL/TLS:
 : <select name="UseTLS" size="1">
@@ -120,7 +172,7 @@ TLS certificate location:
 > The file name of an RSA certificate to use for TLS - as required.
 
 Authentication method:
-: <select name="AuthMethod" size="1">
+: <select name="AuthMethod" size="1" onchange="pwd(this.form)">
   <?=mk_option($ssmtp['AuthMethod'], "none", "None")?>
   <?=mk_option($ssmtp['AuthMethod'], "cram-md5", "CRAM-MD5")?>
   <?=mk_option($ssmtp['AuthMethod'], "login", "Login")?>
@@ -132,11 +184,11 @@ Username:
 : <input type="text" name="AuthUser" value="<?=$ssmtp['AuthUser']?>">
 
 Password:
-: <input type="password" name="AuthPass" value="<?=$ssmtp['AuthPass']?>" onchange="checkPwd(this.value)"><span id='authpass' style='display:none;color:red;font-weight:bold'>Warning: do not use the # character in your password!</span>
+: <input type="password" name="AuthPass" value="<?=$ssmtp['AuthPass']?>" onchange="passcheck(this.form)"><span id='authpass' style='display:none;color:red;font-weight:bold'>Warning: do not use the # character in your password!</span>
 
 > Enter the username and password to login to your email account. Be aware that the password is stored unencrypted in the email configuration file.
 
 &nbsp;
 : <input type="submit" name="#apply" value="Apply"><button type="button" onclick="done();">Done</button>
-  <span id="testresult" style="font-size:13px"><input type="button" id="test" value="Test"<?if (!$ssmtp['root']):?> disabled<?endif;?>><span class="orange"></span></span>
+  <span id="testresult" style="font-size:13px"><input type="button" id="testbutton" value="Test"<?if ($incomplete):?> disabled<?endif;?>></span>
 </form>
