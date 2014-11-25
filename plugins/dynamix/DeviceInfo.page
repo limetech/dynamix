@@ -1,5 +1,5 @@
 Menu="Parity Data Cache"
-Title="{$func(my_disk($name))} Device Settings"
+Title="Device Settings"
 Cond="($disks[$name]['status']!='DISK_NP')&&($disks[$name]['status']!='DISK_NP_OK')"
 ---
 <?PHP
@@ -17,6 +17,9 @@ Cond="($disks[$name]['status']!='DISK_NP')&&($disks[$name]['status']!='DISK_NP_O
 <?$disk = $disks[$name]?>
 
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
+Name:
+: <?=my_disk($name)?>
+
 Partition size:
 : <?=my_number($disk['size'])?> KB (K=1024)
 
