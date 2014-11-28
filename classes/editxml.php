@@ -27,7 +27,7 @@
 						<td>
 							<div>
 								<input type="<?=$type;?>" class="btn btn-sm btn-default" value="Save">
-								<button type="button" class="btn btn-sm btn-default" onclick="javascript:history.go(-1)" ><?=$return?></button>
+								<button type="button" class="btn btn-sm btn-default" onclick="javascript:done()" ><?=$return?></button>
 							</div>
 						</td>
 					</tr>
