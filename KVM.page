@@ -8,35 +8,66 @@ Tabs="true"
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.plugin.manager/styles/fileTree.css">
 <script type="text/javascript" src="/plugins/dynamix.plugin.manager/scripts/fileTree.js"></script>
 <script>
-	function toggle_id(itemID){ 
-      // Toggle visibility between none and 'table-row' 
-      if ((document.getElementById(itemID).style.display == 'none')) { 
-            document.getElementById(itemID).style.display = 'table-row' 
-            event.preventDefault()
-      } else { 
-            document.getElementById(itemID).style.display = 'none'; 
-            event.preventDefault()
-      }    
-	}
+function clearHistory(){
+	window.history.pushState('KVM', 'Title', '/KVM');
+}
+
+function toggle_id(itemID){ 
+   // Toggle visibility between none and 'table-row' 
+   if ((document.getElementById(itemID).style.display == 'none')) { 
+      document.getElementById(itemID).style.display = 'table-row' 
+      event.preventDefault()
+   } else { 
+      document.getElementById(itemID).style.display = 'none'; 
+      event.preventDefault()
+   }    
+}
+
+function showInput(){
+    $(this).off('click');
+    $(this).siblings('input').each(function(){$(this).show();});
+    $(this).siblings('input').focus();
+    $(this).hide();
+}
+function hideInput(){
+    $(this).hide();
+    $(this).siblings('span').show();
+    $(this).siblings('span').click(showInput);
+}
+
+$(function(){
+    $('.text').click(showInput);
+    $('.input').blur(hideInput);
+});
 
 /*$(function() {
   $('#kvm_table').tablesorter({headers:{0:{sorter:false},6:{sorter:false},7:{sorter:false}}});
-  $('#dom_disk_table').tablesorter({headers:{0:{sorter:false},6:{sorter:false},7:{sorter:false}}});
+    $('#dom_disk_table').tablesorter({headers:{0:{sorter:false},6:{sorter:false},7:{sorter:false}}});
   $('#dom_snap_table').tablesorter({headers:{0:{sorter:false},1:{sorter:false},6:{sorter:false},7:{sorter:false}}});
-  $('#KVM_tree').fileTree({root:'/boot/',filter:'plg',script:'/plugins/dynamix.kvm.manager/include/FileTree.php',multiFolder:false}, function(file) {$('#plugin_file').val(file);});
+  
+$('#KVM_tree').fileTree({root:'/boot/',filter:'plg',script:'/plugins/dynamix.kvm.manager/include/FileTree.php',multiFolder:false}, function(file) {$('#plugin_file').val(file);});
 });*/
 </script>
 
 <?php
-   error_reporting(0);
+   //error_reporting(0);
    require('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php');
 	$uri = 'qemu:///system';
    $lv = new Libvirt($uri, null, null, false);
    $action = array_key_exists('action', $_GET) ? $_GET['action'] : '';
    $subaction = array_key_exists('subaction', $_GET) ? $_GET['subaction'] : '';
 	$msg = false;
-	$clear = false;
 	$uuid = $_GET['uuid'];
+	if ($_GET['refresh']) {
+		$name = $_GET['name'];
+		if($lv->domain_is_active($name)){
+			echo "<meta http-equiv='refresh' content='5; url=/KVM?name=$name&amp;refresh=true'>";
+			$msg = "Waiting for domain $name to shutdown...";
+		}else{
+			echo "<script>clearHistory();</script>";
+			$msg = "Domain $name has been successfully shutdown";
+		}
+	}
 	if ($action) {
 		if ($action == 'disk-add') {
 			include('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/addvol.php');
@@ -89,17 +120,9 @@ Tabs="true"
 		}
 		elseif ($subaction == 'domain-stop') {
          $msg = $lv->domain_shutdown($domName) ? 
-         	"Domain $domName has been successfully stopped" : 
+         	"Waiting for domain $domName to shutdown..." : 
          	"Error: ".$lv->get_last_error();
-				$res = $lv->get_domain_by_name($domName);
-				$id = $lv->domain_get_id($res);
-         	for ($i = 0; $i < 30; $i++) {
-	         	sleep(1);
-   	      	$ids = $lv->get_active_domain_ids();
-      	   	if (!in_array($id, $ids, true))
-         			break;
-         		}
-			   $lv = new Libvirt($uri, null, null, false);
+			echo "<meta http-equiv='refresh' content='5; url=/KVM?name=$domName&amp;refresh=true'>";			
          	}
       elseif ($subaction == 'domain-destroy') {
          $msg = $lv->domain_destroy($domName) ? 
@@ -118,10 +141,9 @@ Tabs="true"
       }
       //edit domain XML
       elseif ($subaction == 'domain-create') {
-         $xml = $lv->domain_get_xml($domName);
          if (@$_POST['xmldesc']) {
          	$xml = $_POST['xmldesc'];
-           	$msg = $lv->domain_change_xml($domName, $xml) ? "Domain $domName definition has been successfully changed" :
+           	$msg = $lv->domain_define($xml) ? "Domain $domName definition has been successfully changed" :
          	  	"Error: ".$lv->get_last_error();
          }
 		}
@@ -173,19 +195,22 @@ Tabs="true"
 				'snapshot has been successfully created' : 
 				'Error: '.$lv->get_last_error();
 		}
-		elseif ($subaction == 'snap-delete') {
-			$res = $lv->domain_snapshot_lookup_by_name($domName, $_GET['sname']);         
-			$msg = $lv->domain_snapshot_delete($res) ? 
+		elseif ($subaction == 'snap-delete') {    
+			$msg = $lv->domain_snapshot_delete($domName, $_GET['sname']) ? 
 				'snapshot has been successfully deleted' : 
 				'Error: '.$lv->get_last_error();
 		}
-		elseif ($subaction == 'snap-revert') {
-			$res = $lv->domain_snapshot_lookup_by_name($domName, $_GET['sname']);         
-			$msg = $lv->domain_snapshot_revert($res) ? 
+		elseif ($subaction == 'snap-revert') {         
+			$msg = $lv->domain_snapshot_revert($domName, $_GET['sname']) ? 
 				'domain has been successfully reverted' : 
 				'Error: '.$lv->get_last_error();
 		}
-		$clear=true;
+		elseif ($subaction == 'snap-desc') {
+			$msg = $lv->snapshot_set_metadata($domName, $_GET['sname'], $_POST['snapdesc']) ? 
+				'Snapshot description has been successfully saved':
+				'Error: '.$lv->get_last_error();
+		}
+	echo "<script>clearHistory();</script>";
 	}
    $doms = $lv->get_domains();
    sort($doms);
@@ -280,7 +305,7 @@ Tabs="true"
      			echo '<select name="memory" onchange="location = this.options[this.selectedIndex].value;" title="define the amount memory">';
         		for ($ii = 1; $ii <= ($maxmem*2); $ii++) {
         			$mem2 = ($ii*512);
-         		echo '<option value="'.'?subaction=memory-change&uuid=$uuid&memory='.$mem2.'"';
+         		echo "<option value='?subaction=memory-change&amp;uuid=$uuid&amp;memory=$mem2'";
 					if ((int)$mem == $mem2)
 						echo ' selected';
          		echo '>'.$mem2.'</option>';
@@ -383,7 +408,7 @@ Tabs="true"
 										$vpath = $tmp2[$vname]['path'];
 										$ext = pathinfo($vpath, PATHINFO_EXTENSION);
 										if ($ext == "iso" | $ext == "ISO"){
-											echo "<option value='?subaction=cdrom-change&amp;uuid=$uuid&amp;cdrom=".base64_encode($vpath)."&dev=".$dev."'";
+											echo "<option value='?subaction=cdrom-change&amp;uuid=$uuid&amp;cdrom=".base64_encode($vpath)."&amp;dev=$dev'";
 											if ($vname == basename($disk))
 												echo ' selected';
 										echo '>'.$vname.'</option>';}
@@ -411,7 +436,7 @@ Tabs="true"
          }
          echo "</table>";
 
-			/* Snapshots  information */
+			/* Snapshot  information */
          	echo "<table class='tablesorter dom-snap".($display['tabs']==1?" shift'":"'")." id='dom_snap_table'>
 		        	      <tr>
 		        	      <thead>
@@ -419,6 +444,7 @@ Tabs="true"
          	       		<th class='header'>Name</th>
          	       		<th class='header'>Date</th>
          	       		<th class='header'>Time</th>
+         	       		<th class='header'>Description</th>
                   		<th class='header'>Actions</th>
                   		<th class='header'>&nbsp;</th><th class='header'></th>
                   		</thead>
@@ -428,16 +454,27 @@ Tabs="true"
          	sort($tmp);
 				for ($ii = 0; $ii < sizeof($tmp); $ii++) {
 					$sname = $tmp[$ii];
-					 $date = date("D d M  Y",$sname);
-					 $time = date("H:i:s",$sname);
+					$date = date("D d M  Y",$sname);
+					$time = date("H:i:s",$sname);
+					$sinfo = $lv->domain_snapshot_get_info($name, $sname);
+					if(empty($sinfo)){
+						$sinfo = "Click to change description";
+						$sval = "";}
+					else 
+						$sval = $sinfo;
             	echo "<tr>
             		   	<td>".($ii+1)."</td>
                   	   <td>$sname</td>
                   	   <td>$date</td>
                   	   <td>$time</td>
+                  	   <td><form method='post' action='?subaction=snap-desc&amp;uuid=$uuid&amp;sname=$sname' /><span class='snapdesc'>
+    									<span class='text'> $sinfo </span>
+    									<input class='input' type='text' name='snapdesc' value='$sval' val='snapdesc' hidden placeholder='Click to change description'/>
+									 </span></form>
+								</td>
    	                  <td>
-									revert &nbsp;<a href='?subaction=snap-revert&amp;uuid=$uuid&amp;sname=$sname'><i class='glyphicon glyphicon-refresh lightblue'></i></a>
-            	          </td>                               
+   	                  	revert &nbsp;<a href='?subaction=snap-revert&amp;uuid=$uuid&amp;sname=$sname'><i class='glyphicon glyphicon-refresh lightblue'></i></a>
+            	         </td>                               
    	                  <td>
 									delete&nbsp;<a href='?subaction=snap-delete&amp;uuid=$uuid&amp;sname=$sname'><i class='glyphicon glyphicon-remove red'></i></a>
             	          </td>                               
@@ -449,6 +486,7 @@ Tabs="true"
    	                <td>none</td>                               
    	                <td>N/A</td>                               
    	                <td>N/A</td>                               
+   	                <td>N/A</td>                               
    	                <td>N/A</td>
    	            </tr>";                              
      	echo '</table></td>			
@@ -456,8 +494,6 @@ Tabs="true"
 		}
 	}
 	echo '</table>';
-	
-	if ($clear) echo "<script type='text/javascript'>	window.history.pushState('KVM', 'Title', '/KVM'); </script>";
 }
 if($msg){
 	if(strpos($msg, "rror:"))
