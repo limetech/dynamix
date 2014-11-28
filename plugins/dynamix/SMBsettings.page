@@ -1,0 +1,42 @@
+Menu="SMB:1"
+Title="SMB Settings"
+---
+<?PHP
+/* Copyright 2014, Lime Technology
+ * Copyright 2014, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<form markdown="1" name="SMBEnable" method="POST" action="/update.htm" target="progressFrame">
+Enable SMB:
+: <select name="shareSMBEnabled" size="1">
+  <?=mk_option($var['shareSMBEnabled'], "no", "No")?>
+  <?=mk_option($var['shareSMBEnabled'], "yes", "Yes (Workgroup)")?>
+  <?if ($var['featureSecurityAds']):?>
+  <?=mk_option($var['shareSMBEnabled'], "ads", "Yes (Active Directory)")?>
+  <?else:?>
+  <?=mk_option($var['shareSMBEnabled'], "ads", "Yes (Active Directory)", "disabled")?>
+  <?endif;?>
+  </select><?if ($var['fsState']=="Started"):?>Array must be **Stopped** to change.<?endif;?>
+
+> Select 'Yes (Workgroup)' to enable SMB (Windows Networking) protocol support. This
+> also enables Windows host discovery.
+>
+> Select 'Yes (Active Directory)' to enable Active Directory integration.
+>
+> Note: changing this value with array Started may cause a brief interruption in network services.
+
+<?if ($var['fsState']=="Started"):?>
+&nbsp;
+: <input type="submit" name="changeShare" value="Apply" disabled><button type="button" onclick="done()">Done</button>
+<?else:?>
+&nbsp;
+: <input type="submit" name="changeShare" value="Apply"><button type="button" onclick="done()">Done</button>
+<?endif;?>
+</form>
