@@ -3,7 +3,6 @@ Title="Create VM"
 ---
 <?php
   $skip = false;
-  $msg = false;
   $pools = $lv->get_storagepools();
   $network_cfg = parse_ini_file( "/boot/config/network.cfg" );
   if (array_key_exists('sent', $_POST)) {
@@ -14,15 +13,16 @@ Title="Create VM"
 		if (array_key_exists('feature_'.$features[$i], $_POST))
 			$feature[] = $features[$i];
 
-	$tmp = $lv->domain_new($_POST['name'], $_POST['media'], $_POST['drivers'], $_POST['cpu_count'], $feature, $_POST['memory'], $_POST['maxmem'], $_POST['clock_offset'], $_POST['nic'], $_POST['disk'], $_POST['usb'], $_POST['usbtab'], $_POST['shares'], $_POST['setup_persistent']);
-	if (!$tmp)
-		$msg = "Error: ".$lv->get_last_error();
-	else {
+	$tmp = $lv->domain_new($_POST['name'], $_POST['desc'], $_POST['media'], $_POST['drivers'], $_POST['cpu_count'], $feature, $_POST['memory'], $_POST['maxmem'], $_POST['clock_offset'], $_POST['nic'], $_POST['disk'], $_POST['usb'], $_POST['usbtab'], $_POST['shares'], $_POST['setup_persistent']);
+	if (!$tmp){
+		echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font color=\"red\">Error: ".$lv->get_last_error()."</font>');}); </script>";
+	} else {
 		$skip = true;
   		$name = $_POST['name'];
 		$res = $lv->get_domain_by_name($name);
 		$uuid = libvirt_domain_get_uuid_string($res);
-		$msg = "New virtual machine $name&nbsp;</a> has been created successfully";
+		echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font color=\"green\">New virtual machine $name&nbsp;</a> has been created successfully</font>');}); </script>";
+		echo '<meta http-equiv="refresh" content="3; url=/KVM">';
 	}
   }
 
@@ -97,6 +97,11 @@ Title="Create VM"
 <tr>
     <td align="right">Name:&nbsp; </td>
     <td><input type="text" autofocus name="name" title="name of vitual machine" placeholder="name of vitual machine" /></td>
+</tr>
+
+<tr>
+    <td align="right">Description:&nbsp; </td>
+    <td><input type="text" name="desc" title="description of vitual machine" placeholder="description of vitual machine" /></td>
 </tr>
 
 <tr>
@@ -358,6 +363,4 @@ Title="Create VM"
 </form>
 <?php
   endif;
-  if($msg)
-	echo "<script type='text/javascript'>$(function() { $('#countdown').html('".$msg."');}); </script>";
 ?>
