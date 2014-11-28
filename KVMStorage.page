@@ -1,16 +1,16 @@
 Menu="KVM"
 Title="Storage"
 ---
-<div class="wrap">
-	<div class="list">
 <script type="text/javascript">
 $(function() {
   $('#storage-pool_table').tablesorter({headers:{0:{sorter:false},6:{sorter:false},7:{sorter:false}}});
   $('#storage-vol_table').tablesorter({headers:{0:{sorter:false},6:{sorter:false},7:{sorter:false}}});
-  $('#stroage_tree').fileTree({root:'/boot/',filter:'plg',script:'/plugins/dynamix.kvm.manager/include/FileTree.php',multiFolder:false}, function(file) {$('#storage_file').val(file);});
+  $('#storage_tree').fileTree({root:'/boot/',filter:'plg',script:'/plugins/dynamix.kvm.manager/include/FileTree.php',multiFolder:false}, function(file) {$('#storage_file').val(file);});
 });
 </script>
-	<?php
+<div class="wrap">
+	<div class="list">
+<?php
 	$msg = false;
 	$clear = false;
 	if ($paction) {
@@ -69,42 +69,20 @@ $(function() {
 				if (array_key_exists('sent', $_POST)) {
 					//storage pool create
 					$pool = $_POST['pool'];
-					$ppath = $pool['path'];
-					$pool = $pool['name'];
-					if (!is_dir($ppath))
-						mkdir($ppath);
-						$puuid = $lv->storagepool_generate_uuid();
-						$xml = "<pool type='dir'>
-							<name>$pool</name>
-							<uuid>$puuid</uuid>
-							<capacity unit='bytes'>0</capacity>
-							<allocation unit='bytes'>0</allocation>
-							<available unit='bytes'>0</available>
-							<source>
-							</source>
-							<target>
-								<path>$ppath</path>
-									<permissions>
-										<mode>0755</mode>
-										<owner>-1</owner>
-										<group>-1</group>
-									</permissions>
-							</target>
-						</pool>";						
-					$res = $lv->storagepool_define_xml($xml);
-					$msg = $lv->storagepool_create($res) ?
+					$location = $pool['path'];
+					$pool = $pool['name'];					
+					$msg = $lv->storagepool_create($pool, $location) ?
 						"Storage pool $pool has been created successfully" : 
 						"Error: ".$lv->get_last_error();
 				} else {
 					//storage pool start
 					$pool = $_GET['pool'];
-					$res = $lv->get_storagepool_res($pool);
-					$msg = $lv->storagepool_create($res) ?
+					$msg = $lv->storagepool_start($pool) ?
 						"Storage pool $pool has been successfully started" : 
 						"Error: ".$lv->get_last_error();
 				}
 			}
-			$clear = true;
+		echo "<script>clearHistory </script>";
 		}
 				echo "<table class='tablesorter storage-pool".($display['tabs']==1?" shift'":"'")." id='storage-pool_table'>
 					<tr>
@@ -134,7 +112,7 @@ $(function() {
 		 	    		$scolor = 'green';
 		   		else
 		     			$scolor = 'red';
-		     		$act = $info['active'] ? 'Active' : 'Inactive';
+		     		$active = $info['active'] ? 'Active' : 'Inactive';
 					echo "<tr>
 							<td><img src='/plugins/dynamix.kvm.manager/images/".$scolor."-on.png'></td>
 							<td><a href='#' onclick=\"toggle_id('pool$i')\">$pool</a></td>
@@ -143,14 +121,14 @@ $(function() {
   	  	      	      <td>{$lv->format_size($info['allocation'], 2)}</td>
   		 	      	   <td>{$lv->format_size($info['available'], 2)}</td>
 							<td>{$info['path']}</td>
-							<td><input class='checkbox' type='checkbox' title='Toggle VM auostart' $auto onClick=\"javascript:location.href='?psubaction=pool-autostart&amp;pool=$pool'\" ></td>
+							<td><input class='checkbox' type='checkbox' title='Toggle VM auostart' $auto onClick=\"javascript:location.href='?subaction=pool-autostart&amp;pool=$pool'\" ></td>
 							<td>";
-						if ($act == "Active") {
+						if ($active == "Active") {
 							echo "<a href='?psubaction=pool-stop&amp;pool=$pool' title='stop storage pool'
 									onclick=\"return confirm('All volumes will remain. Stop $pool storage pool?')\"><i class='glyphicon glyphicon-stop red'></i></a> | ".
 									"<a href='?psubaction=pool-refresh&amp;pool=$pool' title='refresh storage pool'>
 									<i class='glyphicon glyphicon-refresh blue'></i></a> | ".
-									"<a href='?action=volume-create&amp;pool=$pool' title='add new storage volume'>
+									"<a href='?paction=volume-create&amp;pool=$pool' title='add new storage volume'>
 									<i class='glyphicon glyphicon-plus green'></i></a> | ";
 						}else{						
 							echo "<a href='?psubaction=pool-start&amp;pool=$pool' title='start storage pool'
@@ -197,10 +175,14 @@ $(function() {
 			}
 				echo '</table>';
 				// remove actions from url
-		if ($clear) echo "<script type='text/javascript'>	window.history.pushState('KVM', 'Title', '/KVM'); </script>";
 		}
-	if($msg)
-		echo "<script type='text/javascript'>$(function() { $('#countdown').html('".$msg."');}); </script>";
-	?>
+if($msg){
+	if(strpos($msg, "rror:"))
+		$color = 'red';
+	else
+		$color = 'green';
+	echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font color=\"".$color."\">".$msg."</font>');}); </script>";
+	}
+?>
 	</div>
 </div>
