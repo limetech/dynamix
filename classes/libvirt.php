@@ -43,7 +43,7 @@
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-		function domain_new($name, $media, $drivers, $vcpus, $features, $mem, $maxmem, $clock, $nic, $disk, $usb, $usbtab, $shares, $persistent=true) {
+		function domain_new($name, $desc, $media, $drivers, $vcpus, $features, $mem, $maxmem, $clock, $nic, $disk, $usb, $usbtab, $shares, $persistent=true) {
 			$uuid = $this->domain_generate_uuid();
 			$emulator = $this->get_default_emulator();
 
@@ -119,6 +119,7 @@
 				<currentMemory>$mem</currentMemory>
 				<memory>$maxmem</memory>
 				<uuid>$uuid</uuid>
+				<description>$desc</description>
 				<os>
 					<type arch='x86_64'>hvm</type>
 					<boot dev='cdrom'/>
@@ -165,6 +166,7 @@
 					<currentMemory>$mem</currentMemory>
 					<memory>$maxmem</memory>
 					<uuid>$uuid</uuid>
+					<description>$desc</description>
 					<os>
 						<type arch='x86_64'>hvm</type>
 						<boot dev='hd'/>
@@ -732,11 +734,43 @@
 				$pool = $this->get_storagepool_res($pool);
 			if (!$pool)
 				return false;			
-			return libvirt_storagepool_undefine($pool);
+			$tmp = libvirt_storagepool_undefine($pool);
+			return ($tmp) ? $tmp : $this->_set_last_error();
+ 		}
+
+		function storagepool_create($pool, $location) {
+					if (!is_dir($location))
+						mkdir($location);
+						$uuid = $this->storagepool_generate_uuid();
+						$xml = "<pool type='dir'>
+							<name>$pool</name>
+							<uuid>$uuid</uuid>
+							<capacity unit='bytes'>0</capacity>
+							<allocation unit='bytes'>0</allocation>
+							<available unit='bytes'>0</available>
+							<source>
+							</source>
+							<target>
+								<path>$location</path>
+									<permissions>
+										<mode>0755</mode>
+										<owner>-1</owner>
+										<group>-1</group>
+									</permissions>
+							</target>
+						</pool>";
+					$res = $this->storagepool_define_xml($xml);
+			$tmp = libvirt_storagepool_create($res);
+			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-		function storagepool_create($res) {
-			return libvirt_storagepool_create($res);
+		function storagepool_start($pool) {
+			if (!is_resource($pool))
+				$pool = $this->get_storagepool_res($pool);
+			if (!$pool)
+				return false;
+			$tmp = libvirt_storagepool_create($pool);
+			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
 		function storagepool_destroy($pool) {
@@ -744,7 +778,8 @@
 				$pool = $this->get_storagepool_res($pool);
 			if (!$pool)
 				return false;
-			return libvirt_storagepool_destroy($pool);
+			$tmp = libvirt_storagepool_destroy($pool);
+			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
 		function storagepool_is_active($pool) {
@@ -752,7 +787,8 @@
 				$pool = $this->get_storagepool_res($pool);
 			if (!$pool)
 				return false;
-			return libvirt_storagepool_is_active($pool);
+			$tmp = libvirt_storagepool_is_active($pool);
+			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
 		function storagepool_refresh($pool) {
@@ -760,7 +796,8 @@
 				$pool = $this->get_storagepool_res($pool);
 			if (!$pool)
 				return false;			
-			return libvirt_storagepool_refresh($pool, false);
+			$tmp = libvirt_storagepool_refresh($pool, false);
+			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
 		function storagepool_get_autostart($pool) {
@@ -768,7 +805,8 @@
 				$pool = $this->get_storagepool_res($pool);
 			if (!$pool)
 				return false;
-			return libvirt_storagepool_get_autostart($pool);
+			$tmp = libvirt_storagepool_get_autostart($pool);
+			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
 		function storagepool_set_autostart($pool,$flags) {
@@ -776,7 +814,8 @@
 				$pool = $this->get_storagepool_res($pool);
 			if (!$pool)
 				return false;
-			return libvirt_storagepool_set_autostart($pool, $flags);
+			$tmp = libvirt_storagepool_set_autostart($pool, $flags);
+			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
 		function get_storagepool_res($res) {
@@ -1387,6 +1426,12 @@
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
+		function domain_is_active($domain) {
+			$domain = $this->get_domain_object($domain);
+			$tmp = libvirt_domain_is_active($domain);
+			return ($tmp) ? $tmp : $this->_set_last_error();
+		}
+
 		function generate_uuid($seed=false) {
 			if (!$seed)
 				$seed = time();
@@ -1682,7 +1727,7 @@
 			else
 				$xml = str_replace("<$feature/>\n", '', $xml);
 
-			return $this->domain_change_xml($domain, $xml);
+			return $this->domain_define($xml);
 		}
 
 		function domain_set_clock_offset($domain, $offset) {
@@ -1694,9 +1739,10 @@
 			$xml = $this->domain_get_xml($domain, true);
 			$xml = str_replace("<clock offset='$old_offset'/>", "<clock offset='$offset'/>", $xml);
 
-			return $this->domain_change_xml($domain, $xml);
+			return $this->domain_define($xml);
 		}
 
+//change vpus for domain
 		function domain_set_vcpu($domain, $vcpu) {
 			$domain = $this->get_domain_object($domain);
 
@@ -1706,9 +1752,10 @@
 			$xml = $this->domain_get_xml($domain, true);
 			$xml = str_replace("$old_vcpu</vcpu>", "$vcpu</vcpu>", $xml);
 
-			return $this->domain_change_xml($domain, $xml);
+			return $this->domain_define($xml);
 		}
 
+//change memory for domain
 		function domain_set_memory($domain, $memory) {
 			$domain = $this->get_domain_object($domain);
 			if (($old_memory = $this->domain_get_memory($domain)) == $memory)
@@ -1717,7 +1764,7 @@
 			$xml = $this->domain_get_xml($domain, true);
 			$xml = str_replace("$old_memory</memory>", "$memory</memory>", $xml);
 
-			return $this->domain_change_xml($domain, $xml);
+			return $this->domain_define($xml);
 		}
 
 		function domain_set_description($domain, $desc) {
@@ -1739,7 +1786,7 @@
 				$xml = join("\n", $tmp);
 			}
 
-			return $this->domain_change_xml($domain, $xml);
+			return $this->domain_define($xml);
 		}
 
 		function host_get_node_info() {
@@ -1747,47 +1794,117 @@
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
+//get domain autostart status true or false
 		function domain_get_autostart($domain) {
 			$domain = $this->get_domain_object($domain);
 			$tmp = libvirt_domain_get_autostart($domain);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
+// set domain to start with libvirt
 		function domain_set_autostart($res,$flags) {
 			$tmp = libvirt_domain_set_autostart($res,$flags);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-		function domain_snapshots_list($res) {
-			$tmp = libvirt_list_domain_snapshots($res);
+// list all snapshots for domain
+		function domain_snapshots_list($domain) {
+			$tmp = libvirt_list_domain_snapshots($domain);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
+// create a snapshot and metadata node for description
 		function domain_snapshot_create($domain) {
+			$this->domain_set_metadata($domain);
 			$domain = $this->get_domain_object($domain);
 			$tmp = libvirt_domain_snapshot_create($domain);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-		function domain_snapshot_delete($res) {
-			$tmp = libvirt_domain_snapshot_delete($res);
+//delete snapshot and metadata
+		function domain_snapshot_delete($domain, $name) {
+			$this->snapshot_remove_metadata($domain, $name);
+			$name = $this->domain_snapshot_lookup_by_name($domain, $name);
+			$tmp = libvirt_domain_snapshot_delete($name);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
+//get resource number of snapshot
 		function domain_snapshot_lookup_by_name($domain, $name) {
 			$domain = $this->get_domain_object($domain);
 			$tmp = libvirt_domain_snapshot_lookup_by_name($domain, $name);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-		function domain_snapshot_revert($res) {
-			$tmp = libvirt_domain_snapshot_revert($res);
+//revert domain to snapshot state
+		function domain_snapshot_revert($domain, $name) {
+			$name = $this->domain_snapshot_lookup_by_name($domain, $name);
+			$tmp = libvirt_domain_snapshot_revert($name);
 			return ($tmp) ? $tmp : $this->_set_last_error();	
 		}
 
-		function domain_is_active($res) {
-			$tmp = libvirt_domain_is_active($res);
-			return ($tmp) ? $tmp : $this->_set_last_error();
+//get snapshot description
+		function domain_snapshot_get_info($domain, $name) {
+			$domain = $this->get_domain_object($domain);
+			$tmp = $this->get_xpath($domain, '//domain/metadata/snapshot'.$name, false);
+			$var = $tmp[0];
+			unset($tmp);
+
+			return $var;
+		}
+
+//set description for snapshot
+		function snapshot_set_metadata($domain, $name, $desc) {
+			$this->domain_set_metadata($domain);
+			$domain = $this->get_domain_object($domain);
+
+			$xml = $this->domain_get_xml($domain, true);
+			$metadata = $this->get_xpath($domain, '//domain/metadata/snapshot'.$name, false);			
+			if (empty($metadata)){
+				$desc = "<metadata>\n<snapshot$name>$desc</snapshot$name>\n";
+				$xml = str_replace('<metadata>', $desc, $xml);
+			} else {
+				$tmp = explode("\n", $xml);
+				for ($i = 0; $i < sizeof($tmp); $i++)
+					if (strpos('.'.$tmp[$i], '<snapshot'.$name))
+						$tmp[$i] = "<snapshot$name>$desc</snapshot$name>";
+
+				$xml = join("\n", $tmp);
+			}
+			return $this->domain_define($xml);
+		}
+
+//create metadata node for domain
+		function domain_set_metadata($domain) {
+			$domain = $this->get_domain_object($domain);
+
+			$xml = $this->domain_get_xml($domain, true);
+			$metadata = $this->get_xpath($domain, '//domain/metadata', false);			
+			if (empty($metadata)){
+				$description = $this->domain_get_description($domain);
+				if(!$description)
+					$node = "</uuid>";
+				else
+					$node = "</description>";
+				$desc = "$node\n<metadata>\n<snapshots/>\n</metadata>";
+				$xml = str_replace($node, $desc, $xml);
+			}
+			return $this->domain_define($xml);
+		}
+
+//remove snapshot metadata
+		function snapshot_remove_metadata($domain, $name) {
+			$domain = $this->get_domain_object($domain);
+
+			$xml = $this->domain_get_xml($domain, true);
+			$tmp = explode("\n", $xml);
+			for ($i = 0; $i < sizeof($tmp); $i++)
+				if (strpos('.'.$tmp[$i], '<snapshot'.$name))
+					$tmp[$i] = null;
+
+			$xml = join("\n", $tmp);
+
+			return $this->domain_define($xml);
 		}
 
 		//create dropbox options for storage devices
@@ -1828,6 +1945,7 @@
 		return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
+//change disk for domain
 		function domain_change_disk($domain, $type, $iso, $dev) {
 			$domain = $this->get_domain_object($domain);
 			$iso = base64_decode($iso);
