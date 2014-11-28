@@ -36,19 +36,19 @@ if ($name == "") {
   echo "<p class='notice'>Share $name has been deleted.</p><button type='button' onclick='done()'>OK</button>";
   return;
 }
-  
+
 /* check for empty share */
 function shareEmpty($name) {
   return (($files = @scandir('/mnt/user/'.$name)) && (count($files) <= 2));
 }
 
-$split = array(""  => "Not set - split function not used",
-               "0" => "Level 0 - combine files to the disk where share '$name' originates.",
-               "1" => "Level 1 - combine files to top level subfolders within share '$name'.",
-               "2" => "Level 2 - combine files to second level subfolders within share '$name'.",
-               "3" => "Level 3 - combine files to third level subfolders within share '$name'.",
-               "4" => "Level 4 - combine files to fourth level subfolders within share '$name'.",
-               "9" => "Disabled - combine files to share '$name' using the allocation method.");
+$split = array( "" => "Permit any directory to be split",
+               "0" => "Manual: do not automatically split directories",
+               "1" => "Automatically split top directory as necessary",
+               "2" => "Automatically split top two directory levels as necessary",
+               "3" => "Automatically split top three directory levels as necessary",
+               "4" => "Automatically split top four directory levels as necessary",
+               "5" => "Automatically split top five directory levels as necessary");
 
 if ($var['shareUserInclude']) {
   $myDisks = explode(',',$var['shareUserInclude']);
@@ -68,15 +68,9 @@ if ($var['shareUserExclude']) {
 <script>
 $(function() {
   presetSpace(document.share_edit.shareFloor);
-  $("#s1").dropdownchecklist({emptyText:'All', width:300, firstItemChecksAll: true, explicitClose:'...close'});
-  $("#s2").dropdownchecklist({emptyText:'None', width:300, firstItemChecksAll: true, explicitClose:'...close'});
+  $("#s1").dropdownchecklist({emptyText:'All', width:300, explicitClose:'...close'});
+  $("#s2").dropdownchecklist({emptyText:'None', width:300, explicitClose:'...close'});
 });
-
-function presetImage(on) {
-  var off = [0,1,2,3,4,9];
-  for (var i=0; i<off.length; i++) document.getElementById('split'+off[i]).style.display = "none";
-  document.getElementById('split'+on).style.display = "";
-}
 
 function presetSpace(shareFloor) {
   var unit = ['KB','MB','GB','TB','PB'];
@@ -107,12 +101,20 @@ function prepareEdit(form) {
   var scale = form.shareFloor.value;
   var index = unit.indexOf(scale.replace(/[0-9.,\s]/g,'').toUpperCase());
   form.shareFloor.value = scale.replace(/[A-Z\s]/gi,'') * Math.pow(1000, (index>0 ? index/3 : 0))
+// Return splitlevel as single value
+  for (var i=0,item; item=form.shareSplitLevel.options[i]; i++) {
+    if (item.selected) {
+      var split = item.value;
+      item.selected = false;
+      break;
+    }
+  }
   item = form.shareSplitLevel.options[0];
   item.value = split;
   item.selected = true;
 // Return include as single line input
   var include = '';
-  for (var i=1,item; item=form.shareInclude.options[i]; i++) {
+  for (var i=0,item; item=form.shareInclude.options[i]; i++) {
     if (item.selected) {
       if (include.length) include += ',';
       include += item.value;
@@ -124,7 +126,7 @@ function prepareEdit(form) {
   item.selected = true;
 // Return exclude as single line input
   var exclude = '';
-  for (var i=1,item; item=form.shareExclude.options[i]; i++) {
+  for (var i=0,item; item=form.shareExclude.options[i]; i++) {
     if (item.selected) {
       if (exclude.length) exclude += ',';
       exclude += item.value;
@@ -159,6 +161,8 @@ Allocation method:
   <?=mk_option($share['allocator'], "fillup", "Fill-up")?>
   </select>
 
+> Need to include help about allocation method.
+
 Minimum free space:
 : <input type="text" name="shareFloor" maxlength="16" value="<?=$share['floor']?>">
 
@@ -167,7 +171,7 @@ Minimum free space:
 > Include units KB, MB, GB and TB as appropriate, e.g. 10MB.
 
 Split level:
-: <select name="shareSplitLevel" size="1" onchange="presetImage(this.form.shareSplitLevel.value)">
+: <select name="shareSplitLevel" size="1" style="width:320px">
   <?foreach ($split as $level => $text):?>
   <?=mk_option($share['splitLevel'], strval($level), $text)?>
   <?endforeach;?>
@@ -177,7 +181,6 @@ Split level:
 
 Included disk(s):
 : <select id="s1" name="shareInclude" size="1" multiple="multiple" style="display:none">
-  <option value=''>(All)</option>
   <?foreach ($myDisks as $disk):?>
   <?=mk_option_check($disk, $share['include'])?>
   <?endforeach;?>
@@ -187,7 +190,6 @@ Included disk(s):
 
 Excluded disk(s):
 : <select id="s2" name="shareExclude" size="1" multiple="multiple" style="display:none">
-  <option value=''>(All)</option>
   <?foreach ($myDisks as $disk):?>
   <?=mk_option_check($disk, $share['exclude'])?>
   <?endforeach;?>
@@ -223,12 +225,3 @@ Share empty?
 : <input type="submit" name="cmdEditShare" value="Apply"><button type="button" onclick="done()">Done</button>
 <?endif;?>
 </form>
-
-<div style="float:right">
-<div id="split0" class="split0" style="display:none"></div>
-<div id="split1" class="split1" style="display:none"></div>
-<div id="split2" class="split2" style="display:none"></div>
-<div id="split3" class="split3" style="display:none"></div>
-<div id="split4" class="split4" style="display:none"></div>
-<div id="split9" class="split9" style="display:none"></div>
-</div>
