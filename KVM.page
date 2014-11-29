@@ -3,10 +3,9 @@ Type="xmenu"
 Title="Virtual Machines"
 Tabs="true"
 ---
-<link type="text/css" rel="stylesheet" href="/plugins/dynamix.plugin.manager/styles/fileTree.css">
-<link href="/plugins/dynamix.kvm.manager/css/custom.css" rel="stylesheet">
-<link type="text/css" rel="stylesheet" href="/plugins/dynamix.plugin.manager/styles/fileTree.css">
-<script type="text/javascript" src="/plugins/dynamix.plugin.manager/scripts/fileTree.js"></script>
+<link type="text/css" rel="stylesheet" href="/plugins/dynamix.kvm.manager/styles/dynamix.kvm.manager.css">
+<link type="text/css" rel="stylesheet" href="/plugins/dynamix.kvm.manager/styles/fileTree.css">
+<script type="text/javascript" src="/plugins/dynamix.kvm.manager/scripts/fileTree.js"></script>
 <script>
 function clearHistory(){
 	window.history.pushState('KVM', 'Title', '/KVM');
@@ -42,13 +41,12 @@ $(function(){
 
 /*$(function() {
   $('#kvm_table').tablesorter({headers:{0:{sorter:false},6:{sorter:false},7:{sorter:false}}});
-    $('#dom_disk_table').tablesorter({headers:{0:{sorter:false},6:{sorter:false},7:{sorter:false}}});
-  $('#dom_snap_table').tablesorter({headers:{0:{sorter:false},1:{sorter:false},6:{sorter:false},7:{sorter:false}}});
+  $('#domdisk_table').tablesorter({headers:{0:{sorter:false},6:{sorter:false},7:{sorter:false}}});
+  $('#domsnap_table').tablesorter({headers:{0:{sorter:false},1:{sorter:false},6:{sorter:false},7:{sorter:false}}});
   
-$('#KVM_tree').fileTree({root:'/boot/',filter:'plg',script:'/plugins/dynamix.kvm.manager/include/FileTree.php',multiFolder:false}, function(file) {$('#plugin_file').val(file);});
+$('#KVM_tree').fileTree({root:'/boot/',filter:'plg',script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false}, function(file) {$('#plugin_file').val(file);});
 });*/
 </script>
-
 <?php
    //error_reporting(0);
    require('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php');
@@ -147,15 +145,24 @@ $('#KVM_tree').fileTree({root:'/boot/',filter:'plg',script:'/plugins/dynamix.kvm
          	  	"Error: ".$lv->get_last_error();
          }
 		}
+		elseif ($subaction == 'domain-diskdev') {
+			$msg = $lv->domain_set_diskdev($domName, $_GET['dev'], $_POST['diskdev']) ? 
+				'Domain '.$domName.' disk dev has been changed from '.$_GET['dev'].' to '.$_POST['diskdev']:
+				'Error: '.$lv->get_last_error();
+		}
 		elseif ($subaction == 'cdrom-change') {
          $msg = $lv->domain_change_cdrom($domName, $_GET['cdrom'], $_GET['dev']) ? 
          	"Domain $domName cdrom has been successfully changed" : 
          	"Error: ".$lv->get_last_error();
       }
+		elseif ($subaction == 'disk-change') {
+         $msg = $lv->domain_change_disk($domName, $_GET['type'], $_GET['disk'], $_GET['dev']) ? 
+         	"Domain $domName disk has been successfully changed" : 
+         	"Error: ".$lv->get_last_error();
+      }
 		elseif ($subaction == 'memory-change') {
-			$memory = $_GET['memory']*1024;
-			$msg = $lv->domain_set_memory($domName, $memory) ? 
-				"Domain $domName vcpu number has been successfully changed to $memory" : 
+			$msg = $lv->domain_set_memory($domName, $_GET['memory']*1024) ? 
+				"Domain $domName vcpu number has been successfully changed to ".$_GET['memory']." MB" : 
 				"Error: ".$lv->get_last_error();
 		}
 		elseif ($subaction == 'vcpu-change') {
@@ -354,7 +361,7 @@ $('#KVM_tree').fileTree({root:'/boot/',filter:'plg',script:'/plugins/dynamix.kvm
 			</tr>
 			<tr id='name$i' style='display: none'>";
 		/* Disk device information */
-         echo "<td colspan='10'><table class='tablesorter dom-disk".($display['tabs']==1?" shift'":"'")." id='dom_disk_table'>
+         echo "<td colspan='10'><table class='tablesorter domdisk".($display['tabs']==1?" shift'":"'")." id='domdisk_table'>
          			<tr>
          				<thead>
                   	<th class='header'><i class='glyphicon glyphicon-hdd '></i><b> Disk devices</b></th>
@@ -366,32 +373,68 @@ $('#KVM_tree').fileTree({root:'/boot/',filter:'plg',script:'/plugins/dynamix.kvm
                  		</thead>
                  	</tr>";
 		/* Display domain disks */
-         $tmp = $lv->get_disk_stats($name);
+			$pools = $lv->get_storagepools();
+			$tmp = $lv->get_disk_stats($name);
          if (!empty($tmp)) {
-			   $pools = $lv->get_storagepools();
 				for ($ii = 0; $ii < sizeof($tmp); $ii++) {
             	$capacity = $lv->format_size($tmp[$ii]['capacity'], 2);
                $allocation = $lv->format_size($tmp[$ii]['allocation'], 2);
                $disk = (array_key_exists('file', $tmp[$ii])) ? $tmp[$ii]['file'] : $tmp[$ii]['partition'];
-					echo "<tr>
-								<td>".basename($disk)."</td>
-                        <td>{$tmp[$ii]['type']}</td>
-                        <td>{$tmp[$ii]['device']}</td>
-                        <td>$capacity</td>
-                        <td>$allocation</td>
-                        <td>N/A</td>
-							</tr>";
-
+					$type = $tmp[$ii]['type'];
+					$dev = $tmp[$ii]['device'];
+					echo '<tr>';
+					if($state == 'running' | $tmp[$ii]['type'] == 'raw' | true )
+					/*if running display disk name*/
+						echo "<td>".basename($disk)."</td>";
+					else {
+					/*else if shutoff display disk change*/
+						echo	'<td><select name="disk_change" onchange="location = this.options[this.selectedIndex].value;"  title="change disk image">
+							<option value="">none selected</option>';
+						if($pools) {
+							for ($j = 0; $j < sizeof($pools); $j++) {
+								$pool = $pools[$j];
+								$info = $lv->get_storagepool_info($pool);
+								if ($info['volume_count'] > 0) {
+									$tmp2 = $lv->storagepool_get_volume_information($pools[$j]);
+									$tmp2_keys = array_keys($tmp2);
+									for ($k = 0; $k < sizeof($tmp2); $k++) {
+										$vname = $tmp2_keys[$k];
+										$vpath = $tmp2[$vname]['path'];
+										$ext = pathinfo($vpath, PATHINFO_EXTENSION);
+										if ($ext != "iso" && $ext != "ISO"){
+											echo "<option value='?subaction=disk-change&amp;uuid=$uuid&amp;disk=".base64_encode($vpath)."&amp;type=$type&amp;dev=$dev'";
+											if ($vname == basename($disk))
+												echo ' selected';
+										echo '>'.$vname.'</option>';}
+									}
+								}
+							}	
+						}
+              	echo "</select></td>";
+              	/*end display disk change*/
+              }
+           		echo "<td>$type</td>
+                 	   <td title='Click to change Dev Name'><form method='post' action='?subaction=domain-diskdev&amp;uuid=$uuid&amp;dev=$dev' /><span class='diskdev' style='width:30px'>
+								<span class='text' > $dev </span>
+  									<input class='input' type='text' style='width:36px' name='diskdev' value='$dev' val='diskdev' hidden />
+								</span></form>
+							</td>
+                     <td>$capacity</td>
+                     <td>$allocation</td>
+                     <td>N/A</td>
+						</tr>";
 				}
          }
+		/*end display disk display*/
+
 		/* Display domain cdroms */
          $tmp = $lv->get_cdrom_stats($name);
          if (!empty($tmp)) {
-			   $pools = $lv->get_storagepools();
 				for ($ii = 0; $ii < sizeof($tmp); $ii++) {
             	$capacity = $lv->format_size($tmp[$ii]['capacity'], 2);
                $allocation = $lv->format_size($tmp[$ii]['allocation'], 2);
                $disk = (array_key_exists('file', $tmp[$ii])) ? $tmp[$ii]['file'] : $tmp[$ii]['partition'];
+					$type = $tmp[$ii]['type'];
 					$dev = $tmp[$ii]['device'];
 					echo '<tr>
 						<td><select name="cdrom_change" onchange="location = this.options[this.selectedIndex].value;"  title="change disk image">
@@ -417,8 +460,8 @@ $('#KVM_tree').fileTree({root:'/boot/',filter:'plg',script:'/plugins/dynamix.kvm
 							}	
 						}
               	echo "</select></td>
-                     <td>{$tmp[$ii]['type']}</td>
-               	   <td>{$tmp[$ii]['device']}</td>
+                     <td>$type</td>
+               	   <td>$dev</td>
                      <td>$capacity</td>
                      <td>$allocation</td>
                      <td>";
@@ -431,13 +474,13 @@ $('#KVM_tree').fileTree({root:'/boot/',filter:'plg',script:'/plugins/dynamix.kvm
                  	   	echo "N/A";
 					echo '</td>
 					</tr>';
-
 				}
          }
+			/*end display cdrom display*/
          echo "</table>";
 
 			/* Snapshot  information */
-         	echo "<table class='tablesorter dom-snap".($display['tabs']==1?" shift'":"'")." id='dom_snap_table'>
+         	echo "<table class='tablesorter domsnap".($display['tabs']==1?" shift'":"'")." id='domsnap_table'>
 		        	      <tr>
 		        	      <thead>
       	      	   	<th class='header'><i class='glyphicon glyphicon-camera '></i><b> Snapshots </b><a href='?subaction=snap-create&amp;uuid=$uuid' title='create a snapshot of current domain state'><i class='glyphicon glyphicon-plus green'></i></a></th>
@@ -469,7 +512,7 @@ $('#KVM_tree').fileTree({root:'/boot/',filter:'plg',script:'/plugins/dynamix.kvm
                   	   <td>$time</td>
                   	   <td><form method='post' action='?subaction=snap-desc&amp;uuid=$uuid&amp;sname=$sname' /><span class='snapdesc'>
     									<span class='text'> $sinfo </span>
-    									<input class='input' type='text' name='snapdesc' value='$sval' val='snapdesc' hidden placeholder='Click to change description'/>
+    									<input class='input' type='text' name='snapdesc' value='$sval' val='snapdesc' hidden placeholder='Click to change description' title='Click to change description'/>
 									 </span></form>
 								</td>
    	                  <td>
