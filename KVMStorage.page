@@ -5,11 +5,9 @@ Title="Storage"
 $(function() {
   $('#storage-pool_table').tablesorter({headers:{0:{sorter:false},6:{sorter:false},7:{sorter:false}}});
   $('#storage-vol_table').tablesorter({headers:{0:{sorter:false},6:{sorter:false},7:{sorter:false}}});
-  $('#storage_tree').fileTree({root:'/boot/',filter:'plg',script:'/plugins/dynamix.kvm.manager/include/FileTree.php',multiFolder:false}, function(file) {$('#storage_file').val(file);});
+  $('#storage_tree').fileTree({root:'/mnt/',filter:'.',script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false}, false, function(directory) {$('#storage_dir').val(directory);});
 });
 </script>
-<div class="wrap">
-	<div class="list">
 <?php
 	$msg = false;
 	$clear = false;
@@ -84,7 +82,7 @@ $(function() {
 			}
 		echo "<script>clearHistory </script>";
 		}
-				echo "<table class='tablesorter storage-pool".($display['tabs']==1?" shift'":"'")." id='storage-pool_table'>
+				echo "<table class='tablesorter storage-pool".($display['tabs']==1?" shift'":"'")." id='storagepool_table'>
 					<tr>
 						<thead>
 						<th><a href='?paction=pool-create' title='create new storage pool'><i class='glyphicon glyphicon-plus green'></i></a></th>
@@ -121,7 +119,8 @@ $(function() {
   	  	      	      <td>{$lv->format_size($info['allocation'], 2)}</td>
   		 	      	   <td>{$lv->format_size($info['available'], 2)}</td>
 							<td>{$info['path']}</td>
-							<td><input class='checkbox' type='checkbox' title='Toggle VM auostart' $auto onClick=\"javascript:location.href='?subaction=pool-autostart&amp;pool=$pool'\" ></td>
+							<td><input class='checkbox' type='checkbox' title='Toggle VM auostart' $auto 
+								onClick=\"javascript:location.href='?psubaction=pool-autostart&amp;pool=$pool'\" ></td>
 							<td>";
 						if ($active == "Active") {
 							echo "<a href='?psubaction=pool-stop&amp;pool=$pool' title='stop storage pool'
@@ -141,7 +140,7 @@ $(function() {
 	
 					if ($info['volume_count'] > 0) {
 						echo "<tr id='pool$i' style='display: none'>
-								<td colspan='10'><table class='tablesorter storage-vol".($display['tabs']==1?" shift'":"'")." id='storage-vol_table'>
+								<td colspan='10'><table class='tablesorter storagevol".($display['tabs']==1?" shift'":"'")." id='storagevol_table'>
 								<tr>
 								<thead>
 								  <th class='header'><i class='glyphicon glyphicon-hdd '></i> Disk Name</th>
@@ -184,5 +183,3 @@ if($msg){
 	echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font color=\"".$color."\">".$msg."</font>');}); </script>";
 	}
 ?>
-	</div>
-</div>
