@@ -17,8 +17,8 @@ Icon="share-settings.png"
 ?>
 <script>
 $(function() {
-  $("#s1").dropdownchecklist({emptyText:'All', width:300, firstItemChecksAll:true, explicitClose:'...close'});
-  $("#s2").dropdownchecklist({emptyText:'None', width:300, firstItemChecksAll:true, explicitClose:'...close'});
+  $("#s1").dropdownchecklist({emptyText:'All', width:300, explicitClose:'...close'});
+  $("#s2").dropdownchecklist({emptyText:'None', width:300, explicitClose:'...close'});
   presetShare(document.share_settings);
 });
 // Fool unRAID by simulating the original input field
@@ -66,7 +66,6 @@ Enable user shares:
 
 Included disk(s):
 : <select id="s1" name="shareUserInclude" size="1" multiple="multiple" style="display:none">
-  <option value=''>(All)</option>
   <?foreach ($disks as $disk):?>
   <?=mk_option_check($disk['name'], $var['shareUserInclude'])?>
   <?endforeach;?>
@@ -82,7 +81,6 @@ Included disk(s):
 
 Excluded disk(s):
 : <select id="s2" name="shareUserExclude" size="1" multiple="multiple" style="display:none">
-  <option value=''>(All)</option>
   <?foreach ($disks as $disk):?>
   <?=mk_option_check($disk['name'], $var['shareUserExclude'])?>
   <?endforeach;?>
