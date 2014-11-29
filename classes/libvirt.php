@@ -1767,6 +1767,21 @@
 			return $this->domain_define($xml);
 		}
 
+//change domain disk dev name
+		function domain_set_diskdev($domain, $olddev, $dev) {
+			$domain = $this->get_domain_object($domain);
+
+			$xml = $this->domain_get_xml($domain, true);
+				$tmp = explode("\n", $xml);
+				for ($i = 0; $i < sizeof($tmp); $i++)
+					if (strpos('.'.$tmp[$i], "<target dev='".$olddev))
+						$tmp[$i] = str_replace("<target dev='".$olddev, "<target dev='".$dev, $tmp[$i]);
+
+				$xml = join("\n", $tmp);
+
+			return $this->domain_define($xml);
+		}
+
 		function domain_set_description($domain, $desc) {
 			$domain = $this->get_domain_object($domain);
 
@@ -1789,6 +1804,46 @@
 			return $this->domain_define($xml);
 		}
 
+//create metadata node for domain
+		function domain_set_metadata($domain) {
+			$domain = $this->get_domain_object($domain);
+
+			$xml = $this->domain_get_xml($domain, true);
+			$metadata = $this->get_xpath($domain, '//domain/metadata', false);			
+			if (empty($metadata)){
+				$description = $this->domain_get_description($domain);
+				if(!$description)
+					$node = "</uuid>";
+				else
+					$node = "</description>";
+				$desc = "$node\n<metadata>\n<snapshots/>\n</metadata>";
+				$xml = str_replace($node, $desc, $xml);
+			}
+			return $this->domain_define($xml);
+		}
+
+//set description for snapshot
+		function snapshot_set_metadata($domain, $name, $desc) {
+			$this->domain_set_metadata($domain);
+			$domain = $this->get_domain_object($domain);
+
+			$xml = $this->domain_get_xml($domain, true);
+			$metadata = $this->get_xpath($domain, '//domain/metadata/snapshot'.$name, false);			
+			if (empty($metadata)){
+				$desc = "<metadata>\n<snapshot$name>$desc</snapshot$name>\n";
+				$xml = str_replace('<metadata>', $desc, $xml);
+			} else {
+				$tmp = explode("\n", $xml);
+				for ($i = 0; $i < sizeof($tmp); $i++)
+					if (strpos('.'.$tmp[$i], '<snapshot'.$name))
+						$tmp[$i] = "<snapshot$name>$desc</snapshot$name>";
+
+				$xml = join("\n", $tmp);
+			}
+			return $this->domain_define($xml);
+		}
+
+//get host node info
 		function host_get_node_info() {
 			$tmp = libvirt_node_get_info($this->conn);
 			return ($tmp) ? $tmp : $this->_set_last_error();
@@ -1801,13 +1856,13 @@
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-// set domain to start with libvirt
+//set domain to start with libvirt
 		function domain_set_autostart($res,$flags) {
 			$tmp = libvirt_domain_set_autostart($res,$flags);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-// list all snapshots for domain
+//list all snapshots for domain
 		function domain_snapshots_list($domain) {
 			$tmp = libvirt_list_domain_snapshots($domain);
 			return ($tmp) ? $tmp : $this->_set_last_error();
@@ -1853,45 +1908,6 @@
 			return $var;
 		}
 
-//set description for snapshot
-		function snapshot_set_metadata($domain, $name, $desc) {
-			$this->domain_set_metadata($domain);
-			$domain = $this->get_domain_object($domain);
-
-			$xml = $this->domain_get_xml($domain, true);
-			$metadata = $this->get_xpath($domain, '//domain/metadata/snapshot'.$name, false);			
-			if (empty($metadata)){
-				$desc = "<metadata>\n<snapshot$name>$desc</snapshot$name>\n";
-				$xml = str_replace('<metadata>', $desc, $xml);
-			} else {
-				$tmp = explode("\n", $xml);
-				for ($i = 0; $i < sizeof($tmp); $i++)
-					if (strpos('.'.$tmp[$i], '<snapshot'.$name))
-						$tmp[$i] = "<snapshot$name>$desc</snapshot$name>";
-
-				$xml = join("\n", $tmp);
-			}
-			return $this->domain_define($xml);
-		}
-
-//create metadata node for domain
-		function domain_set_metadata($domain) {
-			$domain = $this->get_domain_object($domain);
-
-			$xml = $this->domain_get_xml($domain, true);
-			$metadata = $this->get_xpath($domain, '//domain/metadata', false);			
-			if (empty($metadata)){
-				$description = $this->domain_get_description($domain);
-				if(!$description)
-					$node = "</uuid>";
-				else
-					$node = "</description>";
-				$desc = "$node\n<metadata>\n<snapshots/>\n</metadata>";
-				$xml = str_replace($node, $desc, $xml);
-			}
-			return $this->domain_define($xml);
-		}
-
 //remove snapshot metadata
 		function snapshot_remove_metadata($domain, $name) {
 			$domain = $this->get_domain_object($domain);
@@ -1907,7 +1923,7 @@
 			return $this->domain_define($xml);
 		}
 
-		//create dropbox options for storage devices
+//create dropbox options for storage devices
 		function storagepools_get_iso($iso=true) {
 			echo '<option value="" selected>none selected</option>';
 			  $pools = $this->get_storagepools();
@@ -1935,7 +1951,7 @@
 			}
 		}
 		
-		// change cdrom media
+//change cdrom media
 		function domain_change_cdrom($domain, $iso, $dev) {
 			$domain = $this->get_domain_object($domain);
 			$iso = base64_decode($iso);
@@ -1946,12 +1962,10 @@
 		}
 
 //change disk for domain
-		function domain_change_disk($domain, $type, $iso, $dev) {
+		function domain_change_disk($domain, $type, $img, $dev) {
 			$domain = $this->get_domain_object($domain);
-			$iso = base64_decode($iso);
-   		$tmp = libvirt_domain_update_device($domain, "<disk type='file' device='disk'><driver name='qemu' type='$type'/><source file=".escapeshellarg($iso)."/><target dev='$dev' bus='virtio'/></disk>", VIR_DOMAIN_DEVICE_MODIFY_CONFIG);
-			if ($this->domain_is_active($domain))   		
-   			libvirt_domain_update_device($domain, "<disk type='file' device='disk'><driver name='qemu' type='$type'/><source file=".escapeshellarg($iso)."/><target dev='$dev' bus='virtio'/></disk>", VIR_DOMAIN_DEVICE_MODIFY_LIVE);
+			$img = base64_decode($img);
+   		$tmp = libvirt_domain_update_device($domain, "<disk type='file' device='disk'><driver name='qemu' type='$type'/><source file=".escapeshellarg($img)."/><target dev='$dev' bus='virtio'/></disk>", VIR_DOMAIN_DEVICE_MODIFY_CONFIG);
 		return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 	}
