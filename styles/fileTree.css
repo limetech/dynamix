@@ -3,7 +3,7 @@ UL.jqueryFileTree LI{list-style:none;padding:0px;padding-left:20px;margin:0px;wh
 UL.jqueryFileTree A{color:#606060;text-decoration:none;display:block;padding:0px 2px;}
 UL.jqueryFileTree A:hover{background:#BDF;}
 /* Dynamix tree element */
-#plugin_tree{width:33%;border:1px solid #E0E0E0;padding:10px 6px;}
+#storage_tree{width:304px;border:1px solid #E0E0E0;padding:10px 6px;}
 /* Core Styles */
 .jqueryFileTree LI.directory { background: url(../images/directory.png) left top no-repeat; }
 .jqueryFileTree LI.expanded { background: url(../images/folder_open.png) left top no-repeat; }
