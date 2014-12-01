@@ -48,7 +48,7 @@ $('#KVM_tree').fileTree({root:'/boot/',filter:'plg',script:'/plugins/dynamix.kvm
 });*/
 </script>
 <?php
-   //error_reporting(0);
+   error_reporting(0);
    require('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php');
 	$uri = 'qemu:///system';
    $lv = new Libvirt($uri, null, null, false);
@@ -361,7 +361,7 @@ $('#KVM_tree').fileTree({root:'/boot/',filter:'plg',script:'/plugins/dynamix.kvm
 			</tr>
 			<tr id='name$i' style='display: none'>";
 		/* Disk device information */
-         echo "<td colspan='10'><table class='tablesorter domdisk".($display['tabs']==1?" shift'":"'")." id='domdisk_table'>
+         echo "<td colspan='8'><table class='tablesorter domdisk".($display['tabs']==1?" shift'":"'")." id='domdisk_table'>
          			<tr>
          				<thead>
                   	<th class='header'><i class='glyphicon glyphicon-hdd '></i><b> Disk devices</b></th>
