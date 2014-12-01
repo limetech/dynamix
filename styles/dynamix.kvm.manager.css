@@ -1232,12 +1232,17 @@ table.tablesorter.kvm td:last-child{width:96px;padding:0;}
 table.tablesorter.storagepool{margin-top:-21px;}
 table.tablesorter.storagepool th:first-child{width:10px;text-align:center;}
 table.tablesorter.storagepool td:first-child{width:10px;text-align:center;}
+table.tablesorter.storagepool th:nth-child(2){width:9%;text-align:left;}
 table.tablesorter.storagepool td:nth-child(2){width:9%;text-align:left;}
 table.tablesorter.storagepool th:nth-child(3){width:10px;text-align:center;}
 table.tablesorter.storagepool td:nth-child(3){width:10px;text-align:center;}
+table.tablesorter.storagepool th:nth-child(4){width:15px;text-align:left;}
 table.tablesorter.storagepool td:nth-child(4){width:15px;text-align:left;}
+table.tablesorter.storagepool th:nth-child(5){width:15px;text-align:left;}
 table.tablesorter.storagepool td:nth-child(5){width:15px;text-align:left;}
+table.tablesorter.storagepool th:nth-child(6){width:9%;text-align:left;}
 table.tablesorter.storagepool td:nth-child(6){width:9%;text-align:left;}
+table.tablesorter.storagepool th:nth-child(7){width:9%;text-align:left;}
 table.tablesorter.storagepool td:nth-child(7){width:9%;text-align:left;}
 table.tablesorter.storagepool th:nth-child(8){width:10px;text-align:center;}
 table.tablesorter.storagepool td:nth-child(8){width:10px;text-align:center;}
@@ -1247,6 +1252,7 @@ table.tablesorter.storagevol{margin-top:0px;}
 table.tablesorter.storagevol{margin-left:96px;}
 table.tablesorter.storagevol th:first-child{width:9%;text-align:left;}
 table.tablesorter.storagevol td:first-child{width:9%;text-align:left;}
+table.tablesorter.storagevol th:nth-child(2){width:9%;text-align:left;}
 table.tablesorter.storagevol td:nth-child(2){width:9%;text-align:left;}
 table.tablesorter.storagevol th:nth-child(3){width:9%;text-align:left;}
 table.tablesorter.storagevol td:nth-child(3){width:9%;text-align:left;}
