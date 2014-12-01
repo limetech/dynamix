@@ -87,7 +87,7 @@ Title="Create VM"
 
 <form method="POST">
 
-<table id="form-table" class="tablesorter" style="margin-top:-21px"><thead><th colspan="2"><b>Create New Virtual Machine From Template</b></th></thead>
+<table id="form-table" class="tablesorter" style="margin-top:-21px"><thead><th colspan="2">Create New Virtual Machine From Template</th></thead>
 <tr>
     <td align="right">Name:&nbsp; </td>
     <td><input type="text" autofocus name="name" title="name of vitual machine" placeholder="name of vitual machine" /></td>
