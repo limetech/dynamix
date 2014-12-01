@@ -1,42 +1,7 @@
-Menu="KVM"
+Menu="KVM:1"
 Title="Create VM"
 ---
-<?php
-  $skip = false;
-  $pools = $lv->get_storagepools();
-  $network_cfg = parse_ini_file( "/boot/config/network.cfg" );
-  if (array_key_exists('sent', $_POST)) {
-	$features = array('apic', 'acpi', 'pae', 'hap');
-
-	$feature = array();
-	for ($i = 0; $i < sizeof($features); $i++)
-		if (array_key_exists('feature_'.$features[$i], $_POST))
-			$feature[] = $features[$i];
-
-	$tmp = $lv->domain_new($_POST['name'], $_POST['desc'], $_POST['media'], $_POST['drivers'], $_POST['cpu_count'], $feature, $_POST['memory'], $_POST['maxmem'], $_POST['clock_offset'], $_POST['nic'], $_POST['disk'], $_POST['usb'], $_POST['usbtab'], $_POST['shares'], $_POST['setup_persistent']);
-	if (!$tmp){
-		echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font color=\"red\">Error: ".$lv->get_last_error()."</font>');}); </script>";
-	} else {
-		$skip = true;
-  		$name = $_POST['name'];
-		$res = $lv->get_domain_by_name($name);
-		$uuid = libvirt_domain_get_uuid_string($res);
-		echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font color=\"green\">New virtual machine $name&nbsp;</a> has been created successfully</font>');}); </script>";
-		echo '<meta http-equiv="refresh" content="3; url=/KVM">';
-	}
-  }
-
-  $ci  = $lv->get_connect_information();
-  $maxcpu = $ci['hypervisor_maxvcpus'];
-  unset($ci);
-  $info = $lv->host_get_node_info();
-  $maxmem = number_format(($info['memory'] / 1048576), 0, '.', ' ');
-?>
-<?php
-    if (!$skip):
-?>
 <script>
-<!--
 	function toggle_it(itemID){ 
       // Toggle visibility between none and '' 
       if ((document.getElementById(itemID).style.display == 'none')) { 
@@ -86,14 +51,43 @@ Title="Create VM"
 		xmlhttp.open("GET", '<?php echo $_SERVER['REQUEST_URI'] ?>&get_mac=1',true);
 		xmlhttp.send();
 	}
--->
+
 </script>
+<?php
+  $pools = $lv->get_storagepools();
+  $network_cfg = parse_ini_file( "/boot/config/network.cfg" );
+  if (array_key_exists('sent', $_POST)) {
+	$features = array('apic', 'acpi', 'pae', 'hap');
+
+	$feature = array();
+	for ($i = 0; $i < sizeof($features); $i++)
+		if (array_key_exists('feature_'.$features[$i], $_POST))
+			$feature[] = $features[$i];
+
+	$tmp = $lv->domain_new($_POST['name'], $_POST['desc'], $_POST['media'], $_POST['drivers'], $_POST['cpu_count'], $feature, $_POST['memory'], $_POST['maxmem'], $_POST['clock_offset'], $_POST['nic'], $_POST['disk'], $_POST['usb'], $_POST['usbtab'], $_POST['shares'], $_POST['setup_persistent']);
+	if (!$tmp){
+		echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font color=\"red\">Error: ".$lv->get_last_error()."</font>');}); </script>";
+	} else {
+  		$name = $_POST['name'];
+		$res = $lv->get_domain_by_name($name);
+		$uuid = libvirt_domain_get_uuid_string($res);
+		echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font color=\"green\">New virtual machine $name&nbsp;</a> has been created successfully</font>');}); </script>";
+		echo '<meta http-equiv="refresh" content="1; url=/KVM">';
+	}
+  }
+
+  $ci  = $lv->get_connect_information();
+  $maxcpu = $ci['hypervisor_maxvcpus'];
+  unset($ci);
+  $info = $lv->host_get_node_info();
+  $maxmem = number_format(($info['memory'] / 1048576), 0, '.', ' ');
+?>
 
 <div id="content">
 
 <form method="POST">
 
-<table id="form-table" class="tablesorter" style="margin-top:-33px"><thead><th colspan="2"><b>Create New Virtual Machine From Template</b></th></thead>
+<table id="form-table" class="tablesorter" style="margin-top:-21px"><thead><th colspan="2"><b>Create New Virtual Machine From Template</b></th></thead>
 <tr>
     <td align="right">Name:&nbsp; </td>
     <td><input type="text" autofocus name="name" title="name of vitual machine" placeholder="name of vitual machine" /></td>
@@ -351,16 +345,14 @@ Title="Create VM"
     </td>
 </tr>
 
-</div>
-
 <tr align="right">
     <td colspan="1">
-    <input type="submit" value="Create VM" />
+ 	   <input type="submit" value="Create VM" />
     </td>
 </tr>
-</table>
-<input type="hidden" name="sent" value="1" />
-</form>
-<?php
-  endif;
-?>
+
+	</table>
+		<input type="hidden" name="sent" value="1" />
+	</form>
+
+</div>
