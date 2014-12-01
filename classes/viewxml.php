@@ -1,7 +1,6 @@
-<div id="title" <span class='left'>View Node XML Description</span></div>
 <div>
-	<form method="POST" id="viewXML">
-		<table>
+ <form method="POST" id="viewXML">
+  <table class="tablesorter" style="margin-top:-21px"><thead><th colspan="2"><b>View Node XML Description</b></th></thead> 
 			<tr>
 				<td>
 					<textarea autofocus readonly name="xmldesc" rows="16" cols="100%"><?php echo htmlentities($lv->get_node_device_xml($name, false));?></textarea>

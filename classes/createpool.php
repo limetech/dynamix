@@ -1,5 +1,6 @@
-<table class="tablesorter" style="margin-top:-21px"><thead><th colspan="2"><b>Create a new storage pool</b></th></thead> 
-	<form method="POST" action="?psubaction=pool-start">
+<div>
+	<form method="POST" action="?subaction=pool-start">
+	 	<table class="tablesorter" style="margin-top:-21px"><thead><th colspan="2"><b>Create a new storage pool</b></th></thead>
 			<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
 			<tr align="left">
 				<td align="right">Storage name:&nbsp;</td>
@@ -21,6 +22,6 @@
 				<td align="left"><div id="storage_tree"></div></td>
 			</tr>
 			<input type="hidden" name="sent" value="1" />
+		</table>
 	</form>
-</table>
-
+</div>

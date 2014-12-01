@@ -1,5 +1,6 @@
-<table class="tablesorter" style="margin-top:-21px"><thead><th colspan="2"><b>Create a new volume in pool <?=$pool?></b></th></thead> 
-	<form method="POST" action="?psubaction=volume-save&amp;pool=<?=$pool?>">
+<div>
+	<form method="POST" action="?subaction=volume-save&amp;pool=<?=$pool?>">
+	 <table class="tablesorter" style="margin-top:-21px"><thead><th colspan="2"><b>Create a new volume in pool <?=$pool?></b></th></thead>
 		<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
 		<tr align="left">
 			<td align="right">Volume name:&nbsp;</td>
@@ -31,5 +32,6 @@
 			</td>
 		</tr>
 			<input type="hidden" name="sent" value="1" />
-	</table>
+ </table>
 </form>
+</div>
