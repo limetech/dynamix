@@ -1,4 +1,4 @@
-Menu="KVM"
+Menu="KVM:4"
 Title="Devices"
 ---
 <?php
