@@ -84,8 +84,8 @@ echo $size;
 </div>
 <div><span style="width:90px; display:inline-block"><strong>Memory:</strong></span>
 <?
-exec("dmidecode -q -t memory|awk -F: '/Maximum Capacity:/ {print $2}; /Size:/ {total+=$2} END {print total}'",$memory);
-echo "{$memory[1]} MB (max. {$memory[0]})";
+exec("dmidecode -q -t memory|awk '/Maximum Capacity:/{print $3,$4};/Size:/{total+=$2;unit=$3} END{print total,unit}'",$memory);
+echo "{$memory[1]} (max. {$memory[0]})";
 ?>
 </div>
 <div><span style="width:90px; display:inline-block"><strong>Network:</strong></span>
