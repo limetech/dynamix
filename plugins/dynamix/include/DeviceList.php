@@ -444,7 +444,7 @@ case 'open':
   foreach ($devs as $dev) {
     $dev['name'] = 'preclear';
     $dev['color'] = exec("hdparm -C /dev/{$dev['device']}|grep 'standby'") ? 'blue-blink' : 'blue-on';
-    $dev['temp'] = $dev['color']=='blue-on' ? exec("smartctl -A /dev/{$dev['device']}|awk '/Temperature_Celsius/{print \$NF}'") : '*';
+    $dev['temp'] = $dev['color']=='blue-on' ? exec("smartctl -A /dev/{$dev['device']}|awk '/Temperature_Celsius/{print \$10}'") : '*';
     $dev['status'] = $status;
     echo "<tr class='tr_row".($row^=1)."'>";
     echo "<td>".device_info($dev)."</td>";
