@@ -17,7 +17,6 @@ Pre-install checks.
 -->
 <FILE Run="/bin/bash">
 <INLINE>
-# this is only for 6.0-beta11
 source /etc/unraid-version
 if [ "${version:0:10}" != "6.0-beta12" ]; then
   echo "this plugin is only valid for unRAID OS 6.0-beta12 or higher"
