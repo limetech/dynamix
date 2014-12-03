@@ -22,10 +22,10 @@ function my_replace(&$source,$string) {
 function my_insert(&$source,$string) {
   $source = substr_replace($source,$string,20,0);
 }
-function my_smart(&$source,$device) {
+function my_smart(&$source,$name) {
   global $path;
-  $smart = exec("smartctl -n standby -q errorsonly -H /dev/$device");
-  my_insert($source, $smart ? "<img src=$path/bad.png>" : "<img src=$path/good.png>");
+  $smart = exec("awk '$1==5 {print $10}' /var/local/emhttp/smart/$name");
+  my_insert($source, "<a href=\"Data?name=$name\" onclick=\"$.cookie('one','tab2',{path:'/'})\" title=\"$smart reallocated sectors\">".($smart ? "<img src=$path/bad.png>" : "<img src=$path/good.png>")."</a>");
 }
 function my_usage(&$source,$used) {
   my_insert($source, $used ? "<div class='usage-disk all'><span style='width:$used'>$used</span></div>" : "-");
@@ -53,7 +53,7 @@ case 'disk':
   $row3 = array_fill(0,26,"<td class='td_col"); array_walk($row3,'alternate'); my_insert($row3[0],"Unassigned");
   $row4 = array_fill(0,26,"<td class='td_col"); array_walk($row4,'alternate'); my_insert($row4[0],"Faulty");
   $row5 = array_fill(0,26,"<td class='td_col"); array_walk($row5,'alternate'); my_insert($row5[0],"Heat alarm");
-  $row6 = array_fill(0,26,"<td class='td_col"); array_walk($row6,'alternate'); my_insert($row6[0],"SMART status");
+  $row6 = array_fill(0,26,"<td class='td_col"); array_walk($row6,'alternate'); my_insert($row6[0],"Reallocated sectors");
   $row7 = array_fill(0,26,"<td class='td_col"); array_walk($row7,'alternate'); my_insert($row7[0],"Utilization");
   foreach ($disks as $disk) {
     $state = $disk['color'];
@@ -63,8 +63,11 @@ case 'disk':
       if ($disk['status']!='DISK_NP') $n = 1;
     break;
     case 'Data':
+      if ($disk['status']!='DISK_NP') $n = $i++;
+    break;
     case 'Cache':
       if ($disk['status']!='DISK_NP') $n = $i++;
+      if ($disk['name']!='cache') $disk['fsStatus']=='-';
     break;}
     if ($n>0) {
       switch ($state) {
@@ -85,7 +88,7 @@ case 'disk':
       break;}
       $temp = $disk['temp'];
       if ($temp>=$_POST['hot']) my_insert($row5[$n],"<span class='heat-img'><img src='$path/".($temp>=$_POST['max']?'max':'hot').".png'></span><span class='heat-text' style='display:none'>".my_temp($temp,$_POST['unit'])."</span>");
-      if ($disk['device'] && !strpos($state,'blink')) my_smart($row6[$n],$disk['device']);
+      if ($disk['device'] && !strpos($state,'blink')) my_smart($row6[$n],$disk['name']);
       my_usage($row7[$n],($n>1 && $disk['fsStatus']=='Mounted')?(round((1-$disk['fsFree']/$disk['sizeSb'])*100).'%'):'');
     }
   }
@@ -145,5 +148,6 @@ case 'shares':
 	 break;
    case 'afp':
    case 'nfs':
-   break;} // not available
+   // not available
+   break;}
 break;}
