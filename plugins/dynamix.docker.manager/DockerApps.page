@@ -145,8 +145,8 @@ $DockerTemplates = new DockerTemplates();
 <input type="hidden" id="#cmdStartStop" name="#command" value="" />
 </form>
 <form markdown="1" id="formAutostart" method="POST" action="/plugins/dynamix.docker.manager/update_cfg.php" target="progressFrame">
-<input type="hidden" name="#action" value="autostart" />
-<input type="hidden" name="#container" value="none" />
+<input type="hidden" name="action" value="autostart" />
+<input type="hidden" name="container" value="none" />
 </form>
 <div id="dialog-confirm" style="display:none;" title="Dialog Title"></div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
