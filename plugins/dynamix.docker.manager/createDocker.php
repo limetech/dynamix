@@ -557,7 +557,7 @@ if($_GET['xmlTemplate']){
   }
   .toggleMode {
     cursor: pointer;
-    color: #c3c3c3;
+    color: #a3a3a3;
     letter-spacing: 0px;
     padding: 0px;
     padding-right: 10px;
