@@ -1,3 +1,4 @@
+Cond="(pgrep('libvirtd')!==FALSE)"
 Menu="Tasks:70"
 Type="xmenu"
 Title="Virtual Machines"
