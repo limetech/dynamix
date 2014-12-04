@@ -114,7 +114,7 @@ function openWindow(cmd,title,height,width) {
   var top = (screen.height-height)/2;
   var left = (screen.width-width)/2;
   var options = 'resizeable=yes,scrollbars=yes,height='+height+',width='+width+',top='+top+',left='+left;
-  window.open(run, '', options);
+  window.open(run, 'log', options);
 }
 function showStatus(name) {
   $.post('/webGui/include/ProcessStatus.php',{name:name},function(status){$(".tabs").append(status);});
