@@ -23,9 +23,9 @@ div.jGrowl div.jGrowl-closer{padding:4px 0;cursor:pointer;font-size:11px;font-we
 .ui-dropdownchecklist-group{font-weight:normal;font-style:italic;padding:1px 9px 1px 8px;}
 .ui-dropdownchecklist-selector{height:22px;border:1px solid #404040;display:inline-block;cursor:pointer;padding:1px 9px 1px 8px;}
 .ui-dropdownchecklist-selector-wrapper{vertical-align:middle;font-size:0;}
-.ui-state-active{background:linear-gradient(#303030,#101010);}
+.ui-state-active{background:linear-gradient(#303030,#101010);background:-webkit-radial-gradient(#303030,#101010);}
 .ui-dropdownchecklist-dropcontainer{background:#000000;border:1px solid #404040;}
-.ui-state-disabled label{color:#404040;}
+.ui-state-disabled{background:linear-gradient(#202020,#101010);background:-webkit-radial-gradient(#202020,#101010);}
 .ui-dropdownchecklist-indent{padding-left:7px;}
 .ui-dropdownchecklist-text{color:#A0A0A0;line-height:22px;font-size:11px;}
 .ui-dropdownchecklist-item{}
