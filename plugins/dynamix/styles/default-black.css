@@ -73,8 +73,6 @@ select.narrow,input.narrow{width:50px;}
 #indexer td{padding:2px 0;}
 #indexer span{font-size:smaller;}
 #indexer div{margin-left:8px;}
-.logLine{font-family:bitstream;font-size:10px;color:#505050;margin:0 8px;padding:0;}
-.logLine.spacing{margin:10px;}
 .green{color:#6FA239;padding-left:5px;padding-right:5px;}
 .red{color:#CC0000;padding-left:5px;padding-right:5px;}
 .orange{color:#FF9900;padding-left:5px;padding-right:5px;}
