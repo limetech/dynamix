@@ -119,6 +119,10 @@ function openWindow(cmd,title,height,width) {
 function showStatus(name) {
   $.post('/webGui/include/ProcessStatus.php',{name:name},function(status){$(".tabs").append(status);});
 }
+function showFooter(data, id) {
+  if (id!==undefined) $('#'+id).remove();
+  $('#copyright').prepend(data);
+}
 function notifier() {
   $.post('/webGui/include/Notify.php',{cmd:'get'},function(data) {
     if (data) {
