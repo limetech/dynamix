@@ -53,7 +53,7 @@ case 'disk':
   $row3 = array_fill(0,26,"<td class='td_col"); array_walk($row3,'alternate'); my_insert($row3[0],"Unassigned");
   $row4 = array_fill(0,26,"<td class='td_col"); array_walk($row4,'alternate'); my_insert($row4[0],"Faulty");
   $row5 = array_fill(0,26,"<td class='td_col"); array_walk($row5,'alternate'); my_insert($row5[0],"Heat alarm");
-  $row6 = array_fill(0,26,"<td class='td_col"); array_walk($row6,'alternate'); my_insert($row6[0],"Reallocated sectors");
+  $row6 = array_fill(0,26,"<td class='td_col"); array_walk($row6,'alternate'); my_insert($row6[0],"SMART status");
   $row7 = array_fill(0,26,"<td class='td_col"); array_walk($row7,'alternate'); my_insert($row7[0],"Utilization");
   foreach ($disks as $disk) {
     $state = $disk['color'];
