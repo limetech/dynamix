@@ -127,7 +127,6 @@ table.array_status tr>td{text-align:left;white-space:nowrap;padding-left:12px;wi
 table.array_status tr>td+td{padding-left:2px;width:17%;}
 table.array_status tr>td+td+td{width:auto;}
 table.array_status td.line{border-top:1px solid #202020;}
-table.settings{padding:0;margin-left:-26px;}
 table.settings{padding-top:8px;}
 table.settings td:first-child{font-weight:bold;width:33%;padding-left:12px;}
 table.settings tr>td+td{font-size:11px;white-space:nowrap;}

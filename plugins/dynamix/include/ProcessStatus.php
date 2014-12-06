@@ -23,7 +23,7 @@ case '21':
   $pid = exec("lsof -i:21 -n -P | awk '/\(LISTEN\)/ {print $2}'");
   break;
 default:
-  $pid = exec("pidof -s -x $name");
+  $pid = exec("pidof -s -x '$name'");
   break;
 }
 if (isset($_POST['update'])) {$span = ""; $_span = "";}
