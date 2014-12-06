@@ -108,19 +108,6 @@ function assignment($disk) {
   $out .= "</select></form>";
   return $out;
 }
-function usage_color($limit,$free) {
-  global $display;
-  if ($display['text']<2) return '';
-  if (!$free) {
-    if ($limit>=$display['critical']) return 'redbar';
-    if ($limit>=$display['warning']) return 'orangebar';
-    return 'greenbar';
-  } else {
-    if ($limit<=100-$display['critical']) return 'redbar';
-    if ($limit<=100-$display['warning']) return 'orangebar';
-    return 'greenbar';
-  }
-}
 function render_used_and_free($disk) {
   global $display;
   if ($disk['name']=='parity' || $disk['fsStatus']=='-') {
