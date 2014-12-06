@@ -72,7 +72,7 @@ echo "<table class='tablesorter plugins".($display['tabs']==1?" shift'":"'")." i
 echo "<tr><th></th><th>Plugin</th><th>Author</th><th>Version</th><th>Status</th><th></th></tr>";
 echo "</thead><tbody>";
 
-$i = 0;
+$row = 0;
 foreach (glob("/var/log/plugins/*.plg", GLOB_NOSORT) as $plugin_link) {
   // only consider symlinks
   $plugin_file = @readlink($plugin_link);
@@ -127,7 +127,7 @@ foreach (glob("/var/log/plugins/*.plg", GLOB_NOSORT) as $plugin_link) {
   $action = strpos($plugin_file, "/usr/local/emhttp/plugins") !== 0 ? make_link("remove", basename($plugin_file)) : "built-in";
 
   // echo our plugin information
-  echo "<tr>";
+  echo "<tr class='tr_row".($row^=1)."'>";
   echo "<td style=\"vertical-align: top\"><p>{$link}</p></td>";
   echo "<td><span class=\"desc_readmore\" style=\"display:block\">{$desc}</span></td>";
   echo "<td>{$author}</td>";

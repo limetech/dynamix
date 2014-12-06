@@ -59,10 +59,17 @@ if ($var['shareUserExclude']) {
 ?>
 <script>
 $(function() {
-  presetSpace(document.share_edit.shareFloor);
   $("#s1").dropdownchecklist({emptyText:'All', width:300, explicitClose:'...close'});
   $("#s2").dropdownchecklist({emptyText:'None', width:300, explicitClose:'...close'});
+  setDiskList(document.share_edit.shareUseCache);
+  presetSpace(document.share_edit.shareFloor);
 });
+
+function setDiskList(cache) {
+  var onOff = cache=='only' ? 'disable' : 'enable';
+  $("#s1").dropdownchecklist(onOff);
+  $("#s2").dropdownchecklist(onOff);
+}
 
 function presetSpace(shareFloor) {
   var unit = ['KB','MB','GB','TB','PB'];
@@ -221,7 +228,7 @@ Excluded disk(s):
 
 <?if ($var['cacheActive']=="yes"):?>
 Use cache disk:
-: <select name="shareUseCache" size="1">
+: <select name="shareUseCache" size="1" onchange="setDiskList(this.value)">
   <?=mk_option($share['useCache'], "no", "No")?>
   <?=mk_option($share['useCache'], "yes", "Yes")?>
   <?=mk_option($share['useCache'], "only", "Only")?>

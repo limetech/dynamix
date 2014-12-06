@@ -120,7 +120,7 @@ $row=1;
       $total+=$entry['size'];
       $warn = substr($entry['disk'],-1)=="*" ? " style='color:orange'" : "";
 ?>    <td><div class="icon-file icon-<?=strtolower($entry['fext'])?>"></div></td>
-      <td<?=$warn?>><?=$entry['name']?></td>
+      <td<?=$warn?>><a href="<?=urlencode_path($dir.'/'.$entry['name']);?>" class="none"><?=$entry['name']?></a></td>
       <td<?=$warn?>><?=my_scale($entry['size'],$unit).' '.$unit?></td>
 <?  endif;?>
 <?if ($show_disk):?>

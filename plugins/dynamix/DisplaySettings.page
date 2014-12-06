@@ -19,11 +19,20 @@ $(function() {
   presetTime(document.display_settings);
 });
 function prepareDisplay(form) {
+  if (!form.critical.value | !form.warning.value) {
+    alert('An empty percentage value is not allowed!');
+    return false;
+  }
+  if (form.warning.value>form.critical.value) {
+    alert('Warning percentage must be lower than Critical percentage!');
+    return false;
+  }
   if (!form.number.value) form.number.value='.,';
   if (form.unit.selectedIndex==1) {
     form.hot.value = Math.round(5/9*(form.hot.value-32));
     form.max.value = Math.round(5/9*(form.max.value-32));
   }
+  return true;
 }
 function presetTime(form) {
   var system = form.date.selectedIndex==0;
@@ -65,21 +74,23 @@ function resetDisplay(form) {
   form.scale.selectedIndex = 0;
   form.align.selectedIndex = 2;
   form.tabs.selectedIndex = 0;
-  form.text.selectedIndex = 0;
-  form.view.selectedIndex = 0;
-  form.total.selectedIndex = 1;
-  form.spin.selectedIndex = 1;
-  form.usage.selectedIndex = 0;
-  form.icons.selectedIndex = 0;
-  form.banner.selectedIndex = 0;
+  form.text.value = 1;
+  form.critical.value = 90;
+  form.warning.value = 70;
+  form.view.value = '';
+  form.total.value = 1;
+  form.spin.value = 1;
+  form.usage.value = 0;
+  form.icons.value = 1;
+  form.banner.value = '';
   form.theme.selectedIndex = 0;
   form.refresh.selectedIndex = 1;
-  form.poll.selectedIndex = 0;
+  form.poll.value = 0;
   document.getElementsByName('#passive')[0].checked = false;
   $('#passive').show();
 }
 </script>
-<form markdown="1" name="display_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareDisplay(this)">
+<form markdown="1" name="display_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="return prepareDisplay(this)">
 <input type="hidden" name="#file" value="dynamix/dynamix.cfg"/>
 <input type="hidden" name="#section" value="display"/>
 
@@ -131,12 +142,6 @@ Page view:
   <?=mk_option($display['tabs'], "1", "Plain")?>
   </select>
 
-Used / Free columns:
-: <select name="text" size="1">
-  <?=mk_option($display['text'], "1", "Text")?>
-  <?=mk_option($display['text'], "0", "Graphic")?>
-  </select>
-
 Table view spacing:
 : <select name="view" size="1">
   <?=mk_option($display['view'], "", "Normal")?>
@@ -179,6 +184,19 @@ Dynamix color theme:
   <?=mk_option($display['theme'], "white", "White")?>
   <?=mk_option($display['theme'], "black", "Black")?>
   </select>
+
+Used / Free columns:
+: <select name="text" size="1">
+  <?=mk_option($display['text'], "0", "Text")?>
+  <?=mk_option($display['text'], "1", "Bar (gray)")?>
+  <?=mk_option($display['text'], "2", "Bar (color)")?>
+  </select>
+
+Critical disk utilization level (%):
+: <input type="text" name="critical" class="narrow" maxlength="2" value="<?=$display['critical']?>">
+
+Warning disk utilization level (%):
+: <input type="text" name="warning" class="narrow" maxlength="2" value="<?=$display['warning']?>">
 
 Temperature unit:
 : <select name="unit" size="1" onchange="presetTemp(this.form)">

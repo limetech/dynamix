@@ -70,10 +70,23 @@ function my_usage() {
     }
   }
   if ($var['fsNumMounted']>0) {
-    $usage = $arraysize ? 100-round(100*$arrayfree/$arraysize) : 0;
-    echo "<div class='usage-bar'><span style='width:{$usage}%'><span>{$usage}%</span></span></div>";
+    $used = $arraysize ? 100-round(100*$arrayfree/$arraysize) : 0;
+    echo "<div class='usage-bar'><span style='width:{$used}%' class='".usage_color($used,false)."'><span>{$used}%</span></span></div>";
   } else {
     echo "<div class='usage-bar'><span><center>".($var['fsState']=='Started'?'Maintenance':'off-line')."</center></span></div>";
+  }
+}
+function usage_color($limit,$free) {
+  global $display;
+  if ($display['text']<2) return '';
+  if (!$free) {
+    if ($limit>=$display['critical']) return 'redbar';
+    if ($limit>=$display['warning']) return 'orangebar';
+    return 'greenbar';
+  } else {
+    if ($limit<=100-$display['critical']) return 'redbar';
+    if ($limit<=100-$display['warning']) return 'orangebar';
+    return 'greenbar';
   }
 }
 function my_check($time) {
