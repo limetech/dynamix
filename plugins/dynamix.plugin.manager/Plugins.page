@@ -115,7 +115,7 @@ foreach (glob("/var/log/plugins/*.plg", GLOB_NOSORT) as $plugin_link) {
       $latest = plugin("version", $filename);
       if ($latest && strcmp($latest, $version) > 0) {
         if (plugin("changes", $filename))
-          $version_info .= "<br><a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=/tmp/plugins/".urlencode(basename($plugin_file, '.plg')).".txt','Release Notes Version $latest',490,430)\"><font color='red'>{$latest}</font>&nbsp;<img src='/plugins/dynamix.plugin.manager/icons/information.png' class='icon'></a>";
+          $version_info .= "<br><a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=/tmp/plugins/".urlencode(basename($plugin_file, '.plg')).".txt','Release Notes Version $latest',490,430)\"><font color='red'>{$latest}</font>&nbsp;<img src='/webGui/images/information.png' class='icon'></a>";
         else
           $version_info .= "<br><font color='red'>{$latest}</font>";
         $status_info = make_link("update", basename($plugin_file));
