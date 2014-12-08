@@ -10,7 +10,7 @@
  * all copies or substantial portions of the Software.
  */
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <title><?=$var['NAME']?>/<?=$myPage['name']?></title>
@@ -120,7 +120,7 @@ function showStatus(name) {
   $.post('/webGui/include/ProcessStatus.php',{name:name},function(status){$(".tabs").append(status);});
 }
 function showFooter(data, id) {
-  if (id!==undefined) $('#'+id).remove();
+  if (id !== undefined) $('#'+id).remove();
   $('#copyright').prepend(data);
 }
 function notifier() {
@@ -144,15 +144,8 @@ function notifier() {
     }
   });
 }
-function monitor() {
-  $.post('/webGui/include/Monitor.php',{hot:<?=$display['hot']?>,max:<?=$display['max']?>},function(data) {
-<?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
-    timers.monitor = setTimeout(monitor,<?=max(60000,abs($display['refresh']))?>);
-<?endif;?>
-  });
-}
 function watchdog() {
-  $.post('/webGui/include/Watchdog.php',{mode:<?=$display['refresh']?>,dot:'<?=substr($display['number'],0,1)?>'},function(data) {
+  $.post('/webGui/include/Watchdog.php',{mode:<?=$display['refresh']?>,dot:'<?=$display['number'][0]?>'},function(data) {
     if (data) {
       $.each(data.split('#'),function(k,v) {
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
@@ -182,12 +175,13 @@ $(function() {
 <?endif;?>
   updateTime();
   $.jGrowl.defaults.closer = false;
+<?if ($notify['entity'] & 1 == 1):?>
   $.post('/webGui/include/Notify.php',{cmd:'init'},function(x){timers.notifier = setTimeout(notifier,0);});
+<?endif;?>
   Shadowbox.setup('a.sb-enable', {modal:true});
 <?if ($confirm['warn']):?>
   $('form').find('select,input[type=text],input[type=password]').each(function() {$(this).change(function() {$.jGrowl('You have uncommitted form changes',{sticky:false,theme:'bottom',position:'bottom',life:5000});});});
 <?endif;?>
-  timers.monitor = setTimeout(monitor,100);
   timers.watchdog = setTimeout(watchdog,50);
 });
 
@@ -274,8 +268,7 @@ foreach ($pages as $page) {
     }
   }
   $text = Markdown($page['text']);
-  $file = @file_get_contents("{$page['root']}/{$page['name']}.php");
-  eval("?>$text$file");
+  eval("?>$text");
   if ($close) echo "</div></div>";
 }
 ?>

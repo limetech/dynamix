@@ -122,11 +122,11 @@ table.array_status tr>td{text-align:left;white-space:nowrap;padding-left:12px;wi
 table.array_status tr>td+td{padding-left:2px;width:17%;}
 table.array_status tr>td+td+td{width:auto;}
 table.array_status td.line{border-top:1px solid #202020;}
-table.settings{padding:0;margin-left:-26px;}
+table.settings{padding:0;}
 table.settings{padding-top:8px;}
 table.settings td:first-child{font-weight:bold;width:33%;padding-left:12px;}
 table.settings tr>td+td{font-size:11px;white-space:nowrap;}
-table.settings.shifted{padding:0;margin-left:-26px;}
+table.settings.shifted{padding:0;margin-left:-26px;margin-top:0;}
 table.settings.shifted td:first-child{font-size:12px;padding-left:0;}
 table.access_list{border-spacing:0;margin-top:10px;border:0;}
 table.access_list tr:first-child td{font-size:15px;vertical-align:middle;text-align:left;border-top-left-radius:5px;border-top-right-radius:5px;border:1px solid #101010;border-bottom:1px solid #282828;text-shadow:1px 1px 0 #000000;background:-webkit-radial-gradient(#101010,#202020);background:linear-gradient(#101010,#202020);}

@@ -1,0 +1,29 @@
+#!/usr/bin/php
+<?PHP
+/* Copyright 2014, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+$plugin = "/usr/local/sbin/plugin";
+$notify = "/usr/local/sbin/notify";
+
+exec("$plugin checkall >/dev/null");
+foreach (glob("/tmp/plugins/*.plg", GLOB_NOSORT) as $file) {
+  $plg = basename($file);
+  $old = exec("$plugin version '/var/log/plugins/$plg'");
+  $new = exec("$plugin version '$file'");
+  if ($new && strcmp($new, $old) > 0) {
+    $name = basename($file, '.plg');
+    exec("$notify -e 'Plugin: $name' -s 'New version available' -d '$old updated to $new' -x");
+  }
+  unlink($file);
+}
+exit(0);
+?>
