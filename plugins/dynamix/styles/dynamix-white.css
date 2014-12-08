@@ -58,9 +58,7 @@ table.tablesorter thead tr .header{background-repeat:no-repeat;background-positi
 table.tablesorter thead tr .headerSortUp{background-image:url(../images/sort-asc.png);}
 table.tablesorter thead tr .headerSortDown{background-image:url(../images/sort-desc.png);}
 table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {background-color:#E0E0E0;}
-table.tablesorter tbody tr{color:#303030;background-color:#FFF;}
-table.tablesorter tbody tr.tr_row0{background:#F8F8F8;}
-table.tablesorter tbody tr.tr_row1{background:#FFFFFF;}
+table.tablesorter tbody tr:nth-child(even){background-color:#F8F8F8;}
 table.tablesorter tbody tr.tr_last{background:#F0F0F0;border-top:1px solid #E8E8E8;border-bottom:1px solid #E8E8E8;}
 table.tablesorter tbody tr.tr_last td{padding:8px 20px 8px 6px;}
 table.tablesorter tbody td{padding:4px 20px 4px 6px;vertical-align:middle;text-align:justify;}

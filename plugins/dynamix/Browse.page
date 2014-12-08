@@ -83,7 +83,6 @@ $name_order=($column=='name'?$order:'A');
 $size_order=($column=='size'?$order:'A');
 $time_order=($column=='time'?$order:'A');
 $disk_order=($column=='disk'?$order:'A');
-$row=1;
 ?>
 <table id="indexer">
   <tr>
@@ -96,7 +95,7 @@ $row=1;
   <td><a href="<?='/'.$path.'?dir='.$dir.'&column=time&order='.$time_order?>">Last Modified</a></td>
   </tr>
 <?if ($dir):?>
-  <tr class="tr_row<?=$row^=1?>">
+  <tr>
   <td><div class="icon-dirup"></div></td>
   <td><a href="<?='/'.$path.'?dir='.safe_dirname($dir)?>">Parent Directory</a></td>
   <td></td>
@@ -108,7 +107,7 @@ $row=1;
 <?endif;?>
 <?$dirs=0; $files=0; $total=0;
   foreach ($list as $entry):
-?>  <tr class="tr_row<?=$row^=1?>">
+?>  <tr>
 <?  if ($entry['type']=='directory'):
       $dirs++;
       $warn = "";

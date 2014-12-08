@@ -46,9 +46,8 @@ $(function() {
 <thead><tr><td>Name</td><td>Comment</td><td>SMB</td><td>NFS</td><td>AFP</td><td>Size</td><td>Free</td><td>View</td></tr></thead>
 <tbody>
 <?
-$row = 0;
 foreach ($shares as $name => $share):
-?><tr class="tr_row<?=$row^=1?>">
+?><tr>
   <td><a href='#' class='info nohand' onclick='return false'>
   <img src='/webGui/images/<?=$share['color']?>.png' class='icon'><span>
   <img src='/webGui/images/green-on.png' class='icon'>All files on array<br>
@@ -66,7 +65,7 @@ foreach ($shares as $name => $share):
   </tr>
 <?foreach ($ssz[$share['name']] as $disk_name => $disk_size):
     if ($disk_name!="total"):
-?>  <tr class="share_status_size tr_row<?=$row^=1?>">
+?>  <tr class="share_status_size">
     <td><?=my_disk($disk_name)?>:</td>
     <td></td>
 	  <td></td>
