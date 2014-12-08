@@ -254,7 +254,7 @@ foreach ($pages as $page) {
     }
     $tab++;
   }
-  if ($page['Type']=='menu') {
+  if (isset($page['Type']) && $page['Type']=='menu') {
     $pgs = find_pages($page['name']);
     foreach ($pgs as $pg) {
       @eval("\$title=\"{$pg['Title']}\";");
