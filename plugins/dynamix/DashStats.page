@@ -317,7 +317,9 @@ endforeach;
 <?if ($var['shareSMBEnabled']=='yes'):?>
 <tbody class='smb'>
 <?
+$i = 0;
 foreach ($shares as $name => $share):
+  $i++;
   $list = truncate($name,12);
   $comment = truncate($share['comment'],28);
   $security = export_settings($var['shareSMBEnabled'], $sec[$name]);
@@ -349,7 +351,7 @@ foreach ($shares as $name => $share):
   $security = export_settings($var['shareNFSEnabled'], $sec_nfs[$name]);
   echo "<tr><td>$list</td><td>$comment</td><td>$security</td><td>-</td></tr>";
 endforeach;
-if (!count($shares)) echo "<tr><td colspan='5'><center>No shares present</center></td></tr>";
+if (!count($shares)) echo "<tr><td colspan='4'><center>No shares present</center></td></tr>";
 ?>
 </tbody>
 <?endif;?>
