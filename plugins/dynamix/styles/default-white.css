@@ -158,8 +158,8 @@ table.share_status.dash.line tbody td{border:1px solid #D0D0D0;padding:3px 4px 3
 table.share_status.dash tr.h48{height:48px;}
 table.share_status.dash td:first-child{width:25%;}
 table.share_status.m36{width:36%;margin-right:0;}
-table.share_status.m36 tr>td+td+td{width:12%;}
-table.share_status.m36 tr>td+td+td+td+td{width:8%;text-align:center;}
+table.share_status.m36 tr>td+td+td{width:14%;}
+table.share_status.m36 tr>td+td+td+td{width:8%;text-align:center;}
 table.share_status.m0{width:30%;}
 table.share_status.m0 tr>td+td+td{width:12%;text-align:center;}
 [name=arrayOps]{margin-top:12px;}

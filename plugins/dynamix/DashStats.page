@@ -65,6 +65,11 @@ function parity_status() {
 function truncate($string,$len) {
   return strlen($string) < $len ? $string : substr($string,0,$len-3).'...';
 }
+function export_settings($protocol,$share) {
+  if ($protocol!='yes' || $share['export']=='-') return "-";
+  if ($share['export']=='e') return ucfirst($share['security']);
+  return '<em>'.ucfirst($share['security']).'</em>';
+}
 ?>
 <script>
 var timer2,timer30;
@@ -294,7 +299,7 @@ endforeach;
 <?endif;?>
 </table>
 <table class='share_status dash m36'>
-<thead><tr><td colspan='4'>Shares List</td><td>
+<thead><tr><td colspan='3'>Shares List</td><td>
 <?if ($group):?>
 <select name="enter_share" size="1" onchange="changeMode(this.value);">
 <?if ($var['shareSMBEnabled']=='yes'):?>
@@ -308,18 +313,17 @@ endforeach;
 <?endif;?>
 </select>
 <?endif;?>
-</td></tr><tr><td>Name</td><td>Description</td><td>Security</td><td>Export</td><td>Streams</td></tr></thead>
+</td></tr><tr><td>Name</td><td>Description</td><td>Security</td><td>Streams</td></tr></thead>
 <?if ($var['shareSMBEnabled']=='yes'):?>
 <tbody class='smb'>
 <?
 foreach ($shares as $name => $share):
   $list = truncate($name,12);
   $comment = truncate($share['comment'],28);
-  $security = ucfirst($sec[$name]['security']);
-  $visible = $sec[$name]['export']=='-' ? 'No' : ($sec[$name]['export']=='e' ? 'Yes' : 'Hidden');
-  echo "<tr><td>$list</td><td>$comment</td><td>$security</td><td>$visible</td><td class='blue' id='share{$i}'>0</td></tr>";
+  $security = export_settings($var['shareSMBEnabled'], $sec[$name]);
+  echo "<tr><td>$list</td><td>$comment</td><td>$security</td><td class='blue' id='share{$i}'>0</td></tr>";
 endforeach;
-if (!count($shares)) echo "<tr><td colspan='5'><center>No shares present</center></td></tr>";
+if (!count($shares)) echo "<tr><td colspan='4'><center>No shares present</center></td></tr>";
 ?>
 </tbody>
 <?endif;?>
@@ -329,11 +333,10 @@ if (!count($shares)) echo "<tr><td colspan='5'><center>No shares present</center
 foreach ($shares as $name => $share):
   $list = truncate($name,12);
   $comment = truncate($share['comment'],28);
-  $security = ucfirst($sec_afp[$name]['security']);
-  $visible = $sec_afp[$name]['export']=='-' ? 'No' : ($sec_afp[$name]['export']=='e' ? 'Yes' : 'Hidden');
-  echo "<tr><td>$list</td><td>$comment</td><td>$security</td><td>$visible</td><td>-</td></tr>";
+  $security = export_settings($var['shareAFPEnabled'], $sec_afp[$name]);
+  echo "<tr><td>$list</td><td>$comment</td><td>$security</td><td>-</td></tr>";
 endforeach;
-if (!count($shares)) echo "<tr><td colspan='5'><center>No shares present</center></td></tr>";
+if (!count($shares)) echo "<tr><td colspan='4'><center>No shares present</center></td></tr>";
 ?>
 </tbody>
 <?endif;?>
@@ -343,9 +346,8 @@ if (!count($shares)) echo "<tr><td colspan='5'><center>No shares present</center
 foreach ($shares as $name => $share):
   $list = truncate($name,12);
   $comment = truncate($share['comment'],28);
-  $security = ucfirst($sec_nfs[$name]['security']);
-  $visible = $sec_nfs[$name]['export']=='-' ? 'No' : ($sec_nfs[$name]['export']=='e' ? 'Yes' : 'Hidden');
-  echo "<tr><td>$list</td><td>$comment</td><td>$security</td><td>$visible</td><td>-</td></tr>";
+  $security = export_settings($var['shareNFSEnabled'], $sec_nfs[$name]);
+  echo "<tr><td>$list</td><td>$comment</td><td>$security</td><td>-</td></tr>";
 endforeach;
 if (!count($shares)) echo "<tr><td colspan='5'><center>No shares present</center></td></tr>";
 ?>
@@ -357,9 +359,9 @@ if (!count($shares)) echo "<tr><td colspan='5'><center>No shares present</center
 foreach ($shares as $name => $share):
   $list = truncate($name,12);
   $comment = truncate($share['comment'],28);
-  echo "<tr><td>$list</td><td>$comment</td><td>-</td><td>-</td><td>-</td></tr>";
+  echo "<tr><td>$list</td><td>$comment</td><td>-</td><td>-</td></tr>";
 endforeach;
-if (!count($shares)) echo "<tr><td colspan='5'><center>No shares present</center></td></tr>";
+if (!count($shares)) echo "<tr><td colspan='4'><center>No shares present</center></td></tr>";
 ?>
 </tbody>
 <?endif;?>
