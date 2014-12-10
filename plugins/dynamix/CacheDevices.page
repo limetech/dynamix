@@ -36,7 +36,11 @@ cache_status();
 <table class="disk_status <?=($var['fsState']=='Stopped'?'small':$display['view']).' '.$display['align']?>">
 <thead><tr><td>Device</td><td>Identification</td><td>Temp.</td><td>Size</td><td>Used</td><td>Free</td><td>Reads</td><td>Writes</td><td>Errors</td><td>FS</td><td>View</td></tr></thead>
 <tbody id="cache_device">
-<?if (isset($disks['cache'])) echo "<tr class='tr_row0'><td colspan='10'>&nbsp;</td></tr>";?>
+<?
+foreach ($disks as $disk):
+  if ($disk['type']=='Cache') echo "<tr><td colspan='10'>&nbsp;</td></tr>";
+endforeach;
+?>
 </tbody>
 </table>
 

@@ -28,6 +28,10 @@ exec("awk '/^MemTotal/{print $2*1024/1.048576}' /proc/meminfo",$total);
 exec("dmidecode -q -t memory|awk '/Maximum Capacity:/{print $3,$4};/Size:/{total+=$2;unit=$3} END{print total,unit}'",$memory);
 exec("ifconfig -s|awk '/^(bond|eth|lo)/{print $1}'",$ports);
 
+function init_row($label) {
+  echo "<tr><td>$label</td>".str_repeat("<td></td>",25)."</tr>";
+}
+
 function parity_status() {
   global $var,$disks;
   if ($disks['parity']['status']=='DISK_NP') {
@@ -60,6 +64,11 @@ function parity_status() {
 }
 function truncate($string,$len) {
   return strlen($string) < $len ? $string : substr($string,0,$len-3).'...';
+}
+function export_settings($protocol,$share) {
+  if ($protocol!='yes' || $share['export']=='-') return "-";
+  if ($share['export']=='e') return ucfirst($share['security']);
+  return '<em>'.ucfirst($share['security']).'</em>';
 }
 ?>
 <script>
@@ -157,13 +166,13 @@ echo "<td>Array Status</td>".implode('',$row0);
 ?>
 </tr></thead>
 <tbody id='dash1'>
-<tr><td class='td_col0'>Active</td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td></tr>
-<tr><td class='td_col0'>Inactive</td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td></tr>
-<tr><td class='td_col0'>Unassigned</td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td></tr>
-<tr><td class='td_col0'>Faulty</td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td></tr>
-<tr><td class='td_col0'>Heat alarm</td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td></tr>
-<tr><td class='td_col0'>SMART status</td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td></tr>
-<tr><td class='td_col0'>Utilization</td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td><td class='td_col0'></td><td class='td_col1'></td></tr>
+<?init_row('Active')?>
+<?init_row('Inactive')?>
+<?init_row('Unassigned')?>
+<?init_row('Faulty')?>
+<?init_row('Heat alarm')?>
+<?init_row('SMART status')?>
+<?init_row('Utilization')?>
 </tbody>
 </table>
 <table class='share_status table'>
@@ -228,7 +237,6 @@ endforeach;
 <?if ($var['shareSMBEnabled']=='yes'):?>
 <tbody class='smb'>
 <?
-$i = 0;
 foreach ($users as $user):
   $list = truncate($user['name'],12);
   $desc = truncate($user['desc'],28);
@@ -241,7 +249,7 @@ foreach ($users as $user):
       if (strpos($sec[$share['name']]['readList'],$list)!==false) $read++;
     endforeach;
   endif;
-  echo "<tr class='tr_row".($i++%2)."'><td>$list</td><td>$desc</td><td>$write</td><td>$read</td></tr>";
+  echo "<tr><td>$list</td><td>$desc</td><td>$write</td><td>$read</td></tr>";
 endforeach;
 ?>
 </tbody>
@@ -249,7 +257,6 @@ endforeach;
 <?if ($var['shareAFPEnabled']=='yes'):?>
 <tbody class='afp'<?if ($var['shareSMBEnabled']=='yes'):?> style='display:none'<?endif;?>>
 <?
-$i = 0;
 foreach ($users as $user):
   $list = truncate($user['name'],12);
   $desc = truncate($user['desc'],28);
@@ -262,7 +269,7 @@ foreach ($users as $user):
       if (strpos($sec_afp[$share['name']]['readList'],$list)!==false) $read++;
     endforeach;
   endif;
-  echo "<tr class='tr_row".($i++%2)."'><td>$list</td><td>$desc</td><td>$write</td><td>$read</td></tr>";
+  echo "<tr><td>$list</td><td>$desc</td><td>$write</td><td>$read</td></tr>";
 endforeach;
 ?>
 </tbody>
@@ -270,12 +277,11 @@ endforeach;
 <?if ($var['shareNFSEnabled']=='yes'):?>
 <tbody class='nfs'<?if ($var['shareSMBEnabled']=='yes'||$var['shareAFPEnabled']=='yes'):?> style='display:none'<?endif;?>>
 <?
-$i = 0;
 foreach ($users as $user):
   $list = truncate($user['name'],12);
   $desc = truncate($user['desc'],28);
   $write = '-'; $read = '-';
-  echo "<tr class='tr_row".($i++%2)."'><td>$list</td><td>$desc</td><td>$write</td><td>$read</td></tr>";
+  echo "<tr><td>$list</td><td>$desc</td><td>$write</td><td>$read</td></tr>";
 endforeach;
 ?>
 </tbody>
@@ -283,18 +289,17 @@ endforeach;
 <?if (!$group):?>
 <tbody>
 <?
-$i = 0;
 foreach ($users as $user):
   $list = truncate($user['name'],12);
   $desc = truncate($user['desc'],28);
-  echo "<tr class='tr_row".($i++%2)."'><td>$list</td><td>$desc</td><td>-</td><td>-</td></tr>";
+  echo "<tr><td>$list</td><td>$desc</td><td>-</td><td>-</td></tr>";
 endforeach;
 ?>
 </tbody>
 <?endif;?>
 </table>
 <table class='share_status dash m36'>
-<thead><tr><td colspan='4'>Shares List</td><td>
+<thead><tr><td colspan='3'>Shares List</td><td>
 <?if ($group):?>
 <select name="enter_share" size="1" onchange="changeMode(this.value);">
 <?if ($var['shareSMBEnabled']=='yes'):?>
@@ -308,62 +313,57 @@ endforeach;
 <?endif;?>
 </select>
 <?endif;?>
-</td></tr><tr><td>Name</td><td>Description</td><td>Security</td><td>Export</td><td>Streams</td></tr></thead>
+</td></tr><tr><td>Name</td><td>Description</td><td>Security</td><td>Streams</td></tr></thead>
 <?if ($var['shareSMBEnabled']=='yes'):?>
 <tbody class='smb'>
 <?
 $i = 0;
 foreach ($shares as $name => $share):
+  $i++;
   $list = truncate($name,12);
   $comment = truncate($share['comment'],28);
-  $security = ucfirst($sec[$name]['security']);
-  $visible = $sec[$name]['export']=='-' ? 'No' : ($sec[$name]['export']=='e' ? 'Yes' : 'Hidden');
-  echo "<tr class='tr_row".($i++%2)."'><td>$list</td><td>$comment</td><td>$security</td><td>$visible</td><td class='blue' id='share{$i}'>0</td></tr>";
+  $security = export_settings($var['shareSMBEnabled'], $sec[$name]);
+  echo "<tr><td>$list</td><td>$comment</td><td>$security</td><td class='blue' id='share{$i}'>0</td></tr>";
 endforeach;
-if (!$i) echo "<tr class='tr_row0'><td colspan='5'><center>No shares present</center></td></tr>";
+if (!count($shares)) echo "<tr><td colspan='4'><center>No shares present</center></td></tr>";
 ?>
 </tbody>
 <?endif;?>
 <?if ($var['shareAFPEnabled']=='yes'):?>
 <tbody class='afp'<?if ($var['shareSMBEnabled']=='yes'):?> style='display:none'<?endif;?>>
 <?
-$i = 0;
 foreach ($shares as $name => $share):
   $list = truncate($name,12);
   $comment = truncate($share['comment'],28);
-  $security = ucfirst($sec_afp[$name]['security']);
-  $visible = $sec_afp[$name]['export']=='-' ? 'No' : ($sec_afp[$name]['export']=='e' ? 'Yes' : 'Hidden');
-  echo "<tr class='tr_row".($i++%2)."'><td>$list</td><td>$comment</td><td>$security</td><td>$visible</td><td>-</td></tr>";
+  $security = export_settings($var['shareAFPEnabled'], $sec_afp[$name]);
+  echo "<tr><td>$list</td><td>$comment</td><td>$security</td><td>-</td></tr>";
 endforeach;
-if (!$i) echo "<tr class='tr_row0'><td colspan='5'><center>No shares present</center></td></tr>";
+if (!count($shares)) echo "<tr><td colspan='4'><center>No shares present</center></td></tr>";
 ?>
 </tbody>
 <?endif;?>
 <?if ($var['shareNFSEnabled']=='yes'):?>
 <tbody class='nfs'<?if ($var['shareSMBEnabled']=='yes'||$var['shareAFPEnabled']=='yes'):?> style='display:none'<?endif;?>>
 <?
-$i = 0;
 foreach ($shares as $name => $share):
   $list = truncate($name,12);
   $comment = truncate($share['comment'],28);
-  $security = ucfirst($sec_nfs[$name]['security']);
-  $visible = $sec_nfs[$name]['export']=='-' ? 'No' : ($sec_nfs[$name]['export']=='e' ? 'Yes' : 'Hidden');
-  echo "<tr class='tr_row".($i++%2)."'><td>$list</td><td>$comment</td><td>$security</td><td>$visible</td><td>-</td></tr>";
+  $security = export_settings($var['shareNFSEnabled'], $sec_nfs[$name]);
+  echo "<tr><td>$list</td><td>$comment</td><td>$security</td><td>-</td></tr>";
 endforeach;
-if (!$i) echo "<tr class='tr_row0'><td colspan='5'><center>No shares present</center></td></tr>";
+if (!count($shares)) echo "<tr><td colspan='4'><center>No shares present</center></td></tr>";
 ?>
 </tbody>
 <?endif;?>
 <?if (!$group):?>
 <tbody>
 <?
-$i = 0;
 foreach ($shares as $name => $share):
   $list = truncate($name,12);
   $comment = truncate($share['comment'],28);
-  echo "<tr class='tr_row".($i++%2)."'><td>$list</td><td>$comment</td><td>-</td><td>-</td><td>-</td></tr>";
+  echo "<tr><td>$list</td><td>$comment</td><td>-</td><td>-</td></tr>";
 endforeach;
-if (!$i) echo "<tr class='tr_row0'><td colspan='5'><center>No shares present</center></td></tr>";
+if (!count($shares)) echo "<tr><td colspan='4'><center>No shares present</center></td></tr>";
 ?>
 </tbody>
 <?endif;?>

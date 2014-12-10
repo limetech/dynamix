@@ -39,10 +39,9 @@ array_status();
 <thead><tr><td>Device</td><td>Identification</td><td>Temp.</td><td>Size</td><td>Used</td><td>Free</td><td>Reads</td><td>Writes</td><td>Errors</td><td>FS</td><td>View</td></tr></thead>
 <tbody id="array_devices">
 <?
-$row = 0;
 foreach ($disks as $disk):
   if ($disk['name']=='flash' or $disk['name']=='cache') continue;
-  echo "<tr class='tr_row".($row^=1)."'><td colspan='10'>&nbsp;</td></tr>";
+  echo "<tr><td colspan='10'>&nbsp;</td></tr>";
 endforeach;
 if ($display['total']) echo "<tr class='tr_last'><td colspan='10'>&nbsp;</td></tr>";
 ?>

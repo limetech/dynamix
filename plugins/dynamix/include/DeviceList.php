@@ -20,7 +20,7 @@ $devs    = parse_ini_file("state/devs.ini",true);
 $disks   = parse_ini_file("state/disks.ini",true);
 $screen  = '/tmp/screen_buffer';
 
-$temps=0; $counts=0; $fsSize=0; $fsUsed=0; $fsFree=0; $reads=0; $writes=0; $errors=0; $row=0;
+$temps=0; $counts=0; $fsSize=0; $fsUsed=0; $fsFree=0; $reads=0; $writes=0; $errors=0;
 
 extract(parse_plugin_cfg("dynamix",true));
 
@@ -132,8 +132,7 @@ function render_used_and_free($disk) {
   }
 }
 function array_offline($disk) {
-  global $row;
-  echo "<tr class='tr_row".($row^=1)."'>";
+  echo "<tr>";
   switch ($disk['status']) {
   case "DISK_NP":
     echo "<td>".device_info($disk)."</td>";
@@ -265,7 +264,7 @@ function array_offline($disk) {
   echo "</tr>";
 }
 function array_online($disk) {
-  global $display, $temps, $counts, $fsSize, $fsUsed, $fsFree, $reads, $writes, $errors, $row;
+  global $display, $temps, $counts, $fsSize, $fsUsed, $fsFree, $reads, $writes, $errors;
   if (is_numeric($disk['temp'])) {
     $temps += $disk['temp'];
     $counts++;
@@ -279,7 +278,7 @@ function array_online($disk) {
     $fsFree += $disk['fsFree'];
     $fsUsed += $disk['fsUsed'];
   }
-  echo "<tr class='tr_row".($row^=1)."'>";
+  echo "<tr>";
   switch ($disk['status']) {
   case "DISK_NP":
 // Suppress empty slots to keep device list short
@@ -406,7 +405,7 @@ break;
 case 'flash':
   $disk = &$disks['flash'];
   $disk['fsUsed'] = $disk['size'] - $disk['fsFree'];
-  echo "<tr class='tr_row1'>";
+  echo "<tr>";
   echo "<td>".device_info($disk)."</td>";
   echo "<td>".device_desc($disk)."</td>";
   echo "<td>*</td>";
@@ -446,7 +445,7 @@ case 'open':
     $dev['color'] = exec("hdparm -C /dev/{$dev['device']}|grep 'standby'") ? 'blue-blink' : 'blue-on';
     $dev['temp'] = $dev['color']=='blue-on' ? exec("smartctl -A /dev/{$dev['device']}|awk '/Temperature_Celsius/{print \$10}'") : '*';
     $dev['status'] = $status;
-    echo "<tr class='tr_row".($row^=1)."'>";
+    echo "<tr>";
     echo "<td>".device_info($dev)."</td>";
     echo "<td>".device_desc($dev)."</td>";
     echo "<td>".my_temp($dev['temp'])."</td>";

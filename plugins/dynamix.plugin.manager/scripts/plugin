@@ -1,9 +1,9 @@
 #!/usr/bin/php
-<?php
+<?PHP
 // Copyright 2014, Lime Technology LLC.
 // License: GPLv2 only
 //
-// Program updates made by Bergware International (October 2014)
+// Program updates made by Bergware International (December 2014)
 $usage = <<<EOF
 Process plugin files.
 
@@ -112,7 +112,7 @@ pluginURL - OPTIONAL but MANDATORY if you want "check for updates" to work with 
 system - OPTIONAL
   If present the plugin is considered a system plugin and is installed in '/boot/plugins'.
   User plugins get installed in '/boot/config/plugins', which is the default.
-  
+
 configfile - MUST BE OMITTED for ordinary plugins and MANDATORY for virtual machine appliance plugins.
   This is the absolute file name of where the Xen configuration file will end up in the unRAID server.
 
@@ -182,11 +182,16 @@ function plugin($method, $plugin_file, &$error) {
     return true;
   }
 
+  // release notes
+  if ($method == 'changes') {
+    if (!$xml->CHANGES) return false;
+    return file_put_contents("/tmp/plugins/".basename($plugin_file, '.plg').".txt", trim($xml->CHANGES))>0;
+  }
+
   // check if $method is an attribute
   if (!in_array($method, $methods)) {
     foreach ($xml->attributes() as $key => $value) {
-      if ($method == $key)
-	    return $value;
+      if ($method == $key) return $value;
     }
     $error = "$method attribute not present";
     return false;

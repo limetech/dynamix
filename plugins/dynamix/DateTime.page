@@ -37,7 +37,7 @@ Current date and time:
 : <?=my_time($var['currTime'])?>
 
 Time zone:
-: <select name="timeZone" size="1">
+: <select name="timeZone" size="1" style="width:320px">
   <?if (file_exists("/boot/config/timezone")):?>
   <?=mk_option($var['timeZone'], "custom", "(custom)")?>
   <?endif; ?>

@@ -23,10 +23,13 @@ usort($files, create_function('$a,$b', 'return filemtime($b)-filemtime($a);'));
 function askConfirmation() {
   return confirm('This will delete all notification files!\n\nAre you sure?');
 }
+$(function() {
+  $('#archive_table').tablesorter({headers:{5:{sorter:false}}});
+});
 </script>
 
-<table class="share_status small<?if ($display['tabs']==0):?> shift<?endif;?>">
-<thead><tr><td>Time</td><td>Event</td><td>Subject</td><td>Description</td><td style='width:7%'>Importance</td><td style='width:5%;text-align:center'>Delete<?if (count($files)>1):?> <a href='/webGui/include/DeleteLogFile.php?log=<?=$log?>' target='progressFrame' onclick='return askConfirmation()' title='Delete all notifications'>[x]</a><?endif;?></td></tr></thead>
+<table class="tablesorter shift<?if ($display['tabs']==0):?>2<?endif;?>" id="archive_table">
+<thead><tr><th>Time</th><th>Event</th><th>Subject</th><th>Description</th><th style='width:7%'>Importance</th><th style='width:5%;text-align:center'>Delete<?if (count($files)>1):?> <a href='/webGui/include/DeleteLogFile.php?log=<?=$log?>' target='progressFrame' onclick='return askConfirmation()' title='Delete all notifications'>[x]</a><?endif;?></th></tr></thead>
 <tbody>
 <?
 foreach ($files as $file) {

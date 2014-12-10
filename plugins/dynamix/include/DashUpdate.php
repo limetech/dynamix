@@ -13,14 +13,8 @@
 <?
 $path = '/webGui/images';
 
-function alternate(&$td,$index) {
-  $td = "$td".($index%2)."'></td>";
-}
-function my_replace(&$source,$string) {
-  $source = str_replace('-',$string,$source);
-}
 function my_insert(&$source,$string) {
-  $source = substr_replace($source,$string,20,0);
+  $source = substr_replace($source,$string,4,0);
 }
 function my_smart(&$source,$name) {
   global $path;
@@ -48,13 +42,13 @@ case 'disk':
   $i = 2;
   $disks = parse_ini_file("state/disks.ini",true);
   $devs  = parse_ini_file("state/devs.ini",true);
-  $row1 = array_fill(0,26,"<td class='td_col"); array_walk($row1,'alternate'); my_insert($row1[0],"Active");
-  $row2 = array_fill(0,26,"<td class='td_col"); array_walk($row2,'alternate'); my_insert($row2[0],"Inactive");
-  $row3 = array_fill(0,26,"<td class='td_col"); array_walk($row3,'alternate'); my_insert($row3[0],"Unassigned");
-  $row4 = array_fill(0,26,"<td class='td_col"); array_walk($row4,'alternate'); my_insert($row4[0],"Faulty");
-  $row5 = array_fill(0,26,"<td class='td_col"); array_walk($row5,'alternate'); my_insert($row5[0],"Heat alarm");
-  $row6 = array_fill(0,26,"<td class='td_col"); array_walk($row6,'alternate'); my_insert($row6[0],"SMART status");
-  $row7 = array_fill(0,26,"<td class='td_col"); array_walk($row7,'alternate'); my_insert($row7[0],"Utilization");
+  $row1 = array_fill(0,26,"<td></td>"); my_insert($row1[0],"Active");
+  $row2 = array_fill(0,26,"<td></td>"); my_insert($row2[0],"Inactive");
+  $row3 = array_fill(0,26,"<td></td>"); my_insert($row3[0],"Unassigned");
+  $row4 = array_fill(0,26,"<td></td>"); my_insert($row4[0],"Faulty");
+  $row5 = array_fill(0,26,"<td></td>"); my_insert($row5[0],"Heat alarm");
+  $row6 = array_fill(0,26,"<td></td>"); my_insert($row6[0],"SMART status");
+  $row7 = array_fill(0,26,"<td></td>"); my_insert($row7[0],"Utilization");
   foreach ($disks as $disk) {
     $state = $disk['color'];
     $n = 0;
