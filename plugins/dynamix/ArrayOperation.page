@@ -519,7 +519,7 @@ $('.tabs').append("<span class='status vhshift'><input type='button' value='Refr
 <?endif;?>
 </table>
 </form>
-<?if (isset($disks['cache']) && $var['fsState']=="Started"):?>
+<?if (is_dir("/mnt/cache") && is_dir("/mnt/user0") && $var['fsState']=="Started"):?>
 <form name="mover_schedule" method="POST" action="/update.htm" target="progressFrame">
 <table class="array_status">
   <tr><td colspan="3"></td></tr>

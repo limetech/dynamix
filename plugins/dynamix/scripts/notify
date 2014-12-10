@@ -56,6 +56,8 @@ function ssmtp_init($ssmtp) {
   $conf   = $array;
   $conf[] = "# Generated";
   $conf[] = "Root={$ssmtp['root']}";
+  $conf[] = "rewriteDomain={$ssmtp['rewriteDomain']}";
+  $conf[] = "FromLineOverride=YES";
   $conf[] = "Mailhub={$ssmtp['server']}:{$ssmtp['port']}";
   $conf[] = "UseTLS={$ssmtp['UseTLS']}";
   $conf[] = "UseSTARTTLS={$ssmtp['UseSTARTTLS']}";
