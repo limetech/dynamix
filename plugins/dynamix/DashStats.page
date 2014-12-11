@@ -162,6 +162,9 @@ foreach ($disks as $disk):
   break;
   endswitch;
 endforeach;
+foreach ($devs as $dev):
+  $row0[$i++] = "<td>{$dev['device']}</td>";
+endforeach;
 echo "<td>Array Status</td>".implode('',$row0);
 ?>
 </tr></thead>
