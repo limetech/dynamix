@@ -102,7 +102,7 @@ case 'sys':
     echo "{$cpu}%#{$mem}%";
 break;
 case 'cpu':
-  exec("awk '/^cpu MHz/ {print $4*1\" MHz\"}' /proc/cpuinfo",$speeds);
+  exec("awk '/^cpu MHz/ {printf\"%4.0f MHz\\n\", $4}' /proc/cpuinfo",$speeds);
   echo implode('#',$speeds);
 break;
 case 'port':
@@ -135,7 +135,7 @@ case 'shares':
    $names = explode(',',$_POST['names']);
    switch ($_POST['com']) {
    case 'smb':
-     exec("lsof /mnt/user /mnt/disk* 2>/dev/null | awk '/^smbd/ && $0!~/\.Apple(B|ouble)/ && $5==\"REG\"'|awk -F/ '{print $4}'",$lsof);
+     exec("lsof /mnt/user /mnt/disk* 2>/dev/null | awk '/^smbd/ && $0!~/\.AppleD(B|ouble)/ && $5==\"REG\"'|awk -F/ '{print $4}'",$lsof);
      $counts = array_count_values($lsof); $count = array();
      foreach ($names as $name) $count[] =  isset($counts[$name]) ? $counts[$name] : 0;
      echo implode('#',$count);
