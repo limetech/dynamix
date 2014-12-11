@@ -92,7 +92,7 @@ function changeView(item) {
   clearTimeout(timer30);
   update30();
 }
-function update5() {
+function update3() {
   var tag = $('.smb').is(':visible') ? 'smb' : $('.afp').is(':visible') ? 'afp' : $('.nfs').is(':visible') ? 'nfs' : '';
 <?if ($var['fsState']=='Started'):?>
   $.post('<?=$url?>',{cmd:'shares',com:tag,names:'<?=$names?>'},function(data) {
@@ -105,7 +105,7 @@ function update5() {
   $.post('<?=$url?>',{cmd:'cpu'},function(data) {
     if (data) $.each(data.split('#'),function(k,v) {$('#cpu'+k).html(v);});
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
-    setTimeout(update5,<?=max(abs($display['refresh']),5000)?>);
+    setTimeout(update3,<?=max(abs($display['refresh']),3000)?>);
 <?endif;?>
   });
 }
@@ -116,8 +116,8 @@ function update30() {
   });
   $.post('<?=$url?>',{cmd:'disk',hot:'<?=$display['hot']?>',max:'<?=$display['max']?>',unit:'<?=$display['unit']?>'},function(data) {
     if (data) $('#dash1').html(data);
-	  clearTimeout(timer2);
-	  timer2 = setTimeout(heatAlarm,2000);
+    clearTimeout(timer2);
+    timer2 = setTimeout(heatAlarm,2000);
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
     timer30 = setTimeout(update30,<?=max(abs($display['refresh']),30000)?>);
 <?endif;?>
@@ -139,7 +139,7 @@ function heatAlarm() {
   }
   timer2 = setTimeout(heatAlarm,2000);
 }
-$(update5);
+$(update3);
 $(update60);
 $(update30);
 <?if ($display['refresh']==0 || ($display['refresh']<0 && $var['mdResync']>0)):?>

@@ -102,7 +102,7 @@ case 'sys':
     echo "{$cpu}%#{$mem}%";
 break;
 case 'cpu':
-  exec("awk '/^cpu MHz/ {print $4*1\" MHz\"}' /proc/cpuinfo",$speeds);
+  exec("awk '/^cpu MHz/ {printf\"%4.0f MHz\\n\", $4}' /proc/cpuinfo",$speeds);
   echo implode('#',$speeds);
 break;
 case 'port':
