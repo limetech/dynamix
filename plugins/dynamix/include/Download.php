@@ -14,12 +14,19 @@
 $root = $_POST['root'];
 switch ($_POST['cmd']) {
 case 'save':
-  $file = $_POST['file'];
-  $zip = basename($file).'.zip';
-  exec("zip -qj $root/$zip $file");
+  $log = $_POST['file'];
+  $zip = basename($log).'.zip';
+  if (isset($_POST['unix'])) {
+    exec("zip -qj $root/$zip $log");
+  } else {
+    $tmp = '/var/tmp/'.basename($log).'.txt';
+    exec("todos <$log >$tmp");
+    exec("zip -qj $root/$zip $tmp");
+    unlink($tmp);
+  }
   echo "/$zip";
   break;
 case 'del':
-  exec("rm -f $root/{$_POST['zip']}");
+  @unlink("$root/{$_POST['zip']}");
   break;}
 ?>
