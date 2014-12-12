@@ -47,6 +47,11 @@ exec("dmidecode -q -t 2|awk -F: '/Manufacturer:/ {print $2}; /Product Name:/ {pr
 echo "{$product[0]} - {$product[1]}";
 ?>
 </div>
+<div><span style="width:90px;display:inline-block"><strong>Flash GUID:</strong></span>
+<?
+echo $var['flashGUID'];
+?>
+</div>
 <div><span style="width:90px; display:inline-block"><strong>CPU:</strong></span>
 <?
 function write($number) {
