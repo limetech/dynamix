@@ -336,20 +336,26 @@ function my_clock($time) {
   return plus($days,'day',($hour|$mins)==0).plus($hour,'hour',$mins==0).plus($mins,'minute',true);
 }
 function show_totals($text) {
-  global $display, $temps, $counts, $fsSize, $fsUsed, $fsFree, $reads, $writes, $errors;
+  global $var, $display, $temps, $counts, $fsSize, $fsUsed, $fsFree, $reads, $writes, $errors;
   echo "<tr class='tr_last'>";
   echo "<td><img src='/webGui/images/sum.png' class='icon'>Total</td>";
   echo "<td>$text</td>";
   echo "<td>".($counts>0?my_temp(round($temps/$counts, 1)):'*')."</td>";
-  echo "<td>".my_scale($fsSize*1024, $unit)." $unit</td>";
-  if (!$display['text']) {
-    echo "<td>".my_scale($fsUsed*1024, $unit)." $unit</td>";
-    echo "<td>".my_scale($fsFree*1024, $unit)." $unit</td>";
+  if ($var['startMode'] != "Maintenance") {
+    echo "<td>".my_scale($fsSize*1024, $unit)." $unit</td>";
+    if (!$display['text']) {
+      echo "<td>".my_scale($fsUsed*1024, $unit)." $unit</td>";
+      echo "<td>".my_scale($fsFree*1024, $unit)." $unit</td>";
+    } else {
+      $free = round(100*$fsFree/$fsSize);
+      $used = 100-$free;
+      echo "<td><div class='usage-disk'><span style='margin:0;width:{$used}%' class='".usage_color($used,false)."'><span>".my_scale($fsUsed*1024, $unit)." $unit</span></span></div></td>";
+      echo "<td><div class='usage-disk'><span style='margin:0;width:{$free}%' class='".usage_color($free,true)."'><span>".my_scale($fsFree*1024, $unit)." $unit</span></span></div></td>";
+    }
   } else {
-    $free = round(100*$fsFree/$fsSize);
-    $used = 100-$free;
-    echo "<td><div class='usage-disk'><span style='margin:0;width:{$used}%' class='".usage_color($used,false)."'><span>".my_scale($fsUsed*1024, $unit)." $unit</span></span></div></td>";
-    echo "<td><div class='usage-disk'><span style='margin:0;width:{$free}%' class='".usage_color($free,true)."'><span>".my_scale($fsFree*1024, $unit)." $unit</span></span></div></td>";
+    echo "<td>-</td>";
+    echo "<td>-</td>";
+    echo "<td>-</td>";
   }
   echo "<td>".my_number($reads)."</td>";
   echo "<td>".my_number($writes)."</td>";
