@@ -43,12 +43,12 @@
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-		function domain_new($name, $desc, $media, $drivers, $vcpus, $features, $mem, $maxmem, $clock, $nic, $disk, $usb, $usbtab, $shares, $persistent=true) {
+		function domain_new($domain, $media, $features, $nic, $disk, $usb, $usbtab, $shares) {
 			$uuid = $this->domain_generate_uuid();
 			$emulator = $this->get_default_emulator();
 
-			$mem *= 1024;
-			$maxmem *= 1024;
+			$mem = $domain['mem'] * 1024;
+			$maxmem = $domain['maxmem'] * 1024;
 
 			$fs = '';
 			for ($i = 0; $i < sizeof($features); $i++) {
@@ -60,8 +60,8 @@
 					$usbx = explode(',', $v);	
 					$usbstr .="<hostdev mode='subsystem' type='usb' managed='no'>
                           <source>
-                             <vendor id='".$usbx[0]."'/>
-                             <product id='".$usbx[1]."'/>
+                             <vendor id='0x".$usbx[0]."'/>
+                             <product id='0x".$usbx[1]."'/>
                           </source>
                        </hostdev>";
 				}
@@ -71,28 +71,20 @@
 			if (!empty($disk['image'])) {
 				$diskstr = "<disk type='file' device='disk'>
 						<driver name='qemu' type='{$disk['driver']}' />
-                                                <source file='".base64_decode( $disk['image'])."'/>
-                                                <target bus='{$disk['bus']}' dev='{$disk['dev']}' />
+                                                <source file='{$disk['image']}'/>
+                                                <target bus='virtio' dev='{$disk['dev']}' />
                                          </disk>";
 			}
 			$mediastr = '';
 			if (!empty($media)) {
 				$mediastr = "<disk type='file' device='cdrom'>
 						<driver name='qemu'/>
-						<source file='".base64_decode($media)."'/>
+						<source file='$media'/>
 						<target dev='hdc' bus='ide'/>
 						<readonly/>
 					</disk>";
 			}
 			$driverstr = '';
-			if (!empty($drivers)) {
-				$driverstr = "<disk type='file' device='cdrom'>
-						<driver name='qemu' type='raw'/>
-						<source file='".base64_decode($drivers)."'/>
-						<target dev='hdd' bus='ide'/>
-						<readonly/>
-					</disk>";
-			}
 			$netstr = '';
 			if (!empty($nic)) {
 				$model = '';
@@ -115,20 +107,22 @@
 			}
 
 			$xml = "<domain type='kvm'>
-				<name>$name</name>
+				<name>{$domain['name']}</name>
 				<currentMemory>$mem</currentMemory>
 				<memory>$maxmem</memory>
 				<uuid>$uuid</uuid>
-				<description>$desc</description>
+				<description>{$domain['desc']}</description>
 				<os>
 					<type arch='x86_64'>hvm</type>
 					<boot dev='cdrom'/>
 					<boot dev='hd'/>
 				</os>
 				<features>
-				$fs
+					<acpi/>
+    				<apic/>
+					$fs
 				</features>
-				<clock offset=\"$clock\">
+				<clock offset=\"{$domain['clock']}\">
 				  	<timer name='rtc' tickpolicy='catchup'/>
 					<timer name='pit' tickpolicy='delay'/>
 					<timer name='hpet' present='yes'/>
@@ -136,12 +130,11 @@
 				<on_poweroff>destroy</on_poweroff>
 				<on_reboot>restart</on_reboot>
 				<on_crash>restart</on_crash>
-				<vcpu>$vcpus</vcpu>
+				<vcpu>{$domain['vcpus']}</vcpu>
 				<devices>
 					<emulator>$emulator</emulator>
 					$diskstr
 					$mediastr
-					$driverstr				
 					$sharestr
 					$netstr
                $usbtabstr
@@ -151,7 +144,7 @@
 					</graphics>
 					<console type='pty'/>
 					<video>
-						<model type='cirrus'/>
+						<model type='vmvga'/>
 					</video>
 					$usbstr
 				</devices>
@@ -160,21 +153,23 @@
 			if (!$tmp)
 				return $this->_set_last_error();
 
-			if ($persistent) {
+			if ($domain['persistent']) {
 				$xml = "<domain type='kvm'>
-					<name>$name</name>
+					<name>{$domain['name']}</name>
 					<currentMemory>$mem</currentMemory>
 					<memory>$maxmem</memory>
 					<uuid>$uuid</uuid>
-					<description>$desc</description>
+					<description>{$domain['desc']}</description>
 					<os>
 						<type arch='x86_64'>hvm</type>
 						<boot dev='hd'/>
 					</os>
 					<features>
-					$fs
+						<acpi/>
+   	 				<apic/>
+						$fs
 					</features>
-					<clock offset=\"$clock\">
+					<clock offset=\"{$domain['clock']}\">
 					  	<timer name='rtc' tickpolicy='catchup'/>
 						<timer name='pit' tickpolicy='delay'/>
 						<timer name='hpet' present='yes'/>
@@ -182,11 +177,10 @@
 					<on_poweroff>destroy</on_poweroff>
 					<on_reboot>restart</on_reboot>
 					<on_crash>restart</on_crash>
-					<vcpu>$vcpus</vcpu>
+					<vcpu>{$domain['vcpus']}</vcpu>
 					<devices>
 						<emulator>$emulator</emulator>
 						$diskstr
-						$driverstr				
 						$sharestr
 						$netstr
 						$usbtabstr
@@ -196,7 +190,7 @@
 						</graphics>
 						<console type='pty'/>
 						<video>
-							<model type='cirrus'/>
+							<model type='vmvga'/>
 						</video>
 					</devices>
 					</domain>";
@@ -205,11 +199,6 @@
 			}
 			else
 				return $tmp;
-		}
-
-		function create_image($image, $size, $driver) {
-			$tmp = libvirt_image_create($this->conn, $image, $size, $driver);
-         return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
 		function remove_image($image, $ignore_error_codes=false ) {
@@ -282,13 +271,6 @@
 				return $this->_set_last_error();
 		}
 
-      function domain_disk_add($domain, $img, $dev, $type='scsi', $driver='raw') {
-         $domain = $this->get_domain_object($domain);
-			$img = base64_decode($img);
-         $tmp = libvirt_domain_disk_add($domain, $img, $dev, $type, $driver);
-        return ($tmp) ? $tmp : $this->_set_last_error();
-      }
-
 		function domain_change_vcpus($domain, $num) {
 			$domain = $this->get_domain_object($domain);
 
@@ -308,76 +290,6 @@
 
 			$tmp = libvirt_domain_change_boot_devices($domain, $first, $second);
 			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function domain_get_screenshot($domain) {
-			$dom = $this->get_domain_object($domain);
-
-			$tmp = libvirt_domain_get_screenshot($dom, $this->get_hostname(), 8 );
-			if (Graphics::isBMPStream($tmp)) {
-				$gc = new Graphics();
-				$fn = tempnam("/tmp", "php-virt-control.tmp");
-				$fn2 = tempnam("/tmp", "php-virt-control.tmp");
-
-				$fp = fopen($fn, "wb");
-				fputs($fp, $tmp);
-				fclose($fp);
-
-				unset($tmp);
-				if ($gc->ConvertBMPToPNG($fn, $fn2) == false) {
-					unlink($fn);
-					return false;
-				}
-
-				$fp = fopen($fn2, "rb");
-				$tmp = fread($fp, filesize($fn2));
-				fclose($fp);
-
-				unlink($fn2);
-				unlink($fn);
-				unset($gc);
-			}
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function domain_get_screenshot_thumbnail($domain, $w=120) {
-			$screen = $this->domain_get_screenshot($domain);
-			$imgFile = tempnam("/tmp", "libvirt-php-tmp-resize-XXXXXX");;
-
-			if ($screen) {
-				$fp = fopen($imgFile, "wb");
-				fwrite($fp, $screen);
-				fclose($fp);
-			}
-
-			if (file_exists($imgFile) && $screen) {
-				list($width, $height) = getimagesize($imgFile); 
-				$h = ($height / $width) * $w;
-			} else {
-				$w = $h = 1;
-				//$h = $w * (3 / 4.5);
-			}
-
-			$new = imagecreatetruecolor($w, $h);
-			if ($screen) {
-				$img = imagecreatefrompng($imgFile);
-				imagecopyresampled($new,$img,0,0,0,0, $w,$h,$width,$height);
-				imagedestroy($img);
-			}
-			else {
-				$c = imagecolorallocate($new, 255, 255, 255);
-				imagefill($new, 0, 0, $c);
-			}
-
-			imagepng($new, $imgFile);
-			imagedestroy($new);
-
-			$fp = fopen($imgFile, "rb");
-			$data = fread($fp, filesize($imgFile));
-			fclose($fp);
-
-			unlink($imgFile);
-			return $data;
 		}
 
                 function domain_get_screen_dimensions($domain) {
@@ -437,23 +349,6 @@
 				$this->macbyte(($seed * rand()) % 256).':'.
 				$this->macbyte(($seed * rand()) % 256).':'.
 				$this->macbyte(($seed * rand()) % 256);
-		}
-
-		function domain_nic_add($domain, $mac, $network, $model=false) {
-			$dom = $this->get_domain_object($domain);
-
-			if ($model == 'default')
-				$model = false;
-
-			$tmp = libvirt_domain_nic_add($dom, $mac, $network, $model);
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function domain_nic_remove($domain, $mac) {
-			$dom = $this->get_domain_object($domain);
-
-			$tmp = libvirt_domain_nic_remove($dom, $mac);
-			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
 		function get_connection() {
@@ -719,171 +614,6 @@
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-		function get_storagepools() {
-			$tmp = libvirt_list_storagepools($this->conn);
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function storagepool_define_xml($xml) {
-			$tmp = libvirt_storagepool_define_xml($this->conn, $xml, false);
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function storagepool_undefine($pool) {
-			if (!is_resource($pool))
-				$pool = $this->get_storagepool_res($pool);
-			if (!$pool)
-				return false;			
-			$tmp = libvirt_storagepool_undefine($pool);
-			return ($tmp) ? $tmp : $this->_set_last_error();
- 		}
-
-		function storagepool_create($pool, $location) {
-					if (!is_dir($location))
-						mkdir($location);
-						$uuid = $this->storagepool_generate_uuid();
-						$xml = "<pool type='dir'>
-							<name>$pool</name>
-							<uuid>$uuid</uuid>
-							<capacity unit='bytes'>0</capacity>
-							<allocation unit='bytes'>0</allocation>
-							<available unit='bytes'>0</available>
-							<source>
-							</source>
-							<target>
-								<path>$location</path>
-									<permissions>
-										<mode>0755</mode>
-										<owner>-1</owner>
-										<group>-1</group>
-									</permissions>
-							</target>
-						</pool>";
-					$res = $this->storagepool_define_xml($xml);
-			$tmp = libvirt_storagepool_create($res);
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function storagepool_start($pool) {
-			if (!is_resource($pool))
-				$pool = $this->get_storagepool_res($pool);
-			if (!$pool)
-				return false;
-			$tmp = libvirt_storagepool_create($pool);
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function storagepool_destroy($pool) {
-			if (!is_resource($pool))
-				$pool = $this->get_storagepool_res($pool);
-			if (!$pool)
-				return false;
-			$tmp = libvirt_storagepool_destroy($pool);
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function storagepool_is_active($pool) {
-			if (!is_resource($pool))
-				$pool = $this->get_storagepool_res($pool);
-			if (!$pool)
-				return false;
-			$tmp = libvirt_storagepool_is_active($pool);
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function storagepool_refresh($pool) {
-			if (!is_resource($pool))
-				$pool = $this->get_storagepool_res($pool);
-			if (!$pool)
-				return false;			
-			$tmp = libvirt_storagepool_refresh($pool, false);
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function storagepool_get_autostart($pool) {
-			if (!is_resource($pool))
-				$pool = $this->get_storagepool_res($pool);
-			if (!$pool)
-				return false;
-			$tmp = libvirt_storagepool_get_autostart($pool);
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function storagepool_set_autostart($pool,$flags) {
-			if (!is_resource($pool))
-				$pool = $this->get_storagepool_res($pool);
-			if (!$pool)
-				return false;
-			$tmp = libvirt_storagepool_set_autostart($pool, $flags);
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function get_storagepool_res($res) {
-			if ($res == false)
-				return false;
-			if (is_resource($res))
-				return $res;
-
-			$tmp = libvirt_storagepool_lookup_by_name($this->conn, $res);
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function get_storagepool_info($name) {
-			if (!($res = $this->get_storagepool_res($name)))
-				return false;
-
-			$path = libvirt_storagepool_get_xml_desc($res, '/pool/target/path');
-			if (!$path)
-				return $this->_set_last_error();
-			$perms = libvirt_storagepool_get_xml_desc($res, '/pool/target/permissions/mode');
-			if (!$perms)
-				return $this->_set_last_error();
-			$otmp1 = libvirt_storagepool_get_xml_desc($res, '/pool/target/permissions/owner');
-			if (!is_string($otmp1))
-				return $this->_set_last_error();
-			$otmp2 = libvirt_storagepool_get_xml_desc($res, '/pool/target/permissions/group');
-			if (!is_string($otmp2))
-				return $this->_set_last_error();
-			$tmp = libvirt_storagepool_get_info($res);
-			if (libvirt_storagepool_is_active($res))
-				$tmp['volume_count'] = sizeof( libvirt_storagepool_list_volumes($res) );
-			$tmp['active'] = libvirt_storagepool_is_active($res);
-			$tmp['path'] = $path;
-			$tmp['permissions'] = $perms;
-			$tmp['id_user'] = $otmp1;
-			$tmp['id_group'] = $otmp2;
-
-			return $tmp;
-		}
-
-		function storagepool_get_volume_information($pool, $name=false) {
-			if (!is_resource($pool))
-				$pool = $this->get_storagepool_res($pool);
-			if (!$pool)
-				return false;
-
-			$out = array();
-			$tmp = libvirt_storagepool_list_volumes($pool);
-			for ($i = 0; $i < sizeof($tmp); $i++) {
-				if (($tmp[$i] == $name) || ($name == false)) {
-					$r = libvirt_storagevolume_lookup_by_name($pool, $tmp[$i]);
-					$out[$tmp[$i]] = libvirt_storagevolume_get_info($r);
-					$out[$tmp[$i]]['path'] = libvirt_storagevolume_get_path($r);
-					unset($r);
-				}
-			}
-
-			return $out;
-		}
-
-		function storagevolume_delete($path) {
-			$vol = libvirt_storagevolume_lookup_by_path($this->conn, $path);
-			if (!libvirt_storagevolume_delete($vol))
-				return $this->_set_last_error();
-
-			return true;
-		}
-
 		function translate_volume_type($type) {
 			if ($type == 1)
 				return 'Block device';
@@ -927,10 +657,9 @@
 
 			return $size;
 		}
+		
 		//create a storage volume and add file extension
-		function storagevolume_create($pool, $name, $capacity, $allocation, $format) {
-			$pool = $this->get_storagepool_res($pool);
-
+		function volume_create($name, $capacity, $allocation, $format) {
 			$capacity = $this->parse_size($capacity);
 			$allocation = $this->parse_size($allocation);
 			($format != 'raw' ) ? $ext = $format : $ext = 'img';
@@ -986,137 +715,6 @@
 			}
 
 			return true;
-		}
-
-		function network_change_xml($network, $xml) {
-			$net = $this->get_network_res($network);
-
-			if (!($old_xml = libvirt_network_get_xml_desc($net, NULL))) {
-				return $this->_set_last_error();
-			}
-			if (!libvirt_network_undefine($net)) {
-				return $this->_set_last_error();
-			}
-			if (!libvirt_network_define_xml($this->conn, $xml)) {
-				$this->last_error = libvirt_get_last_error();
-				libvirt_network_define_xml($this->conn, $old_xml);
-				return false;
-			}
-
-			return true;
-		}
-
-		function network_new($name, $ipinfo, $dhcpinfo=false, $forward=false, $forward_dev=false, $bridge=false) {
-			$uuid = $this->network_generate_uuid();
-			if (!$bridge) {
-				$maxid = -1;
-				$nets = $this->get_networks();
-				for ($i = 0; $i < sizeof($nets); $i++) {
-					$bridge = $this->get_network_bridge($nets[$i]);
-					if ($bridge) {
-						$tmp = explode('br', $bridge);
-						$id = (int)$tmp[1];
-
-						if ($id > $maxid)
-							$maxid = $id;
-					}
-				}
-
-				$newid = $maxid + 1;
-				$bridge = 'virbr'.$newid;
-			}
-
-			$forwards = '';
-			if ($forward) {
-				if (!$forward_dev)
-					$forwards = "<forward mode='$forward' />";
-				else
-					$forwards = "<forward mode='$forward' dev='$forward_dev' />";
-			}
-
-			/* array('ip' => $ip, 'netmask' => $mask) has been passed */
-			if (is_array($ipinfo)) {
-				$ip = $ipinfo['ip'];
-				$mask = $ipinfo['netmask'];
-			}
-			else {
-				/* CIDR definition otherwise, like 192.168.122.0/24 */
-				$tmp = explode('/', $ipinfo);
-				$ipc = explode('.', $tmp[0]);
-				$ipc[3] = (int)$ipc[3] + 1;
-				$ip = implode('.', $ipc);
-
-				$bin = '';
-				for ($i = 0; $i < $tmp[1]; $i++)
-					$bin .= '1';
-
-				$tmp = bindec($bin);
-				$ipc[0] = $tmp         % 256;
-				$ipc[1] = ($tmp >> 8 ) % 256;
-				$ipc[2] = ($tmp >> 16) % 256;
-				$ipc[3] = ($tmp >> 24) % 256;
-
-				$mask = implode('.', $ipc);
-			}
-
-			$dhcps = '';
-			if ($dhcpinfo) {
-				/* For definition like array('start' => $dhcp_start, 'end' => $dhcp_end) */
-				if (is_array($dhcpinfo)) {
-					$dhcp_start = $dhcpinfo['start'];
-					$dhcp_end = $dhcpinfo['end'];
-				}
-				else {
-					/* Definition like '$dhcp_start - $dhcp_end' */
-					$tmp = explode('-', $dhcpinfo);
-					$dhcp_start = Trim($tmp[0]);
-					$dhcp_end = Trim($tmp[1]);
-				}
-
-				$dhcps = "<dhcp>
-                                                <range start='$dhcp_start' end='$dhcp_end' />
-                                        </dhcp>";
-			}
-
-			$xml = "<network>
-				<name>$name</name>
-				<uuid>$uuid</uuid>
-				$forwards
-				<bridge name='$bridge' stp='on' delay='0' />
-				<ip address='$ip' netmask='$mask'>
-					$dhcps
-				</ip>
-				</network>";
-
-			return $this->network_define($xml);
-		}
-
-		function network_define($xml) {
-			$tmp = libvirt_network_define_xml($this->conn, $xml);
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function network_undefine($network) {
-			$net = $this->get_network_res($network);
-			$tmp = libvirt_network_undefine($net);
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function translate_storagepool_state($state) {
-			switch ($state) {
-				case 0: return 'Not running';
-					break;
-				case 1: return 'Building pool';
-					break;
-				case 2: return 'Running';
-					break;
-				case 3: return 'Running degraded';
-					break;
-				case 4: return 'Running but inaccessible';
-					break;
-			}
-
-			return 'Unknown';
 		}
 
 		function get_domains() {
@@ -1459,10 +1057,6 @@
 			return $uuid;
 		}
 
-		function storagepool_generate_uuid() {
-			return $this->generate_uuid();
-		}
-
 		function network_generate_uuid() {
 			/* TODO: Fix after virNetworkLookupByUUIDString is exposed
 				 to libvirt-php to ensure UUID uniqueness */
@@ -1516,6 +1110,14 @@
 
 		function domain_get_vnc_port($domain) {
 			$tmp = $this->get_xpath($domain, '//domain/devices/graphics/@port', false);
+			$var = (int)$tmp[0];
+			unset($tmp);
+
+			return $var;
+		}
+
+		function domain_get_ws_port($domain) {
+			$tmp = $this->get_xpath($domain, '//domain/devices/graphics/@websocket', false);
 			$var = (int)$tmp[0];
 			unset($tmp);
 
@@ -1782,6 +1384,7 @@
 			return $this->domain_define($xml);
 		}
 
+//set domain description 
 		function domain_set_description($domain, $desc) {
 			$domain = $this->get_domain_object($domain);
 
@@ -1922,39 +1525,10 @@
 
 			return $this->domain_define($xml);
 		}
-
-//create dropbox options for storage devices
-		function storagepools_get_iso($iso=true) {
-			echo '<option value="" selected>none selected</option>';
-			  $pools = $this->get_storagepools();
-			  if($pools) {
-				for ($i = 0; $i < sizeof($pools); $i++) {
-					$pname = $pools[$i];
-					$info = $this->get_storagepool_info($pname);
-					if ($info['volume_count'] > 0) {
-						$tmp = $this->storagepool_get_volume_information($pools[$i]);
-						$tmp_keys = array_keys($tmp);
-						for ($ii = 0; $ii < sizeof($tmp); $ii++) {
-							$vname = $tmp_keys[$ii];
-							$vpath = $tmp[$vname]['path'];
-							$ext = pathinfo($vpath, PATHINFO_EXTENSION);
-							if ($iso) {
-								if ($ext == "iso" | $ext == "ISO")
-									echo '<option value="'.base64_encode($vpath).'">'.$vname.'</option>';
-							}else{
-								if ($ext != "iso" && $ext != "ISO")
-									echo '<option value="'.base64_encode($vpath).'">'.$vname.'</option>';
-							}
-						}
-					}
-				}	
-			}
-		}
-		
+	
 //change cdrom media
 		function domain_change_cdrom($domain, $iso, $dev) {
 			$domain = $this->get_domain_object($domain);
-			$iso = base64_decode($iso);
    		$tmp = libvirt_domain_update_device($domain, "<disk type='file' device='cdrom'><driver name='qemu' type='raw'/><source file=".escapeshellarg($iso)."/><target dev='$dev' bus='ide'/><readonly/></disk>", VIR_DOMAIN_DEVICE_MODIFY_CONFIG);
 			if ($this->domain_is_active($domain))   		
    			libvirt_domain_update_device($domain, "<disk type='file' device='cdrom'><driver name='qemu' type='raw'/><source file=".escapeshellarg($iso)."/><target dev='$dev' bus='ide'/><readonly/></disk>", VIR_DOMAIN_DEVICE_MODIFY_LIVE);
