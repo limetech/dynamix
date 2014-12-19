@@ -10,7 +10,7 @@ Tabs="true"
 <script type="text/javascript" src="/plugins/dynamix.kvm.manager/scripts/kvm.js"></script>
 
 <?php
-   //error_reporting(0);
+   error_reporting(0);
    require('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php');
 	$uri = 'qemu:///system';
    $lv = new Libvirt($uri, null, null, false);
@@ -115,7 +115,7 @@ Tabs="true"
       }
 		elseif ($subaction == 'memory-change') {
 			$msg = $lv->domain_set_memory($domName, $_GET['memory']*1024) ? 
-				"Domain $domName vcpu number has been successfully changed to ".$_GET['memory']." MiB" : 
+				"Domain $domName vcpu number has been successfully changed to ".$_GET['memory']." MiB" :
 				"Error: ".$lv->get_last_error();
 		}
 		elseif ($subaction == 'vcpu-change') {
@@ -160,7 +160,7 @@ Tabs="true"
   	      				<th class='header'><i class='glyphicon glyphicon-th-list'></i></th>
   		          		<th class='header'><a href='#' onClick='window.location.reload()'>Name</a></th>
    	         	   <th class='header'>vCPU</th>
-      	        		<th class='header'>RAM (MiB)</th>
+							<th class='header'>RAM (MiB)</th>
          	     		<th class='header'>Hard Drive(s)</th>
               		 	<th class='header'>ID/VNC Port</th>
               			<th class='header'>Auto</th>
@@ -242,7 +242,7 @@ Tabs="true"
 			/* display memory*/         
      		if ($state == 'shutoff') {
      			echo '<select name="memory" onchange="location = this.options[this.selectedIndex].value;" title="define the amount memory">';
-				echo "<option value=''>*****</option>"; 
+				echo "<option value=''>*****</option>";
         		for ($ii = 1; $ii <= ($maxmem*2); $ii++) {
         			$mem2 = ($ii*512);
          		echo "<option value='?subaction=memory-change&amp;uuid=$uuid&amp;memory=$mem2'";
@@ -316,8 +316,8 @@ Tabs="true"
 					$dev = $tmp[$ii]['device'];
 					echo "<tr>
 						   <td>".basename($disk)."</td>
-           				<td>$type</td>
-                 	   <td title='Click to change Dev Name'><form method='post' action='?subaction=domain-diskdev&amp;uuid=$uuid&amp;dev=$dev' /><span class='diskdev' style='width:30px'>
+							<td>$type</td>
+           				<td title='Click to change Dev Name'><form method='post' action='?subaction=domain-diskdev&amp;uuid=$uuid&amp;dev=$dev' /><span class='diskdev' style='width:30px'>
 								<span class='text' ><a href='#'> $dev </a></span>
   									<input class='input' type='text' style='width:36px' name='diskdev' value='$dev' val='diskdev' hidden />
 								</span></form>
