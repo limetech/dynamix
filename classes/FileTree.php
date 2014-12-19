@@ -18,7 +18,7 @@
 // Program update made by Bergware International (October 2014)
 
 $path = urldecode($_POST['dir']);
-$filter = $_POST['filter'];
+$filters = $_POST['filter'];
 
 if (!file_exists($path)) return; // skip invalid path
 $files = scandir($path);
@@ -33,7 +33,9 @@ foreach ($files as $file) {
 foreach ($files as $file) {
   if (is_file($path.$file)) {
     $ext = pathinfo($file, PATHINFO_EXTENSION);
-    if (!$filter|$ext==$filter) echo "<li class='file ext_$ext'><a href='#' rel='".htmlentities($path.$file)."'>".htmlentities($file)."</a></li>";
+    foreach ($filters as $filter) {
+   	 if (!$filter|$ext==$filter) echo "<li class='file ext_$ext'><a href='#' rel='".htmlentities($path.$file)."'>".htmlentities($file)."</a></li>";
+	  }
   }
 }
 echo "</ul>";
