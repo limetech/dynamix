@@ -18,7 +18,7 @@ else {
 		<table class="tablesorter" style="margin-top:-33px"><thead><th colspan="2"><b><?=$method;?> Domain <?=$domName;?> XML Description</b></th></thead>
 			<tr>
 				<td>
-					<textarea autofocus <?=$readonly?> name="xmldesc" rows="15" cols="50"><?=$xml;?></textarea>
+					<textarea autofocus <?=$readonly?> name="xmldesc" rows="15" cols="100%"><?=$xml;?></textarea>
 				</td>
 			</tr>
 			<tr>
