@@ -10,7 +10,7 @@ Tabs="true"
 <script type="text/javascript" src="/plugins/dynamix.kvm.manager/scripts/kvm.js"></script>
 
 <?php
-   //error_reporting(0);
+   error_reporting(0);
    require('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php');
 	$uri = 'qemu:///system';
    $lv = new Libvirt($uri, null, null, false);
@@ -147,7 +147,8 @@ Tabs="true"
 	echo "<script>clearHistory();</script>";
 	}
    $doms = $lv->get_domains();
-   sort($doms);
+   if(is_array($doms))
+   	sort($doms);
    $domkeys = array_keys($doms);
 	echo "<table class='tablesorter kvm".($display['tabs']==1?" shift'":"'")." id='kvm_table'>
   	      			<tr>
