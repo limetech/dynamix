@@ -43,21 +43,20 @@
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-		function domain_new($domain, $media, $features, $nic, $disk, $usb, $usbtab, $shares) {
+		function domain_new($domain, $media, $nic, $disk, $usb, $shares) {
 			$uuid = $this->domain_generate_uuid();
+			$name = $domain['name'];
 			$emulator = $this->get_default_emulator();
-
+			$arch = ($domain['arch']) ? 'x86_64' : 'i686';
+			$pae = '';
+			if ($arch == 'i686')
+				$pae = '<pae/>';
 			$mem = $domain['mem'] * 1024;
 			$maxmem = $domain['maxmem'] * 1024;
-
-			$fs = '';
-			for ($i = 0; $i < sizeof($features); $i++) {
-				$fs .= '<'.$features[$i].' />';
-			}
 			$usbstr = '';
 			if (!empty($usb)) {
 				foreach($usb as $i => $v){
-					$usbx = explode(',', $v);	
+					$usbx = explode(':', $v);	
 					$usbstr .="<hostdev mode='subsystem' type='usb' managed='no'>
                           <source>
                              <vendor id='0x".$usbx[0]."'/>
@@ -66,12 +65,27 @@
                        </hostdev>";
 				}
 			}
-			($usbtab) ? $usbtabstr = "<input type='tablet' bus='usb'/>" : $usbtabstr = '';
+			//disk settings
 			$diskstr = '';
-			if (!empty($disk['image'])) {
+			if (!empty($disk['image']) | !empty($disk['new'])) {
+				if (!$disk['settings']) {
+					$img = $disk['image'];
+					$cmd = "qemu-img info $img | grep 'file format:'";
+					$driver = trim(shell_exec($cmd));
+					$driver = ltrim($driver, 'file format: ');
+				}else {
+					$img = $disk['new'].$name."/"; 
+					if (!is_dir($img))
+						mkdir($img);
+					$driver = $disk['driver'];
+					$img .= $name.'.'.$driver;
+					$size = $disk['size'];
+					$cmd = "qemu-img create -q -f $driver $img $size";
+					shell_exec($cmd);
+				}
 				$diskstr = "<disk type='file' device='disk'>
-						<driver name='qemu' type='{$disk['driver']}' />
-                                                <source file='{$disk['image']}'/>
+						<driver name='qemu' type='$driver' />
+                                                <source file='$img'/>
                                                 <target bus='virtio' dev='{$disk['dev']}' />
                                          </disk>";
 			}
@@ -87,14 +101,11 @@
 			$driverstr = '';
 			$netstr = '';
 			if (!empty($nic)) {
-				$model = '';
-				if ($nic['type'] != 'default')
-					$model = "<model type='{$nic['type']}'/>";
 				$netstr = "
 					    <interface type='bridge'>
 					      <mac address='{$nic['mac']}'/>
 					      <source bridge='{$nic['net']}'/>
-					      $model
+					      <model type='virtio'/>
 					    </interface>";
 			}
 			$sharestr = '';
@@ -107,20 +118,20 @@
 			}
 
 			$xml = "<domain type='kvm'>
-				<name>{$domain['name']}</name>
+				<name>$name</name>
 				<currentMemory>$mem</currentMemory>
 				<memory>$maxmem</memory>
 				<uuid>$uuid</uuid>
 				<description>{$domain['desc']}</description>
 				<os>
-					<type arch='x86_64'>hvm</type>
+					<type arch='$arch'>hvm</type>
 					<boot dev='cdrom'/>
 					<boot dev='hd'/>
 				</os>
 				<features>
 					<acpi/>
-    				<apic/>
-					$fs
+					<apic/>
+					$pae
 				</features>
 				<clock offset=\"{$domain['clock']}\">
 				  	<timer name='rtc' tickpolicy='catchup'/>
@@ -137,7 +148,7 @@
 					$mediastr
 					$sharestr
 					$netstr
-               $usbtabstr
+               <input type='tablet' bus='usb'/>
 					<input type='mouse' bus='ps2'/>
 					<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0'>
 						<listen type='address' address='0.0.0.0'/>
@@ -155,19 +166,19 @@
 
 			if ($domain['persistent']) {
 				$xml = "<domain type='kvm'>
-					<name>{$domain['name']}</name>
+					<name>$name</name>
 					<currentMemory>$mem</currentMemory>
 					<memory>$maxmem</memory>
 					<uuid>$uuid</uuid>
 					<description>{$domain['desc']}</description>
 					<os>
-						<type arch='x86_64'>hvm</type>
+						<type arch='$arch'>hvm</type>
 						<boot dev='hd'/>
 					</os>
 					<features>
 						<acpi/>
-   	 				<apic/>
-						$fs
+						<apic/>
+						$pae
 					</features>
 					<clock offset=\"{$domain['clock']}\">
 					  	<timer name='rtc' tickpolicy='catchup'/>
@@ -181,9 +192,10 @@
 					<devices>
 						<emulator>$emulator</emulator>
 						$diskstr
+						$mediastr
 						$sharestr
 						$netstr
-						$usbtabstr
+						<input type='tablet' bus='usb'/>
 						<input type='mouse' bus='ps2'/>
 						<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0'>
 							<listen type='address' address='0.0.0.0'/>
@@ -269,20 +281,6 @@
 			}
 			if ($this->conn==false)
 				return $this->_set_last_error();
-		}
-
-		function domain_change_vcpus($domain, $num) {
-			$domain = $this->get_domain_object($domain);
-
-			$tmp = libvirt_domain_change_vcpus($domain, $num);
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function domain_change_memory_allocation($domain, $memory, $maxmem) {
-			$domain = $this->get_domain_object($domain);
-
-			$tmp = libvirt_domain_change_memory($domain, $memory, $maxmem);
-			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
 		function domain_change_boot_devices($domain, $first, $second) {
@@ -1532,14 +1530,6 @@
    		$tmp = libvirt_domain_update_device($domain, "<disk type='file' device='cdrom'><driver name='qemu' type='raw'/><source file=".escapeshellarg($iso)."/><target dev='$dev' bus='ide'/><readonly/></disk>", VIR_DOMAIN_DEVICE_MODIFY_CONFIG);
 			if ($this->domain_is_active($domain))   		
    			libvirt_domain_update_device($domain, "<disk type='file' device='cdrom'><driver name='qemu' type='raw'/><source file=".escapeshellarg($iso)."/><target dev='$dev' bus='ide'/><readonly/></disk>", VIR_DOMAIN_DEVICE_MODIFY_LIVE);
-		return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-//change disk for domain
-		function domain_change_disk($domain, $type, $img, $dev) {
-			$domain = $this->get_domain_object($domain);
-			$img = base64_decode($img);
-   		$tmp = libvirt_domain_update_device($domain, "<disk type='file' device='disk'><driver name='qemu' type='$type'/><source file=".escapeshellarg($img)."/><target dev='$dev' bus='virtio'/></disk>", VIR_DOMAIN_DEVICE_MODIFY_CONFIG);
 		return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 	}
