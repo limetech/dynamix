@@ -5,7 +5,7 @@ Title="Create VM"
 $network_cfg = parse_ini_file( "/boot/config/network.cfg" );
 if (array_key_exists('sent', $_POST)) {
 
-	$tmp = $lv->domain_new($_POST['domain'], $_POST['media'], $_POST['nic'], $_POST['disk'], $_POST['usb'], $_POST['shares']);
+	$tmp = $lv->domain_new($_POST['domain'], $_POST['media'], $_POST['nic'], $_POST['disk'], $_POST['usb'], $_POST['usbtab'],$_POST['shares']);
 	if (!$tmp){
 		echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font class=\"red\">Error: ".$lv->get_last_error()."</font>');}); </script>";
 	} else {
@@ -29,7 +29,9 @@ if (array_key_exists('sent', $_POST)) {
 
 <form method="POST">
 
-<table id="form-table" class="tablesorter" style="margin-top:-21px"><thead><th colspan="2">Create New Virtual Machine From Template</th></thead>
+<table class="tablesorter" id="form-table" style="margin-top:-21px;margin-left:0px"><thead><th colspan="2">Create New Virtual Machine From Template</th></thead>
+</table>
+<table style="margin-top:-5px;margin-left:0px">
 <tr>
     <td align="right">Name:&nbsp; </td>
     <td><input type="text" autofocus name="domain[name]" title="name of vitual machine" placeholder="name of vitual machine" /></td>
@@ -43,15 +45,24 @@ if (array_key_exists('sent', $_POST)) {
 <tr>
     <td align="right">Install image (iso):&nbsp; </td>
     <td>
-		<input type="text" id="media_file" name="media" placeholder="Click and Select cdrom image to install operating system">
+		<input type="text" id="media_file" name="media[cdrom]" placeholder="Click and Select cdrom image to install operating system">
+		<div style="margin-top:10px;margin-left:0px" id="media_tree" hidden></div>
 	</td>
 </tr>
 
-<tr>
-	<td></td>
-	<td>
-		<div id="media_tree" hidden></div>			
-	</td>
+<tr id="setup2_os" style="display: table-row">
+    <td align="right">Install drivers (iso):&nbsp; </td>
+    <td>
+		<table style="margin-top:-5px;margin-left:0px">
+			<tr>
+			    <td>
+					<input type="text" id="drivers_file" name="media[drivers]" placeholder="Click and Select cdrom image for OS drivers">
+					<a href="http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/">Latest Windows Virtio Drivers </a>
+					<div style="margin-top:10px;margin-left:0px" id="drivers_tree" hidden></div>
+				</td>
+			</tr>
+		</table>
+    </td>
 </tr>
 
 <tr>
@@ -61,15 +72,16 @@ if (array_key_exists('sent', $_POST)) {
 			<option value="0">Windows</option>
 			<option value="1">Linux/OSX</option>
 		</select>
-		<label style="margin-left:10px">Architecture:&nbsp;</label>
+		<label style="margin-top:0px;margin-left:19px">Architecture:&nbsp;</label>
 		<select name="domain[arch]" title="Select domain operating system type">
 			<option value="1">64bit</option>
 			<option value="0">32bit</option>
 		</select>
-		<label style="margin-left:11px">Persistence:&nbsp;</label>
-		<select name="domain[persistent]" title="Select domain to be permanent or temporary">
-			<option value="1">Permanent</option>
-			<option value="0">Temporary</option>
+		<label style="margin-top:0px;margin-left:11px">Machine:&nbsp;</label>
+		<select name="domain[machine]" title="Select domain to be permanent or temporary">
+			<option value="pc-i440fx-2.1">pc-i440fx-2.1</option>
+			<option value="pc-q35-2.1">pc-q35-2.1</option>
+			<option value="pc-q35-2.0">pc-q35-2.0</option>
 		</select>
 	</td>
 </tr>
@@ -78,44 +90,47 @@ if (array_key_exists('sent', $_POST)) {
     <td align="right">vCPUs:&nbsp; </td>
     <td>
 		<select name="domain[vcpus]" title="define number of vpus for domain">
-	<?php
-        for ($i = 1; $i <= $maxcpu; $i++)
-            echo '<option value='.$i.'>'.$i.'</option>';
-	?>
+		<?php
+	        for ($i = 1; $i <= $maxcpu; $i++)
+   	         echo '<option value='.$i.'>'.$i.'</option>';
+		?>
 		</select>
-
-		<label style="margin-left:36px">Memory (MiB):&nbsp;</label>
+		<label style="margin-top:0px;margin-left:45px">Memory (MiB):&nbsp;</label>
 		<select name="domain[mem]" title="define the amount memory">
-	<?php
-        for ($i = 1; $i <= ($maxmem*2); $i++) {
-        		$mem = ($i*512);
-            echo '<option value="'.$mem.'">'.$mem.'</option>';
-			}
-	?>
+		<?php
+   	     for ($i = 1; $i <= ($maxmem*2); $i++) {
+      	  		$mem = ($i*512);
+         	   echo '<option value="'.$mem.'">'.$mem.'</option>';
+				}
+		?>
 		</select>
-		<label style="margin-left:10px">Max. Mem (MiB):&nbsp;</label>
+		<label style="margin-top:0px;margin-left:0px">Max. Mem (MiB):&nbsp;</label>
 		<select name="domain[maxmem]" title="define the maximun amount of memory">
-	<?php
-        for ($i = 1; $i <= ($maxmem*2); $i++) {
-        		$mem = ($i*512);
-            echo '<option value="'.$mem.'">'.$mem.'</option>';
-			}
-	?>
+		<?php
+   	     for ($i = 1; $i <= ($maxmem*2); $i++) {
+      	  		$mem = ($i*512);
+         	   echo '<option value="'.$mem.'">'.$mem.'</option>';
+				}
+		?>
 		</select>
 	</td> 
 </tr>
 
 <tr>
-    <td align="right">Clock offset:&nbsp;</td>
+    <td align="right">Persistence:&nbsp;</td>
     <td>
-        <select name="domain[clock]" title="how the guest clock is synchronized to the host">
-          <option value="localtime">localtime</option>
-          <option value="utc">UTC</option>
+        <select name="domain[persistent]" title="Select domain to be permanent or temporary">
+			<option value="1">Permanent</option>
+			<option value="0">Temporary</option>
         </select>
+      <label style="margin-top:0px;margin-left:0px">Clock offset:&nbsp;</label>
+		<select name="domain[clock]" title="how the guest clock is synchronized to the host">
+			<option value="localtime">localtime</option>
+			<option value="utc">UTC</option>
+		</select>
+
     </td>
 </tr>
-
-<tr><td></td></tr>
 
 <tr>
     <td align="right"><b>Network Settings:&nbsp;</b></td>
@@ -130,7 +145,7 @@ if (array_key_exists('sent', $_POST)) {
 <tr id="setup_network" style="display: none">
     <td>&nbsp;</td>
     <td>
-        <table class="tablesorter"  style="margin-left:-29px">
+        <table style="margin-top:0px;margin-left:-15px">
 			<tr>
 		   	<td align="right">MAC:&nbsp;</td>
    			<td>
@@ -148,8 +163,6 @@ if (array_key_exists('sent', $_POST)) {
     </td>
 </tr>
 
-<tr><td></td></tr>
-
 <tr>
     <td align="right"><b>Disk Settings:&nbsp;</b></td>
     <td>
@@ -163,30 +176,26 @@ if (array_key_exists('sent', $_POST)) {
 <tr id="setup_disk" style="display: table-row">
 	<td></td>
    <td>
-   <table class="tablesorter"  style="margin-left:-90px" >
+   <table style="margin-top:0px;margin-left:0px" >
      
 	<tr>
-		<td align="right">Disk location:&nbsp;</td>
 		<td>
+			<label>Disk location:&nbsp;</label>
 			<input type="text" id="new_disk_file" name="disk[new]" placeholder="Separate sub-folder and image will be created based on Name">
+			<div style="margin-top:10px;margin-left:0px" id="new_disk_tree" hidden></div>
 		</td>
 	</tr>
 
 	<tr>
-		<td></td>
 		<td>
-			<div id="new_disk_tree" hidden></div>			
+			<label style="margin-top:0px;margin-left:46px" >Size:&nbsp;</label>
+			<input type="text" name="disk[size]" placeholder="e.g. 10M, 1G, 10G...">
 		</td>
 	</tr>
 
 	<tr>
-		<td align="right">Size:&nbsp;</td>
-		<td align="left"><input type="text" name="disk[size]" placeholder="e.g. 10M, 1G, 10G..."></td>
-	</tr>
-
-	<tr>
-		<td align="right">Disk type:&nbsp;</td>
 		<td>
+			<label style="margin-top:0px;margin-left:20px">Disk type:&nbsp;</label>
 		   <select name="disk[driver]" title="type of storage image">
 				<option value="qcow2">qcow2</option>
 				<option value="raw">raw</option>
@@ -201,19 +210,13 @@ if (array_key_exists('sent', $_POST)) {
 <tr id="setup2_disk" style="display: none">
     <td>&nbsp;</td>
     <td>
-        <table class="tablesorter"  style="margin-left:-90px" >
+        <table style="margin-top:0px;margin-left:0px" >
 
 	<tr>
-		<td align="right">Existing Disk:&nbsp;</td>
 		<td>
+			<label>Existing Disk:&nbsp;</label>
 			<input type="text" id="disk_file" name="disk[image]" placeholder="Select existing image to use for virtual machine">
-		</td>
-	</tr>
-
-	<tr>
-		<td></td>
-		<td>
-			<div id="disk_tree" hidden></div>			
+			<div style="margin-top:10px;margin-left:0px" id="disk_tree" hidden></div>			
 		</td>
 	</tr>
 	</table>
@@ -223,10 +226,10 @@ if (array_key_exists('sent', $_POST)) {
 <tr>
 	<td>&nbsp;</td>
 	<td>
-   <table class="tablesorter"  style="margin-top:-20px;margin-left:-104px" >
+   <table style="margin-top:-10px;margin-left:0px" >
 	<tr>
-		<td align="right">Disk dev name:&nbsp;</td>
 		<td>
+			<label style="margin-top:0px;margin-left:-10px">Disk dev name:&nbsp;</llabel>
 			<input type="text" value="hda" name="disk[dev]" placeholder="name of disk inside vm" title="name of disk inside vm" />
 		</td>
 	</tr>
@@ -246,7 +249,7 @@ if (array_key_exists('sent', $_POST)) {
 <tr id="setup_usb" style="display: none">
     <td>&nbsp;</td>
     <td>
-        <table class="tablesorter">
+        <table style="margin-top:0px;margin-left:10px" >
 <tr>
 	<td align="left">
 <?php
@@ -261,6 +264,7 @@ $usb = trim(shell_exec('lsusb'));
 $usb = explode("\n", $usb);
 array_walk($usb, 'usb_checkbox');
 ?>
+	<input class="checkbox" type="checkbox" value="1" name="usbtab" title="mouse coordinates in vm match the pointer position on the real desktop" checked="checked"/> VNC Mouse (uncheck for OS without desktop)
   	</td>
 </tr>
 	</table>
@@ -280,7 +284,7 @@ array_walk($usb, 'usb_checkbox');
 <tr id="setup_shares" style="display: none">
     <td>&nbsp;</td>
     <td>
-        <table class="tablesorter"  style="margin-left:-96px">
+        <table style="margin-top:0px;margin-left:0px">
 <tr>
 	<td align="right">unRAID share:&nbsp;</td>
 	<td>
