@@ -90,7 +90,11 @@ endforeach;
 </table>
 <form method="GET" action="<?=$path?>/Share">
 <input type="hidden" name="name" value="">
-<p class="centered"><input type="submit" value="Add Share"<?=$var['shareUser']=='e'?'>':' disabled>User shares must be <strong>enabled</strong> to add shares.'?></p>
+<?if ($var['startMode']=='Normal'):?>
+<p><input type="submit" value="Add Share"<?=$var['shareUser']=='e'?'>':' disabled>User shares must be <strong>enabled</strong> to add shares.'?></p>
+<?else:?>
+<p><input type="submit" value="Add Share" disabled></p>
+<?endif;?>
 </form>
 
 > Shares displayed in *italic* are exported as hidden shares.
