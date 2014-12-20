@@ -13,7 +13,7 @@ function toggle_id(itemID){
    }    
 }
 
-function change_divs(what, val) {
+function toggleRows(what, val) {
 	if (val == 1){
 		style = 'table-row';
 		style2 = 'none';}		
@@ -30,7 +30,7 @@ function change_divs(what, val) {
 		d.style.display = style2;
 }
 
-function toggle_divs(what, val) {
+function hideRows(what, val) {
 	if (val == 1)
 		style = 'table-row';
 	else 
