@@ -341,7 +341,7 @@ function show_totals($text) {
   echo "<td><img src='/webGui/images/sum.png' class='icon'>Total</td>";
   echo "<td>$text</td>";
   echo "<td>".($counts>0?my_temp(round($temps/$counts, 1)):'*')."</td>";
-  if ($var['startMode'] != "Maintenance") {
+  if ($var['startMode'] == "Normal") {
     echo "<td>".my_scale($fsSize*1024, $unit)." $unit</td>";
     if (!$display['text']) {
       echo "<td>".my_scale($fsUsed*1024, $unit)." $unit</td>";
