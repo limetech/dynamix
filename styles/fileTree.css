@@ -5,6 +5,7 @@ UL.jqueryFileTree A:hover{background:#BDF;}
 /* Dynamix tree element */
 #storage_tree{width:304px;border:1px solid #E0E0E0;padding:10px 6px;}
 #media_tree{width:450px;border:1px solid #E0E0E0;padding:10px 6px;}
+#drivers_tree{width:450px;border:1px solid #E0E0E0;padding:10px 6px;}
 #disk_tree{width:450px;border:1px solid #E0E0E0;padding:10px 6px;}
 #new_disk_tree{width:450px;border:1px solid #E0E0E0;padding:10px 6px;}
 #cdrom_tree{width:450px;border:1px solid #E0E0E0;padding:10px 6px;}
