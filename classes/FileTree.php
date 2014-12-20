@@ -16,6 +16,7 @@
 // Output a list of files for jQuery File Tree
 //
 // Program update made by Bergware International (October 2014)
+// update to use multiple filters by dmacias72 (December 2014)
 
 $path = urldecode($_POST['dir']);
 $filters = $_POST['filter'];
