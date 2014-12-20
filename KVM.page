@@ -10,7 +10,7 @@ Tabs="true"
 <script type="text/javascript" src="/plugins/dynamix.kvm.manager/scripts/kvm.js"></script>
 
 <?php
-   error_reporting(0);
+   //error_reporting(0);
    require('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php');
 	$uri = 'qemu:///system';
    $lv = new Libvirt($uri, null, null, false);
@@ -22,10 +22,10 @@ Tabs="true"
 		$name = $_GET['name'];
 		if($lv->domain_is_active($name)){
 			echo "<meta http-equiv='refresh' content='5; url=/KVM?name=$name&amp;refresh=true'>";
-			$msg = "Waiting for domain $name to shutdown...";
+			$msg = "Waiting for $name to shutdown...";
 		}else{
 			echo "<script>clearHistory();</script>";
-			$msg = "Domain $name has been successfully shutdown";
+			$msg = "$name has been shutdown";
 		}
 	}
 	if ($action) {
@@ -36,57 +36,57 @@ Tabs="true"
    if ($subaction) {
      	$domName = $lv->domain_get_name_by_uuid($uuid);
       if ($subaction == 'domain-start') {
-        	$msg = $lv->domain_start($domName) ? "Domain $domName has been successfully started" : 
+        	$msg = $lv->domain_start($domName) ? "$domName has been started" : 
         		"error";
 			 }
 		elseif ($subaction == 'domain-autostart') {
 			$res = $lv->get_domain_by_name($domName);
 	 		if ($lv->domain_get_autostart($res)) {
-	 			$msg = $lv->domain_set_autostart($res, false) ? "Domain $domName has been successfully removed from autostart" :
+	 			$msg = $lv->domain_set_autostart($res, false) ? "$domName has been removed from autostart" :
 	 				"Error: ".$lv->get_last_error();
 	 		} else {
-	 			$msg = $lv->domain_set_autostart($res, true) ? "Domain $domName has been successfully added to autostart" :
+	 			$msg = $lv->domain_set_autostart($res, true) ? "$domName has been added to autostart" :
        			"Error: ".$lv->get_last_error(); 
 			}
 		}
       elseif ($subaction == 'domain-pause') {
         	$msg = $lv->domain_suspend($domName) ? 
-  	      	"Domain $domName has been successfully paused" : 
+  	      	"$domName has been paused" : 
    	     	"Error: ".$lv->get_last_error();
 		}
       elseif ($subaction == 'domain-resume') {
       	$msg = $lv->domain_resume($domName) ? 
-      		"Domain $domName has been successfully resumed" : 
+      		"$domName has been resumed" : 
       		"Error: ".$lv->get_last_error();
 		}
       elseif ($subaction == 'domain-restart') {
         	$msg = $lv->domain_reboot($domName) ? 
-        		"Domain $domName has been successfully restarted" : 
+        		"$domName has been restarted" : 
         		"Error: ".$lv->get_last_error();
 		}
       elseif ($subaction == 'domain-save') {
         	$msg = $lv->domain_save($domName) ? 
-        		"Domain $domName has been successfully shutdown and saved" : 
+        		"$domName has been shutdown and saved" : 
         		'Error: '.$lv->get_last_error();
 		}
 		elseif ($subaction == 'domain-stop') {
          $msg = $lv->domain_shutdown($domName) ? 
-         	"Waiting for domain $domName to shutdown..." : 
+         	"Waiting for $domName to shutdown..." : 
          	"Error: ".$lv->get_last_error();
 			echo "<meta http-equiv='refresh' content='5; url=/KVM?name=$domName&amp;refresh=true'>";			
          	}
       elseif ($subaction == 'domain-destroy') {
          $msg = $lv->domain_destroy($domName) ? 
-         	"Domain $domName has been successfully destroyed" : 
+         	"$domName has been destroyed" : 
          	"Error: ".$lv->get_last_error();
       }
       elseif ($subaction == 'domain-undefine') {
-         $msg = $lv->domain_undefine($domName) ? "Domain $domName has been successfully undefined" : 
+         $msg = $lv->domain_undefine($domName) ? "$domName has been undefined" : 
          	"Error: ".$lv->get_last_error();
       }
       elseif ($subaction == 'domain-define') {
          if (@$_POST['xmldesc']) {
-      	   $msg = $lv->domain_define( $_POST['xmldesc']) ? "Domain definition has been successfully added" : 
+      	   $msg = $lv->domain_define( $_POST['xmldesc']) ? "Domain definition has been added" : 
    	      	'Error: '.$lv->get_last_error();
          }
       }
@@ -94,59 +94,54 @@ Tabs="true"
       elseif ($subaction == 'domain-create') {
          if (@$_POST['xmldesc']) {
          	$xml = $_POST['xmldesc'];
-           	$msg = $lv->domain_define($xml) ? "Domain $domName definition has been successfully changed" :
+           	$msg = $lv->domain_define($xml) ? "$domName definition has been changed" :
          	  	"Error: ".$lv->get_last_error();
          }
 		}
 		elseif ($subaction == 'domain-diskdev') {
 			$msg = $lv->domain_set_diskdev($domName, $_GET['dev'], $_POST['diskdev']) ? 
-				'Domain '.$domName.' disk dev has been changed from '.$_GET['dev'].' to '.$_POST['diskdev']:
+				$domName.' disk dev has been changed from '.$_GET['dev'].' to '.$_POST['diskdev']:
 				'Error: '.$lv->get_last_error();
 		}
 		elseif ($subaction == 'cdrom-change') {
          $msg = $lv->domain_change_cdrom($domName, $_POST['cdrom'], $_GET['dev']) ? 
-         	"Domain $domName cdrom has been successfully changed" : 
-         	"Error: ".$lv->get_last_error();
-      }
-		elseif ($subaction == 'disk-change') {
-         $msg = $lv->domain_change_disk($domName, $_GET['type'], $_GET['disk'], $_GET['dev']) ? 
-         	"Domain $domName disk has been successfully changed" : 
+         	"$domName cdrom has been changed" : 
          	"Error: ".$lv->get_last_error();
       }
 		elseif ($subaction == 'memory-change') {
 			$msg = $lv->domain_set_memory($domName, $_GET['memory']*1024) ? 
-				"Domain $domName vcpu number has been successfully changed to ".$_GET['memory']." MiB" :
+				"$domName memory has been changed to ".$_GET['memory']." MiB" :
 				"Error: ".$lv->get_last_error();
 		}
 		elseif ($subaction == 'vcpu-change') {
 			$vcpu = $_GET['vcpu'];
 			$msg = $lv->domain_set_vcpu($domName, $vcpu) ? 
-				"Domain vcpu number has been successfully changed to $vcpu" : 
+				"$domName vcpu number has been changed to $vcpu" : 
 				"Error: ".$lv->get_last_error();
 		}
 		elseif ($subaction == 'disk-remove') {
 			$msg = $lv->domain_disk_remove($domName, $_GET['dev']) ? 
-				'Disk has been successfully removed' : 
+				"$domName disk has been removed" : 
 				'Error: '.$lv->get_last_error();
 		}
 		elseif ($subaction == 'snap-create') {
 			$msg = $lv->domain_snapshot_create($domName) ? 
-				'snapshot has been successfully created' : 
+				"Snapshot for $domName has been created" : 
 				'Error: '.$lv->get_last_error();
 		}
 		elseif ($subaction == 'snap-delete') {    
 			$msg = $lv->domain_snapshot_delete($domName, $_GET['sname']) ? 
-				'snapshot has been successfully deleted' : 
+				"Snapshot for $domName has been deleted" : 
 				'Error: '.$lv->get_last_error();
 		}
 		elseif ($subaction == 'snap-revert') {         
 			$msg = $lv->domain_snapshot_revert($domName, $_GET['sname']) ? 
-				'domain has been successfully reverted' : 
+				"$domName has been reverted" : 
 				'Error: '.$lv->get_last_error();
 		}
 		elseif ($subaction == 'snap-desc') {
 			$msg = $lv->snapshot_set_metadata($domName, $_GET['sname'], $_POST['snapdesc']) ? 
-				'Snapshot description has been successfully saved':
+				"Snapshot description for $domName has been saved":
 				'Error: '.$lv->get_last_error();
 		}
 	echo "<script>clearHistory();</script>";
