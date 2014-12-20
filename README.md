@@ -6,6 +6,7 @@ Manage Virtual Machines using a libvirt-php module that provides PHP bindings fo
          It will disapear after vm has shut down
     Added Machine type selection.  Usbtab doesn't work with q35
     Added usbtab selection under usb devices
+    Fixed no domains sort error
     Removed Storage Pool tab and all storage pool functions.
     Added web based file trees to Create VM tab to access cdrom, 
          existing images and to create images.
