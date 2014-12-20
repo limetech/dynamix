@@ -43,7 +43,7 @@
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-		function domain_new($domain, $media, $nic, $disk, $usb, $shares) {
+		function domain_new($domain, $media, $nic, $disk, $usb, $usbtab, $shares) {
 			$uuid = $this->domain_generate_uuid();
 			$name = $domain['name'];
 			$emulator = $this->get_default_emulator();
@@ -65,6 +65,7 @@
                        </hostdev>";
 				}
 			}
+			($usbtab) ? $usbtabstr = "<input type='tablet' bus='usb'/>" : $usbtabstr = '';
 			//disk settings
 			$diskstr = '';
 			if (!empty($disk['image']) | !empty($disk['new'])) {
@@ -90,15 +91,23 @@
                                          </disk>";
 			}
 			$mediastr = '';
-			if (!empty($media)) {
+			if (!empty($media['cdrom'])) {
 				$mediastr = "<disk type='file' device='cdrom'>
 						<driver name='qemu'/>
-						<source file='$media'/>
+						<source file='{$media['cdrom']}'/>
 						<target dev='hdc' bus='ide'/>
 						<readonly/>
 					</disk>";
 			}
 			$driverstr = '';
+			if (!empty($media['drivers']) && (!$domain['os'])) {
+				$driverstr = "<disk type='file' device='cdrom'>
+						<driver name='qemu'/>
+						<source file='{$media['drivers']}'/>
+						<target dev='hdd' bus='ide'/>
+						<readonly/>
+					</disk>";
+			}
 			$netstr = '';
 			if (!empty($nic)) {
 				$netstr = "
@@ -124,7 +133,7 @@
 				<uuid>$uuid</uuid>
 				<description>{$domain['desc']}</description>
 				<os>
-					<type arch='$arch'>hvm</type>
+					<type arch='$arch' machine='{$domain['machine']}'>hvm</type>
 					<boot dev='cdrom'/>
 					<boot dev='hd'/>
 				</os>
@@ -146,9 +155,10 @@
 					<emulator>$emulator</emulator>
 					$diskstr
 					$mediastr
+					$driverstr
 					$sharestr
 					$netstr
-               <input type='tablet' bus='usb'/>
+               $usbtabstr
 					<input type='mouse' bus='ps2'/>
 					<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0'>
 						<listen type='address' address='0.0.0.0'/>
@@ -172,7 +182,7 @@
 					<uuid>$uuid</uuid>
 					<description>{$domain['desc']}</description>
 					<os>
-						<type arch='$arch'>hvm</type>
+						<type arch='$arch' machine='{$domain['machine']}'>hvm</type>
 						<boot dev='hd'/>
 					</os>
 					<features>
@@ -195,7 +205,7 @@
 						$mediastr
 						$sharestr
 						$netstr
-						<input type='tablet' bus='usb'/>
+	               $usbtabstr
 						<input type='mouse' bus='ps2'/>
 						<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0'>
 							<listen type='address' address='0.0.0.0'/>
