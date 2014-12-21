@@ -46,23 +46,35 @@ if (array_key_exists('sent', $_POST)) {
     <td align="right">Install image (iso):&nbsp; </td>
     <td>
 		<input type="text" id="media_file" name="media[cdrom]" placeholder="Click and Select cdrom image to install operating system">
-		<div style="margin-top:10px;margin-left:0px" id="media_tree" hidden></div>
+	</td>
+</tr>
+
+<tr>
+	<td></td>
+	<td>
+		<div style="margin-top:0px;margin-left:0px" id="media_tree" hidden></div>
 	</td>
 </tr>
 
 <tr id="setup2_os" style="display: table-row">
     <td align="right">Install drivers (iso):&nbsp; </td>
     <td>
-		<table style="margin-top:-5px;margin-left:0px">
+		<table style="margin-top:0px;margin-left:0px">
 			<tr>
 			    <td>
 					<input type="text" id="drivers_file" name="media[drivers]" placeholder="Click and Select cdrom image for OS drivers">
-					<a href="http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/">Latest Windows Virtio Drivers </a>
-					<div style="margin-top:10px;margin-left:0px" id="drivers_tree" hidden></div>
+					<a href="http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/">Windows Virtio Drivers </a>
 				</td>
 			</tr>
 		</table>
     </td>
+</tr>
+
+<tr>
+	<td></td>
+	<td>
+		<div style="margin-top:0px;margin-left:0px" id="drivers_tree" hidden></div>
+	</td>
 </tr>
 
 <tr>
@@ -72,16 +84,10 @@ if (array_key_exists('sent', $_POST)) {
 			<option value="0">Windows</option>
 			<option value="1">Linux/OSX</option>
 		</select>
-		<label style="margin-top:0px;margin-left:19px">Architecture:&nbsp;</label>
+		<label style="margin-top:0px;margin-left:50px">Architecture:&nbsp;</label>
 		<select name="domain[arch]" title="Select domain operating system type">
 			<option value="1">64bit</option>
 			<option value="0">32bit</option>
-		</select>
-		<label style="margin-top:0px;margin-left:11px">Machine:&nbsp;</label>
-		<select name="domain[machine]" title="Select domain to be permanent or temporary">
-			<option value="pc-i440fx-2.1">pc-i440fx-2.1</option>
-			<option value="pc-q35-2.1">pc-q35-2.1</option>
-			<option value="pc-q35-2.0">pc-q35-2.0</option>
 		</select>
 	</td>
 </tr>
@@ -95,7 +101,18 @@ if (array_key_exists('sent', $_POST)) {
    	         echo '<option value='.$i.'>'.$i.'</option>';
 		?>
 		</select>
-		<label style="margin-top:0px;margin-left:45px">Memory (MiB):&nbsp;</label>
+		<label style="margin-top:0px;margin-left:110px">Machine:&nbsp;</label>
+		<select name="domain[machine]" title="Select domain to be permanent or temporary">
+			<option value="pc-i440fx-2.1">pc-i440fx-2.1</option>
+			<option value="pc-q35-2.1">pc-q35-2.1</option>
+			<option value="pc-q35-2.0">pc-q35-2.0</option>
+		</select>
+	</td> 
+</tr>
+
+<tr>
+    <td align="right"> Memory (MiB):&nbsp; </td>
+    <td>
 		<select name="domain[mem]" title="define the amount memory">
 		<?php
    	     for ($i = 1; $i <= ($maxmem*2); $i++) {
@@ -104,7 +121,7 @@ if (array_key_exists('sent', $_POST)) {
 				}
 		?>
 		</select>
-		<label style="margin-top:0px;margin-left:0px">Max. Mem (MiB):&nbsp;</label>
+		<label style="margin-top:0px;margin-left:45px">Max. Mem (MiB):&nbsp;</label>
 		<select name="domain[maxmem]" title="define the maximun amount of memory">
 		<?php
    	     for ($i = 1; $i <= ($maxmem*2); $i++) {
@@ -123,43 +140,12 @@ if (array_key_exists('sent', $_POST)) {
 			<option value="1">Permanent</option>
 			<option value="0">Temporary</option>
         </select>
-      <label style="margin-top:0px;margin-left:0px">Clock offset:&nbsp;</label>
+      <label style="margin-top:0px;margin-left:45px">Clock offset:&nbsp;</label>
 		<select name="domain[clock]" title="how the guest clock is synchronized to the host">
 			<option value="localtime">localtime</option>
 			<option value="utc">UTC</option>
 		</select>
 
-    </td>
-</tr>
-
-<tr>
-    <td align="right"><b>Network Settings:&nbsp;</b></td>
-    <td>
-      <select onchange="toggleRows('network', this.value)">
-	<option value="0">Auto</option>
-	<option value="1">Manual</option>
-      </select>
-    </td>
-</tr>	
-
-<tr id="setup_network" style="display: none">
-    <td>&nbsp;</td>
-    <td>
-        <table style="margin-top:0px;margin-left:-15px">
-			<tr>
-		   	<td align="right">MAC:&nbsp;</td>
-   			<td>
-					<input type="text" name="nic[mac]" title="random mac, you can supply your own" value="<?php echo $lv->generate_random_mac_addr() ?>" id="nic_mac_addr" />
-				</td>
-			</tr>
-
-			<tr>
-   			<td align="right" >Bridge:&nbsp;</td>
-			   <td>
-					<input type="text" value="<?=$network_cfg['BRNAME'];?>" name="nic[net]" placeholder="name of bridge in unRAID" title="name of bridge in unRAID automatically filled in" />			
-			   </td>
-			</tr>
-        </table>
     </td>
 </tr>
 
@@ -176,26 +162,26 @@ if (array_key_exists('sent', $_POST)) {
 <tr id="setup_disk" style="display: table-row">
 	<td></td>
    <td>
-   <table style="margin-top:0px;margin-left:0px" >
+   <table style="margin-top:0px;margin-left:-75px" >
      
 	<tr>
 		<td>
 			<label>Disk location:&nbsp;</label>
 			<input type="text" id="new_disk_file" name="disk[new]" placeholder="Separate sub-folder and image will be created based on Name">
-			<div style="margin-top:10px;margin-left:0px" id="new_disk_tree" hidden></div>
+			<div style="margin-top:10px;margin-left:78px" id="new_disk_tree" hidden></div>
 		</td>
 	</tr>
 
 	<tr>
 		<td>
-			<label style="margin-top:0px;margin-left:46px" >Size:&nbsp;</label>
+			<label style="margin-top:0px;margin-left:44px" >Size:&nbsp;</label>
 			<input type="text" name="disk[size]" placeholder="e.g. 10M, 1G, 10G...">
 		</td>
 	</tr>
 
 	<tr>
 		<td>
-			<label style="margin-top:0px;margin-left:20px">Disk type:&nbsp;</label>
+			<label style="margin-top:0px;margin-left:19px">Disk type:&nbsp;</label>
 		   <select name="disk[driver]" title="type of storage image">
 				<option value="qcow2">qcow2</option>
 				<option value="raw">raw</option>
@@ -210,13 +196,13 @@ if (array_key_exists('sent', $_POST)) {
 <tr id="setup2_disk" style="display: none">
     <td>&nbsp;</td>
     <td>
-        <table style="margin-top:0px;margin-left:0px" >
+        <table style="margin-top:0px;margin-left:-76px" >
 
 	<tr>
 		<td>
 			<label>Existing Disk:&nbsp;</label>
 			<input type="text" id="disk_file" name="disk[image]" placeholder="Select existing image to use for virtual machine">
-			<div style="margin-top:10px;margin-left:0px" id="disk_tree" hidden></div>			
+			<div style="margin-top:10px;margin-left:80px" id="disk_tree" hidden></div>			
 		</td>
 	</tr>
 	</table>
@@ -229,11 +215,42 @@ if (array_key_exists('sent', $_POST)) {
    <table style="margin-top:-10px;margin-left:0px" >
 	<tr>
 		<td>
-			<label style="margin-top:0px;margin-left:-10px">Disk dev name:&nbsp;</llabel>
+			<label style="margin-top:0px;margin-left:-87px">Disk dev name:&nbsp;</label>
 			<input type="text" value="hda" name="disk[dev]" placeholder="name of disk inside vm" title="name of disk inside vm" />
 		</td>
 	</tr>
 	</table>
+    </td>
+</tr>
+
+<tr>
+    <td align="right"><b>Network Settings:&nbsp;</b></td>
+    <td>
+      <select onchange="toggleRows('network', this.value)">
+	<option value="0">Auto</option>
+	<option value="1">Manual</option>
+      </select>
+    </td>
+</tr>	
+
+<tr id="setup_network" style="display: none">
+    <td>&nbsp;</td>
+    <td>
+        <table style="margin-top:0px;margin-left:-110px">
+			<tr>
+		   	<td align="right">MAC:&nbsp;</td>
+   			<td>
+					<input type="text" name="nic[mac]" title="random mac, you can supply your own" value="<?php echo $lv->generate_random_mac_addr() ?>" id="nic_mac_addr" />
+				</td>
+			</tr>
+
+			<tr>
+   			<td align="right" >Bridge:&nbsp;</td>
+			   <td>
+					<input type="text" value="<?=$network_cfg['BRNAME'];?>" name="nic[net]" placeholder="name of bridge in unRAID" title="name of bridge in unRAID automatically filled in" />			
+			   </td>
+			</tr>
+        </table>
     </td>
 </tr>
 
