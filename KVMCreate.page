@@ -57,13 +57,13 @@ if (array_key_exists('sent', $_POST)) {
 </tr>
 
 <tr id="setup2_os" style="display: table-row">
-    <td align="right">Install drivers (iso):&nbsp; </td>
+    <td align="right"><a href="http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/" target="_blank">Virtio drivers (iso):&nbsp; </a>
+</td>
     <td>
 		<table style="margin-top:0px;margin-left:0px">
 			<tr>
 			    <td>
-					<input type="text" id="drivers_file" name="media[drivers]" placeholder="Click and Select cdrom image for OS drivers">
-					<a href="http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/">Windows Virtio Drivers </a>
+					<input type="text" id="drivers_file" name="media[drivers]" placeholder="Download, Click and Select location of virtio drivers image">
 				</td>
 			</tr>
 		</table>
