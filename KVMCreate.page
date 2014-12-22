@@ -102,10 +102,9 @@ if (array_key_exists('sent', $_POST)) {
 		?>
 		</select>
 		<label style="margin-top:0px;margin-left:110px">Machine:&nbsp;</label>
-		<select name="domain[machine]" title="Select domain to be permanent or temporary">
+		<select name="domain[machine]" onchange="toggleTab(this.options[this.selectedIndex].value);" title="Select domain to be permanent or temporary">
 			<option value="pc-i440fx-2.1">pc-i440fx-2.1</option>
-			<option value="pc-q35-2.1">pc-q35-2.1</option>
-			<option value="pc-q35-2.0">pc-q35-2.0</option>
+			<option value="q35">q35</option>
 		</select>
 	</td> 
 </tr>
@@ -273,15 +272,15 @@ if (array_key_exists('sent', $_POST)) {
 
 function usb_checkbox($usb, $key)
 {
-	$usb = strstr($usb, 'ID');
-	$device = substr($usb,3,9);
-	echo '<input class="checkbox" type="checkbox" value="'.$device.'" name="usb['.$key.']" />'.$usb.'<br />';
+	$deviceid = strstr($usb, 'ID');
+	$deviceid = substr($usb,3,9);
+	echo '<input class="checkbox" type="checkbox" value="'.$deviceid.'" name="usb['.$key.']" />'.$usb.'<br />';
 }
 $usb = trim(shell_exec('lsusb'));
 $usb = explode("\n", $usb);
 array_walk($usb, 'usb_checkbox');
 ?>
-	<input class="checkbox" type="checkbox" value="1" name="usbtab" title="mouse coordinates in vm match the pointer position on the real desktop" checked="checked"/> VNC Mouse (uncheck for OS without desktop)
+	<input class="checkbox" id="usbtab" type="checkbox" value="1" name="usbtab" title="mouse coordinates in vm match the pointer position on the real desktop" checked="checked"/> VNC Mouse (uncheck for OS without desktop)
   	</td>
 </tr>
 	</table>
