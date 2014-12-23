@@ -96,7 +96,7 @@ case 'disk':
   echo "<tr>".implode('',$row7)."</tr>";
 break;
 case 'sys':
-    exec("awk '/^Mem(Total|Free)/ {print $2}' /proc/meminfo",$memory);
+    exec("awk '/^Mem(Total|Available)/ {print $2}' /proc/meminfo",$memory);
     $cpu = min(@file_get_contents('state/cpuload.ini'),100);
     $mem = max(round((1-$memory[1]/$memory[0])*100),0);
     echo "{$cpu}%#{$mem}%";
