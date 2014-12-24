@@ -1,0 +1,123 @@
+Menu="KVM:3"
+Title="Settings"
+---
+<script>
+$(function(){
+	$('#mediadir_tree').fileTree(
+		{root:'/mnt/',filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
+		function(file) {$('#mediadir_file').val(file);$('#mediadir_tree').hide();},
+		function(directory) {$('#mediadir_file').val(directory);});
+	$('#dir_tree').fileTree(
+		{root:'/mnt/',filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
+		function(file) {$('#dir_file').val(file);$('#dir_tree').hide();},
+		function(directory) {$('#dir_file').val(directory);});
+});
+</script>
+<?php
+if (isset($domain_cfg['SERVICE']) && ($domain_cfg['SERVICE'] == "enable" || $domain_cfg['SERVICE'] == "disable"))
+	$libvirt_service = $domain_cfg['SERVICE'];
+else
+	$libvirt_service = "enable";
+
+
+$libvirt_running = trim ( shell_exec ( "[ -f /proc/`cat /var/run/libvirt/libvirtd.pid 2> /dev/null`/exe ] && echo 'yes' || echo 'no' 2> /dev/null" ) );
+$libvirt_curversion = trim ( shell_exec ( "virsh --version" ) );
+if ($libvirt_curversion == "")
+	$libvirt_curversion = "couldn't determine the libvirt version";
+?>
+<table class="tablesorter" style="margin-top:-21px"><thead><th colspan="2">Status:&#32;
+			<?if ($libvirt_running=="yes"):?>
+					<span class="green"><b>RUNNING</b></span>
+				<span style="font-size:12px;"> with libvirt version: <b><?=$libvirt_curversion?></b></span>
+			<?else:?>
+				<span class="red"><b>STOPPED</b></span>
+			<?endif;?>
+</th><th></th></thead></table>
+<div style="width: 49%; float:left;margin-top:-10px">
+	<div id="title">
+		<span class="left">Libvirt Control:&#32;
+		</span>
+	</div>  
+		<?if ($libvirt_running=="yes"):?>
+			<div style="position:relative;float:left;width:50%;text-align:right; margin-bottom:24px">
+				<form name="libvirt_start_stop" method="POST" action="/update.htm" target="progressFrame">
+					<input type="hidden" name="cmd" value="/etc/rc.d/rc.libvirt stop  ">
+					<input type="submit" name="runCmd" value="Stop">
+				</form>
+			</div>
+			<div style="position:relative;float:left;width:50%;margin-bottom:24px">
+				<form name="libvirt_restart" method="POST" action="/update.htm" target="progressFrame">
+					<input type="hidden" name="cmd" value="/etc/rc.d/rc.libvirt restart  ">
+					<input type="submit" name="runCmd" value="Restart">
+				</form>
+			</div>
+		<?else:?>
+			<div style="position:relative;float:left;width:100%;text-align:center;margin-bottom:24px">
+				<form name="libvirt_start" method="POST" action="/update.htm" target="progressFrame">
+					<input type="hidden" name="cmd" value="/etc/rc.d/rc.libvirt start  " />
+					<input type="submit" name="runCmd" value="Start">
+				</form>
+			</div>
+		<?endif;?>
+	<div id="title">
+		<span class="left">Information:&#32;</span>
+	</div>
+	<?if ($var['BRIDGING'] == "no"):?>
+		<p class="red" style="margin-left:10px;margin-right:10px;"><b>WARNING:</b> You must enable bridging in network settings</p>
+	<?else:?>
+		<p class="green" style="margin-left:10px;margin-right:10px;">No messages</p>
+	<?endif;?>
+</div>
+<div style="width: 49%; float:right;margin-top:-10px">
+	<div id="title">
+		<span class="left">Configuration:&#32;</span>
+	</div>
+	<form name="domain_settings" method="POST" action="/update.php" target="progressFrame">
+		<input type="hidden" name="#file" value="<?=$domain_cfgfile;?>" />
+		<table class="settings">
+<!--			<tr>
+				<td align="right"> Enable libvirt:&nbsp;&nbsp; </td>
+				<td>
+					<input type="checkbox" id="enable" <?=($libvirt_service=="enable")?"checked=\"checked\"":"";?> onChange="checkENABLE(this.form);">
+					<input type="hidden" name="SERVICE" value="<?=$libvirt_service;?>">     
+				</td>
+			</tr>-->
+			<tr>
+				<td align="right"> Enable Debugging:&nbsp;&nbsp; </td>
+				<td align="left">
+					<input type="checkbox" id="error" <?=($domain_debug == enable) ? 'checked="checked"':'';?> onChange="checkDebug(this.form);">
+					<input type="hidden" name="DEBUG" value="<?=$domain_debug?>">     
+				</td>
+			</tr>
+
+			<tr>
+				<td align="right"> Default Media directory:&nbsp;&nbsp; </td>
+				<td><input type="text" id="mediadir_file" name="MEDIADIR" maxlength="60" value="<?=$domain_cfg['MEDIADIR']?>" placeholder="ie. /mnt/disk1/media"></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>
+					<div style="margin-top:0px;margin-left:0px" id="mediadir_tree" hidden></div>
+				</td>
+			</tr>
+			<tr>
+				<td align="right"> Default VM directory:&nbsp;&nbsp;</td>
+				<td><input type="text" id="dir_file" name="DISKDIR" maxlength="60" value="<?=$domain_cfg['DISKDIR']?>" placeholder="ie. /mnt/cache/image"></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>
+					<div style="margin-top:0px;margin-left:0px" id="dir_tree" hidden></div>
+				</td>
+			</tr>
+
+			<br />
+			<td></td>
+		</table>
+		<div align="center">
+			<input type="submit" value="Apply" style="margin-bottom:8px" onClick="verifyDATA(this.form);">
+			<button type="button" style="margin-bottom:35px" onClick="done();">Done</button>
+		</div>
+	</form>
+	<br/>
+</div>
