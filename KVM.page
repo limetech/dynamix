@@ -11,33 +11,38 @@ Tabs="true"
 
 <?php
 $domain_cfgfile = "/boot/config/domain.cfg";
+if(!is_file($domain_cfgfile)){
+	$fp = fopen("$domain_cfgfile", 'w');
+	fwrite($fp, 'DEBUG="disable"'."\n".'MEDIADIR="/mnt/"'."\n".'DISKDIR="/mnt/"'."\n");
+	fclose($fp);
+}
 $domain_cfg = parse_ini_file( "$domain_cfgfile" );
 $domain_debug = $domain_cfg['DEBUG'];
 if($domain_debug != "enable")
 	error_reporting(0);
-   require('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php');
-	$uri = 'qemu:///system';
-   $lv = new Libvirt($uri, null, null, false);
-   $action = array_key_exists('action', $_GET) ? $_GET['action'] : '';
-   $subaction = array_key_exists('subaction', $_GET) ? $_GET['subaction'] : '';
-	$msg = false;
-	$sName = "libvirtd";
-	$uuid = $_GET['uuid'];
-	if ($_GET['refresh']) {
-		$name = $_GET['name'];
-		if($lv->domain_is_active($name)){
-			echo "<meta http-equiv='refresh' content='5; url=/KVM?name=$name&amp;refresh=true'>";
-			$msg = "Waiting for $name to shutdown...";
-		}else{
-			echo "<script>clearHistory();</script>";
-			$msg = "$name has been shutdown";
-		}
-	}
-	if ($action) {
-		if ($action == 'domain-edit') {
-			include('/usr/local/emhttp/plugins/dynamix.kvm.manager/editxml.php');
-		}
+require('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php');
+$uri = 'qemu:///system';
+$lv = new Libvirt($uri, null, null, false);
+$action = array_key_exists('action', $_GET) ? $_GET['action'] : '';
+$subaction = array_key_exists('subaction', $_GET) ? $_GET['subaction'] : '';
+$msg = false;
+$sName = "libvirtd";
+$uuid = $_GET['uuid'];
+if ($_GET['refresh']) {
+	$name = $_GET['name'];
+	if($lv->domain_is_active($name)){
+		echo "<meta http-equiv='refresh' content='5; url=/KVM?name=$name&amp;refresh=true'>";
+		$msg = "Waiting for $name to shutdown...";
 	}else{
+		echo "<script>clearHistory();</script>";
+		$msg = "$name has been shutdown";
+	}
+}
+if ($action) {
+	if ($action == 'domain-edit') {
+		include('/usr/local/emhttp/plugins/dynamix.kvm.manager/editxml.php');
+	}
+}else{
    if ($subaction) {
      	$domName = $lv->domain_get_name_by_uuid($uuid);
       if ($subaction == 'domain-start') {
