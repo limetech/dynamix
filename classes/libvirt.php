@@ -125,7 +125,7 @@
                            </filesystem>";
 				
 			}
-
+			if (!empty($diskstr) | !empty($mediastr)) {
 			$xml = "<domain type='kvm'>
 				<name>$name</name>
 				<currentMemory>$mem</currentMemory>
@@ -173,6 +173,7 @@
 			$tmp = libvirt_domain_create_xml($this->conn, $xml);
 			if (!$tmp)
 				return $this->_set_last_error();
+				}
 
 			if ($domain['persistent']) {
 				$xml = "<domain type='kvm'>
