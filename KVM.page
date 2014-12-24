@@ -10,13 +10,18 @@ Tabs="true"
 <script type="text/javascript" src="/plugins/dynamix.kvm.manager/scripts/kvm.js"></script>
 
 <?php
-   error_reporting(0);
+$domain_cfgfile = "/boot/config/domain.cfg";
+$domain_cfg = parse_ini_file( "$domain_cfgfile" );
+$domain_debug = $domain_cfg['DEBUG'];
+if($domain_debug != "enable")
+	error_reporting(0);
    require('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php');
 	$uri = 'qemu:///system';
    $lv = new Libvirt($uri, null, null, false);
    $action = array_key_exists('action', $_GET) ? $_GET['action'] : '';
    $subaction = array_key_exists('subaction', $_GET) ? $_GET['subaction'] : '';
 	$msg = false;
+	$sName = "libvirtd";
 	$uuid = $_GET['uuid'];
 	if ($_GET['refresh']) {
 		$name = $_GET['name'];
@@ -99,7 +104,12 @@ Tabs="true"
          }
 		}
 		elseif ($subaction == 'domain-diskdev') {
-			$msg = $lv->domain_set_diskdev($domName, $_GET['dev'], $_POST['diskdev']) ? 
+			$msg = $lv->domain_set_disk_dev($domName, $_GET['dev'], $_POST['diskdev']) ? 
+				$domName.' disk dev has been changed from '.$_GET['dev'].' to '.$_POST['diskdev']:
+				'Error: '.$lv->get_last_error();
+		}
+		elseif ($subaction == 'domain-diskresize') {
+			$msg = $lv->domain_diskresize($domName, $_GET['dev'], $_POST['diskdev']) ? 
 				$domName.' disk dev has been changed from '.$_GET['dev'].' to '.$_POST['diskdev']:
 				'Error: '.$lv->get_last_error();
 		}
@@ -205,7 +215,7 @@ Tabs="true"
         	$wsport = '-';
         	$vncport = "auto";
       }else
-         $vnc = '/plugins/dynamix.kvm.manager/vnc.html?autoconnect=true&host='.gethostname().'&port='.$wsport;
+         $vnc = '/plugins/dynamix.kvm.manager/vnc.html?autoconnect=true&host='.$var['IPADDR'].'&port='.$wsport;
       
       unset($tmp);
       if (!$id)
@@ -318,7 +328,11 @@ Tabs="true"
   									<input class='input' type='text' style='width:36px' name='diskdev' value='$dev' val='diskdev' hidden />
 								</span></form>
 							</td>
-                     <td>$capacity</td>
+                               				<td title='Click to increase Disk Size'><form method='post' action='?subaction=domain-diskresize&amp;uuid=$uuid&amp;dev=$dev&amp;oldcap=$capacity' /><span class='diskresize' style='width:30px'>
+								<span class='text' ><a href='#'> $capacity </a></span>
+  									<input class='input' type='text' style='width:46px' name='diskresize' value='$capacity' val='diskresize' hidden />
+								</span></form>
+							</td>
                      <td>$allocation</td>
                      <td>N/A</td>
 						</tr>";
@@ -346,7 +360,11 @@ Tabs="true"
 						</form>
               			</td>
                      <td>$type</td>
-               	   <td>$dev</td>
+           				<td title='Click to change Dev Name'><form method='post' action='?subaction=domain-diskdev&amp;uuid=$uuid&amp;dev=$dev' /><span class='diskdev' style='width:30px'>
+								<span class='text' ><a href='#'> $dev </a></span>
+  									<input class='input' type='text' style='width:36px' name='diskdev' value='$dev' val='diskdev' hidden />
+								</span></form>
+							</td>
                      <td>$capacity</td>
                      <td>$allocation</td>
                      <td>";
