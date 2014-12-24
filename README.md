@@ -1,7 +1,11 @@
 **Virtual Machine Management**
 
 Manage Virtual Machines using a libvirt-php module that provides PHP bindings for libvirt virtualization toolkit and therefore you can access libvirt directly from your PHP scripts with no need to have virt-manager or libvirt-based CLI/GUI tools installed. 
-<a href="http://lime-technology.com/forum/index.php?topic=35858.0" title="2014.12.21-21a
+<a href="http://lime-technology.com/forum/index.php?topic=35858.0" title="2014.12.23
+    Changed VNC to ip based for our OSX friends
+    Added settings tab with default media and image settings
+    Added debug checkbox 
+2014.12.21-21a
     expanded usb devices to include bus and device 
     Add change of machine toggles VNC Mouse(usb tablet)
     change to q35 in dropdown  q35 equals pc-q35-2.1
