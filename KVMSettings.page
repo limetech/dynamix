@@ -14,12 +14,8 @@ $(function(){
 });
 </script>
 <?php
-if (isset($domain_cfg['SERVICE']) && ($domain_cfg['SERVICE'] == "enable" || $domain_cfg['SERVICE'] == "disable"))
-	$libvirt_service = $domain_cfg['SERVICE'];
-else
-	$libvirt_service = "enable";
-
-
+$libvirt_service = isset($domain_cfg['SERVICE']) ?	$domain_cfg['SERVICE'] : "enable";
+$domain_debug = isset($domain_cfg['DEBUG']) ? $domain_cfg['DEBUG'] : "disable";
 $libvirt_running = trim ( shell_exec ( "[ -f /proc/`cat /var/run/libvirt/libvirtd.pid 2> /dev/null`/exe ] && echo 'yes' || echo 'no' 2> /dev/null" ) );
 $libvirt_curversion = trim ( shell_exec ( "virsh --version" ) );
 if ($libvirt_curversion == "")
@@ -33,7 +29,7 @@ if ($libvirt_curversion == "")
 				<span class="red"><b>STOPPED</b></span>
 			<?endif;?>
 </th><th></th></thead></table>
-<div style="width: 49%; float:left;margin-top:-10px">
+<div style="width: 39%; float:left;margin-top:-10px">
 	<div id="title">
 		<span class="left">Libvirt Control:&#32;
 		</span>
@@ -68,7 +64,7 @@ if ($libvirt_curversion == "")
 		<p class="green" style="margin-left:10px;margin-right:10px;">No messages</p>
 	<?endif;?>
 </div>
-<div style="width: 49%; float:right;margin-top:-10px">
+<div style="width: 59%; float:right;margin-top:-10px">
 	<div id="title">
 		<span class="left">Configuration:&#32;</span>
 	</div>
@@ -101,7 +97,7 @@ if ($libvirt_curversion == "")
 				</td>
 			</tr>
 			<tr>
-				<td align="right"> Default VM directory:&nbsp;&nbsp;</td>
+				<td align="right"> Default Existing VM directory:&nbsp;&nbsp;</td>
 				<td><input type="text" id="dir_file" name="DISKDIR" maxlength="60" value="<?=$domain_cfg['DISKDIR']?>" placeholder="ie. /mnt/cache/image"></td>
 			</tr>
 			<tr>
