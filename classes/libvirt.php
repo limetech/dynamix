@@ -1378,7 +1378,7 @@
 		}
 
 //change domain disk dev name
-		function domain_set_diskdev($domain, $olddev, $dev) {
+		function domain_set_disk_dev($domain, $olddev, $dev) {
 			$domain = $this->get_domain_object($domain);
 
 			$xml = $this->domain_get_xml($domain, true);
