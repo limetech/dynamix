@@ -92,10 +92,22 @@ function showDisk(){
     $('#disk_tree').focus();
 }
 
-function showNewDisk(){
-    $('#new_disk_file').on('click');
-    $('#new_disk_tree').show();
-    $('#new_disk_tree').focus();
+function showNew(){
+    $('#new_file').on('click');
+    $('#new_tree').show();
+    $('#new_tree').focus();
+}
+
+function showDir(){
+    $('#dir_file').on('click');
+    $('#dir_tree').show();
+    $('#dir_tree').focus();
+}
+
+function showMediaDir(){
+    $('#mediadir_file').on('click');
+    $('#mediadir_tree').show();
+    $('#mediadir_tree').focus();
 }
 
 $(function(){
@@ -103,27 +115,17 @@ $(function(){
    	{root:'/mnt/',filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
    	function(file) {$('#cdrom_file').val(file);$('#cdrom_tree').hide();$('#cdrom_form').submit();},
    	function(directory) {$('#cdrom_dir').val(directory);});
-	$('#media_tree').fileTree(
-		{root:'/mnt/',filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
-		function(file) {$('#media_file').val(file);$('#media_tree').hide();},
-		function(directory) {$('#media_dir').val(directory);});
 	$('#drivers_tree').fileTree(
 		{root:'/mnt/',filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
 		function(file) {$('#drivers_file').val(file);$('#drivers_tree').hide();},
 		function(directory) {$('#drivers_dir').val(directory);});
-	$('#disk_tree').fileTree(
-		{root:'/mnt/',filter:['qcow2','qcow','img'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
-		function(file) {$('#disk_file').val(file);$('#disk_tree').hide();},
-		function(directory) {$('#disk_file').val(directory);});
-	$('#new_disk_tree').fileTree(
-		{root:'/mnt/',filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
-		function(file) {$('#new_disk_file').val(file);$('#new_disk_tree').hide();},
-		function(directory) {$('#new_disk_file').val(directory);});
 	$('#media_file').click(showMedia);
 	$('#drivers_file').click(showDrivers);
 	$('#disk_file').click(showDisk);
-	$('#new_disk_file').click(showNewDisk);
+	$('#new_file').click(showNew);
 	$('#cdrom_file').click(showCDRom);
+	$('#dir_file').click(showDir);
+	$('#mediadir_file').click(showMediaDir);
    $('.text').click(showInput);
    $('.input').blur(hideInput);
    $('body').click(function(event) {
@@ -139,8 +141,42 @@ $(function(){
     	if (!$(event.target).closest('#disk_file').length) {
       	  $('#disk_tree').hide();
     	};
-    	if (!$(event.target).closest('#new_disk_file').length) {
-      	  $('#new_disk_tree').hide();
+    	if (!$(event.target).closest('#new_file').length) {
+      	  $('#new_tree').hide();
+    	};
+    	if (!$(event.target).closest('#dir_file').length) {
+      	  $('#dir_tree').hide();
+    	};
+    	if (!$(event.target).closest('#mediadir_file').length) {
+      	  $('#mediadir_tree').hide();
     	};
 	});
 });
+
+function checkDebug(form) {
+	if (form.error.checked == false ) {
+		form.DEBUG.value = "disable";
+	} else {
+		form.DEBUG.value = "enable";
+	}
+}
+
+function checkENABLE(form) {
+	if (form.enable.checked == false ) {
+		form.SERVICE.value = "disable";
+	} else {
+		form.SERVICE.value = "enable";
+	}
+}
+
+function verifyDATA(form) {
+	if (form.mediadir_file.value == ""){
+		form.mediadir_file.value = "/mnt/";
+	}
+	if (form.dir_file.value == ""){
+		form.dir_file.value = "/mnt/";
+	}
+	form.mediadir_file.value = form.mediadir_file.value.replace(/ /g,"_");
+	form.dir_file.value = form.dir_file.value.replace(/ /g,"_");
+}
+

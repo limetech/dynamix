@@ -7,8 +7,10 @@ UL.jqueryFileTree A:hover{background:#BDF;}
 #media_tree{width:450px;border:1px solid #E0E0E0;padding:10px 6px;}
 #drivers_tree{width:450px;border:1px solid #E0E0E0;padding:10px 6px;}
 #disk_tree{width:450px;border:1px solid #E0E0E0;padding:10px 6px;}
-#new_disk_tree{width:450px;border:1px solid #E0E0E0;padding:10px 6px;}
+#new_tree{width:450px;border:1px solid #E0E0E0;padding:10px 6px;}
 #cdrom_tree{width:450px;border:1px solid #E0E0E0;padding:10px 6px;}
+#mediadir_tree{width:450px;border:1px solid #E0E0E0;padding:10px 6px;}
+#dir_tree{width:450px;border:1px solid #E0E0E0;padding:10px 6px;}
 /* Core Styles */
 .jqueryFileTree LI.directory { background: url(../images/directory.png) left top no-repeat; }
 .jqueryFileTree LI.expanded { background: url(../images/folder_open.png) left top no-repeat; }
