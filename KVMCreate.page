@@ -1,8 +1,23 @@
 Menu="KVM:1"
 Title="Create VM"
 ---
+<script>
+$(function(){
+	$('#media_tree').fileTree(
+		{root: "<?php echo $domain_cfg['MEDIADIR'];?>",filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
+		function(file) {$('#media_file').val(file);$('#media_tree').hide();},
+		function(directory) {$('#media_dir').val(directory);});
+	$('#disk_tree').fileTree(
+		{root:"<?php echo $domain_cfg['DISKDIR'];?>",filter:['qcow2','qcow','img'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
+		function(file) {$('#disk_file').val(file);$('#disk_tree').hide();},
+		function(directory) {$('#disk_file').val(directory);});
+	$('#new_tree').fileTree(
+		{root:'/mnt/',filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
+		function(file) {$('#new_file').val(file);$('#new_tree').hide();},
+		function(directory) {$('#new_file').val(directory);});
+});
+</script>
 <?php
-$network_cfg = parse_ini_file( "/boot/config/network.cfg" );
 if (array_key_exists('sent', $_POST)) {
 
 	$tmp = $lv->domain_new($_POST['domain'], $_POST['media'], $_POST['nic'], $_POST['disk'], $_POST['usb'], $_POST['usbtab'],$_POST['shares']);
@@ -166,8 +181,8 @@ if (array_key_exists('sent', $_POST)) {
 	<tr>
 		<td>
 			<label>Disk location:&nbsp;</label>
-			<input type="text" id="new_disk_file" name="disk[new]" placeholder="Separate sub-folder and image will be created based on Name">
-			<div style="margin-top:10px;margin-left:78px" id="new_disk_tree" hidden></div>
+			<input type="text" id="new_file" name="disk[new]" placeholder="Separate sub-folder and image will be created based on Name">
+			<div style="margin-top:10px;margin-left:78px" id="new_tree" hidden></div>
 		</td>
 	</tr>
 
@@ -246,7 +261,7 @@ if (array_key_exists('sent', $_POST)) {
 			<tr>
    			<td align="right" >Bridge:&nbsp;</td>
 			   <td>
-					<input type="text" value="<?=$network_cfg['BRNAME'];?>" name="nic[net]" placeholder="name of bridge in unRAID" title="name of bridge in unRAID automatically filled in" />			
+					<input type="text" value="<?=$var['BRNAME'];?>" name="nic[net]" placeholder="name of bridge in unRAID" title="name of bridge in unRAID automatically filled in" />			
 			   </td>
 			</tr>
         </table>
@@ -319,7 +334,8 @@ array_walk($usb, 'usb_checkbox');
 </tr>
 
 <tr align="left">
-	<td></td>
+	<td align="right">
+	</td>
     <td>
  	   <input type="submit" value="Create VM" />
  	   <input type="button" value="Reset Form" onClick="this.form.reset();location.reload()" />
