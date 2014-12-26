@@ -456,5 +456,5 @@ if($msg){
 		$color = 'green';
 	echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font class=\"".$color."\">".$msg."</font>');}); </script>";
 	}
+//echo '<a href="/plugins/dynamix.kvm.manager/classes/vnc.php?port=5900">VNC</a>';
 ?>
-<a href="/plugins/dynamix.kvm.manager/classes/vnc.php?port=5900">VNC</a>
