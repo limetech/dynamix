@@ -1,22 +1,6 @@
 Menu="KVM:1"
 Title="Create VM"
 ---
-<script>
-$(function(){
-	$('#media_tree').fileTree(
-		{root: "<?php echo $domain_cfg['MEDIADIR'];?>",filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
-		function(file) {$('#media_file').val(file);$('#media_tree').hide();},
-		function(directory) {$('#media_dir').val(directory);});
-	$('#disk_tree').fileTree(
-		{root:"<?php echo $domain_cfg['DISKDIR'];?>",filter:['qcow2','qcow','img'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
-		function(file) {$('#disk_file').val(file);$('#disk_tree').hide();},
-		function(directory) {$('#disk_file').val(directory);});
-	$('#new_tree').fileTree(
-		{root:'/mnt/',filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
-		function(file) {$('#new_file').val(file);$('#new_tree').hide();},
-		function(directory) {$('#new_file').val(directory);});
-});
-</script>
 <?php
 if (array_key_exists('sent', $_POST)) {
 
@@ -27,7 +11,7 @@ if (array_key_exists('sent', $_POST)) {
   		$name = $_POST['domain']['name'];
 		$res = $lv->get_domain_by_name($name);
 		$uuid = libvirt_domain_get_uuid_string($res);
-		echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font class=\"green\">New virtual machine $name&nbsp;</a> has been created successfully</font>');}); </script>";
+		echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font class=\"green\">$name&nbsp; has been created</font>');}); </script>";
 		echo '<meta http-equiv="refresh" content="1; url=/KVM">';
 	}
 }
@@ -73,6 +57,8 @@ if (array_key_exists('sent', $_POST)) {
 
 <tr id="setup2_os" style="display: table-row">
     <td align="right"><a href="http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/" target="_blank">Virtio drivers (iso):&nbsp; </a>
+    <br />
+    <font size="-6">(latest windows drivers)&nbsp;&nbsp;</font>
 </td>
     <td>
 		<table style="margin-top:0px;margin-left:0px">
@@ -347,3 +333,109 @@ array_walk($usb, 'usb_checkbox');
 	</form>
 
 </div>
+
+<script type="text/javascript">
+function toggleRows(what, val) {
+	if (val == 1){
+		style = 'table-row';
+		style2 = 'none';}		
+	else {
+		style = 'none';
+		style2 = 'table-row';}
+	name = 'setup_'+what;
+	d = document.getElementById(name);
+	if (d != null)
+		d.style.display = style;
+	name = 'setup2_'+what;
+	d = document.getElementById(name);
+	if (d != null)
+		d.style.display = style2;
+}
+
+function hideRows(what, val) {
+	if (val == 1)
+		style = 'table-row';
+	else 
+		style = 'none';
+	name = 'setup_'+what;
+	d = document.getElementById(name);
+	if (d != null)
+		d.style.display = style;
+	name = 'setup2_'+what;
+	d = document.getElementById(name);
+	if (d != null)
+		d.style.display = style;
+	name = 'setup3_'+what;
+	d = document.getElementById(name);
+	if (d != null)
+		d.style.display = style;
+}
+
+
+function showMedia(){
+    $('#media_file').on('click');
+    $('#media_tree').show();
+    $('#media_tree').focus();
+}
+
+function showDrivers(){
+    $('#drivers_file').on('click');
+    $('#drivers_tree').show();
+    $('#drivers_tree').focus();
+}
+
+function showDisk(){
+    $('#disk_file').on('click');
+    $('#disk_tree').show();
+    $('#disk_tree').focus();
+}
+
+function showNew(){
+    $('#new_file').on('click');
+    $('#new_tree').show();
+    $('#new_tree').focus();
+}
+
+function hideNew(){
+    $('#new_tree').on('dblclick');
+    $('#new_tree').hide();
+}
+
+$(function(){
+	$('#media_tree').fileTree(
+		{root: "<?php echo $domain_cfg['MEDIADIR'];?>",filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
+		function(file) {$('#media_file').val(file);$('#media_tree').hide();},
+		function(directory) {$('#media_dir').val(directory);});
+	$('#drivers_tree').fileTree(
+		{root:'/mnt/',filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
+		function(file) {$('#drivers_file').val(file);$('#drivers_tree').hide();},
+		function(directory) {$('#drivers_dir').val(directory);});
+	$('#disk_tree').fileTree(
+		{root:"<?php echo $domain_cfg['DISKDIR'];?>",filter:['qcow2','qcow','img'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
+		function(file) {$('#disk_file').val(file);$('#disk_tree').hide();},
+		function(directory) {$('#disk_file').val(directory);});
+	$('#new_tree').fileTree(
+		{root:'/mnt/',filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
+		function(file) {$('#new_file').val(file);$('#new_tree').hide();},
+		function(directory) {$('#new_file').val(directory);});
+	$('#media_file').click(showMedia);
+	$('#drivers_file').click(showDrivers);
+	$('#disk_file').click(showDisk);
+	$('#new_file').click(showNew);
+	$('#new_tree').dblclick(hideNew);
+   $('body').click(function(event) {
+    	if (!$(event.target).closest('#media_file').length) {
+      	  $('#media_tree').hide();
+    	};
+    	if (!$(event.target).closest('#drivers_file').length) {
+      	  $('#drivers_tree').hide();
+    	};
+    	if (!$(event.target).closest('#disk_file').length) {
+      	  $('#disk_tree').hide();
+    	};
+    	if (!$(event.target).closest('#new_file').length) {
+      	  $('#new_tree').hide();
+    	};
+	});
+});
+</script>

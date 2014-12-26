@@ -1,22 +1,9 @@
 Menu="KVM:3"
 Title="Settings"
 ---
-<script>
-$(function(){
-	$('#mediadir_tree').fileTree(
-		{root:'/mnt/',filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
-		function(file) {$('#mediadir_file').val(file);$('#mediadir_tree').hide();},
-		function(directory) {$('#mediadir_file').val(directory);});
-	$('#dir_tree').fileTree(
-		{root:'/mnt/',filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
-		function(file) {$('#dir_file').val(file);$('#dir_tree').hide();},
-		function(directory) {$('#dir_file').val(directory);});
-});
-</script>
 <?php
 $libvirt_service = isset($domain_cfg['SERVICE']) ?	$domain_cfg['SERVICE'] : "enable";
 $domain_debug = isset($domain_cfg['DEBUG']) ? $domain_cfg['DEBUG'] : "disable";
-$libvirt_running = trim ( shell_exec ( "[ -f /proc/`cat /var/run/libvirt/libvirtd.pid 2> /dev/null`/exe ] && echo 'yes' || echo 'no' 2> /dev/null" ) );
 $libvirt_curversion = trim ( shell_exec ( "virsh --version" ) );
 if ($libvirt_curversion == "")
 	$libvirt_curversion = "couldn't determine the libvirt version";
@@ -117,3 +104,50 @@ if ($libvirt_curversion == "")
 	</form>
 	<br/>
 </div>
+<script>
+function showDir(){
+    $('#dir_file').on('click');
+    $('#dir_tree').show();
+    $('#dir_tree').focus();
+}
+
+function hideDir(){
+    $('#dir_tree').on('dblclick');
+    $('#dir_tree').hide();
+}
+
+function showMediaDir(){
+    $('#mediadir_file').on('click');
+    $('#mediadir_tree').show();
+    $('#mediadir_tree').focus();
+}
+
+function hideMediaDir(){
+    $('#MediaDir_tree').on('dblclick');
+    $('#MediaDir_tree').hide();
+}
+
+$(function(){
+	$('#mediadir_tree').fileTree(
+		{root:'/mnt/',filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
+		function(file) {$('#mediadir_file').val(file);$('#mediadir_tree').hide();},
+		function(directory) {$('#mediadir_file').val(directory);});
+	$('#dir_tree').fileTree(
+		{root:'/mnt/',filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
+		function(file) {$('#dir_file').val(file);$('#dir_tree').hide();},
+		function(directory) {$('#dir_file').val(directory);});
+	$('#dir_file').click(showDir);
+	$('#dir_tree').dblclick(hideDir);
+	$('#mediadir_file').click(showMediaDir);
+	$('#mediadir_tree').dblclick(hideMediaDir);
+		
+   $('body').click(function(event) {
+    	if (!$(event.target).closest('#dir_file').length) {
+      	  $('#dir_tree').hide();
+    	};
+    	if (!$(event.target).closest('#mediadir_file').length) {
+      	  $('#mediadir_tree').hide();
+    	};
+	});
+});
+</script>
