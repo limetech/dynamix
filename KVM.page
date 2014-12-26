@@ -1,4 +1,3 @@
-Cond="(pgrep('libvirtd')!==FALSE)"
 Menu="Tasks:70"
 Type="xmenu"
 Title="Virtual Machines"
@@ -11,7 +10,8 @@ Tabs="true"
 
 <?php
 $domain_cfgfile = "/boot/config/domain.cfg";
-if(!is_file($domain_cfgfile)){
+$libvirt_running = trim ( shell_exec ( "[ -f /proc/`cat /var/run/libvirt/libvirtd.pid 2> /dev/null`/exe ] && echo 'yes' || echo 'no' 2> /dev/null" ) );
+if(!file_exists($domain_cfgfile)){
 	$fp = fopen("$domain_cfgfile", 'w');
 	fwrite($fp, 'DEBUG="disable"'."\n".'MEDIADIR="/mnt/"'."\n".'DISKDIR="/mnt/"'."\n");
 	fclose($fp);
@@ -55,7 +55,7 @@ if ($action) {
 	 			$msg = $lv->domain_set_autostart($res, false) ? "$domName has been removed from autostart" :
 	 				"Error: ".$lv->get_last_error();
 	 		} else {
-	 			$msg = $lv->domain_set_autostart($res, true) ? "$domName has been added to autostart" :
+	 			$msg = $lv->domain_set_autostart($res, true) ? "$domName has been set to autostart" :
        			"Error: ".$lv->get_last_error(); 
 			}
 		}
@@ -180,9 +180,12 @@ if ($action) {
               			<tbody>
             		</tr>";
    //Get domain variables for each domain
-	if (!$lv->get_domains())
-		$msg = "No domains defined. Create from template or add XML description.";
-	else {
+	if (!$lv->get_domains()){
+		if ($libvirt_running == "yes")
+			$msg = "No domains defined. Create from template or add XML.";
+		else 
+			$msg = "Libvirt is not running. Goto Settings tab then start.";
+	} else {
    for ($i = 0; $i < sizeof($doms); $i++) {
    	$name = $doms[$i];
       $res = $lv->get_domain_by_name($name);
@@ -454,3 +457,4 @@ if($msg){
 	echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font class=\"".$color."\">".$msg."</font>');}); </script>";
 	}
 ?>
+<a href="/plugins/dynamix.kvm.manager/classes/vnc.php?port=5900">VNC</a>
