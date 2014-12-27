@@ -105,7 +105,7 @@ if (array_key_exists('sent', $_POST)) {
 		<label style="margin-top:0px;margin-left:110px">Machine:&nbsp;</label>
 		<select name="domain[machine]" title="Select domain to be permanent or temporary">
 			<option value="q35">q35</option>
-			<option value="pc-i440fx-2.1">pc-i440fx-2.1</option>
+			<option value="pc-i440fx-2.1">i440fx</option>
 		</select>
 	</td> 
 </tr>

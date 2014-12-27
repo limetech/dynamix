@@ -51,10 +51,8 @@
 			$ctrl = '';
 			if ($machine == 'q35'){
 				$bus = "sata";
-	         $ctrl = "<controller type='usb' index='0' model='ich9-ehci1'>
-					</controller>
-            	<controller type='usb' index='0' model='ich9-uhci1'>
-					</controller>";
+	         $ctrl = "<controller type='usb' index='0' model='ich9-ehci1'/>
+            	<controller type='usb' index='0' model='ich9-uhci1'/>";
 			}
     		$emulator = $this->get_default_emulator();
 			$pae = '';
