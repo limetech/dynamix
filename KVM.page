@@ -14,7 +14,7 @@ $libvirt_running = trim ( shell_exec ( "[ -f /proc/`cat /var/run/libvirt/libvirt
 $domain_cfgfile = "/boot/config/domain.cfg";
 if(!file_exists($domain_cfgfile)){
 	$fp = fopen("$domain_cfgfile", 'w');
-	fwrite($fp, 'DEBUG="disable"'."\n".'MEDIADIR="/mnt/"'."\n".'DISKDIR="/mnt/"'."\n");
+	fwrite($fp, 'DEBUG="no"'."\n".'MEDIADIR="/mnt/"'."\n".'DISKDIR="/mnt/"'."\n");
 	fclose($fp);
 }
 $domain_cfg = parse_ini_file( "$domain_cfgfile" );

@@ -89,6 +89,12 @@
 					$img = $disk['new'].$name."/"; 
 					if (!is_dir($img))
 						mkdir($img);
+					$cfg = $img.$name.".cfg";
+					if (!file_exists($cfg)){
+							$fp = fopen("$cfg", 'w');
+							fwrite($fp, 'AUTOSTART="no"'."\n");
+							fclose($fp);
+					}
 					$driver = $disk['driver'];
 					$img .= $name.'.'.$driver;
 					$size = strtoupper($disk['size']);

@@ -3,7 +3,7 @@ Title="Settings"
 ---
 <?php
 $libvirt_service = isset($domain_cfg['SERVICE']) ?	$domain_cfg['SERVICE'] : "enable";
-$domain_debug = isset($domain_cfg['DEBUG']) ? $domain_cfg['DEBUG'] : "disable";
+$domain_debug = isset($domain_cfg['DEBUG']) ? $domain_cfg['DEBUG'] : "no";
 $libvirt_curversion = trim ( shell_exec ( "virsh --version" ) );
 if ($libvirt_curversion == "")
 	$libvirt_curversion = "couldn't determine the libvirt version";
@@ -68,7 +68,7 @@ if ($libvirt_curversion == "")
 			<tr>
 				<td align="right"> Enable Debugging:&nbsp;&nbsp; </td>
 				<td align="left">
-					<input type="checkbox" id="error" <?=($domain_debug == enable) ? 'checked="checked"':'';?> onChange="checkDebug(this.form);">
+					<input type="checkbox" id="debug" <?=($domain_debug == yes) ? 'checked="checked"':'';?> onChange="checkDebug(this.form);">
 					<input type="hidden" name="DEBUG" value="<?=$domain_debug?>">     
 				</td>
 			</tr>
@@ -105,6 +105,33 @@ if ($libvirt_curversion == "")
 	<br/>
 </div>
 <script>
+function checkDebug(form) {
+	if (form.debug.checked == false ) {
+		form.DEBUG.value = "no";
+	} else {
+		form.DEBUG.value = "yes";
+	}
+}
+
+function checkENABLE(form) {
+	if (form.enable.checked == false ) {
+		form.SERVICE.value = "disable";
+	} else {
+		form.SERVICE.value = "enable";
+	}
+}
+
+function verifyDATA(form) {
+	if (form.mediadir_file.value == ""){
+		form.mediadir_file.value = "/mnt/";
+	}
+	if (form.dir_file.value == ""){
+		form.dir_file.value = "/mnt/";
+	}
+	form.mediadir_file.value = form.mediadir_file.value.replace(/ /g,"_");
+	form.dir_file.value = form.dir_file.value.replace(/ /g,"_");
+}
+
 function showDir(){
     $('#dir_file').on('click');
     $('#dir_tree').show();
