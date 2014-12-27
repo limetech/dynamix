@@ -11,7 +11,7 @@ if (array_key_exists('sent', $_POST)) {
   		$name = $_POST['domain']['name'];
 		$res = $lv->get_domain_by_name($name);
 		$uuid = libvirt_domain_get_uuid_string($res);
-		echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font class=\"green\">$name&nbsp; has been created</font>');}); </script>";
+		echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font class=\"green\">Domain $name&nbsp; has been created</font>');}); </script>";
 		echo '<meta http-equiv="refresh" content="1; url=/KVM">';
 	}
 }
@@ -33,7 +33,7 @@ if (array_key_exists('sent', $_POST)) {
 <table style="margin-top:-5px;margin-left:0px">
 <tr>
     <td align="right">Name:&nbsp; </td>
-    <td><input type="text" autofocus name="domain[name]" title="name of vitual machine" placeholder="name of vitual machine" /></td>
+    <td><input type="text" id="name" autofocus name="domain[name]" title="name of vitual machine" placeholder="name of vitual machine" /></td>
 </tr>
 
 <tr>
@@ -103,9 +103,9 @@ if (array_key_exists('sent', $_POST)) {
 		?>
 		</select>
 		<label style="margin-top:0px;margin-left:110px">Machine:&nbsp;</label>
-		<select name="domain[machine]" onchange="toggleTab(this.options[this.selectedIndex].value);" title="Select domain to be permanent or temporary">
-			<option value="pc-i440fx-2.1">pc-i440fx-2.1</option>
+		<select name="domain[machine]" title="Select domain to be permanent or temporary">
 			<option value="q35">q35</option>
+			<option value="pc-i440fx-2.1">pc-i440fx-2.1</option>
 		</select>
 	</td> 
 </tr>
@@ -166,7 +166,7 @@ if (array_key_exists('sent', $_POST)) {
      
 	<tr>
 		<td>
-			<label>Disk location:&nbsp;</label>
+			<label style="margin-top:0px;margin-left:-28px">Directory location:&nbsp;</label>
 			<input type="text" id="new_file" name="disk[new]" placeholder="Separate sub-folder and image will be created based on Name">
 			<div style="margin-top:10px;margin-left:78px" id="new_tree" hidden></div>
 		</td>
@@ -174,7 +174,7 @@ if (array_key_exists('sent', $_POST)) {
 
 	<tr>
 		<td>
-			<label style="margin-top:0px;margin-left:44px" >Size:&nbsp;</label>
+			<label style="margin-top:0px;margin-left:44px">Size:&nbsp;</label>
 			<input type="text" name="disk[size]" placeholder="e.g. 10M, 1G, 10G...">
 		</td>
 	</tr>
@@ -236,7 +236,7 @@ if (array_key_exists('sent', $_POST)) {
 <tr id="setup_network" style="display: none">
     <td>&nbsp;</td>
     <td>
-        <table style="margin-top:0px;margin-left:-110px">
+        <table style="margin-top:0px;margin-left:-95px">
 			<tr>
 		   	<td align="right">MAC:&nbsp;</td>
    			<td>
@@ -281,7 +281,7 @@ $usb = trim(shell_exec('lsusb'));
 $usb = explode("\n", $usb);
 array_walk($usb, 'usb_checkbox');
 ?>
-	<input class="checkbox" id="usbtab" type="checkbox" value="1" name="usbtab" title="mouse coordinates in vm match the pointer position on the real desktop" checked="checked"/> VNC Mouse (uncheck for OS without desktop)
+	<input class="checkbox" id="usbtab" type="checkbox" value="1" name="usbtab" title="mouse coordinates in vm match the pointer position on the real desktop" checked="checked"/> VNC Mouse/USB Tablet (uncheck for OS without desktop)
   	</td>
 </tr>
 	</table>
@@ -370,7 +370,6 @@ function hideRows(what, val) {
 	if (d != null)
 		d.style.display = style;
 }
-
 
 function showMedia(){
     $('#media_file').on('click');

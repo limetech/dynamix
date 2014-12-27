@@ -2,13 +2,6 @@ function clearHistory(){
 	window.history.pushState('KVM', 'Title', '/KVM');
 }
 
-function toggleTab(val) {
-	if (val == 'q35') {
-		document.getElementById('usbtab').checked = false;
-	} else {
-		document.getElementById('usbtab').checked = true;
-	}
-}
 function toggle_id(itemID){ 
 
    if ((document.getElementById(itemID).style.display == 'none')) { 

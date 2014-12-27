@@ -46,11 +46,24 @@
 		function domain_new($domain, $media, $nic, $disk, $usb, $usbtab, $shares) {
 			$uuid = $this->domain_generate_uuid();
 			$name = $domain['name'];
-			$emulator = $this->get_default_emulator();
-			$arch = ($domain['arch']) ? 'x86_64' : 'i686';
+			$machine = $domain['machine'];
+			$bus = "ide";
+			$ctrl = '';
+			if ($machine == 'q35'){
+				$bus = "sata";
+	         $ctrl = "<controller type='usb' index='0' model='ich9-ehci1'>
+					</controller>
+            	<controller type='usb' index='0' model='ich9-uhci1'>
+					</controller>";
+			}
+    		$emulator = $this->get_default_emulator();
 			$pae = '';
-			if ($arch == 'i686')
+			if ($domain['arch']){
+				$arch = 'x86_64';
+			}else {
+				$arch = 'i686';
 				$pae = '<pae/>';
+			}
 			$mem = $domain['mem'] * 1024;
 			$maxmem = $domain['maxmem'] * 1024;
 			$usbstr = '';
@@ -65,10 +78,10 @@
                        </hostdev>";
 				}
 			}
-			($usbtab) ? $usbtabstr = "<input type='tablet' bus='usb'/>" : $usbtabstr = '';
+			$usbtabstr = ($usbtab) ? "<input type='tablet' bus='usb'/>" : '';
 			//disk settings
 			$diskstr = '';
-			if (!empty($disk['image']) | !empty($disk['new'])) {
+			if (!empty($disk['image']) | !empty($disk['new']) ) {
 				if (!$disk['settings']) {
 					$img = $disk['image'];
 					$cmd = "qemu-img info $img | grep 'file format:'";
@@ -80,9 +93,8 @@
 						mkdir($img);
 					$driver = $disk['driver'];
 					$img .= $name.'.'.$driver;
-					$size = $disk['size'];
-					$cmd = "qemu-img create -q -f $driver $img $size";
-					shell_exec($cmd);
+					$size = strtoupper($disk['size']);
+					shell_exec("qemu-img create -q -f $driver $img $size");
 				}
 				$diskstr = "<disk type='file' device='disk'>
 						<driver name='qemu' type='$driver' />
@@ -95,7 +107,7 @@
 				$mediastr = "<disk type='file' device='cdrom'>
 						<driver name='qemu'/>
 						<source file='{$media['cdrom']}'/>
-						<target dev='hdc' bus='ide'/>
+						<target dev='hdc' bus='$bus'/>
 						<readonly/>
 					</disk>";
 			}
@@ -104,7 +116,7 @@
 				$driverstr = "<disk type='file' device='cdrom'>
 						<driver name='qemu'/>
 						<source file='{$media['drivers']}'/>
-						<target dev='hdd' bus='ide'/>
+						<target dev='hdd' bus='$bus'/>
 						<readonly/>
 					</disk>";
 			}
@@ -133,7 +145,7 @@
 				<uuid>$uuid</uuid>
 				<description>{$domain['desc']}</description>
 				<os>
-					<type arch='$arch' machine='{$domain['machine']}'>hvm</type>
+					<type arch='$arch' machine='$machine'>hvm</type>
 					<boot dev='cdrom'/>
 					<boot dev='hd'/>
 				</os>
@@ -156,6 +168,7 @@
 					$diskstr
 					$mediastr
 					$driverstr
+					$ctrl
 					$sharestr
 					$netstr
                $usbtabstr
@@ -170,6 +183,7 @@
 					$usbstr
 				</devices>
 				</domain>";
+			//	echo "<textarea>$xml</textarea>";
 			$tmp = libvirt_domain_create_xml($this->conn, $xml);
 			if (!$tmp)
 				return $this->_set_last_error();
@@ -183,7 +197,7 @@
 					<uuid>$uuid</uuid>
 					<description>{$domain['desc']}</description>
 					<os>
-						<type arch='$arch' machine='{$domain['machine']}'>hvm</type>
+						<type arch='$arch' machine='$machine'>hvm</type>
 						<boot dev='hd'/>
 					</os>
 					<features>
@@ -204,6 +218,7 @@
 						<emulator>$emulator</emulator>
 						$diskstr
 						$mediastr
+						$ctrl
 						$sharestr
 						$netstr
 	               $usbtabstr
@@ -491,31 +506,6 @@
 			return $ret;
 		}
 
-      function get_nic_info($res) {
-         $macs = $this->get_xpath($res, "//domain/devices/interface/mac/@address", false);
-			$net = $this->get_xpath($res, "//domain/devices/interface/@type", false);
-			$bridge = $this->get_xpath($res, "//domain/devices/interface/source/@bridge", false);
-			if (!$macs)
-				return $this->_set_last_error();
-			$ret = array();
-			for ($i = 0; $i < $macs['num']; $i++) {
-				if ($net[$i] != 'bridge')
-					$tmp = libvirt_domain_get_network_info($res, $macs[$i]);
-				if ($tmp)
-					$ret[] = $tmp;
-				else {
-					$this->_set_last_error();
-					$ret[] = array(
-							'mac' => $macs[$i],
-							'network' => $bridge[$i],
-							'nic_type' => 'virtio'
-							);
-				}
-			}
-
-        return $ret;
-       }
-
       function get_domain_type($domain) {
          $dom = $this->get_domain_object($domain);
 
@@ -541,16 +531,6 @@
 
           return $ret;
       }
-
-		function get_network_cards($domain) {
-			$dom = $this->get_domain_object($domain);
-
-			$nics =  $this->get_xpath($dom, '//domain/devices/interface[@type="network"]', false);
-			if (!is_array($nics))
-				return $this->_set_last_error();
-
-			return $nics['num'];
-		}
 
 		function get_disk_capacity($domain, $physical=false, $disk='*', $unit='?') {
 			$dom = $this->get_domain_object($domain);
@@ -603,10 +583,10 @@
 			$unit = strtoupper($unit);
 
 			switch ($unit) {
-				case 'T': return number_format($value / (float)1099511627776, $decimals, '.', ' ').' TB';
-				case 'G': return number_format($value / (float)(1 << 30), $decimals, '.', ' ').' GB';
-				case 'M': return number_format($value / (float)(1 << 20), $decimals, '.', ' ').' MB';
-				case 'K': return number_format($value / (float)(1 << 10), $decimals, '.', ' ').' kB';
+				case 'T': return number_format($value / (float)1099511627776, $decimals, '.', ' ').'T';
+				case 'G': return number_format($value / (float)(1 << 30), $decimals, '.', ' ').'G';
+				case 'M': return number_format($value / (float)(1 << 20), $decimals, '.', ' ').'M';
+				case 'K': return number_format($value / (float)(1 << 10), $decimals, '.', ' ').'k';
 				case 'B': return $value.' B';
 			}
 
@@ -741,75 +721,6 @@
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-		function get_networks($type = VIR_NETWORKS_ALL) {
-			$tmp = libvirt_list_networks($this->conn, $type);
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function get_nic_models() {
-			return array('virtio', 'default', 'rtl8139', 'e1000', 'pcnet', 'ne2k_pci');
-		}
-
-		function get_network_res($network) {
-			if ($network == false)
-				return false;
-			if (is_resource($network))
-				return $network;
-
-			$tmp = libvirt_network_get($this->conn, $network);
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function get_network_bridge($network) {
-			$res = $this->get_network_res($network);
-			if ($res == false)
-				return false;
-
-			$tmp = libvirt_network_get_bridge($res);
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function get_network_active($network) {
-			$res = $this->get_network_res($network);
-			if ($res == false)
-				return false;
-
-			$tmp = libvirt_network_get_active($res);
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function set_network_active($network, $active = true) {
-			$res = $this->get_network_res($network);
-			if ($res == false)
-				return false;
-
-			if (!libvirt_network_set_active($res, $active ? 1 : 0))
-				return $this->_set_last_error();
-
-			return true;
-		}
-
-		function get_network_information($network) {
-			$res = $this->get_network_res($network);
-			if ($res == false)
-				return false;
-
-			$tmp = libvirt_network_get_information($res);
-			if (!$tmp)
-				return $this->_set_last_error();
-			$tmp['active'] = $this->get_network_active($res);
-			return $tmp;
-		}
-
-		function get_network_xml($network) {
-			$res = $this->get_network_res($network);
-			if ($res == false)
-				return false;
-
-			$tmp = libvirt_network_get_xml_desc($res, NULL);
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
 		function get_node_devices($dev = false) {
 			$tmp = ($dev == false) ? libvirt_list_nodedevs($this->conn) : libvirt_list_nodedevs($this->conn, $dev);
 			return ($tmp) ? $tmp : $this->_set_last_error();
@@ -919,15 +830,6 @@
 
 			$tmp = libvirt_domain_get_xml_desc($dom, $get_inactive ? VIR_DOMAIN_XML_INACTIVE : 0);
 			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function network_get_xml($network) {
-			$net = $this->get_network_res($network);
-			if (!$net)
-				return false;
-
-			$tmp = libvirt_network_get_xml_desc($net, NULL);
-			return ($tmp) ? $tmp : $this->_set_last_error();;
 		}
 
 		function domain_get_id($domain, $name = false) {
@@ -1064,12 +966,6 @@
 				//$uuid = $this->generate_uuid();
 
 			return $uuid;
-		}
-
-		function network_generate_uuid() {
-			/* TODO: Fix after virNetworkLookupByUUIDString is exposed
-				 to libvirt-php to ensure UUID uniqueness */
-			return $this->generate_uuid();
 		}
 
 		function domain_shutdown($domain) {
@@ -1542,6 +1438,20 @@
 			if ($this->domain_is_active($domain))   		
    			libvirt_domain_update_device($domain, "<disk type='file' device='cdrom'><driver name='qemu' type='raw'/><source file=".escapeshellarg($iso)."/><target dev='$dev' bus='ide'/><readonly/></disk>", VIR_DOMAIN_DEVICE_MODIFY_LIVE);
 		return ($tmp) ? $tmp : $this->_set_last_error();
+		}
+
+//change disk capacity
+		function disk_set_cap($disk, $cap) {
+
+			$xml = $this->domain_get_xml($domain, true);
+				$tmp = explode("\n", $xml);
+				for ($i = 0; $i < sizeof($tmp); $i++)
+					if (strpos('.'.$tmp[$i], "<target dev='".$olddev))
+						$tmp[$i] = str_replace("<target dev='".$olddev, "<target dev='".$dev, $tmp[$i]);
+
+				$xml = join("\n", $tmp);
+
+			return $this->domain_define($xml);
 		}
 	}
 ?>
