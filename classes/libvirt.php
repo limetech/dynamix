@@ -47,6 +47,7 @@
 			$uuid = $this->domain_generate_uuid();
 			$name = $domain['name'];
 			$machine = $domain['machine'];
+    		$emulator = $this->get_default_emulator();
 			$bus = "ide";
 			$ctrl = '';
 			if ($machine == 'q35'){
@@ -54,7 +55,12 @@
 	         $ctrl = "<controller type='usb' index='0' model='ich9-ehci1'/>
             	<controller type='usb' index='0' model='ich9-uhci1'/>";
 			}
-    		$emulator = $this->get_default_emulator();
+			$hyperv = '';
+			$hvclock = '';
+			if ($domain['os']){
+				$hyperv = "<hyperv> <relaxed state='on'/> <vapic state='on'/> <spinlocks state='on' retries='8191'/> </hyperv>";
+				$hvclock = " <timer name='hypervclock' present='yes'/>";
+			}
 			$pae = '';
 			if ($domain['arch']){
 				$arch = 'x86_64';
@@ -76,7 +82,7 @@
                        </hostdev>";
 				}
 			}
-			$usbtabstr = ($usbtab) ? "<input type='tablet' bus='usb'/>" : '';
+			$usbtabstr = (!empty($usbtab)) ? "<input type='tablet' bus='usb'/>" : '';
 			//disk settings
 			$diskstr = '';
 			if (!empty($disk['image']) | !empty($disk['new']) ) {
@@ -116,7 +122,7 @@
 					</disk>";
 			}
 			$driverstr = '';
-			if (!empty($media['drivers']) && (!$domain['os'])) {
+			if (!empty($media['drivers']) && ($domain['os'])) {
 				$driverstr = "<disk type='file' device='cdrom'>
 						<driver name='qemu'/>
 						<source file='{$media['drivers']}'/>
@@ -156,12 +162,14 @@
 				<features>
 					<acpi/>
 					<apic/>
+					$hyperv
 					$pae
 				</features>
 				<clock offset=\"{$domain['clock']}\">
 				  	<timer name='rtc' tickpolicy='catchup'/>
 					<timer name='pit' tickpolicy='delay'/>
 					<timer name='hpet' present='yes'/>
+					$hvclock
 				</clock>
 				<on_poweroff>destroy</on_poweroff>
 				<on_reboot>restart</on_reboot>
@@ -207,12 +215,14 @@
 					<features>
 						<acpi/>
 						<apic/>
+						$hyperv
 						$pae
 					</features>
 					<clock offset=\"{$domain['clock']}\">
 					  	<timer name='rtc' tickpolicy='catchup'/>
 						<timer name='pit' tickpolicy='delay'/>
 						<timer name='hpet' present='yes'/>
+						$hvclock
 					</clock>
 					<on_poweroff>destroy</on_poweroff>
 					<on_reboot>restart</on_reboot>
@@ -1436,11 +1446,11 @@
 		}
 	
 //change cdrom media
-		function domain_change_cdrom($domain, $iso, $dev) {
+		function domain_change_cdrom($domain, $iso, $dev, $bus) {
 			$domain = $this->get_domain_object($domain);
-   		$tmp = libvirt_domain_update_device($domain, "<disk type='file' device='cdrom'><driver name='qemu' type='raw'/><source file=".escapeshellarg($iso)."/><target dev='$dev' bus='ide'/><readonly/></disk>", VIR_DOMAIN_DEVICE_MODIFY_CONFIG);
+   		$tmp = libvirt_domain_update_device($domain, "<disk type='file' device='cdrom'><driver name='qemu' type='raw'/><source file=".escapeshellarg($iso)."/><target dev='$dev' bus='$bus'/><readonly/></disk>", VIR_DOMAIN_DEVICE_MODIFY_CONFIG);
 			if ($this->domain_is_active($domain))   		
-   			libvirt_domain_update_device($domain, "<disk type='file' device='cdrom'><driver name='qemu' type='raw'/><source file=".escapeshellarg($iso)."/><target dev='$dev' bus='ide'/><readonly/></disk>", VIR_DOMAIN_DEVICE_MODIFY_LIVE);
+   			libvirt_domain_update_device($domain, "<disk type='file' device='cdrom'><driver name='qemu' type='raw'/><source file=".escapeshellarg($iso)."/><target dev='$dev' bus='$bus'/><readonly/></disk>", VIR_DOMAIN_DEVICE_MODIFY_LIVE);
 		return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
