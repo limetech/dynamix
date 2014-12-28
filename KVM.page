@@ -19,7 +19,7 @@ if(!file_exists($domain_cfgfile)){
 }
 $domain_cfg = parse_ini_file( "$domain_cfgfile" );
 $domain_debug = $domain_cfg['DEBUG'];
-if($domain_debug != "enable")
+if($domain_debug != "yes")
 	error_reporting(0);
 $uri = 'qemu:///system';
 $lv = new Libvirt($uri, null, null, false);
