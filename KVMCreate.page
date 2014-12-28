@@ -55,7 +55,7 @@ if (array_key_exists('sent', $_POST)) {
 	</td>
 </tr>
 
-<tr id="setup2_os" style="display: table-row">
+<tr id="setup_os" style="display: table-row">
     <td align="right"><a href="http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/" target="_blank">Virtio drivers (iso):&nbsp; </a>
     <br />
     <font size="-6">(latest windows drivers)&nbsp;&nbsp;</font>
@@ -82,8 +82,8 @@ if (array_key_exists('sent', $_POST)) {
 	<td align="right">Operating System:&nbsp;</td>
 	<td>
 		<select onchange="toggleRows('os', this.value)" name="domain[os]" title="Select domain operating system type">
-			<option value="0">Windows</option>
-			<option value="1">Linux/OSX</option>
+			<option value="1">Windows</option>
+			<option value="0">Linux/OSX</option>
 		</select>
 		<label style="margin-top:0px;margin-left:50px">Architecture:&nbsp;</label>
 		<select name="domain[arch]" title="Select domain operating system type">
@@ -288,7 +288,7 @@ array_walk($usb, 'usb_checkbox');
     </td>
 </tr>
 
-<tr id="setup_os" hidden>
+<tr id="setup2_os" hidden>
     <td align="right"><b>9p Share Settings:&nbsp;</b></td>
     <td>
       <select onchange="toggleRows('shares', this.value)">
@@ -406,7 +406,7 @@ $(function(){
 		function(file) {$('#media_file').val(file);$('#media_tree').hide();},
 		function(directory) {$('#media_dir').val(directory);});
 	$('#drivers_tree').fileTree(
-		{root:'/mnt/',filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
+		{root: "<?php echo $domain_cfg['MEDIADIR'];?>",filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
 		function(file) {$('#drivers_file').val(file);$('#drivers_tree').hide();},
 		function(directory) {$('#drivers_dir').val(directory);});
 	$('#disk_tree').fileTree(
