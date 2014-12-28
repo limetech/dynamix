@@ -44,23 +44,13 @@
 		}
 
 		function domain_new($domain, $media, $nic, $disk, $usb, $usbtab, $shares) {
-			$uuid = $this->domain_generate_uuid();
 			$name = $domain['name'];
+			$mem = $domain['mem'] * 1024;
+			$maxmem = $domain['maxmem'] * 1024;
+			$uuid = $this->domain_generate_uuid();
 			$machine = $domain['machine'];
     		$emulator = $this->get_default_emulator();
-			$bus = "ide";
-			$ctrl = '';
-			if ($machine == 'q35'){
-				$bus = "sata";
-	         $ctrl = "<controller type='usb' index='0' model='ich9-ehci1'/>
-            	<controller type='usb' index='0' model='ich9-uhci1'/>";
-			}
-			$hyperv = '';
-			$hvclock = '';
-			if ($domain['os']){
-				$hyperv = "<hyperv> <relaxed state='on'/> <vapic state='on'/> <spinlocks state='on' retries='8191'/> </hyperv>";
-				$hvclock = " <timer name='hypervclock' present='yes'/>";
-			}
+
 			$pae = '';
 			if ($domain['arch']){
 				$arch = 'x86_64';
@@ -68,8 +58,33 @@
 				$arch = 'i686';
 				$pae = '<pae/>';
 			}
-			$mem = $domain['mem'] * 1024;
-			$maxmem = $domain['maxmem'] * 1024;
+
+			$bus = "ide";
+			$ctrl = '';
+			if ($machine == 'q35'){
+				$bus = "sata";
+	         $ctrl = "<controller type='usb' index='0' model='ich9-ehci1'/>
+            	<controller type='usb' index='0' model='ich9-uhci1'/>";
+			}
+			$clock =	"<clock offset=\"{$domain['clock']}\">
+				  	<timer name='rtc' tickpolicy='catchup'/>
+					<timer name='pit' tickpolicy='delay'/>
+					<timer name='hpet' present='yes'/>
+				</clock>";
+
+			$hyperv = '';
+			if ($domain['os']){
+				$hyperv = "<hyperv> <relaxed state='on'/>
+						<vapic state='on'/>
+						<spinlocks state='on'
+						retries='8191'/>
+					</hyperv>";
+				$clock = "<clock offset=\"{$domain['clock']}\">
+						<timer name='hypervclock' present='yes'/>
+						<timer name='hpet' present='no'/>
+					</clock>";
+			}
+
 			$usbstr = '';
 			if (!empty($usb)) {
 				foreach($usb as $i => $v){
@@ -84,6 +99,7 @@
 			}
 			$usbtabstr = (!empty($usbtab)) ? "<input type='tablet' bus='usb'/>" : '';
 			//disk settings
+
 			$diskstr = '';
 			if (!empty($disk['image']) | !empty($disk['new']) ) {
 				if (!$disk['settings']) {
@@ -112,6 +128,7 @@
                                                 <target bus='virtio' dev='{$disk['dev']}' />
                                          </disk>";
 			}
+
 			$mediastr = '';
 			if (!empty($media['cdrom'])) {
 				$mediastr = "<disk type='file' device='cdrom'>
@@ -121,6 +138,7 @@
 						<readonly/>
 					</disk>";
 			}
+
 			$driverstr = '';
 			if (!empty($media['drivers']) && ($domain['os'])) {
 				$driverstr = "<disk type='file' device='cdrom'>
@@ -130,6 +148,7 @@
 						<readonly/>
 					</disk>";
 			}
+
 			$netstr = '';
 			if (!empty($nic)) {
 				$netstr = "
@@ -139,6 +158,7 @@
 					      <model type='virtio'/>
 					    </interface>";
 			}
+	
 			$sharestr = '';
 			if (!empty($shares['source']) && !empty($shares['target']) ) {
 					$sharestr = "<filesystem type='mount' accessmode='passthrough'>
@@ -147,8 +167,9 @@
                            </filesystem>";
 				
 			}
+
 			if (!empty($diskstr) | !empty($mediastr)) {
-			$xml = "<domain type='kvm'>
+				$xml = "<domain type='kvm'>
 				<name>$name</name>
 				<currentMemory>$mem</currentMemory>
 				<memory>$maxmem</memory>
@@ -165,12 +186,7 @@
 					$hyperv
 					$pae
 				</features>
-				<clock offset=\"{$domain['clock']}\">
-				  	<timer name='rtc' tickpolicy='catchup'/>
-					<timer name='pit' tickpolicy='delay'/>
-					<timer name='hpet' present='yes'/>
-					$hvclock
-				</clock>
+				$clock
 				<on_poweroff>destroy</on_poweroff>
 				<on_reboot>restart</on_reboot>
 				<on_crash>restart</on_crash>
@@ -218,12 +234,7 @@
 						$hyperv
 						$pae
 					</features>
-					<clock offset=\"{$domain['clock']}\">
-					  	<timer name='rtc' tickpolicy='catchup'/>
-						<timer name='pit' tickpolicy='delay'/>
-						<timer name='hpet' present='yes'/>
-						$hvclock
-					</clock>
+					$clock
 					<on_poweroff>destroy</on_poweroff>
 					<on_reboot>restart</on_reboot>
 					<on_crash>restart</on_crash>
