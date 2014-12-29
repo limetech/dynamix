@@ -1,5 +1,6 @@
 Menu="Main:2"
 Title="Cache Devices"
+Cond="($var['fsState']=='Stopped' || isset($disk['cache']))"
 ---
 <?PHP
 /* Copyright 2014, Lime Technology
