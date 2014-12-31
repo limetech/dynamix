@@ -44,7 +44,7 @@ function device_info($disk) {
   $a = "<a href='#' class='info nohand' onclick='return false'>";
   $spin_disk = "";
   $title = "";
-  if ($display['spin'] && $var['fsState']=="Started") {
+  if ($display['spin'] && $var['fsState']=='Started') {
     $a = "<a href='update.htm?cmdSpin{$action}={$href}' class='info' target='progressFrame'>";
     $title = "Spin $action";
     $spin_disk = "<img src='/webGui/images/$action.png' class='iconwide'>Spin $action disk<br>";
@@ -52,7 +52,7 @@ function device_info($disk) {
   $ball = "/webGui/images/{$disk['color']}.png";
   $left = ($width>1590 && $display['spin']) ? " class='left'" : "";
 
-  if ($type=='Parity' || $type=='Data') {
+  if ($type=='Parity' || $type=='Data' || $type=='Preclear') {
     $status = "{$a}
     <img src='$ball' title='$title' class='icon' onclick=\"$.removeCookie('one',{path:'/'});\"><span{$left}>
     <img src='/webGui/images/green-on.png' class='icon'>Normal operation<br>
@@ -123,12 +123,7 @@ function render_used_and_free($disk) {
       echo "<td><div class='usage-disk'><span style='margin:0;width:{$free}%' class='".usage_color($free,true)."'><span>".my_scale($disk['fsFree']*1024, $unit)." $unit</span></span></div></td>";
     }
   } else {
-    if (!$display['text']) {
-      echo "<td></td><td>{$disk['fsStatus']}</td>";
-    } else {
-      echo "<td><div class='usage-disk'><span style='margin:0;width:0'></span></div></td>";
-      echo "<td><div class='usage-disk'><span style='margin:0;width:0'><span>{$disk['fsStatus']}</span></span></div></td>";
-    }
+    echo "<td>{$disk['fsStatus']}</td><td></td>";
   }
 }
 function array_offline($disk) {
@@ -274,7 +269,7 @@ function array_online($disk) {
   $errors += $disk['numErrors'];
   if (isset($disk['fsFree']) && $disk['name']!='parity') {
     $disk['fsUsed'] = $disk['fsSize'] - $disk['fsFree'];
-    $fsSize += $disk['fsSize'];
+    $fsSize += $disk['size'];
     $fsFree += $disk['fsFree'];
     $fsUsed += $disk['fsUsed'];
   }
@@ -397,16 +392,14 @@ function cache_slots() {
 }
 switch ($_POST['device']) {
 case 'array':
-  switch ($var['fsState']) {
-  case 'Started':
-    foreach ($disks as $disk) {if ($disk['type']=='Parity' || $disk['type']=='Data') array_online($disk);}
-    if ($display['total'] && $var['mdNumProtected']>1) show_totals("Array of ".my_word($var['mdNumProtected'])." disks".($disks['parity'][status]=='DISK_OK' ? " (including parity disk)" : ""));
-  break;
-  case 'Stopped':
+  if ($var['fsState']=='Stopped') {
     foreach ($disks as $disk) {if ($disk['type']=='Parity' || $disk['type']=='Data') array_offline($disk);}
     echo "<tr class='tr_last'><td><img src='/webGui/images/sum.png' class='icon'>Slots:</td><td colspan='10'>".array_slots()."</td></tr>";
     echo "<tr><td colspan='11'></td></tr>";
-  break;};
+  } else {
+    foreach ($disks as $disk) {if ($disk['type']=='Parity' || $disk['type']=='Data') array_online($disk);}
+    if ($display['total'] && $var['mdNumProtected']>1) show_totals("Array of ".my_word($var['mdNumProtected'])." disks".($disks['parity'][status]=='DISK_OK' ? " (including parity disk)" : ""));
+  }
 break;
 case 'flash':
   $disk = &$disks['flash'];
@@ -433,16 +426,14 @@ case 'flash':
   echo "</tr>";
 break;
 case 'cache':
-  switch ($var['fsState']) {
-  case 'Started':
-    foreach ($disks as $disk) {if ($disk['type']=='Cache') array_online($disk);}
-    if ($display['total'] && $var['cacheSbNumDisks']>1) show_totals("Pool of ".my_word($var['cacheSbNumDisks'])." disks");
-  break;
-  case 'Stopped':
+  if ($var['fsState']=='Stopped') {
     foreach ($disks as $disk) {if ($disk['type']=='Cache') array_offline($disk);}
     echo "<tr class='tr_last'><td><img src='/webGui/images/sum.png' class='icon'>Slots:</td><td colspan='10'>".cache_slots()."</td></tr>";
     echo "<tr><td colspan='11'></td></tr>";
-  break;}
+  } else {
+    foreach ($disks as $disk) {if ($disk['type']=='Cache') array_online($disk);}
+    if ($display['total'] && $var['cacheSbNumDisks']>1) show_totals("Pool of ".my_word($var['cacheSbNumDisks'])." disks");
+  }
 break;
 case 'open':
   $status = isset($confirm['preclear']) ? '' : '_NP';
