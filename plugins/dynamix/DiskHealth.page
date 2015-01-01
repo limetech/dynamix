@@ -23,12 +23,12 @@ $dev = $disk['device'];
 ?>
 <div id="menuDiv" style="overflow:hidden">
 <ul id="SystemProfilerStyleSidebar">
-<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=IDENTITY&amp;disk=<?=$diskname?>&amp;port=<?=$dev?>">Disk identity</a></li>
-<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=ATTRIBUTES&amp;disk=<?=$diskname?>&amp;port=<?=$dev?>">Disk attributes</a></li>
-<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=CAPABILITIES&amp;disk=<?=$diskname?>&amp;port=<?=$dev?>">Disk capabilities</a></li>
-<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=TESTLOG&amp;disk=<?=$diskname?>&amp;port=<?=$dev?>">Disk self-test log</a></li>
-<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=ERRORLOG&amp;disk=<?=$diskname?>&amp;port=<?=$dev?>">Disk error log</a></li>
-<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=SELFTEST&amp;disk=<?=$diskname?>&amp;port=<?=$dev?>">Run disk self-test</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=IDENTITY&disk=<?=$diskname?>&port=<?=$dev?>">Disk identity</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=ATTRIBUTES&disk=<?=$diskname?>&port=<?=$dev?>">Disk attributes</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=CAPABILITIES&disk=<?=$diskname?>&port=<?=$dev?>">Disk capabilities</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=TESTLOG&disk=<?=$diskname?>&port=<?=$dev?>">Disk self-test log</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=ERRORLOG&disk=<?=$diskname?>&port=<?=$dev?>">Disk error log</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=SELFTEST&disk=<?=$diskname?>&port=<?=$dev?>">Run disk self-test</a></li>
 </ul>
 <div id="mainContent"><!-- content  --></div>
 </div>
