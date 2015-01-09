@@ -74,11 +74,12 @@
 
 			$hyperv = '';
 			if ($domain['os']){
+				if ($domain['hyperv']){
 				$hyperv = "<hyperv> <relaxed state='on'/>
 						<vapic state='on'/>
 						<spinlocks state='on'
 						retries='8191'/>
-					</hyperv>";
+					</hyperv>";}
 				$clock = "<clock offset=\"{$domain['clock']}\">
 						<timer name='hypervclock' present='yes'/>
 						<timer name='hpet' present='no'/>
