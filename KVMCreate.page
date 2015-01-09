@@ -31,62 +31,16 @@ if (array_key_exists('sent', $_POST)) {
 <table class="tablesorter" id="form-table" style="margin-top:-21px;margin-left:0px"><thead><th colspan="2">Create New Virtual Machine From Template</th></thead>
 </table>
 <table style="margin-top:-5px;margin-left:0px">
-<tr>
-    <td align="right">Name:&nbsp; </td>
-    <td><input type="text" id="name" autofocus name="domain[name]" title="name of vitual machine" placeholder="name of vitual machine" /></td>
-</tr>
-
-<tr>
-    <td align="right">Description:&nbsp; </td>
-    <td><input type="text" name="desc" title="description of vitual machine" placeholder="description of vitual machine (optional)" /></td>
-</tr>
-
-<tr>
-    <td align="right">Install image (iso):&nbsp; </td>
-    <td>
-		<input type="text" id="media_file" name="media[cdrom]" placeholder="Click and Select cdrom image to install operating system">
-	</td>
-</tr>
-
-<tr>
-	<td></td>
-	<td>
-		<div style="margin-top:0px;margin-left:0px" id="media_tree" hidden></div>
-	</td>
-</tr>
-
-<tr id="setup_os" style="display: table-row">
-    <td align="right"><a href="http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/" target="_blank">Virtio drivers (iso):&nbsp; </a>
-    <br />
-    <font size="-6">(latest windows drivers)&nbsp;&nbsp;</font>
-</td>
-    <td>
-		<table style="margin-top:0px;margin-left:0px">
-			<tr>
-			    <td>
-					<input type="text" id="drivers_file" name="media[drivers]" placeholder="Download, Click and Select location of virtio drivers image">
-				</td>
-			</tr>
-		</table>
-    </td>
-</tr>
-
-<tr>
-	<td></td>
-	<td>
-		<div style="margin-top:0px;margin-left:0px" id="drivers_tree" hidden></div>
-	</td>
-</tr>
 
 <tr>
 	<td align="right">Operating System:&nbsp;</td>
 	<td>
-		<select onchange="toggleRows('os', this.value)" name="domain[os]" title="Select domain operating system type">
+		<select onchange="toggleRows('os', this.value)" name="domain[os]" autofocus title="Select domain operating system type. Windows or Other for Linux, OSX and others">
 			<option value="1">Windows</option>
-			<option value="0">Linux/OSX</option>
+			<option value="0">Other</option>
 		</select>
-		<label style="margin-top:0px;margin-left:50px">Architecture:&nbsp;</label>
-		<select name="domain[arch]" title="Select domain operating system type">
+		<label style="margin-top:0px;margin-left:54px">Architecture:&nbsp;</label>
+		<select name="domain[arch]" title="Select domain Architecture 32bit or 64bit">
 			<option value="1">64bit</option>
 			<option value="0">32bit</option>
 		</select>
@@ -103,9 +57,9 @@ if (array_key_exists('sent', $_POST)) {
 		?>
 		</select>
 		<label style="margin-top:0px;margin-left:110px">Machine:&nbsp;</label>
-		<select name="domain[machine]" title="Select domain to be permanent or temporary">
+		<select name="domain[machine]" title="Select the machine model.  pc-i440fx will work for most.  Q35 for a newer machine model with PCIE">
+			<option value="pc-i440fx-2.1">pc</option>
 			<option value="q35">q35</option>
-			<option value="pc-i440fx-2.1">i440fx</option>
 		</select>
 	</td> 
 </tr>
@@ -149,6 +103,69 @@ if (array_key_exists('sent', $_POST)) {
     </td>
 </tr>
 
+<tr id="setup2_os" style="display: table-row">
+    <td align="right">HyperV:&nbsp;
+</td>
+    <td>
+		<table style="margin-top:0px;margin-left:0px">
+			<tr>
+			<td>
+		 		<select name="domain[hyperv]" title="Hyperv tweaks for Windows.  Don't select if trying to passthrough Nvidia card">
+					<option value="0">No</option>
+					<option value="1">Yes</option>
+				</select>
+			</td>
+			</tr>
+		</table>
+    </td>
+</tr>
+
+<tr>
+    <td align="right">Name:&nbsp; </td>
+    <td><input type="text" id="name" name="domain[name]" title="name of vitual machine" placeholder="name of vitual machine" /></td>
+</tr>
+
+<tr>
+    <td align="right">Description:&nbsp; </td>
+    <td><input type="text" name="desc" title="description of vitual machine" placeholder="description of vitual machine (optional)" /></td>
+</tr>
+
+<tr>
+    <td align="right">Install image (iso):&nbsp; </td>
+    <td>
+		<input type="text" id="media_file" name="media[cdrom]" placeholder="Click and Select cdrom image to install operating system">
+	</td>
+</tr>
+
+<tr>
+	<td></td>
+	<td>
+		<div style="margin-top:0px;margin-left:-75px" id="media_tree" hidden></div>
+	</td>
+</tr>
+
+<tr id="setup_os" style="display: table-row">
+    <td align="right"><a href="http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/" target="_blank">Virtio drivers (iso):&nbsp; </a>
+    <br /></<font size="-6">(latest drivers)&nbsp;&nbsp;</font>
+</td>
+    <td>
+		<table style="margin-top:0px;margin-left:0px">
+			<tr>
+			    <td>
+					<input type="text" id="drivers_file" name="media[drivers]" placeholder="Download, Click and Select location of virtio drivers image">
+				</td>
+			</tr>
+		</table>
+    </td>
+</tr>
+
+<tr>
+	<td></td>
+	<td>
+		<div style="margin-top:0px;margin-left:-75px" id="drivers_tree" hidden></div>
+	</td>
+</tr>
+
 <tr>
     <td align="right"><b>Disk Settings:&nbsp;</b></td>
     <td>
@@ -168,7 +185,7 @@ if (array_key_exists('sent', $_POST)) {
 		<td>
 			<label style="margin-top:0px;margin-left:-28px">Directory location:&nbsp;</label>
 			<input type="text" id="new_file" name="disk[new]" placeholder="Separate sub-folder and image will be created based on Name">
-			<div style="margin-top:10px;margin-left:78px" id="new_tree" hidden></div>
+			<div style="margin-top:10px;margin-left:0px" id="new_tree" hidden></div>
 		</td>
 	</tr>
 
@@ -193,7 +210,7 @@ if (array_key_exists('sent', $_POST)) {
    </td>
 </tr>
 
-<tr id="setup2_disk" style="display: none">
+<tr id="setup3_disk" style="display: none">
     <td>&nbsp;</td>
     <td>
         <table style="margin-top:0px;margin-left:-76px" >
@@ -202,7 +219,7 @@ if (array_key_exists('sent', $_POST)) {
 		<td>
 			<label>Existing Disk:&nbsp;</label>
 			<input type="text" id="disk_file" name="disk[image]" placeholder="Select existing image to use for virtual machine">
-			<div style="margin-top:10px;margin-left:80px" id="disk_tree" hidden></div>			
+			<div style="margin-top:10px;margin-left:0px" id="disk_tree" hidden></div>			
 		</td>
 	</tr>
 	</table>
@@ -263,33 +280,36 @@ if (array_key_exists('sent', $_POST)) {
       </select>
     </td>
 </tr>
+
 <tr id="setup_usb" style="display: none">
     <td>&nbsp;</td>
     <td>
-        <table style="margin-top:0px;margin-left:10px" >
+        <table style="margin-top:0px;margin-left:-50px;width:auto; max-width:382px; word-wrap: break-word;" >
 <tr>
 	<td align="left">
+
 <?php
 
 function usb_checkbox($usb, $key)
 {
 	$deviceid = strstr($usb, 'ID');
 	$deviceid = substr($usb,3,9);
-	echo '<input class="checkbox" type="checkbox" value="'.$deviceid.'" name="usb['.$key.']" />'.$usb.'<br />';
+	echo '<input class="checkbox" type="checkbox" value="'.$deviceid.'" name="usb['.$key.']" />';
+	echo "<label>$usb</label><br />";
 }
 $usb = trim(shell_exec('lsusb'));
 $usb = explode("\n", $usb);
 array_walk($usb, 'usb_checkbox');
 ?>
 	<input class="checkbox" id="usbtab" type="checkbox" value="1" name="usbtab" title="mouse coordinates in vm match the pointer position on the real desktop" checked="checked"/> VNC Mouse/USB Tablet (uncheck for OS without desktop)
-  	</td>
+   </td>
 </tr>
 	</table>
     </td>
 </tr>
 
-<tr id="setup2_os" hidden>
-    <td align="right"><b>9p Share Settings:&nbsp;</b></td>
+<tr id="setup3_os" hidden>
+    <td align="right"><b>unRAID Shares:&nbsp;</b></td>
     <td>
       <select onchange="toggleRows('shares', this.value)">
 	<option value="0">No</option>
@@ -301,9 +321,9 @@ array_walk($usb, 'usb_checkbox');
 <tr id="setup_shares" style="display: none">
     <td>&nbsp;</td>
     <td>
-        <table style="margin-top:0px;margin-left:0px">
+        <table style="margin-top:0px;margin-left:-129px">
 <tr>
-	<td align="right">unRAID share:&nbsp;</td>
+	<td align="right">Share:&nbsp;</td>
 	<td>
 		<input type="text" value="" name="shares[source]" placeholder="e.g. /mnt...(won't work with windows)" title="path of unRAID share" />
 	</td>
@@ -338,10 +358,12 @@ array_walk($usb, 'usb_checkbox');
 function toggleRows(what, val) {
 	if (val == 1){
 		style = 'table-row';
-		style2 = 'none';}		
+		style2 = 'table-row';		
+		style3 = 'none';}		
 	else {
 		style = 'none';
-		style2 = 'table-row';}
+		style2 = 'none';
+		style3 = 'table-row';}
 	name = 'setup_'+what;
 	d = document.getElementById(name);
 	if (d != null)
@@ -350,6 +372,10 @@ function toggleRows(what, val) {
 	d = document.getElementById(name);
 	if (d != null)
 		d.style.display = style2;
+	name = 'setup3_'+what;
+	d = document.getElementById(name);
+	if (d != null)
+		d.style.display = style3;		
 }
 
 function hideRows(what, val) {
