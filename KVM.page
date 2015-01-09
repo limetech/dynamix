@@ -188,7 +188,7 @@ if ($action) {
 		if ($libvirt_running == "yes")
 			$msg = "No domains defined. Create from template or add XML.";
 		else 
-			$msg = "Libvirt is not running. Goto Settings tab then start.";
+			$msg = "Libvirt is not running. Goto Settings tab then click Start.";
 	} else {
    for ($i = 0; $i < sizeof($doms); $i++) {
    	$name = $doms[$i];
@@ -462,5 +462,5 @@ if($msg){
 		$color = 'green';
 	echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font class=\"".$color."\">".$msg."</font>');}); </script>";
 	}
-//echo '<a href="/plugins/dynamix.kvm.manager/classes/vnc.php?port=5900">VNC</a>';
+//echo '<a href="/plugins/dynamix.kvm.manager/classes/vnc.php?srv=server">VNC to webserver</a>';
 ?>
