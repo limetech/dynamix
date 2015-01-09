@@ -32,6 +32,10 @@ function showCDRom(){
     $('#cdrom_tree').focus();
 }
 
+function cdromTree() {
+
+}
+
 $(function(){
    $('#cdrom_tree').fileTree(
    	{root:'/mnt/',filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
