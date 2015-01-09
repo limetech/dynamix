@@ -25,20 +25,20 @@ if ($libvirt_curversion == "")
 			<div style="position:relative;float:left;width:50%;text-align:right; margin-bottom:24px">
 				<form name="libvirt_start_stop" method="POST" action="/update.htm" target="progressFrame">
 					<input type="hidden" name="cmd" value="/etc/rc.d/rc.libvirt stop  ">
-					<input type="submit" name="runCmd" value="Stop">
+					<input type="submit" value="Stop">
 				</form>
 			</div>
 			<div style="position:relative;float:left;width:50%;margin-bottom:24px">
 				<form name="libvirt_restart" method="POST" action="/update.htm" target="progressFrame">
 					<input type="hidden" name="cmd" value="/etc/rc.d/rc.libvirt restart  ">
-					<input type="submit" name="runCmd" value="Restart">
+					<input type="submit" value="Restart">
 				</form>
 			</div>
 		<?else:?>
 			<div style="position:relative;float:left;width:100%;text-align:center;margin-bottom:24px">
-				<form name="libvirt_start" method="POST" action="/update.htm" target="progressFrame">
-					<input type="hidden" name="cmd" value="/etc/rc.d/rc.libvirt start  " />
-					<input type="submit" name="runCmd" value="Start">
+				<form name="libvirt_start" method="POST" action="/update.php" target="progressFrame">
+					<input type="hidden" name="#command" value="/etc/rc.d/rc.libvirt start  " />
+					<input type="submit" value="Start">
 				</form>
 			</div>
 		<?endif;?>
@@ -48,7 +48,7 @@ if ($libvirt_curversion == "")
 	<?if ($var['BRIDGING'] == "no"):?>
 		<p class="red" style="margin-left:10px;margin-right:10px;"><b>WARNING:</b> You must enable bridging in network settings</p>
 	<?else:?>
-		<p class="green" style="margin-left:10px;margin-right:10px;">No messages</p>
+		<p class="green" style="margin-left:10px;margin-right:10px;">Network Bridge <?=$var['BRNAME'];?> enabled</p>
 	<?endif;?>
 </div>
 <div style="width: 59%; float:right;margin-top:-10px">
@@ -75,22 +75,22 @@ if ($libvirt_curversion == "")
 
 			<tr>
 				<td align="right"> Default Media directory:&nbsp;&nbsp; </td>
-				<td><input type="text" id="mediadir_file" name="MEDIADIR" maxlength="60" value="<?=$domain_cfg['MEDIADIR']?>" placeholder="ie. /mnt/disk1/media"></td>
+				<td><input type="text" id="mediadir_file" name="MEDIADIR" maxlength="60" value="<?=$domain_cfg['MEDIADIR']?>" placeholder="ie. /mnt/disk1/media  Double Click to Select"></td>
 			</tr>
 			<tr>
 				<td></td>
 				<td>
-					<div style="margin-top:0px;margin-left:0px" id="mediadir_tree" hidden></div>
+					<div style="margin-top:0px;margin-left:-75px" id="mediadir_tree" hidden></div>
 				</td>
 			</tr>
 			<tr>
 				<td align="right"> Default Existing VM directory:&nbsp;&nbsp;</td>
-				<td><input type="text" id="dir_file" name="DISKDIR" maxlength="60" value="<?=$domain_cfg['DISKDIR']?>" placeholder="ie. /mnt/cache/image"></td>
+				<td><input type="text" id="dir_file" name="DISKDIR" maxlength="60" value="<?=$domain_cfg['DISKDIR']?>" placeholder="ie. /mnt/cache/images  Double Click to Select"></td>
 			</tr>
 			<tr>
 				<td></td>
 				<td>
-					<div style="margin-top:0px;margin-left:0px" id="dir_tree" hidden></div>
+					<div style="margin-top:0px;margin-left:-75px" id="dir_tree" hidden></div>
 				</td>
 			</tr>
 
@@ -150,8 +150,8 @@ function showMediaDir(){
 }
 
 function hideMediaDir(){
-    $('#MediaDir_tree').on('dblclick');
-    $('#MediaDir_tree').hide();
+    $('#mediadir_tree').on('dblclick');
+    $('#mediadir_tree').hide();
 }
 
 $(function(){
