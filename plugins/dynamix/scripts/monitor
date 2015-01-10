@@ -17,7 +17,7 @@ $notify = "/usr/local/sbin/notify";
 function parse_plugin_cfg($plugin, $sections=false) {
   $vars = @parse_ini_file("/usr/local/emhttp/plugins/{$plugin}/default.cfg", $sections);
   $conf = "/boot/config/plugins/{$plugin}/{$plugin}.cfg";
-  if (is_file($conf)) $vars = array_merge($vars, parse_ini_file($conf, $sections));
+  if (is_file($conf)) $vars = array_replace_recursive($vars, parse_ini_file($conf, $sections));
   return $vars;
 }
 
