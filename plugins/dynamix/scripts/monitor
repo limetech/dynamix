@@ -13,25 +13,27 @@
 ?>
 <?
 $notify = "/usr/local/sbin/notify";
-$conf   = "/boot/config/plugins/dynamix/dynamix.cfg";
 
-$disks  = @parse_ini_file("/var/local/emhttp/disks.ini",true);
-$saved  = @parse_ini_file("/var/local/emhttp/monitor.ini",true);
-$keys   = @parse_ini_file("/usr/local/emhttp/webGui/default.cfg",true);
-
-if (is_file($conf)) $keys = array_merge($keys, parse_ini_file($conf,true));
-extract($keys);
-unset($keys);
+function parse_plugin_cfg($plugin, $sections=false) {
+  $vars = @parse_ini_file("/usr/local/emhttp/plugins/{$plugin}/default.cfg", $sections);
+  $conf = "/boot/config/plugins/{$plugin}/{$plugin}.cfg";
+  if (is_file($conf)) $vars = array_merge($vars, parse_ini_file($conf, $sections));
+  return $vars;
+}
 
 function my_temp($value) {
-  global $display;
-  $unit = $display['unit'];
-  return ($unit=='C' ? str_replace('.', $display['number'][0], $value) : round(9/5*$value+32))." $unit";
+  global $unraid;
+  $unit = $unraid['display']['unit'];
+  return ($unit=='C' ? str_replace('.', $unraid['display']['number'][0], $value) : round(9/5*$value+32))." $unit";
 }
 
 function my_disk($name) {
   return ucfirst(preg_replace('/^(disk|cache)([0-9]+)/','$1 $2',$name));
 }
+
+$disks  = @parse_ini_file("/var/local/emhttp/disks.ini",true);
+$saved  = @parse_ini_file("/var/local/emhttp/monitor.ini",true);
+$unraid = @parse_plugin_cfg("dynamix",true);
 
 foreach ($disks as $disk) {
   $name = $disk['name'];
@@ -41,7 +43,7 @@ foreach ($disks as $disk) {
   $text = my_disk($name).($name=='cache'||$name=='parity'?' disk':'');
 
 // process temperature notifications. Give messages only when changes occur!
-  $warn = $temp>=$display['max'] ? 'alert' : ($temp>=$display['hot'] ? 'warning' : '');
+  $warn = $temp>=$unraid['display']['max'] ? 'alert' : ($temp>=$unraid['display']['hot'] ? 'warning' : '');
   $item = 'temp';
   $last = isset($saved[$item][$name]) ? $saved[$item][$name] : 0;
   if ($warn) {

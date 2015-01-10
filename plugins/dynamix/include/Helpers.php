@@ -147,7 +147,7 @@ function urlencode_path($path) {
 function pgrep($process_name) {
   $pid = exec("pgrep $process_name", $output, $retval);
   return $retval == 0 ? $pid : false;
-} 
+}
 function input_secure_users($sec) {
   global $name, $users;
   echo "<table class='settings shifted'>";
@@ -156,12 +156,12 @@ function input_secure_users($sec) {
     $idx = $user['idx'];
     if ($user['name'] == "root") {
       echo "<input type='hidden' name='userAccess.$idx' value='no-access'>";
-      continue; 
+      continue;
     }
     if (in_array( $user['name'], $write_list))
       $userAccess = "read-write";
     else
-      $userAccess = "read-only"; 
+      $userAccess = "read-only";
     echo "<tr><td>{$user['name']}</td>";
     echo "<td><select name='userAccess.$idx' size='1'>";
     echo mk_option($userAccess, "read-write", "Read/Write");
@@ -179,7 +179,7 @@ function input_private_users($sec) {
     $idx = $user['idx'];
     if ($user['name'] == "root") {
       echo "<input type='hidden' name='userAccess.$idx' value='no-access'>";
-      continue; 
+      continue;
     }
     if (in_array( $user['name'], $read_list))
       $userAccess = "read-only";
@@ -198,16 +198,13 @@ function input_private_users($sec) {
 }
 // parse_plugin_cfg() takes the name of the plugin along with a boolean indication if the cfg file has
 // sections or not. We first look for a "default configuration" file in the plugin directory and initialze
-// our variables from this file. We then look for an existing persistent cfg file and if present, merge 
+// our variables from this file. We then look for an existing persistent cfg file and if present, merge
 // those values.
 //
 function parse_plugin_cfg($plugin, $sections=FALSE) {
-  $keys = parse_ini_file("plugins/{$plugin}/default.cfg", $sections);
-  
-  $ini = "/boot/config/plugins/{$plugin}/{$plugin}.cfg";
-  if (is_file($ini))
-    $keys = array_merge($keys, parse_ini_file($ini, $sections));
-  
+  $keys = @parse_ini_file("plugins/{$plugin}/default.cfg", $sections);
+  $conf = "/boot/config/plugins/{$plugin}/{$plugin}.cfg";
+  if (is_file($conf)) $keys = array_merge($keys, parse_ini_file($conf, $sections));
   return $keys;
 }
 ?>
