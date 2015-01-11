@@ -204,7 +204,6 @@ function input_private_users($sec) {
 function parse_plugin_cfg($plugin, $sections=FALSE) {
   $keys = @parse_ini_file("plugins/{$plugin}/default.cfg", $sections);
   $conf = "/boot/config/plugins/{$plugin}/{$plugin}.cfg";
-  if (is_file($conf)) $keys = array_replace_recursive($keys, parse_ini_file($conf, $sections));
-  return $keys;
+  return is_file($conf) ? array_replace_recursive($keys, parse_ini_file($conf, $sections)) : $keys;
 }
 ?>

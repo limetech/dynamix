@@ -15,10 +15,9 @@
 $notify = "/usr/local/sbin/notify";
 
 function parse_plugin_cfg($plugin, $sections=false) {
-  $vars = @parse_ini_file("/usr/local/emhttp/plugins/{$plugin}/default.cfg", $sections);
+  $keys = @parse_ini_file("/usr/local/emhttp/plugins/{$plugin}/default.cfg", $sections);
   $conf = "/boot/config/plugins/{$plugin}/{$plugin}.cfg";
-  if (is_file($conf)) $vars = array_replace_recursive($vars, parse_ini_file($conf, $sections));
-  return $vars;
+  return is_file($conf) ? array_replace_recursive($keys, parse_ini_file($conf, $sections)) : $keys;
 }
 
 function my_temp($value) {
