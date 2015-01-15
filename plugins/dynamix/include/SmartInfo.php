@@ -36,21 +36,12 @@ case "IDENTITY":
   break;
 case "ATTRIBUTES":
   exec("smartctl -A /dev/$port|awk 'NR>6'",$output);
-  $bold = count($output)<=2 ? "" : "font-weight:bold;";
+  $bold = count($output)<=2 ? "" : " style='font-weight:bold'";
   foreach ($output as $line):
     if (!$line) continue;
     $info = explode(' ', trim(preg_replace('/\s+/',' ',$line)), 10);
-    $color = "";
-    if ($info[3]<=$info[5]):
-      if (strtolower($info[6])=='pre-fail'):
-        $color = "background-color:#FF0000;color:#FFFFFF"; // red
-      else:
-        $color = "background-color:#EE6AA7;color:#FFFFFF"; // pink
-      endif;
-    elseif ($info[3]>$info[4]):
-      $color = "background-color:#EED2EE;color:#303030"; // purple
-    endif;
-    echo "<tr style='{$bold}{$color}'>";
+    $color = array_search($info[0], array(5,187,188,197,198))!==false && $info[9]>0 ? " class='red-text'" : "";
+    echo "<tr{$color}{$bold}>";
     $bold = "";
     foreach ($info as $field):
       switch ($field):

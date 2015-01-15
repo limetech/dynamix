@@ -14,13 +14,9 @@
 ?>
 <?
 function parse_plugin_cfg($plugin, $sections=FALSE) {
-  $keys = parse_ini_file("/usr/local/emhttp/plugins/{$plugin}/default.cfg", $sections);
-  
-  $ini = "/boot/config/plugins/{$plugin}/{$plugin}.cfg";
-  if (is_file($ini))
-    $keys = array_merge($keys, parse_ini_file($ini, $sections));
-  
-  return $keys;
+  $keys = @parse_ini_file("/usr/local/emhttp/plugins/{$plugin}/default.cfg", $sections);
+  $conf = "/boot/config/plugins/{$plugin}/{$plugin}.cfg";
+  return is_file($conf) ? array_replace_recursive($keys, parse_ini_file($conf, $sections)) : $keys;
 }
 
 function usage() {
@@ -38,20 +34,20 @@ notify [-e "event"] [-s "subject"] [-d "description"] [-i "normal|warning|alert"
 
 notify init
   Initialize the notification subsystem.
-  
+
 notify smtp-init
   Initialize sendmail configuration (ssmtp in our case).
-  
+
 notify get
   Output a json-encoded list of all the unread notifications.
-  
+
 notify archive file
   Move file from 'unread' state to 'archive' state.
 
 EOT;
   return 1;
 }
-  
+
 function ssmtp_init($ssmtp) {
   $conf   = $array;
   $conf[] = "# Generated";
