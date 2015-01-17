@@ -48,24 +48,6 @@ EOT;
   return 1;
 }
 
-function ssmtp_init($ssmtp) {
-  $conf   = $array;
-  $conf[] = "# Generated";
-  $conf[] = "Root={$ssmtp['root']}";
-  $conf[] = "rewriteDomain={$ssmtp['rewriteDomain']}";
-  $conf[] = "FromLineOverride=YES";
-  $conf[] = "Mailhub={$ssmtp['server']}:{$ssmtp['port']}";
-  $conf[] = "UseTLS={$ssmtp['UseTLS']}";
-  $conf[] = "UseSTARTTLS={$ssmtp['UseSTARTTLS']}";
-  if ($ssmtp['AuthMethod'] != "none") {
-    $conf[] = "AuthMethod={$ssmtp['AuthMethod']}";
-    $conf[] = "AuthUser={$ssmtp['AuthUser']}";
-    $conf[] = "AuthPass={$ssmtp['AuthPass']}";
-  }
-  $conf[] = "";
-  file_put_contents("/etc/ssmtp/ssmtp.conf", implode("\n", $conf));
-}
-
 function generate_email($event, $subject, $description, $importance, $message) {
   global $ssmtp;
 
@@ -73,8 +55,7 @@ function generate_email($event, $subject, $description, $importance, $message) {
   if ($importance == "warning" || $importance == "alert")
     $rcpt .= " ".$ssmtp['ErrorRcptTo'];
   $to = implode(",", explode(" ", trim($rcpt)));
-  if (empty($to))
-    return;
+  if (empty($to)) return;
 
   $subj = $ssmtp['Subject'] . $subject;
 
@@ -105,22 +86,13 @@ function generate_email($event, $subject, $description, $importance, $message) {
 }
 
 // start
-
-if ($argc == 1)
-  exit(usage());
-
-$method = $argv[1];
-if ($method[0] == '-')
-  $method = "add";
+if ($argc == 1) exit(usage());
 
 extract(parse_plugin_cfg("dynamix",true));
-//echo "notify "; print_r($notify);
-//echo "ssmtp "; print_r($ssmtp);
-
-$unread = "{$notify['path']}/unread";
+$unread  = "{$notify['path']}/unread";
 $archive = "{$notify['path']}/archive";
 
-switch ($method) {
+switch ($argv[1][0]=='-' ? 'add' : $argv[1]) {
 case 'init':
   @mkdir($unread,0755,true);
   @mkdir($archive,0755,true);
@@ -129,7 +101,23 @@ case 'init':
   break;
 
 case 'smtp-init':
-  ssmtp_init($ssmtp);
+  $conf   = $array;
+  $conf[] = "# Generated";
+  $conf[] = "Root={$ssmtp['root']}";
+  $domain = strtok($ssmtp['root'],'@');
+  $domain = strtok('@');
+  $conf[] = "rewriteDomain=$domain";
+  $conf[] = "FromLineOverride=YES";
+  $conf[] = "Mailhub={$ssmtp['server']}:{$ssmtp['port']}";
+  $conf[] = "UseTLS={$ssmtp['UseTLS']}";
+  $conf[] = "UseSTARTTLS={$ssmtp['UseSTARTTLS']}";
+  if ($ssmtp['AuthMethod'] != "none") {
+    $conf[] = "AuthMethod={$ssmtp['AuthMethod']}";
+    $conf[] = "AuthUser={$ssmtp['AuthUser']}";
+    $conf[] = "AuthPass={$ssmtp['AuthPass']}";
+  }
+  $conf[] = "";
+  file_put_contents("/etc/ssmtp/ssmtp.conf", implode("\n", $conf));
   break;
 
 case 'add':
@@ -172,8 +160,7 @@ case 'add':
     file_put_contents($file,"timestamp = $timestamp\nevent = $event\nsubject = $subject\ndescription = $description\nimportance = $importance\n");
   }
   if (($notify['entity'] & 2)==2 || $testing_email) {
-    if (!generate_email($event, $subject, $description, $importance, $message))
-      exit(1);
+    if (!generate_email($event, $subject, $description, $importance, $message)) exit(1);
   }
   break;
 
@@ -201,8 +188,7 @@ case 'get':
   break;
 
 case 'archive':
-  if ($argc != 3)
-    exit(usage());
+  if ($argc != 3) exit(usage());
   $file = $argv[2];
   $open = "$unread/$file";
   $closed = "$archive/$file";
