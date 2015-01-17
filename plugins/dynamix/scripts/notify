@@ -129,7 +129,7 @@ case 'add':
   $ticket = $timestamp;
   $testing_email = false;
 
-  $options = getopt("e:s:d:i:xt");
+  $options = getopt("e:s:d:i:m:xt");
   foreach ($options as $option => $value) {
     switch ($option) {
      case 'e':
