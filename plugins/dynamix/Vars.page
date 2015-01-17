@@ -14,9 +14,12 @@ Title="Vars"
  */
 ?>
 <?
+foreach ($site as &$page) $page['text'] = '...';
+$myPage['text'] = '...';
+$pages['Vars']['text'] = '...';
+$text = '...';
 ksort($site);
-foreach ($site as &$page) unset($page['text']);
 ksort($GLOBALS);
 ?>
-<pre class='up'>$GLOBALS = <?=print_r($GLOBALS);?></pre>
+<pre class='up'><?=print_r($GLOBALS);?></pre>
 <button type="button" onclick="done()">Done</button>
