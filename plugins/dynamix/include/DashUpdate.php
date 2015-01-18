@@ -102,8 +102,15 @@ case 'sys':
     echo "{$cpu}%#{$mem}%";
 break;
 case 'cpu':
-  exec("awk '/^cpu MHz/ {printf\"%4.0f MHz\\n\", $4}' /proc/cpuinfo",$speeds);
+  if (file_exists("/proc/xen"))
+    exec("xenpm get-cpufreq-states|awk '/^current frequency/{print \$4\" \"\$5}'",$speeds);
+  else
+    exec("awk '/^cpu MHz/{printf\"%4.0f MHz\\n\", $4}' /proc/cpuinfo",$speeds);
   echo implode('#',$speeds);
+break;
+case 'fan':
+  exec("sensors -uA|awk '/fan[0-9]_input/{print $2+0\" RPM\"}'",$rpms);
+  echo implode('#',$rpms);
 break;
 case 'port':
   switch ($_POST['view']) {

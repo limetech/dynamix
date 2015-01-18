@@ -15,6 +15,7 @@ Title="Statistics"
 ?>
 <?
 $cores = exec('nproc');
+$fans  = exec("sensors -uA|grep -c 'fan[0-9]_input'");
 $group = $var['shareSMBEnabled']=='yes' | $var['shareAFPEnabled']=='yes' | $var['shareNFSEnabled']=='yes';
 $names = "";
 $url   = "/webGui/include/DashUpdate.php";
@@ -102,6 +103,11 @@ function update3() {
   $.post('<?=$url?>',{cmd:'sys'},function(data) {
     if (data) $.each(data.split('#'),function(k,v) {$('#sys'+k).animate({width:v},{step:function(){$('#sys'+k).css("overflow","visible");}}).text(v);});
   });
+<?if ($fans>0):?>
+  $.post('<?=$url?>',{cmd:'fan'},function(data) {
+    if (data) $.each(data.split('#'),function(k,v) {$('#fan'+k).html(v);});
+  });
+<?endif;?>
   $.post('<?=$url?>',{cmd:'cpu'},function(data) {
     if (data) $.each(data.split('#'),function(k,v) {$('#cpu'+k).html(v);});
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
@@ -202,6 +208,18 @@ for ($c=0; $c<$cores; $c+=2):
     echo "<td>core ".($c+1)."</td><td colspan='2' class='blue' id='cpu{$c}'>";
   echo "</tr>";
 endfor;
+if ($fans>0):
+  echo $fans>2 ? "<tr><td rowspan='".ceil($fans/2)."'>" : "<tr class='wide'><td>";
+  echo "FAN speed</td>";
+  for ($f=0; $f<$fans; $f+=2):
+    if ($f) echo "<tr>";
+    if ($f+1<$fans)
+      echo "<td>fan ".($f+1)." / ".($f+2)."</td><td class='blue' id='fan{$f}'>"."</td><td class='blue' id='fan".($f+1)."'></td>";
+    else
+      echo "<td>fan ".($f+1)."</td><td colspan='2' class='blue' id='fan{$f}'>";
+    echo "</tr>";
+  endfor;
+endif;
 $scale = $display['scale'];
 $display['scale'] = 2;
 ?>
