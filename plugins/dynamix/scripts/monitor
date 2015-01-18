@@ -127,18 +127,25 @@ foreach ($disks as $disk) {
   break;}
 
 // process disk SMART notifications. Give messages only when changes occur!
-  $warn = exec("awk '$1==5 {print $10}' /var/local/emhttp/smart/{$disk['name']}");
+  unset($codes);
+  exec("awk '$1~/(5|187|188|197|198)/{print $1,$10,$2}' /var/local/emhttp/smart/{$disk['name']}", $codes);
   $item = 'smart';
-  $last = isset($saved[$item][$name]) ? $saved[$item][$name] : 0;
-  if ($warn) {
-    if (!$last) {
-      exec("$notify -e \"unRAID $text SMART failure\" -s \"Alert: $text failed SMART health check\" -d \"$info\" -i \"alert\"");
-      $saved[$item][$name] = $warn;
-    }
-  } else {
-    if ($last) {
-      exec("$notify -e \"unRAID $text SMART message\" -s \"Notice: $text passed SMART health check\" -d \"$info\" -i \"normal\"");
-      unset($saved[$item][$name]);
+  foreach ($codes as $code) {
+    if (!$code) continue;
+    $warn = explode(' ',$code);
+    $attr = "$name.{$warn[0]}";
+    $word = str_replace('_',' ',strtolower($warn[2]));
+    $last = isset($saved[$item][$attr]) ? $saved[$item][$attr] : 0;
+    if ($warn[1]>0) {
+      if ($warn[1]>$last) {
+        exec("$notify -e \"unRAID $text SMART health [{$warn[0]}]\" -s \"Warning: $word is {$warn[1]}\" -d \"$info\" -i \"warning\"");
+        $saved[$item][$attr] = $warn[1];
+      }
+    } else {
+      if ($last>0) {
+        exec("$notify -e \"unRAID $text SMART message [{$warn[0]}]\" -s \"Notice: $word returned to nominal value\" -d \"$info\" -i \"normal\"");
+        unset($saved[$item][$attr]);
+      }
     }
   }
 }
