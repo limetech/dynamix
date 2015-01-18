@@ -82,8 +82,8 @@ foreach (glob("/var/log/plugins/*.plg", GLOB_NOSORT) as $plugin_link) {
 
   // link/icon
   $icon = icon($name);
-  if (file_exists( "/usr/local/emhttp/plugins/{$name}/{$name}.page"))
-    $link = "<a href='/{$name}.page'><img src='/{$icon}' width='48px'/></a>";
+  if ($launch = plugin("launch", $plugin_file))
+    $link = "<a href='/$launch'><img src='/$icon' width='48px'/></a>";
   else
     $link = "<img src='/{$icon}' width='48px'/>";
 
