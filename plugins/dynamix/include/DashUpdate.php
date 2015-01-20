@@ -96,18 +96,22 @@ case 'disk':
   echo "<tr>".implode('',$row7)."</tr>";
 break;
 case 'sys':
-    exec("awk '/^Mem(Total|Available)/ {print $2}' /proc/meminfo",$memory);
-    $cpu = min(@file_get_contents('state/cpuload.ini'),100);
-    $mem = max(round((1-$memory[1]/$memory[0])*100),0);
-    echo "{$cpu}%#{$mem}%";
+  exec("awk '/^Mem(Total|Available)/ {print $2}' /proc/meminfo",$memory);
+  $cpu = min(@file_get_contents('state/cpuload.ini'),100);
+  $mem = max(round((1-$memory[1]/$memory[0])*100),0);
+  echo "{$cpu}%#{$mem}%";
 break;
 case 'cpu':
   if (file_exists("/proc/xen")) {
-    exec("xenpm get-cpufreq-states | awk '/^current frequency/ {print \$4\" \"\$5}'",$speeds);
+    exec("xenpm get-cpufreq-states|awk '/^current frequency/ {print \$4\" \"\$5}'",$speeds);
   } else {
     exec("awk '/^cpu MHz/ {printf\"%4.0f MHz\\n\", $4}' /proc/cpuinfo",$speeds);
   }
   echo implode('#',$speeds);
+break;
+case 'fan':
+  exec("sensors -uA|awk '/fan[0-9]_input/{print $2+0\" RPM\"}'",$rpms);
+  echo implode('#',$rpms);
 break;
 case 'port':
   switch ($_POST['view']) {

@@ -36,7 +36,6 @@ function mailcheck(form) {
     alert("Please enter a valid sending email address");
     return false;
   }
-  form.rewriteDomain.value = form.root.value.substr(form.root.value.search('@')+1);
   return true;
 }
 function passcheck(form) {
@@ -72,7 +71,6 @@ function settings(form, data) {
 <input type="hidden" name="#file"  value="dynamix/dynamix.cfg">
 <input type="hidden" name="#section" value="ssmtp">
 <input type="hidden" name="#command" value="/usr/local/sbin/notify smtp-init">
-<input type="hidden" name="rewriteDomain" value="">
 
 Preset service:
 : <select name="service" size="1" onchange="settings(this.form,this.value)">
