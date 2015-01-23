@@ -46,11 +46,18 @@ if ($libvirt_curversion == "")
 		<span class="left">Information:&#32;</span>
 	</div>
 	<?if ($var['BRIDGING'] == "no"):?>
-		<p class="red" style="margin-left:10px;margin-right:10px;"><b>WARNING:</b> You must enable bridging in network settings</p>
+		<p class="red" style="margin-left:10px;"><b>WARNING:</b> You must enable bridging in network settings</p>
 	<?else:?>
-		<p class="green" style="margin-left:10px;margin-right:10px;">Network Bridge <?=$var['BRNAME'];?> enabled</p>
+		<p class="green" style="margin-left:10px;">Network Bridge <?=$var['BRNAME'];?> enabled</p>
 	<?endif;?>
+	<div id="title">
+		<span class="left">Logfile:&#32;</span>
+	</div>
+		<p style="margin-left:15px;">
+        <a id="openlog" title="/var/log/libvirt/libvirtd.log" href="#" onclick="openWindow('/usr/bin/tail -n 42 -f /var/log/libvirt/libvirtd.log','Log Information',600,900);">/var/log/libvirt/libvirtd.log</a>
+		</p>
 </div>
+
 <div style="width: 59%; float:right;margin-top:-10px">
 	<div id="title">
 		<span class="left">Configuration:&#32;</span>
@@ -102,8 +109,16 @@ if ($libvirt_curversion == "")
 			<button type="button" style="margin-bottom:35px" onClick="done();">Done</button>
 		</div>
 	</form>
-	<br/>
 </div>
+<div hidden>
+	<div id="title"><span class="left">Log File:</span></div>  
+   	<table class="share_status wide">
+			<tr>
+         <td><a id="openlog" title="/var/log/libvirt/libvirtd.log" href="#" onclick="openWindow('/usr/bin/tail -n 42 -f /var/log/libvirt/libvirtd.log','Log Information',600,900);">/var/log/libvirt/libvirtd.log</a></td>
+         </tr>
+  </table>
+</div>
+
 <script>
 function checkDebug(form) {
 	if (form.debug.checked == false ) {
@@ -156,11 +171,11 @@ function hideMediaDir(){
 
 $(function(){
 	$('#mediadir_tree').fileTree(
-		{root:'/mnt/',filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
+		{root:'/mnt/',filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false,multiSelect:false},
 		function(file) {$('#mediadir_file').val(file);$('#mediadir_tree').hide();},
 		function(directory) {$('#mediadir_file').val(directory);});
 	$('#dir_tree').fileTree(
-		{root:'/mnt/',filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
+		{root:'/mnt/',filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false,multiSelect:false},
 		function(file) {$('#dir_file').val(file);$('#dir_tree').hide();},
 		function(directory) {$('#dir_file').val(directory);});
 	$('#dir_file').click(showDir);
