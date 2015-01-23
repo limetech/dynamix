@@ -28,7 +28,7 @@ if (array_key_exists('sent', $_POST)) {
 
 <form method="POST">
 
-<table class="tablesorter" id="form-table" style="margin-top:-21px;margin-left:0px"><thead><th colspan="2">Create New Virtual Machine From Template</th></thead>
+<table class="tablesorter" id="createvm" style="margin-top:-21px;margin-left:0px"><thead><th colspan="2">Create New Virtual Machine From Template</th></thead>
 </table>
 <table style="margin-top:-5px;margin-left:0px">
 
@@ -428,19 +428,19 @@ function hideNew(){
 
 $(function(){
 	$('#media_tree').fileTree(
-		{root: "<?php echo $domain_cfg['MEDIADIR'];?>",filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
+		{root: "<?php echo $domain_cfg['MEDIADIR'];?>",filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false,multiSelect:false},
 		function(file) {$('#media_file').val(file);$('#media_tree').hide();},
 		function(directory) {$('#media_dir').val(directory);});
 	$('#drivers_tree').fileTree(
-		{root: "<?php echo $domain_cfg['MEDIADIR'];?>",filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
+		{root: "<?php echo $domain_cfg['MEDIADIR'];?>",filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false,multiSelect:false},
 		function(file) {$('#drivers_file').val(file);$('#drivers_tree').hide();},
 		function(directory) {$('#drivers_dir').val(directory);});
 	$('#disk_tree').fileTree(
-		{root:"<?php echo $domain_cfg['DISKDIR'];?>",filter:['qcow2','qcow','img'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
+		{root:"<?php echo $domain_cfg['DISKDIR'];?>",filter:['qcow2','qcow','img','QCOW2','QCOW','IMG'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false,multiSelect:false},
 		function(file) {$('#disk_file').val(file);$('#disk_tree').hide();},
 		function(directory) {$('#disk_file').val(directory);});
 	$('#new_tree').fileTree(
-		{root:'/mnt/',filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
+		{root:'/mnt/',filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false,multiSelect:false},
 		function(file) {$('#new_file').val(file);$('#new_tree').hide();},
 		function(directory) {$('#new_file').val(directory);});
 	$('#media_file').click(showMedia);
