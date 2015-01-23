@@ -27,7 +27,7 @@
 
 		function set_logfile($filename)
 		{
-			if (!libvirt_logfile_set($filename))
+			if (!libvirt_logfile_set($filename,'10M'))
 				return $this->_set_last_error();
 
 			return true;
