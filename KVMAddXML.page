@@ -3,7 +3,7 @@ Title="Add XML"
 ---
 <div>
 	<form method="POST" id="addxml" action="?subaction=domain-define" >
-		<table class="tablesorter" style="margin-top:-21px"><thead><th colspan="2">Create New Domain XML Description</th></thead>
+		<table class="tablesorter kvm-span" style="margin-top:-21px"><thead><th colspan="2">Create New Domain XML Description</th></thead>
 			<tr>
 				<td>
 					<textarea autofocus spellcheck="false" name="xmldesc" rows="15" cols="100%" placeholder="Copy & Paste Domain XML Configuration Here."></textarea>
