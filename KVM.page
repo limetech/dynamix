@@ -4,12 +4,14 @@ Title="Virtual Machines"
 Tabs="true"
 ---
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.kvm.manager/styles/dynamix.kvm.manager.css">
-<link type="text/css" rel="stylesheet" href="/plugins/dynamix.kvm.manager/styles/fileTree.css">
-<script type="text/javascript" src="/plugins/dynamix.kvm.manager/scripts/fileTree.js"></script>
+<link type="text/css" rel="stylesheet" href="/plugins/dynamix.kvm.manager/styles/jqueryFileTree.css">
+<script type="text/javascript" src="/plugins/dynamix.kvm.manager/scripts/jqueryFileTree.js"></script>
 <script type="text/javascript" src="/plugins/dynamix.kvm.manager/scripts/kvm.js"></script>
 
 <?php
 require('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php');
+$uri = 'qemu:///system';
+$lv = new Libvirt($uri, null, null, false);
 $libvirt_running = trim ( shell_exec ( "[ -f /proc/`cat /var/run/libvirt/libvirtd.pid 2> /dev/null`/exe ] && echo 'yes' || echo 'no' 2> /dev/null" ) );
 $domain_cfgfile = "/boot/config/domain.cfg";
 if(!file_exists($domain_cfgfile)){
@@ -21,8 +23,6 @@ $domain_cfg = parse_ini_file( "$domain_cfgfile" );
 $domain_debug = $domain_cfg['DEBUG'];
 if($domain_debug != "yes")
 	error_reporting(0);
-$uri = 'qemu:///system';
-$lv = new Libvirt($uri, null, null, false);
 $action = array_key_exists('action', $_GET) ? $_GET['action'] : '';
 $subaction = array_key_exists('subaction', $_GET) ? $_GET['subaction'] : '';
 $msg = false;
@@ -304,7 +304,7 @@ if ($action) {
       	echo " | <a class='btn btn-sm btn-danger' href='?subaction=domain-undefine&amp;uuid=$uuid' 
           		 onClick=\"return confirm('Are your sure you want to remove $name?')\" title='delete domain definition'><i class='glyphicon glyphicon-remove'></i></a>
           		  | <button class='btn btn-sm btn-info' onClick=\"javascript:location.href='?action=domain-edit&amp;uuid=$uuid'\" 
-		  		title='edit domain XML'><i class='glyphicon glyphicon-plus'></i></button>";
+		  		title='edit domain XML'><i class='glyphicon glyphicon-pencil'></i></button>";
 		else
 			echo " | <button class='btn btn-sm btn-info' onClick=\"javascript:location.href='?action=domain-edit&amp;uuid=$uuid&amp;readonly=true'\" 
 		  		title='view domain XML'><i class=\"glyphicon glyphicon-open\"></i></button>";
@@ -365,11 +365,11 @@ if ($action) {
 					$bus = $tmp[$ii]['bus'];
 					echo "<tr>
 							<td>
-						<form method='post' id='cdrom_form' action='?subaction=cdrom-change&amp;uuid=$uuid&amp;dev=$dev&amp;bus=$bus' />
+						<form method='post' id='cdrom_form$ii' name='cdromform' value='$ii' action='?subaction=cdrom-change&amp;uuid=$uuid&amp;dev=$dev&amp;bus=$bus' />
 							<span>
 								<span class='text'><a href='#'>".basename($disk)."</a></span>
-								<input class='input' hidden type='text' id='cdrom_file' name='cdrom' value='$disk' title=change cdrom image'>
-								<div class='input' id='cdrom_tree' hidden></div>
+								<input class='input cdrom_file' hidden type='text' name='cdrom' value='$disk' title=change cdrom image'>
+								<div class='cdrom_tree' hidden></div>
 							</span>
 						</form>
               			</td>
@@ -462,5 +462,5 @@ if($msg){
 		$color = 'green';
 	echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font class=\"".$color."\">".$msg."</font>');}); </script>";
 	}
-//echo '<a href="/plugins/dynamix.kvm.manager/classes/vnc.php?srv=server">VNC to webserver</a>';
+//echo '<button type="button" onclick="vncOpen();">VNC</button>';
 ?>
