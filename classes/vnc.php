@@ -1,5 +1,5 @@
 <?php
-$file = '/usr/local/emhttp/plugins/dynamix.kvm.manager/vncconnect.vnc';
+/*$file = '/usr/local/emhttp/plugins/dynamix.kvm.manager/vncconnect.vnc';
 
 if(!file_exists($file))
 {
@@ -23,4 +23,7 @@ else
    else
       die("You must specify a valid server name");
 }
-?> 
+*/
+  echo "/plugins/dynamix.kvm.manager/vncconnect.vnc";
+
+?>
