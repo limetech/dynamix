@@ -2,8 +2,13 @@ function clearHistory(){
 	window.history.pushState('KVM', 'Title', '/KVM');
 }
 
-function toggle_id(itemID){ 
+function vncOpen() {
+  $.post('/plugins/dynamix.kvm.manager/classes/vnc.php',{cmd:'open',root:'<?=$docroot?>',file:'/usr/local/emhttp/plugins/dynamix.kvm.manager/vncconnect.vnc'},function(data) {
+    window.location.href = data;
+  });
+}
 
+function toggle_id(itemID){ 
    if ((document.getElementById(itemID).style.display == 'none')) { 
       document.getElementById(itemID).style.display = 'table-row';
       event.preventDefault();
@@ -27,26 +32,22 @@ function hideInput(){
 }
 
 function showCDRom(){
-    $('#cdrom_file').on('click');
-    $('#cdrom_tree').show();
-    $('#cdrom_tree').focus();
-}
-
-function cdromTree() {
-
+    $('.cdrom_file').on('click');
+    $('.cdrom_tree').show();
+    $('.cdrom_tree').focus();
 }
 
 $(function(){
-   $('#cdrom_tree').fileTree(
-   	{root:'/mnt/',filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/FileTree.php',multiFolder:false},
-   	function(file) {$('#cdrom_file').val(file);$('#cdrom_tree').hide();$('#cdrom_form').submit();},
-   	function(directory) {$('#cdrom_dir').val(directory);});
-	$('#cdrom_file').click(showCDRom);
+   $('.cdrom_tree').fileTree(
+   	{root:'/mnt/',filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false},
+   	function(file) {$('.cdrom_file').val(file);$('.cdrom_tree').hide();$('.text').hide();$('.cdrom_file').show();$('.cdrom_file').focus();},
+   	function(directory) {$('.cdrom_dir').val(directory);});
+	$('.cdrom_file').click(showCDRom);
    $('.text').click(showInput);
    $('.input').blur(hideInput);
    $('body').click(function(event) {
-    	if (!$(event.target).closest('#cdrom_file').length) {
-      	  $('#cdrom_tree').hide();
+    	if (!$(event.target).closest('.cdrom_file').length) {
+      	  $('.cdrom_tree').hide();
     	};
 	});
 });
