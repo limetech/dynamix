@@ -2,13 +2,14 @@
 /**
  * jQuery File Tree PHP Connector
  *
- * Version 1.1.0
+ * Version 1.2.0
  *
  * @author - Cory S.N. LaViska A Beautiful Site (http://abeautifulsite.net/)
  * @author - Dave Rogers - https://github.com/daverogers/jQueryFileTree
  *
  * History:
  *
+ * 1.2.0 - adding file filter and file crop- by dmacias (01/24/2015)
  * 1.1.0 - adding multiSelect (checkbox) support (08/22/2014)
  * 1.0.2 - fixes undefined 'dir' error - by itsyash (06/09/2014)
  * 1.0.1 - updated to work with foreign characters in directory/file names (12 April 2008)
@@ -31,7 +32,8 @@ if( file_exists($filepath) ) {
 		// All dirs
 		foreach( $files as $file ) {
 			if( file_exists($filepath . $file) && $file != '.' && $file != '..' && is_dir($filepath . $file) ) {
-				echo "<li class='directory collapsed'>{$checkbox}<a href='#' rel='" .htmlentities($filepath . $file). "/'>" . htmlentities($file) . "</a></li>";
+				echo "<li class='directory collapsed'>{$checkbox}<a href='#' rel='" .htmlentities($filepath . $file). 
+				"/'>" . htmlentities((strlen($file) > 33) ? substr($file,0,33).'...' : $file) . "</a></li>";
 			}
 		}
 		// All files
