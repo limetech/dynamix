@@ -23,6 +23,9 @@ $domain_cfg = parse_ini_file( "$domain_cfgfile" );
 $domain_debug = $domain_cfg['DEBUG'];
 if($domain_debug != "yes")
 	error_reporting(0);
+$dynamix_cfgfile = "/boot/config/plugins/dynamix/dynamix.cfg";
+$dynamix_cfg = parse_ini_file( "$dynamix_cfgfile" );
+$dynamix_css = $dynamix_cfg['theme'];
 $action = array_key_exists('action', $_GET) ? $_GET['action'] : '';
 $subaction = array_key_exists('subaction', $_GET) ? $_GET['subaction'] : '';
 $msg = false;
@@ -104,6 +107,13 @@ if ($action) {
       elseif ($subaction == 'domain-create') {
          if (@$_POST['xmldesc']) {
          	$xml = $_POST['xmldesc'];
+         	if (strpos($xml,'<qemu:commandline>')) {
+	  				$tmp = explode("\n", $xml);
+					for ($i = 0; $i < sizeof($tmp); $i++)
+						if (strpos('.'.$tmp[$i], "<domain type='kvm'"))
+							$tmp[$i] = "<domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>";
+					$xml = join("\n", $tmp);
+				}
            	$msg = $lv->domain_define($xml) ? "$domName definition has been changed" :
          	  	"Error: ".$lv->get_last_error();
          }
@@ -138,6 +148,12 @@ if ($action) {
 				"$domName vcpu number has been changed to $vcpu" : 
 				"Error: ".$lv->get_last_error();
 		}
+		elseif ($subaction == 'bootdev-change') {
+			$bootdev = $_GET['bootdev'];
+			$msg = $lv->domain_set_boot_device($domName, $bootdev) ? 
+				"$domName boot device has been changed to $bootdev" : 
+				"Error: ".$lv->get_last_error();
+		}
 		elseif ($subaction == 'disk-remove') {
 			$msg = $lv->domain_disk_remove($domName, $_GET['dev']) ? 
 				"$domName disk has been removed" : 
@@ -169,7 +185,7 @@ if ($action) {
    if(is_array($doms))
    	sort($doms);
    $domkeys = array_keys($doms);
-	echo "<table class='tablesorter kvm".($display['tabs']==1?" shift'":"'")." id='kvm_table'>
+	echo "<table class='tablesorter kvm id='kvm_table'>
   	      			<tr>
   	      				<thead>
   	      				<th class='header'><i class='glyphicon glyphicon-th-list'></i></th>
@@ -228,18 +244,19 @@ if ($action) {
         	$vncport = "auto";
       }else
          $vnc = '/plugins/dynamix.kvm.manager/vnc.html?autoconnect=true&host='.$var['IPADDR'].'&port='.$wsport;
-      
+		$bootdev = $lv->domain_get_boot_devices($name)[0];      
+
       unset($tmp);
       if (!$id)
         	$id = '-';
       unset($dom);
 		//Domain information
-      echo "<tr>
+      echo "<tr style='background-color:".$lv->bcolor($i,$dynamix_css)."'>
       			<td>
-						<img src='/plugins/dynamix.kvm.manager/images/".$color."-on.png'>      			
+						<img src='/plugins/dynamix.kvm.manager/images/".$color."-on.png' title='$state'>      			
       			</td>
         	      <td>
-						<a href='#' onclick=\"toggle_id('name$i')\" title='$state'>$name</a>
+						<a href='#' onclick=\"toggle_id('name$i')\" title='click for more domain info'>$name</a>
                </td>
                <td>";
      		/* display and change vcpus */
@@ -291,7 +308,7 @@ if ($action) {
               	<a class='btn btn-sm btn-default' href=\"?subaction=domain-destroy&amp;uuid=$uuid\" 
               		onClick=\"return confirm('Are your sure you want to force shutdown $name?')\" title='force domain to shutdown'><i class=\"glyphicon glyphicon-eject\"></i></a>";
  		}else {
-        	if ($state == 'paused')
+        	if ($state == 'paused' | $state == 'unknown')
         		echo "<button class='btn btn-sm btn-success' onClick=\"javascript:location.href='?subaction=domain-resume&amp;uuid=$uuid'\" 
         				title='resume domain'><i class='glyphicon glyphicon-play'></i></button> |
         			<button class='btn btn-sm btn-warning' onClick=\"javascript:location.href='?subaction=domain-save&amp;uuid=$uuid'\" 
@@ -307,15 +324,27 @@ if ($action) {
 		  		title='edit domain XML'><i class='glyphicon glyphicon-pencil'></i></button>";
 		else
 			echo " | <button class='btn btn-sm btn-info' onClick=\"javascript:location.href='?action=domain-edit&amp;uuid=$uuid&amp;readonly=true'\" 
-		  		title='view domain XML'><i class=\"glyphicon glyphicon-open\"></i></button>";
+		  		title='view domain XML'><i class=\"glyphicon glyphicon-share-alt\"></i></button>";
 			echo "</td>
 			</tr>
 			<tr id='name$i' style='display: none'>";
 		/* Disk device information */
-         echo "<td colspan='8'><table class='tablesorter domdisk".($display['tabs']==1?" shift'":"'")." id='domdisk_table'>
+         echo "<td colspan='8'><table class='tablesorter domdisk id='domdisk_table'>
          			<tr>
          				<thead>
-                  	<th class='header'><i class='glyphicon glyphicon-hdd '></i><b> Disk devices</b></th>
+                  	<th class='header'><i class='glyphicon glyphicon-hdd '></i><b> Disk devices &nbsp;</b>
+                  	<select name='boot_dev' onchange='location = this.options[this.selectedIndex].value;' title='change boot device'>
+                  	<option ";
+               //boot device select
+							if($bootdev == 'hd')
+								echo "selected ";                  	
+              	echo "value='?subaction=bootdev-change&amp;uuid=$uuid&amp;bootdev=hd'>hd</option>
+              			<option ";
+							if($bootdev == 'cdrom')
+								echo "selected ";                  	
+               echo "value='?subaction=bootdev-change&amp;uuid=$uuid&amp;bootdev=cdrom'>cd</option>
+                  	</select><font size='-6'>(boot)</font>
+                  	</th>
                      <th class='header'>Driver type</th>
                      <th class='header'>Dev Name</th>
                      <th class='header'>Capacity</th>
@@ -332,7 +361,7 @@ if ($action) {
                $disk = (array_key_exists('file', $tmp[$ii])) ? $tmp[$ii]['file'] : $tmp[$ii]['partition'];
 					$type = $tmp[$ii]['type'];
 					$dev = $tmp[$ii]['device'];
-					echo "<tr>
+					echo "<tr style='background-color:".$lv->bcolor($ii,$dynamix_css)."'>
 						   <td>".basename($disk)."</td>
 							<td>$type</td>
            				<td title='Click to change Dev Name'><form method='post' action='?subaction=domain-diskdev&amp;uuid=$uuid&amp;olddev=$dev' /><span class='diskdev' style='width:30px'>
@@ -363,13 +392,14 @@ if ($action) {
 					$type = $tmp[$ii]['type'];
 					$dev = $tmp[$ii]['device'];
 					$bus = $tmp[$ii]['bus'];
-					echo "<tr>
+					echo "<tr style='background-color:".$lv->bcolor($ii,$dynamix_css)."'>
 							<td>
-						<form method='post' id='cdrom_form$ii' name='cdromform' value='$ii' action='?subaction=cdrom-change&amp;uuid=$uuid&amp;dev=$dev&amp;bus=$bus' />
+						<form method='post' id='cdrom_form$i$ii' name='cdromform' action='?subaction=cdrom-change&amp;uuid=$uuid&amp;dev=$dev&amp;bus=$bus' />
 							<span>
 								<span class='text'><a href='#'>".basename($disk)."</a></span>
-								<input class='input cdrom_file' hidden type='text' name='cdrom' value='$disk' title=change cdrom image'>
-								<div class='cdrom_tree' hidden></div>
+								<input class='input cdrom_file' id='cdrom_file$i$ii' 
+								onclick='CDRomTree(cdrom_tree$i$ii, cdrom_file$i$ii, cdrom_form$i$ii)' hidden type='text' name='cdrom' value='$disk' title=change cdrom image'>
+								<div class='cdrom_tree' id='cdrom_tree$i$ii' hidden></div>
 							</span>
 						</form>
               			</td>
@@ -422,7 +452,7 @@ if ($action) {
 						$sval = "";}
 					else 
 						$sval = $sinfo;
-            	echo "<tr>
+            	echo "<tr style='background-color:".$lv->bcolor($ii,$dynamix_css)."'>
             		   	<td>".($ii+1)."</td>
                   	   <td>$sname</td>
                   	   <td>$date</td>
@@ -462,5 +492,5 @@ if($msg){
 		$color = 'green';
 	echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font class=\"".$color."\">".$msg."</font>');}); </script>";
 	}
-//echo '<button type="button" onclick="vncOpen();">VNC</button>';
+//echo '<button type="button" onclick="vncOpen()">VNC</button>';
 ?>
