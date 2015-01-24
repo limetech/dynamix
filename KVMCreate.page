@@ -146,7 +146,7 @@ if (array_key_exists('sent', $_POST)) {
 
 <tr id="setup_os" style="display: table-row">
     <td align="right"><a href="http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/" target="_blank">Virtio drivers (iso):&nbsp; </a>
-    <br /></<font size="-6">(latest drivers)&nbsp;&nbsp;</font>
+    <br /><font size="-6">(latest drivers)&nbsp;&nbsp;</font>
 </td>
     <td>
 		<table style="margin-top:0px;margin-left:0px">
