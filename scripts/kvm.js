@@ -31,23 +31,21 @@ function hideInput(){
     $(this).siblings('span').click(showInput);
 }
 
-function showCDRom(){
-    $('.cdrom_file').on('click');
-    $('.cdrom_tree').show();
-    $('.cdrom_tree').focus();
+function CDRomTree(cdrom_treeID, cdrom_fileID, cdrom_formID){
+   $(cdrom_treeID).fileTree(
+   	{root:'/mnt/',filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false},
+   	function(file) {$(cdrom_fileID).val(file);$(cdrom_treeID).hide();$(cdrom_formID).submit();},
+   	function(directory) {$('.cdrom_dir').val(directory);});
+	$(cdrom_treeID).show();
+   $(cdrom_treeID).focus();
+   $('body').click(function(event) {
+    	if (!$(event.target).closest(cdrom_fileID).length) {
+      	  $(cdrom_treeID).hide();
+    	};
+	});
 }
 
 $(function(){
-   $('.cdrom_tree').fileTree(
-   	{root:'/mnt/',filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false},
-   	function(file) {$('.cdrom_file').val(file);$('.cdrom_tree').hide();$('.text').hide();$('.cdrom_file').show();$('.cdrom_file').focus();},
-   	function(directory) {$('.cdrom_dir').val(directory);});
-	$('.cdrom_file').click(showCDRom);
    $('.text').click(showInput);
    $('.input').blur(hideInput);
-   $('body').click(function(event) {
-    	if (!$(event.target).closest('.cdrom_file').length) {
-      	  $('.cdrom_tree').hide();
-    	};
-	});
 });
