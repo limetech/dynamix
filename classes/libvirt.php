@@ -342,7 +342,7 @@
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-                function domain_get_screen_dimensions($domain) {
+      function domain_get_screen_dimensions($domain) {
 			$dom = $this->get_domain_object($domain);
 
 			$tmp = libvirt_domain_get_screen_dimensions($dom, $this->get_hostname() );
@@ -1305,12 +1305,12 @@
 			$domain = $this->get_domain_object($domain);
 
 			$xml = $this->domain_get_xml($domain, true);
-				$tmp = explode("\n", $xml);
-				for ($i = 0; $i < sizeof($tmp); $i++)
-					if (strpos('.'.$tmp[$i], "<target dev='".$olddev))
-						$tmp[$i] = str_replace("<target dev='".$olddev, "<target dev='".$dev, $tmp[$i]);
+			$tmp = explode("\n", $xml);
+			for ($i = 0; $i < sizeof($tmp); $i++)
+				if (strpos('.'.$tmp[$i], "<target dev='".$olddev))
+					$tmp[$i] = str_replace("<target dev='".$olddev, "<target dev='".$dev, $tmp[$i]);
 
-				$xml = join("\n", $tmp);
+			$xml = join("\n", $tmp);
 
 			return $this->domain_define($xml);
 		}
@@ -1479,5 +1479,29 @@
 
 			return $this->domain_define($xml);
 		}
+
+//change domain boot device
+		function domain_set_boot_device($domain, $bootdev) {
+
+			$xml = $this->domain_get_xml($domain, true);
+				$tmp = explode("\n", $xml);
+				for ($i = 0; $i < sizeof($tmp); $i++)
+					if (strpos('.'.$tmp[$i], "<boot dev="))
+						$tmp[$i] = "<boot dev='$bootdev'/>";
+
+				$xml = join("\n", $tmp);
+
+			return $this->domain_define($xml);
+		}
+
+//set color on even rows for white or black theme
+		function bcolor($row, $color) { 
+	      if ($color == "white")
+   		   $color = ($row % 2 == 0) ? "transparent" : "#F8F8F8";
+			else 
+	      	$color = ($row % 2 == 0) ? "transparent" : "#0C0C0C";
+	      return $color;
+	   }
+
 	}
 ?>
