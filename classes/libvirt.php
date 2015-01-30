@@ -44,21 +44,19 @@
 		}
 
 		function domain_new($domain, $media, $nic, $disk, $usb, $usbtab, $shares) {
+			$type = $domain['type'];
 			$name = $domain['name'];
 			$mem = $domain['mem'] * 1024;
 			$maxmem = $domain['maxmem'] * 1024;
 			$uuid = $this->domain_generate_uuid();
 			$machine = $domain['machine'];
     		$emulator = $this->get_default_emulator();
-
+			$password = $domain['password'];
+			$arch = $domain['arch'];
 			$pae = '';
-			if ($domain['arch']){
-				$arch = 'x86_64';
-			}else {
-				$arch = 'i686';
+			if ($arch == 'i686'){
 				$pae = '<pae/>';
 			}
-
 			$bus = "ide";
 			$ctrl = '';
 			if ($machine == 'q35'){
@@ -168,9 +166,8 @@
                            </filesystem>";
 				
 			}
-
 			if (!empty($diskstr) | !empty($mediastr)) {
-				$xml = "<domain type='kvm'>
+				$xml = "<domain type='$type'>
 				<name>$name</name>
 				<currentMemory>$mem</currentMemory>
 				<memory>$maxmem</memory>
@@ -202,7 +199,7 @@
 					$netstr
                $usbtabstr
 					<input type='mouse' bus='ps2'/>
-					<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0'>
+					<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0' passwd='$password'>
 						<listen type='address' address='0.0.0.0'/>
 					</graphics>
 					<console type='pty'/>
@@ -212,14 +209,13 @@
 					$usbstr
 				</devices>
 				</domain>";
-			//	echo "<textarea>$xml</textarea>";
 			$tmp = libvirt_domain_create_xml($this->conn, $xml);
 			if (!$tmp)
 				return $this->_set_last_error();
 				}
 
 			if ($domain['persistent']) {
-				$xml = "<domain type='kvm'>
+				$xml = "<domain type='$type'>
 					<name>$name</name>
 					<currentMemory>$mem</currentMemory>
 					<memory>$maxmem</memory>
@@ -249,7 +245,7 @@
 						$netstr
 	               $usbtabstr
 						<input type='mouse' bus='ps2'/>
-						<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0'>
+						<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0' passwd='$password'>
 							<listen type='address' address='0.0.0.0'/>
 						</graphics>
 						<console type='pty'/>
@@ -263,66 +259,6 @@
 			}
 			else
 				return $tmp;
-		}
-
-		function remove_image($image, $ignore_error_codes=false ) {
-			$tmp = libvirt_image_remove($this->conn, $image);
-			if ((!$tmp) && ($ignore_error_codes)) {
-				$err = libvirt_get_last_error();
-				$comps = explode(':', $err);
-				$err = explode('(', $comps[sizeof($comps)-1]);
-				$code = (int)Trim($err[0]);
-
-				if (in_array($code, $ignore_error_codes))
-					return true;
-			}
-
-			return ($tmp) ? $tmp : $this->_set_last_error();
-		}
-
-		function generate_connection_uri($hv, $remote, $remote_method, $remote_username, $remote_hostname, $session=false) {
-			if ($hv == 'qemu') {
-				if ($session)
-					$append_type = 'session';
-				else
-					$append_type = 'system';
-			}
-
-			if (!$remote) {
-				if ($hv == 'xen')
-					return 'xen:///';
-				if ($hv == 'qemu')
-					return 'qemu:///'.$append_type;
-
-				return false;
-			}
-
-			if ($hv == 'xen')
-				return 'xen+'.$remote_method.'://'.$remote_username.'@'.$remote_hostname;
-			else
-			if ($hv == 'qemu')
-				return 'qemu+'.$remote_method.'://'.$remote_username.'@'.$remote_hostname.'/'.$append_type;
-		}
-
-		function test_connection_uri($hv, $rh, $rm, $un, $pwd, $hn, $session=false) {
-	                $uri = $this->generate_connection_uri($hv, $rh, $rm, $un, $hn, $session);
-	                if (strlen($pwd) > 0) {
-				$credentials = array(VIR_CRED_AUTHNAME => $un, VIR_CRED_PASSPHRASE => $pwd);
-                		$test = libvirt_connect($uri, false, $credentials);
-	                }
-        	        else
-                		$test = libvirt_connect($uri);
-			$ok = is_resource($test);
-			unset($test);
-
-			if (!$ok)
-				$this->_set_last_error();
-
-			return $ok;
-		}
-
-		function print_resources() {
-			return libvirt_print_binding_resources();
 		}
 
 		function connect($uri = 'null', $login = false, $password = false) {
