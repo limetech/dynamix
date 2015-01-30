@@ -35,14 +35,14 @@ if (array_key_exists('sent', $_POST)) {
 <tr>
 	<td align="right">Operating System:&nbsp;</td>
 	<td>
-		<select onchange="toggleRows('os', this.value)" name="domain[os]" autofocus title="Select domain operating system type. Windows or Other for Linux, OSX and others">
+		<select onchange="toggleRows('windows', this.value, 'other');" name="domain[os]" autofocus title="Select domain operating system type. Windows or Other for Linux, OSX and others">
 			<option value="1">Windows</option>
 			<option value="0">Other</option>
 		</select>
 		<label style="margin-top:0px;margin-left:54px">Architecture:&nbsp;</label>
 		<select name="domain[arch]" title="Select domain Architecture 32bit or 64bit">
-			<option value="1">64bit</option>
-			<option value="0">32bit</option>
+			<option value="x86_64">64bit</option>
+			<option value="i686">32bit</option>
 		</select>
 	</td>
 </tr>
@@ -94,30 +94,28 @@ if (array_key_exists('sent', $_POST)) {
 			<option value="1">Permanent</option>
 			<option value="0">Temporary</option>
         </select>
-      <label style="margin-top:0px;margin-left:45px">Clock offset:&nbsp;</label>
+      <label style="margin-top:0px;margin-left:47px">Clock offset:&nbsp;</label>
 		<select name="domain[clock]" title="how the guest clock is synchronized to the host">
 			<option value="localtime">localtime</option>
 			<option value="utc">UTC</option>
 		</select>
-
     </td>
 </tr>
 
-<tr id="setup2_os" style="display: table-row">
-    <td align="right">HyperV:&nbsp;
-</td>
+<tr>
+    <td align="right">Autostart on boot:&nbsp;</td>
     <td>
-		<table style="margin-top:0px;margin-left:0px">
-			<tr>
-			<td>
-		 		<select name="domain[hyperv]" title="Hyperv tweaks for Windows.  Don't select if trying to passthrough Nvidia card">
-					<option value="0">No</option>
-					<option value="1">Yes</option>
-				</select>
-			</td>
-			</tr>
-		</table>
-    </td>
+        <select name="domain[autostart]" title="Select domain autostart on boot">
+			<option value="0">No</option>
+			<option value="1">Yes</option>
+        </select>
+		   <span class="windows">
+		   <label style="margin-top:0px;margin-left:100px">HyperV: &nbsp;</label>
+	 		<select name="domain[hyperv]" title="Hyperv tweaks for Windows.  Don't select if trying to passthrough Nvidia card">
+				<option value="0">No</option>
+				<option value="1">Yes</option>
+			</select>
+			</span>
 </tr>
 
 <tr>
@@ -131,9 +129,14 @@ if (array_key_exists('sent', $_POST)) {
 </tr>
 
 <tr>
+    <td align="right">Password:&nbsp; </td>
+    <td><input type="password" id="password" name="domain[password]" title="password for VNC" placeholder="Password for VNC (optional)" /></td>
+</tr>
+
+<tr>
     <td align="right">Install image (iso):&nbsp; </td>
     <td>
-		<input type="text" id="media_file" name="media[cdrom]" placeholder="Click and Select cdrom image to install operating system">
+		<input type="text" onclick='mediaTree(media_tree, media_file, "<?php echo $domain_cfg['MEDIADIR'];?>");' id="media_file" name="media[cdrom]" placeholder="Click and Select cdrom image to install operating system">
 	</td>
 </tr>
 
@@ -144,7 +147,7 @@ if (array_key_exists('sent', $_POST)) {
 	</td>
 </tr>
 
-<tr id="setup_os" style="display: table-row">
+<tr class="windows">
     <td align="right"><a href="http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/" target="_blank">Virtio drivers (iso):&nbsp; </a>
     <br /><font size="-6">(latest drivers)&nbsp;&nbsp;</font>
 </td>
@@ -152,14 +155,14 @@ if (array_key_exists('sent', $_POST)) {
 		<table style="margin-top:0px;margin-left:0px">
 			<tr>
 			    <td>
-					<input type="text" id="drivers_file" name="media[drivers]" placeholder="Download, Click and Select location of virtio drivers image">
+					<input type="text" onclick='mediaTree(drivers_tree, drivers_file, "<?php echo $domain_cfg['MEDIADIR'];?>");' id="drivers_file" name="media[drivers]" placeholder="Download, Click and Select location of virtio drivers image">
 				</td>
 			</tr>
 		</table>
     </td>
 </tr>
 
-<tr>
+<tr class="windows">
 	<td></td>
 	<td>
 		<div style="margin-top:0px;margin-left:-75px" id="drivers_tree" hidden></div>
@@ -169,14 +172,14 @@ if (array_key_exists('sent', $_POST)) {
 <tr>
     <td align="right"><b>Disk Settings:&nbsp;</b></td>
     <td>
-      <select name="disk[settings]" onchange="toggleRows('disk', this.value)">
+      <select name="disk[settings]" onchange="toggleRows('newdisk', this.value, 'existing');">
 	<option value="1">Create New Disk</option>
 	<option value="0">Use Existing Disk</option>
       </select>
     </td>
 </tr>
 
-<tr id="setup_disk" style="display: table-row">
+<tr class="newdisk">
 	<td></td>
    <td>
    <table style="margin-top:0px;margin-left:-75px" >
@@ -184,7 +187,7 @@ if (array_key_exists('sent', $_POST)) {
 	<tr>
 		<td>
 			<label style="margin-top:0px;margin-left:-28px">Directory location:&nbsp;</label>
-			<input type="text" id="new_file" name="disk[new]" placeholder="Separate sub-folder and image will be created based on Name">
+			<input type="text" onclick='newTree(new_tree, new_file, "/mnt/");' id="new_file" name="disk[new]" placeholder="Separate sub-folder and image will be created based on Name">
 			<div style="margin-top:10px;margin-left:0px" id="new_tree" hidden></div>
 		</td>
 	</tr>
@@ -210,7 +213,7 @@ if (array_key_exists('sent', $_POST)) {
    </td>
 </tr>
 
-<tr id="setup3_disk" style="display: none">
+<tr class="existing" hidden>
     <td>&nbsp;</td>
     <td>
         <table style="margin-top:0px;margin-left:-76px" >
@@ -218,8 +221,8 @@ if (array_key_exists('sent', $_POST)) {
 	<tr>
 		<td>
 			<label>Existing Disk:&nbsp;</label>
-			<input type="text" id="disk_file" name="disk[image]" placeholder="Select existing image to use for virtual machine">
-			<div style="margin-top:10px;margin-left:0px" id="disk_tree" hidden></div>			
+			<input type="text" onclick='diskTree(existing_tree, existing_file, "/mnt/");' id="existing_file" name="disk[image]" placeholder="Select existing image to use for virtual machine">
+			<div style="margin-top:10px;margin-left:0px" id="existing_tree" hidden></div>			
 		</td>
 	</tr>
 	</table>
@@ -250,7 +253,7 @@ if (array_key_exists('sent', $_POST)) {
     </td>
 </tr>	
 
-<tr id="setup_network" style="display: none">
+<tr class="network" hidden>
     <td>&nbsp;</td>
     <td>
         <table style="margin-top:0px;margin-left:-95px">
@@ -281,7 +284,7 @@ if (array_key_exists('sent', $_POST)) {
     </td>
 </tr>
 
-<tr id="setup_usb" style="display: none">
+<tr class="usb" id="setup_usb" hidden>
     <td>&nbsp;</td>
     <td>
         <table style="margin-top:0px;margin-left:-50px;width:auto; max-width:382px; word-wrap: break-word;" >
@@ -308,7 +311,7 @@ array_walk($usb, 'usb_checkbox');
     </td>
 </tr>
 
-<tr id="setup3_os" hidden>
+<tr class="other" hidden>
     <td align="right"><b>unRAID Shares:&nbsp;</b></td>
     <td>
       <select onchange="toggleRows('shares', this.value)">
@@ -318,7 +321,7 @@ array_walk($usb, 'usb_checkbox');
     </td>
 </tr>
 	
-<tr id="setup_shares" style="display: none">
+<tr class="shares" hidden>
     <td>&nbsp;</td>
     <td>
         <table style="margin-top:0px;margin-left:-129px">
@@ -350,75 +353,64 @@ array_walk($usb, 'usb_checkbox');
 
 	</table>
 		<input type="hidden" name="sent" value="1" />
+		<input type="hidden" name="domain[type]" value="<?php echo is_dir('/proc/xen') ? 'xen' : 'kvm'; ?>" />
 	</form>
 
 </div>
 
 <script type="text/javascript">
-function toggleRows(what, val) {
+
+function mediaTree(treeID, fileID, root){
+   $(treeID).fileTree(
+   	{root:''+root,filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false},
+   	function(file) {$(fileID).val(file);$(treeID).hide();},
+   	function(directory) {$('.disk_').val(directory);});
+	$(treeID).show();
+   $(treeID).focus();
+   $('body').click(function(event) {
+    	if (!$(event.target).closest(fileID).length) {
+      	  $(treeID).hide();
+    	};
+	});
+}
+
+function diskTree(treeID, fileID, root){
+   $(treeID).fileTree(
+   	{root:''+root,filter:['qcow2','qcow','img','QCOW2','QCOW','IMG'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false},
+   	function(file) {$(fileID).val(file);$(treeID).hide();},
+   	function(directory) {$('.disk_dir').val(directory);});
+	$(treeID).show();
+   $(treeID).focus();
+   $('body').click(function(event) {
+    	if (!$(event.target).closest(fileID).length) {
+      	  $(treeID).hide();
+    	};
+	});
+}
+
+function newTree(treeID, fileID, root){
+   $(treeID).fileTree(
+   	{root:''+root,filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false},
+   	function(file) {$(fileID).val(file);$(treeID).hide();},
+   	function(directory) {$(fileID).val(directory);});
+	$(treeID).show();
+   $(treeID).focus();
+   $('body').click(function(event) {
+    	if (!$(event.target).closest(fileID).length) {
+      	  $(treeID).hide();
+    	};
+	});
+}
+function toggleRows(what, val, what2) {
 	if (val == 1){
-		style = 'table-row';
-		style2 = 'table-row';		
-		style3 = 'none';}		
-	else {
-		style = 'none';
-		style2 = 'none';
-		style3 = 'table-row';}
-	name = 'setup_'+what;
-	d = document.getElementById(name);
-	if (d != null)
-		d.style.display = style;
-	name = 'setup2_'+what;
-	d = document.getElementById(name);
-	if (d != null)
-		d.style.display = style2;
-	name = 'setup3_'+what;
-	d = document.getElementById(name);
-	if (d != null)
-		d.style.display = style3;		
-}
-
-function hideRows(what, val) {
-	if (val == 1)
-		style = 'table-row';
-	else 
-		style = 'none';
-	name = 'setup_'+what;
-	d = document.getElementById(name);
-	if (d != null)
-		d.style.display = style;
-	name = 'setup2_'+what;
-	d = document.getElementById(name);
-	if (d != null)
-		d.style.display = style;
-	name = 'setup3_'+what;
-	d = document.getElementById(name);
-	if (d != null)
-		d.style.display = style;
-}
-
-function showMedia(){
-    $('#media_file').on('click');
-    $('#media_tree').show();
-    $('#media_tree').focus();
-}
-
-function showDrivers(){
-    $('#drivers_file').on('click');
-    $('#drivers_tree').show();
-    $('#drivers_tree').focus();
-}
-
-function showDisk(){
-    $('#disk_file').on('click');
-    $('#disk_tree').show();
-    $('#disk_tree').focus();
-}
-
-function showNew(){
-    $('#new_file').on('click');
-    $('#new_tree').show();
-    $('#new_tree').focus();
+		$('.'+what).show();
+		if (what2 != null)
+			$('.'+what2).hide();
+	} else {
+		$('.'+what).hide();
+		if (what2 != null)
+			$('.'+what2).show();
+	}		
 }
 
 function hideNew(){
@@ -427,40 +419,6 @@ function hideNew(){
 }
 
 $(function(){
-	$('#media_tree').fileTree(
-		{root: "<?php echo $domain_cfg['MEDIADIR'];?>",filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false,multiSelect:false},
-		function(file) {$('#media_file').val(file);$('#media_tree').hide();},
-		function(directory) {$('#media_dir').val(directory);});
-	$('#drivers_tree').fileTree(
-		{root: "<?php echo $domain_cfg['MEDIADIR'];?>",filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false,multiSelect:false},
-		function(file) {$('#drivers_file').val(file);$('#drivers_tree').hide();},
-		function(directory) {$('#drivers_dir').val(directory);});
-	$('#disk_tree').fileTree(
-		{root:"<?php echo $domain_cfg['DISKDIR'];?>",filter:['qcow2','qcow','img','QCOW2','QCOW','IMG'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false,multiSelect:false},
-		function(file) {$('#disk_file').val(file);$('#disk_tree').hide();},
-		function(directory) {$('#disk_file').val(directory);});
-	$('#new_tree').fileTree(
-		{root:'/mnt/',filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false,multiSelect:false},
-		function(file) {$('#new_file').val(file);$('#new_tree').hide();},
-		function(directory) {$('#new_file').val(directory);});
-	$('#media_file').click(showMedia);
-	$('#drivers_file').click(showDrivers);
-	$('#disk_file').click(showDisk);
-	$('#new_file').click(showNew);
 	$('#new_tree').dblclick(hideNew);
-   $('body').click(function(event) {
-    	if (!$(event.target).closest('#media_file').length) {
-      	  $('#media_tree').hide();
-    	};
-    	if (!$(event.target).closest('#drivers_file').length) {
-      	  $('#drivers_tree').hide();
-    	};
-    	if (!$(event.target).closest('#disk_file').length) {
-      	  $('#disk_tree').hide();
-    	};
-    	if (!$(event.target).closest('#new_file').length) {
-      	  $('#new_tree').hide();
-    	};
-	});
 });
 </script>
