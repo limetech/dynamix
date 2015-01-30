@@ -33,7 +33,7 @@ UL.jqueryFileTree A:hover{background:#BDF;}
 /* Dynamix tree element */
 #media_tree{width:380px;border:1px solid #E0E0E0;padding:10px 6px;}
 #drivers_tree{width:380px;border:1px solid #E0E0E0;padding:10px 6px;}
-#disk_tree{width:380px;border:1px solid #E0E0E0;padding:10px 6px;}
+#existing_tree{width:380px;border:1px solid #E0E0E0;padding:10px 6px;}
 #new_tree{width:380px;border:1px solid #E0E0E0;padding:10px 6px;}
 .cdrom_tree{width:380px;border:1px solid #E0E0E0;padding:10px 6px;}
 #mediadir_tree{width:380px;border:1px solid #E0E0E0;padding:10px 6px;}
