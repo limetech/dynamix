@@ -13,6 +13,11 @@ Title="Flash Device Settings"
  * all copies or substantial portions of the Software.
  */
 ?>
+<?if (strstr($var['flashGUID'], "No flash")):?>
+Flash GUID:
+: <?=$var['flashGUID'];?>&nbsp;
+
+<?else:?>
 Flash Vendor:
 : <?=$var['flashVendor'];?>&nbsp;
 
@@ -22,25 +27,31 @@ Flash Product:
 Flash GUID:
 : <?=$var['flashGUID'];?>&nbsp;
 
-<?if ($var['regTy']=="Basic" && strlen($var['regGUID'])):?>
-Registered GUID:
-: <?=$var['regGUID'];?> <strong>Wrong</strong>
-<?endif;?>
+<?if (strstr($var['regTo'], "Blacklisted")):?>
+&nbsp;
+: **Blacklisted** - <a href="http://lime-technology.com/contact" target="_blank">Contact Support</a>
+
+<?elseif (!strlen($var['regTm'])):?>
+&nbsp;
+: <a href="http://lime-technology.com/v6regkey?TrialGUID=<?=$var['flashGUID'];?>" target="_blank">Purchase Registration Key</a>
+
+<?else:?>
+Date Registered:
+: <?=my_time($var['regTm']);?>&nbsp;
 
 Registered to:
-: <?=$var['regTo'] ? $var['regTo'] : 'unregistered'?>
+: <?=$var['regTo'];?>&nbsp;
 
-Registration date:
-: <?=strlen(my_key()) ? my_key() : '---'?>
-
-<?if ($var['regTy']=="Basic" && !strlen($var['regGUID'])):?>
+<?if ($var['regTy']=="Basic"):?>
 &nbsp;
-: [Upgrade to ***Plus*** or go ***Pro***](http://lime-technology.com/registration-keys?BasicGUID=<?=$var['flashGUID'];?>)
+: <a href="http://lime-technology.com/v6regkey?BasicGUID=<?=$var['flashGUID'];?>" target="_blank">Upgrade to ***Plus*** or go ***Pro***</a>
 <?endif;?>
 
 <?if ($var['regTy']=="Plus"):?>
 &nbsp;
-: [Upgrade to ***Pro***](http://lime-technology.com/registration-keys?PlusGUID=<?=$var['flashGUID'];?>)
+: <a href="http://lime-technology.com/v6regkey?PlusGUID=<?=$var['flashGUID'];?>" target="_blank">Upgrade to ***Pro***</a>
+<?endif;?>
+<?endif;?>
 <?endif;?>
 
 &nbsp;

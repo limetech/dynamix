@@ -55,10 +55,6 @@ function my_word($num) {
   $words = array('zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty');
   return $num<count($words) ? $words[$num] : $num;
 }
-function my_key() {
-  $keyfile = exec("find /boot/config -name '*.key'");
-  return strlen($keyfile) ? my_time(filemtime($keyfile)) : "";
-}
 function my_usage() {
   global $disks,$var;
   $arraysize=0;
