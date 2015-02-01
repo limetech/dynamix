@@ -45,6 +45,64 @@ function CDRomTree(cdrom_treeID, cdrom_fileID, cdrom_formID){
 	});
 }
 
+function mediaTree(treeID, fileID, root){
+   $(treeID).fileTree(
+   	{root:''+root,filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false},
+   	function(file) {$(fileID).val(file);$(treeID).hide();},
+   	function(directory) {$('.disk_').val(directory);});
+	$(treeID).show();
+   $(treeID).focus();
+   $('body').click(function(event) {
+    	if (!$(event.target).closest(fileID).length) {
+      	  $(treeID).hide();
+    	};
+	});
+}
+
+function diskTree(treeID, fileID, root){
+   $(treeID).fileTree(
+   	{root:''+root,filter:['qcow2','qcow','img','QCOW2','QCOW','IMG'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false},
+   	function(file) {$(fileID).val(file);$(treeID).hide();},
+   	function(directory) {$('.disk_dir').val(directory);});
+	$(treeID).show();
+   $(treeID).focus();
+   $('body').click(function(event) {
+    	if (!$(event.target).closest(fileID).length) {
+      	  $(treeID).hide();
+    	};
+	});
+}
+
+function newTree(treeID, fileID, root){
+   $(treeID).fileTree(
+   	{root:''+root,filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false},
+   	function(file) {$(fileID).val(file);$(treeID).hide();},
+   	function(directory) {$(fileID).val(directory);});
+	$(treeID).show();
+   $(treeID).focus();
+   $('body').click(function(event) {
+    	if (!$(event.target).closest(fileID).length) {
+      	  $(treeID).hide();
+    	};
+	});
+}
+function toggleRows(what, val, what2) {
+	if (val == 1){
+		$('.'+what).show();
+		if (what2 != null)
+			$('.'+what2).hide();
+	} else {
+		$('.'+what).hide();
+		if (what2 != null)
+			$('.'+what2).show();
+	}		
+}
+
+function hideNew(){
+    $('#new_tree').on('dblclick');
+    $('#new_tree').hide();
+}
+
 $(function(){
    $('.text').click(showInput);
    $('.input').blur(hideInput);
