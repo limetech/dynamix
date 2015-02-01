@@ -12,6 +12,13 @@ Tabs="true"
 require('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php');
 $uri = is_dir('/proc/xen') ? 'xen:///system' : 'qemu:///system';
 $lv = new Libvirt($uri, null, null, false);
+$info = $lv->host_get_node_info();
+$maxcpu = (int)$info['cores']*(int)$info['threads'];
+$maxmem = number_format(($info['memory'] / 1048576), 1, '.', ' ');
+$doms = $lv->get_domains();
+if(is_array($doms))
+	sort($doms);
+
 $libvirt_running = trim ( shell_exec ( "[ -f /proc/`cat /var/run/libvirt/libvirtd.pid 2> /dev/null`/exe ] && echo 'yes' || echo 'no' 2> /dev/null" ) );
 $domain_cfgfile = "/boot/config/domain.cfg";
 if(!file_exists($domain_cfgfile)){
@@ -178,10 +185,6 @@ if ($action) {
 		}
 	echo "<script>clearHistory();</script>";
 	}
-   $doms = $lv->get_domains();
-   if(is_array($doms))
-   	sort($doms);
-   $domkeys = array_keys($doms);
 	echo "<table class='tablesorter kvm id='kvm_table'>
   	      			<tr>
   	      				<thead>
@@ -197,7 +200,7 @@ if ($action) {
               			<tbody>
             		</tr>";
    //Get domain variables for each domain
-	if (!$lv->get_domains()){
+   if(!is_array($doms)){
 		if ($libvirt_running == "yes")
 			$msg = "No domains defined. Create from template or add XML.";
 		else 
@@ -208,9 +211,6 @@ if ($action) {
       $res = $lv->get_domain_by_name($name);
       $uuid = libvirt_domain_get_uuid_string($res);
       $dom = $lv->domain_get_info($res);
-	   $info = $lv->host_get_node_info();
-	   $maxcpu = (int)$info['cores']*(int)$info['threads'];
-		$maxmem = number_format(($info['memory'] / 1048576), 1, '.', ' ');
       $id = $lv->domain_get_id($res);
       $state = $lv->domain_state_translate($dom['state']);
    	if ($state == 'running') {
@@ -224,7 +224,6 @@ if ($action) {
       	  	$color = 'red';
       }               
    	$vcpu = $dom['nrVirtCpu'];
-	   $cpused = $dom['cpuUsed'];
 		$auto = $lv->domain_get_autostart($name) ? 'checked="checked"':"";  
       if (($diskcnt = $lv->get_disk_count($res)) > 0) {
         	$disks = $diskcnt.' / '.$lv->get_disk_capacity($res);
@@ -279,10 +278,10 @@ if ($action) {
         			$mem2 = ($ii*512);
          		echo "<option value='?subaction=memory-change&amp;uuid=$uuid&amp;memory=$mem2'";
 					if ((int)$mem == $mem2)
-						echo ' selected';
-         		echo '>'.$mem2.'</option>';
+						echo " selected";
+         		echo ">$mem2</option>";
 				}
-				echo '</select>';
+				echo "</select>";
 			} else
      			echo $mem;
          echo "</td>
@@ -314,9 +313,11 @@ if ($action) {
         		echo "<button class='btn btn-sm btn-success' onClick=\"javascript:location.href='?subaction=domain-start&amp;uuid=$uuid'\" 
         				title='start domain'><i class='glyphicon glyphicon-play'></i></button>";
 		}
-      if ($state == 'shutoff' )
-      	echo " | <a class='btn btn-sm btn-danger' href='?subaction=domain-undefine&amp;uuid=$uuid' 
-          		 onClick=\"return confirm('Are your sure you want to remove $name?')\" title='delete domain definition'><i class='glyphicon glyphicon-remove'></i></a>
+      if ($state == 'shutoff')
+      	echo " | <a class='btn btn-sm btn-warning' href='?subaction=domain-undefine&amp;uuid=$uuid' 
+          		 onClick=\"return confirm('Remove $name definition?')\" title='remove $name definition'><i class='glyphicon glyphicon-minus'></i></a>
+					 | <a class='btn btn-sm btn-danger' href='?subaction=domain-remove&amp;uuid=$uuid' 
+          		 onClick=\"return confirm('Completely remove $name xml and image?')\" title='remove $name xml and image'><i class=' glyphicon glyphicon-remove'></i></a>          		  
           		  | <button class='btn btn-sm btn-info' onClick=\"javascript:location.href='?action=domain-edit&amp;uuid=$uuid'\" 
 		  		title='edit domain XML'><i class='glyphicon glyphicon-pencil'></i></button>";
 		else
@@ -422,18 +423,84 @@ if ($action) {
          }
 			/*end display cdrom display*/
          echo "</table>";
-
-			/* Snapshot  information */
-         	echo "<table class='tablesorter domsnap".($display['tabs']==1?" shift'":"'")." id='domsnap_table'>
+         
+			/* Backup  information */
+         	echo "<table class='tablesorter domsnap' id='backup_table'>
 		        	      <tr>
 		        	      <thead>
-      	      	   	<th class='header'><i class='glyphicon glyphicon-camera '></i><b> Snapshots </b><a href='?subaction=snap-create&amp;uuid=$uuid' title='create a snapshot of current domain state'><i class='glyphicon glyphicon-plus green'></i></a></th>
+      	      	   	<th class='header'><i class='glyphicon glyphicon-floppy-disk '></i><b> Backups &nbsp;&nbsp;&nbsp;</b>";
+      	          if ($state == 'shutoff')
+      	          	echo "<a href='?subaction=backup-create&amp;uuid=$uuid' title='create a backup of current domain'><i class='glyphicon glyphicon-plus green'></i></a>";
+      	          echo	"</th>
          	       		<th class='header'>Name</th>
          	       		<th class='header'>Date</th>
          	       		<th class='header'>Time</th>
          	       		<th class='header'>Description</th>
-                  		<th class='header'>Actions</th>
-                  		<th class='header'>&nbsp;</th><th class='header'></th>
+                  		<th class='header'>Actions ";
+  	         if ($state == 'running')
+  	         	echo " <small>(stop to enable)</small>";
+                  echo "</th><th class='header'></th><th class='header'></th>
+                  		</thead>
+	                  </tr>";
+         if (false) {
+         	sort($tmp);
+				for ($ii = 0; $ii < sizeof($tmp); $ii++) {
+					$sname = $tmp[$ii];
+					$date = date("D d M  Y",$sname);
+					$time = date("H:i:s",$sname);
+					$sinfo = $lv->domain_snapshot_get_info($name, $sname);
+					if(empty($sinfo)){
+						$sinfo = "Click to change description";
+						$sval = "";}
+					else 
+						$sval = $sinfo;
+            	echo "<tr style='background-color:".$lv->bcolor($ii,$theme)."'>
+            		   	<td>".($ii+1)."</td>
+                  	   <td>$sname</td>
+                  	   <td>$date</td>
+                  	   <td>$time</td>
+                  	   <td><form method='post' action='?subaction=snap-desc&amp;uuid=$uuid&amp;sname=$sname' /><span class='snapdesc'>
+    									<span class='text'><a href='#'> $sinfo </a></span>
+    									<input class='input' type='text' name='snapdesc' value='$sval' val='snapdesc' hidden placeholder='Click to change description' title='Click to change description'/>
+									 </span></form>
+								</td>
+   	                  <td>
+   	                  	revert &nbsp;<a href='?subaction=snap-revert&amp;uuid=$uuid&amp;sname=$sname'><i class='glyphicon glyphicon-refresh lightblue'></i></a>
+            	         </td>                               
+   	                  <td>
+									delete&nbsp;<a href='?subaction=snap-delete&amp;uuid=$uuid&amp;sname=$sname'><i class='glyphicon glyphicon-remove red'></i></a>
+            	          </td>                               
+               	   </tr>";
+				}
+         }
+         else
+         	echo "<tr><td>no backups</td>
+   	                <td>none</td>                               
+   	                <td>N/A</td>                               
+   	                <td>N/A</td>                               
+   	                <td>N/A</td>                               
+   	                <td>N/A</td>
+   	            </tr>";                              
+     	echo '</table>';
+
+/* End Backup information*/
+
+			/* Snapshot  information */
+         	echo "<table class='tablesorter domsnap' id='domsnap_table'>
+		        	      <tr>
+		        	      <thead>
+      	      	   	<th class='header'><i class='glyphicon glyphicon-camera '></i><b> Snapshots </b>";
+  	         if ($state == 'shutoff')
+						echo "<a href='?subaction=snap-create&amp;uuid=$uuid' title='create a snapshot of current domain state'><i class='glyphicon glyphicon-plus green'></i></a>";
+						echo "</th>
+         	       		<th class='header'>Name</th>
+         	       		<th class='header'>Date</th>
+         	       		<th class='header'>Time</th>
+         	       		<th class='header'>Description</th>
+                  		<th class='header'>Actions ";
+  	         if ($state == 'running')
+  	         	echo " <small>(stop to enable)</small>";
+                  echo "</th><th class='header'></th><th class='header'></th>
                   		</thead>
 	                  </tr>";
          $tmp = $lv->domain_snapshots_list($res); 
@@ -482,6 +549,7 @@ if ($action) {
 	}
 	echo '</table>';
 }
+/* End Snapshot information */
 if($msg){
 	if(strpos($msg, "rror:"))
 		$color = 'red';
@@ -489,5 +557,4 @@ if($msg){
 		$color = 'green';
 	echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font class=\"".$color."\">".$msg."</font>');}); </script>";
 	}
-//echo '<button type="button" onclick="vncOpen()">VNC</button>';
 ?>
