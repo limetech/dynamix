@@ -59,7 +59,7 @@
 			}
 			$bus = "ide";
 			$ctrl = '';
-			if ($machine == 'q35'){
+			if ($machine == 'pc-q35-2.1'){
 				$bus = "sata";
 	         $ctrl = "<controller type='usb' index='0' model='ich9-ehci1'/>
             	<controller type='usb' index='0' model='ich9-uhci1'/>";
@@ -1001,6 +1001,16 @@
 			return $var;
 		}
 
+		function domain_get_machine($domain) {
+			$domain = $this->get_domain_object($domain);
+
+			$tmp = $this->get_xpath($domain, '//domain/os/type/@machine', false);
+			$var = $tmp[0];
+			unset($tmp);
+
+			return $var;
+		}
+
 		function domain_get_description($domain) {
 			$tmp = $this->get_xpath($domain, '//domain/description', false);
 			$var = $tmp[0];
@@ -1027,6 +1037,14 @@
 
 		function domain_get_memory($domain) {
 			$tmp = $this->get_xpath($domain, '//domain/memory', false);
+			$var = $tmp[0];
+			unset($tmp);
+
+			return $var;
+		}
+
+		function domain_get_current_memory($domain) {
+			$tmp = $this->get_xpath($domain, '//domain/currentMemory', false);
 			$var = $tmp[0];
 			unset($tmp);
 
@@ -1179,6 +1197,31 @@
 
 			return array('pci' => $devs_pci, 'usb' => $devs_usb);
 		}
+
+      function get_nic_info($domain) {
+         $macs = $this->get_xpath($domain, "//domain/devices/interface/mac/@address", false);
+			$net = $this->get_xpath($domain, "//domain/devices/interface/@type", false);
+			$bridge = $this->get_xpath($domain, "//domain/devices/interface/source/@bridge", false);
+			if (!$macs)
+				return $this->_set_last_error();
+			$ret = array();
+			for ($i = 0; $i < $macs['num']; $i++) {
+				if ($net[$i] != 'bridge')
+					$tmp = libvirt_domain_get_network_info($domain, $macs[$i]);
+				if ($tmp)
+					$ret[] = $tmp;
+				else {
+					$this->_set_last_error();
+					$ret[] = array(
+							'mac' => $macs[$i],
+							'network' => $bridge[$i],
+							'nic_type' => 'virtio'
+							);
+				}
+			}
+
+        return $ret;
+       }
 
 		function domain_set_feature($domain, $feature, $val) {
 			$domain = $this->get_domain_object($domain);
