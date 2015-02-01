@@ -121,11 +121,10 @@ case 'smtp-init':
 
 case 'cron-init':
   $cron = "/tmp/cron.tmp";
-  exec("crontab -l|grep -v '# Array status notification'|grep -v '/usr/local/sbin/statuscheck' >$cron");
-  if (!empty($notify['status'])) {
-    file_put_contents($cron, "# Array status notification\n", FILE_APPEND);
-    file_put_contents($cron, "{$notify['status']} /usr/local/sbin/statuscheck 1>/dev/null 2>&1\n", FILE_APPEND);
-  }
+  $note = "# Array status notification";
+  $util = "/usr/local/sbin/statuscheck";
+  exec("crontab -l|grep -v '$note'|grep -v '$util' >$cron");
+  if (!empty($notify['status'])) file_put_contents($cron, "$note\n{$notify['status']} $util 1>/dev/null 2>&1\n", FILE_APPEND);
   exec("crontab $cron");
   unlink($cron);
   break;
