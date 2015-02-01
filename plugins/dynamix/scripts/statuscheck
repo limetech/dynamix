@@ -41,8 +41,10 @@ function read_temp($name) {
 }
 
 $disks  = parse_ini_file("/var/local/emhttp/disks.ini",true);
+$var    = parse_ini_file("/var/local/emhttp/var.ini");
 $unraid = parse_plugin_cfg("dynamix",true);
 $report = $unraid['notify']['report'];
+$server = strtoupper($var['NAME']);
 $active = array();
 $parity = false;
 $cache  = false;
@@ -70,7 +72,7 @@ $warn = $error ? "warning" : "normal";
 $stat = $error ? "[FAIL]" : "[PASS]";
 $info = "Array has $size disk".($size==1 ? "" : "s").($parity ? " ({$word}parity".($cache ? " & cache)" : ")") : ($cache ? " ({$word}cache)" : ""));
 $message = implode('\n', $active);
-exec("$notify -s \"Notice - array health report $stat\" -d \"$info\" -m \"$message\" -i \"$warn $report\"");
+exec("$notify -s \"Notice [$server] - array health report $stat\" -d \"$info\" -m \"$message\" -i \"$warn $report\"");
 
 exit(0);
 ?>
