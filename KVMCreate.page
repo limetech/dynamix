@@ -16,17 +16,17 @@ if (array_key_exists('sent', $_POST)) {
 	}
 }
 
-  $ci  = $lv->get_connect_information();
-  unset($ci);
-  $info = $lv->host_get_node_info();
-  $info = $lv->host_get_node_info();
-  $maxcpu = (int)$info['cores']*(int)$info['threads'];
-  $maxmem = number_format(($info['memory'] / 1048576), 0, '.', ' ');
+	function memOption($maxmem) {
+   	for ($i = 1; $i <= ($maxmem*2); $i++) {
+      	$mem = ($i*512);
+         echo "<option value='$mem'>$mem</option>";
+		}
+	}
 ?>
 
 <div id="content">
 
-<form method="POST">
+<form id="createform" method="POST">
 
 <table class="tablesorter" id="createvm" style="margin-top:-21px;margin-left:0px"><thead><th colspan="2">Create New Virtual Machine From Template</th></thead>
 </table>
@@ -59,7 +59,7 @@ if (array_key_exists('sent', $_POST)) {
 		<label style="margin-top:0px;margin-left:110px">Machine:&nbsp;</label>
 		<select name="domain[machine]" title="Select the machine model.  pc-i440fx will work for most.  Q35 for a newer machine model with PCIE">
 			<option value="pc-i440fx-2.1">pc</option>
-			<option value="q35">q35</option>
+			<option value="pc-q35-2.1">q35</option>
 		</select>
 	</td> 
 </tr>
@@ -68,21 +68,11 @@ if (array_key_exists('sent', $_POST)) {
     <td align="right"> Memory (MiB):&nbsp; </td>
     <td>
 		<select name="domain[mem]" title="define the amount memory">
-		<?php
-   	     for ($i = 1; $i <= ($maxmem*2); $i++) {
-      	  		$mem = ($i*512);
-         	   echo '<option value="'.$mem.'">'.$mem.'</option>';
-				}
-		?>
+		<?php memOption($maxmem);?>
 		</select>
 		<label style="margin-top:0px;margin-left:45px">Max. Mem (MiB):&nbsp;</label>
 		<select name="domain[maxmem]" title="define the maximun amount of memory">
-		<?php
-   	     for ($i = 1; $i <= ($maxmem*2); $i++) {
-      	  		$mem = ($i*512);
-         	   echo '<option value="'.$mem.'">'.$mem.'</option>';
-				}
-		?>
+		<?php memOption($maxmem);?>
 		</select>
 	</td> 
 </tr>
@@ -120,21 +110,21 @@ if (array_key_exists('sent', $_POST)) {
 
 <tr>
     <td align="right">Name:&nbsp; </td>
-    <td><input type="text" id="name" name="domain[name]" title="name of vitual machine" placeholder="name of vitual machine" /></td>
+    <td><input type="text" name="domain[name]" title="name of vitual machine" placeholder="name of vitual machine" /></td>
 </tr>
 
 <tr>
     <td align="right">Description:&nbsp; </td>
-    <td><input type="text" name="desc" title="description of vitual machine" placeholder="description of vitual machine (optional)" /></td>
+    <td><input type="text" name="domain[desc]" title="description of vitual machine" placeholder="description of vitual machine (optional)" /></td>
 </tr>
 
 <tr>
     <td align="right">Password:&nbsp; </td>
-    <td><input type="password" id="password" name="domain[password]" title="password for VNC" placeholder="Password for VNC (optional)" /></td>
+    <td><input type="password" name="domain[password]" title="password for VNC" placeholder="Password for VNC (optional)" /></td>
 </tr>
 
 <tr>
-    <td align="right">Install image (iso):&nbsp; </td>
+    <td align="right">CDRom (iso):&nbsp; </td>
     <td>
 		<input type="text" onclick='mediaTree(media_tree, media_file, "<?php echo $domain_cfg['MEDIADIR'];?>");' id="media_file" name="media[cdrom]" placeholder="Click and Select cdrom image to install operating system">
 	</td>
@@ -155,7 +145,7 @@ if (array_key_exists('sent', $_POST)) {
 		<table style="margin-top:0px;margin-left:0px">
 			<tr>
 			    <td>
-					<input type="text" onclick='mediaTree(drivers_tree, drivers_file, "<?php echo $domain_cfg['MEDIADIR'];?>");' id="drivers_file" name="media[drivers]" placeholder="Download, Click and Select location of virtio drivers image">
+					<input type="text" onclick='mediaTree(drivers_tree, drivers_file, "<?php echo $domain_cfg['MEDIADIR'];?>");' id="drivers_file" name="media[drivers]" placeholder="Download, Click and Select virtio drivers image">
 				</td>
 			</tr>
 		</table>
@@ -256,7 +246,7 @@ if (array_key_exists('sent', $_POST)) {
 <tr class="network" hidden>
     <td>&nbsp;</td>
     <td>
-        <table style="margin-top:0px;margin-left:-95px">
+        <table style="margin-top:0px;margin-left:-105px">
 			<tr>
 		   	<td align="right">MAC:&nbsp;</td>
    			<td>
@@ -284,7 +274,7 @@ if (array_key_exists('sent', $_POST)) {
     </td>
 </tr>
 
-<tr class="usb" id="setup_usb" hidden>
+<tr class="usb" hidden>
     <td>&nbsp;</td>
     <td>
         <table style="margin-top:0px;margin-left:-50px;width:auto; max-width:382px; word-wrap: break-word;" >
@@ -304,7 +294,7 @@ $usb = trim(shell_exec('lsusb'));
 $usb = explode("\n", $usb);
 array_walk($usb, 'usb_checkbox');
 ?>
-	<input class="checkbox" id="usbtab" type="checkbox" value="1" name="usbtab" title="mouse coordinates in vm match the pointer position on the real desktop" checked="checked"/> VNC Mouse/USB Tablet (uncheck for OS without desktop)
+	<input class="checkbox" type="checkbox" value="1" name="usbtab" title="mouse coordinates in vm match the pointer position on the real desktop" checked="checked"/> VNC Mouse/USB Tablet (uncheck for OS without desktop)
    </td>
 </tr>
 	</table>
@@ -359,64 +349,6 @@ array_walk($usb, 'usb_checkbox');
 </div>
 
 <script type="text/javascript">
-
-function mediaTree(treeID, fileID, root){
-   $(treeID).fileTree(
-   	{root:''+root,filter:['iso','ISO'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false},
-   	function(file) {$(fileID).val(file);$(treeID).hide();},
-   	function(directory) {$('.disk_').val(directory);});
-	$(treeID).show();
-   $(treeID).focus();
-   $('body').click(function(event) {
-    	if (!$(event.target).closest(fileID).length) {
-      	  $(treeID).hide();
-    	};
-	});
-}
-
-function diskTree(treeID, fileID, root){
-   $(treeID).fileTree(
-   	{root:''+root,filter:['qcow2','qcow','img','QCOW2','QCOW','IMG'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false},
-   	function(file) {$(fileID).val(file);$(treeID).hide();},
-   	function(directory) {$('.disk_dir').val(directory);});
-	$(treeID).show();
-   $(treeID).focus();
-   $('body').click(function(event) {
-    	if (!$(event.target).closest(fileID).length) {
-      	  $(treeID).hide();
-    	};
-	});
-}
-
-function newTree(treeID, fileID, root){
-   $(treeID).fileTree(
-   	{root:''+root,filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false},
-   	function(file) {$(fileID).val(file);$(treeID).hide();},
-   	function(directory) {$(fileID).val(directory);});
-	$(treeID).show();
-   $(treeID).focus();
-   $('body').click(function(event) {
-    	if (!$(event.target).closest(fileID).length) {
-      	  $(treeID).hide();
-    	};
-	});
-}
-function toggleRows(what, val, what2) {
-	if (val == 1){
-		$('.'+what).show();
-		if (what2 != null)
-			$('.'+what2).hide();
-	} else {
-		$('.'+what).hide();
-		if (what2 != null)
-			$('.'+what2).show();
-	}		
-}
-
-function hideNew(){
-    $('#new_tree').on('dblclick');
-    $('#new_tree').hide();
-}
 
 $(function(){
 	$('#new_tree').dblclick(hideNew);
