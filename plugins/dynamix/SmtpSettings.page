@@ -107,17 +107,12 @@ Preset service:
 Sending email address:
 : <input type="text" name="root" value="<?=$ssmtp['root']?>">
 
-> Email address for your mail account. This address is used as sender of the notifications.
+> Email address of your mail account. This address is used as sender of the notifications.
 
 Email recipients:
 : <input type="text" name="RcptTo" value="<?=$ssmtp['RcptTo']?>">
 
-> Recipients of status and error notifications. Separate multiple email addresses with a space, leave empty if you want to receive errors only.
-
-Error recipients:
-: <input type="text" name="ErrorRcptTo" value="<?=$ssmtp['ErrorRcptTo']?>">
-
-> Recipients of error only notifications. Separate multiple email addresses with a space.
+> Recipients of status and error notifications. Specify one or more email addresses, separate multiple email addresses with a space.
 
 Priority in header:
 : <select name="SetEmailPriority" size="1">

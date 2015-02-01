@@ -52,12 +52,10 @@ function generate_email($event, $subject, $description, $importance, $message) {
   global $ssmtp;
 
   $rcpt = $ssmtp['RcptTo'];
-  if ($importance == "warning" || $importance == "alert")
-    $rcpt .= " ".$ssmtp['ErrorRcptTo'];
-  $to = implode(",", explode(" ", trim($rcpt)));
+  $to = implode(',', explode(' ', trim($rcpt)));
   if (empty($to)) return;
 
-  $subj = $ssmtp['Subject'] . $subject;
+  $subj = "{$ssmtp['Subject']}$subject";
 
   $headers   = array();
   $headers[] = "MIME-Version: 1.0";
@@ -77,8 +75,9 @@ function generate_email($event, $subject, $description, $importance, $message) {
   $body[]    = "Description: $description";
   $body[]    = "Importance: $importance";
   if (!empty($message)) {
-    $body[]    = "";
-    $body[]    = "$message";
+    $body[]  = "";
+    foreach (explode('\n',$message) as $line)
+    $body[]  = $line;
   }
   $body[]    = "";
 
@@ -120,14 +119,27 @@ case 'smtp-init':
   file_put_contents("/etc/ssmtp/ssmtp.conf", implode("\n", $conf));
   break;
 
+case 'cron-init':
+  $cron = "/tmp/cron.tmp";
+  exec("crontab -l|grep -v '# Array status notification'|grep -v '/usr/local/sbin/statuscheck' >$cron");
+  if (!empty($notify['status'])) {
+    file_put_contents($cron, "# Array status notification\n", FILE_APPEND);
+    file_put_contents($cron, "{$notify['status']} /usr/local/sbin/statuscheck 1>/dev/null 2>&1\n", FILE_APPEND);
+  }
+  exec("crontab $cron");
+  unlink($cron);
+  break;
+
 case 'add':
   $event = 'unRAID Status';
   $subject = 'Notification';
   $description = 'No description';
   $importance = 'normal';
+  $message = '';
   $timestamp = time();
   $ticket = $timestamp;
-  $testing_email = false;
+  $mailtest = false;
+  $overrule = false;
 
   $options = getopt("e:s:d:i:m:xt");
   foreach ($options as $option => $value) {
@@ -142,7 +154,8 @@ case 'add':
       $description = $value;
       break;
      case 'i':
-      $importance = $value;
+      $importance = strtok($value,' ');
+      $overrule = strtok(' ');
       break;
      case 'm':
       $message = $value;
@@ -151,17 +164,17 @@ case 'add':
       $ticket = 'ticket';
       break;
      case 't':
-      $testing_email = true;
+      $mailtest = true;
       break;
     }
   }
-  if (($notify['entity'] & 1)==1 && !$testing_email) {
-    $file = "{$unread}/{$event}-{$ticket}.notify";
-    file_put_contents($file,"timestamp = $timestamp\nevent = $event\nsubject = $subject\ndescription = $description\nimportance = $importance\n");
-  }
-  if (($notify['entity'] & 2)==2 || $testing_email) {
-    if (!generate_email($event, $subject, $description, $importance, $message)) exit(1);
-  }
+  $unread = "{$unread}/{$event}-{$ticket}.notify";
+  $archive = "{$archive}/{$event}-{$ticket}.notify";
+  if (file_exists($archive)) break;
+  $entity = $overrule===false ? $notify[$importance] : $overrule;
+  if (($entity & 1)==1 && !$mailtest) file_put_contents($unread,"timestamp = $timestamp\nevent = $event\nsubject = $subject\ndescription = $description\nimportance = $importance\n");
+  if (($entity & 2)==2 || $mailtest) if (!generate_email($event, $subject, $description, $importance, $message)) exit(1);
+  if (!$mailtest) file_put_contents($archive,"timestamp = $timestamp\nevent = $event\nsubject = $subject\ndescription = $description\nimportance = $importance\n");
   break;
 
 case 'get':
@@ -189,10 +202,8 @@ case 'get':
 
 case 'archive':
   if ($argc != 3) exit(usage());
-  $file = $argv[2];
-  $open = "$unread/$file";
-  $closed = "$archive/$file";
-  if (file_exists($open)) {rename($open, $closed); chmod($closed,0666);}
+  $file = "$unread/{$argv[2]}";
+  if (file_exists($file)) unlink($file);
   break;
 }
 
