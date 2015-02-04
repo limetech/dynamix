@@ -20,8 +20,8 @@ function parse_plugin_cfg($plugin, $sections=false) {
   return is_file($conf) ? array_replace_recursive($keys, parse_ini_file($conf, $sections)) : $keys;
 }
 
-function my_var($item) {
-  return exec("awk -F'\"' '/^'$item'=/ {print $2}' /var/local/emhttp/var.ini");
+function my_var($key) {
+  return exec("awk -F= '/^'$key'/ {print $2}' /proc/mdcmd");
 }
 
 function my_scale($value, &$unit, $precision = NULL) {
@@ -63,7 +63,7 @@ function my_check($time) {
   $hour = floor($hmss/3600);
   $mins = $hmss/60%60;
   $secs = $hmss%60;
-  return plus($days,'day',($hour|$mins|$secs)==0).plus($hour,'hour',($mins|$secs)==0).plus($mins,'minute',$secs==0).plus($secs,'second',true).". Average speed: ".(isset($disks['parity']['sizeSb']) ? my_scale($disks['parity']['sizeSb']*1024/$time,$unit,1)." $unit/sec" : "unknown");
+  return plus($days,'day',($hour|$mins|$secs)==0).plus($hour,'hour',($mins|$secs)==0).plus($mins,'minute',$secs==0).plus($secs,'second',true)."<br>Average speed: ".(isset($disks['parity']['sizeSb']) ? my_scale($disks['parity']['sizeSb']*1024/$time,$unit,1)." $unit/sec" : "unknown");
 }
 
 function my_error($code) {
@@ -75,29 +75,49 @@ function my_error($code) {
   }
 }
 
-$disks  = @parse_ini_file("/var/local/emhttp/disks.ini",true);
+function read_temp($name) {
+  $temp = exec("awk '/Temperature/{print $10}' /var/local/emhttp/smart/$name");
+  return $temp ? $temp : 0;
+}
+
+function active_state($name) {
+  $state = exec("awk '/STANDBY/{print $4}' /var/local/emhttp/smart/$name");
+  return strlen($state)==0;
+}
+
 $saved  = @parse_ini_file("/var/local/emhttp/monitor.ini",true);
-$unraid = @parse_plugin_cfg("dynamix",true);
+$disks  = parse_ini_file("/var/local/emhttp/disks.ini",true);
+$var    = parse_ini_file("/var/local/emhttp/var.ini");
+$unraid = parse_plugin_cfg("dynamix",true);
+$events = $unraid['notify']['events'];
+$max    = $unraid['display']['max'];
+$hot    = $unraid['display']['hot'];
+$server = strtoupper($var['NAME']);
+$active = array();
+$errors = array();
+$parity = false;
+$cache  = false;
 
 foreach ($disks as $disk) {
   $name = $disk['name'];
-  if ($name=='flash' || substr($disk['status'],-3)=='_NP') continue;
-  $temp = $disk['temp'];
+  if ($name=='flash' || substr(my_var("rdevStatus.{$disk['idx']}"),-3)=='_NP') continue;
+  $temp = read_temp($name);
   $info = "{$disk['id']} ({$disk['device']})";
+  if ($info==" ()") $info = 'No device identification present';
   $text = my_disk($name).($name=='cache'||$name=='parity'?' disk':'');
 
 // process temperature notifications. Give messages only when changes occur!
-  $warn = $temp>=$unraid['display']['max'] ? 'alert' : ($temp>=$unraid['display']['hot'] ? 'warning' : '');
+  $warn = $temp>=$max ? 'alert' : ($temp>=$hot ? 'warning' : '');
   $item = 'temp';
   $last = isset($saved[$item][$name]) ? $saved[$item][$name] : 0;
   if ($warn) {
     if ($temp>$last) {
-      exec("$notify -e \"unRAID $text temperature\" -s \"".ucfirst($warn).": $text ".($warn=='alert'?'overheated (':'is hot (').my_temp($temp).")\" -d \"$info\" -i \"$warn\" -x");
+      exec("$notify -e \"unRAID $text temperature\" -s \"".ucfirst($warn)." [$server] - $text ".($warn=='alert'?'overheated (':'is hot (').my_temp($temp).")\" -d \"$info\" -i \"$warn\"");
       $saved[$item][$name] = $temp;
     }
   } else {
-    if ($last>0) {
-      exec("$notify -e \"unRAID $text message\" -s \"Notice: $text returned to normal temperature\" -d \"$info\" -i \"normal\" -x");
+    if ($last) {
+      exec("$notify -e \"unRAID $text message\" -s \"Notice [$server] - $text returned to normal temperature\" -d \"$info\"");
       unset($saved[$item][$name]);
     }
   }
@@ -109,57 +129,107 @@ foreach ($disks as $disk) {
   switch ($warn) {
   case 'red':
     if ($warn!=$last) {
-      exec("$notify -e \"unRAID $text error\" -s \"Alert: $text in error state\" -d \"$info\" -i \"alert\"");
+      $status = strtolower(str_replace(array('NP_','_'),array('',' '),$disk['status']));
+      exec("$notify -e \"unRAID $text error\" -s \"Alert [$server] - $text in error state ($status)\" -d \"$info\" -i \"alert\"");
       $saved[$item][$name] = $warn;
     }
   break;
   case 'yellow':
     if ($warn!=$last) {
-      exec("$notify -e \"unRAID $text error\" -s \"Warning: $text has invalid data\" -d \"$info\" -i \"warning\"");
+      exec("$notify -e \"unRAID $text error\" -s \"Warning [$server] - $text has invalid data\" -d \"$info\" -i \"warning\"");
       $saved[$item][$name] = $warn;
     }
   break;
   default:
     if ($last) {
-      exec("$notify -e \"unRAID $text message\" -s \"Notice: $text returned to normal operation\" -d \"$info\" -i \"normal\"");
+      exec("$notify -e \"unRAID $text message\" -s \"Notice [$server] - $text returned to normal operation\" -d \"$info\"");
       unset($saved[$item][$name]);
     }
   break;}
 
+// Count number of active disks, excluding flash drive
+  if (active_state($name)) {
+    $active[] = "$text - $info (".my_temp($temp).")";
+    if ($name == 'parity') $parity = true;
+    if ($name == 'cache') $cache = true;
+  }
+
+// Count errors
+  if ($numErrors = my_var("rdevNumErrors.{$disk['idx']}")) $errors[] = "$text - $info (errors $numErrors)";
+
 // process disk SMART notifications. Give messages only when changes occur!
   unset($codes);
-  exec("awk '$1~/(5|187|188|197|198)/{print $1,$10,$2}' /var/local/emhttp/smart/{$disk['name']}", $codes);
+  exec("awk '$1~/^($events)$/{print $1,$10,$2,$9}' /var/local/emhttp/smart/{$disk['name']}", $codes);
   $item = 'smart';
   foreach ($codes as $code) {
     if (!$code) continue;
     $warn = explode(' ',$code);
     $attr = "$name.{$warn[0]}";
-    $word = str_replace('_',' ',strtolower($warn[2]));
+    $word = str_replace(array('_',' (-) '),array(' ',''),strtolower($warn[2]).' ('.strtolower($warn[3]).') ');
     $last = isset($saved[$item][$attr]) ? $saved[$item][$attr] : 0;
     if ($warn[1]>0) {
       if ($warn[1]>$last) {
-        exec("$notify -e \"unRAID $text SMART health [{$warn[0]}]\" -s \"Warning: $word is {$warn[1]}\" -d \"$info\" -i \"warning\"");
+        exec("$notify -e \"unRAID $text SMART health [{$warn[0]}]\" -s \"Warning [$server] - $word is {$warn[1]}\" -d \"$info\" -i \"warning\"");
         $saved[$item][$attr] = $warn[1];
       }
     } else {
-      if ($last>0) {
-        exec("$notify -e \"unRAID $text SMART message [{$warn[0]}]\" -s \"Notice: $word returned to nominal value\" -d \"$info\" -i \"normal\"");
+      if ($last) {
+        exec("$notify -e \"unRAID $text SMART message [{$warn[0]}]\" -s \"Notice [$server] - $word returned to normal value\" -d \"$info\"");
         unset($saved[$item][$attr]);
       }
     }
   }
 }
 
-$item = 'parity';
-$name = 'status';
+$item = 'array';
+$name = 'errors';
+$last = isset($saved[$item][$name]) ? $saved[$item][$name] : 0;
+$warn = count($errors);
+$info = "Array has $warn disk".($warn==1 ? "" : "s")." with read errors";
+
+// report array read errors. Give messages on disk changes.
+if ($warn>0) {
+  if ($warn<>$last) {
+    $message = implode('\n', $errors);
+    exec("$notify -e \"unRAID array errors\" -s \"Warning [$server] - array has errors\" -d \"$info\" -m \"$message\" -i \"warning\"");
+    $saved[$item][$name] = $warn;
+  }
+} else {
+  if ($last) {
+    exec("$notify -e \"unRAID array errors\" -s \"Notice [$server] - array turned good\" -d \"$info\"");
+    unset($saved[$item][$name]);
+  }
+}
+
+$name = 'active';
+$last = isset($saved[$item][$name]) ? $saved[$item][$name] : 0;
+$warn = count($active);
+$word = $warn==1 ? "" : "including ";
+$info = "Array has $warn active disk".($warn==1 ? "" : "s").($parity ? " ({$word}parity".($cache ? " & cache)" : ")") : ($cache ? " ({$word}cache)" : ""));
+
+// report array active status. Give messages on active/inactive changes.
+if ($warn>0) {
+  if (!$last) {
+    $message = implode('\n', $active);
+    exec("$notify -e \"unRAID active array\" -s \"Notice [$server] - array is active\" -d \"$info\" -m \"$message\"");
+    $saved[$item][$name] = $warn;
+  }
+} else {
+  if ($last) {
+    exec("$notify -e \"unRAID inactive array\" -s \"Notice [$server] - array turned inactive\" -d \"$info\"");
+    unset($saved[$item][$name]);
+  }
+}
+
+$name = 'parity';
 $last = isset($saved[$item][$name]) ? $saved[$item][$name] : '';
 
 // process parity check, parity sync and data-rebuild notifications. Give messages on start/stop conditions.
 if (my_var('mdResync')>0) {
   if (!$last) {
-    $last = my_var('mdNumInvalid')==0 ? 'Parity-check' : (my_var('mdInvalidDisk')==0 ? 'Parity-Sync:' : 'Data-Rebuild:');
+    $last = my_var('mdNumInvalid')==0 ? 'Parity check' : (my_var('mdInvalidDisk')==0 ? 'Parity sync:' : 'Data rebuild:');
     $info = isset($disks['parity']['sizeSb']) ? "Parity size: ".my_scale($disks['parity']['sizeSb']*1024, $unit)." $unit" : "No parity disk present";
-    exec("$notify -e \"unRAID $last\" -s \"Notice: $last started\" -d \"$info\" -i \"warning\"");
+    exec("$notify -e \"unRAID $last\" -s \"Notice [$server] - $last started\" -d \"$info\" -i \"warning\"");
     $saved[$item][$name] = $last;
   }
 } else {
@@ -168,11 +238,31 @@ if (my_var('mdResync')>0) {
     if (!count($time)) $time = array_fill(0,2,0);
     $info = $time[1]==0 ? "Duration: ".my_check($time[0]) : "Error code: ".my_error($time[1]);
     $level = $time[1]==0 ? "normal" : "warning";
-    exec("$notify -e \"unRAID $last\" -s \"Notice: $last finished\" -d \"$info\" -i \"$level\"");
+    exec("$notify -e \"unRAID $last\" -s \"Notice [$server] - $last finished\" -d \"$info\" -i \"$level\"");
     unset($saved[$item][$name]);
   }
 }
 
+// check read-write status of USB flash drive
+$name = 'flash';
+$last = isset($saved[$item][$name]) ? $saved[$item][$name] : '';
+$warn = exec("awk '/boot/{print $4}' /proc/mounts|cut -d, -f1");
+$info = "{$disks['flash']['id']} ({$disks['flash']['device']})";
+
+if ($warn!="rw") {
+  if ($warn!=$last) {
+    $message = implode('\n', $active);
+    exec("$notify -e \"USB flash drive failure\" -s \"Alert [$server] - USB drive is not read-write\" -d \"$info\" -i \"alert\"");
+    $saved[$item][$name] = $warn;
+  }
+} else {
+  if ($last) {
+    exec("$notify -e \"USB flash drive operation\" -s \"Notice [$server] - USB drive returned to normal operation\" -d \"$info\"");
+    unset($saved[$item][$name]);
+  }
+}
+
+// save new status
 if ($saved) {
   $text = "";
   foreach ($saved as $item => $block) {
@@ -181,4 +271,6 @@ if ($saved) {
   }
   if ($text) file_put_contents('/var/local/emhttp/monitor.ini', $text); else unlink('/var/local/emhttp/monitor.ini');
 }
+
+exit(0);
 ?>

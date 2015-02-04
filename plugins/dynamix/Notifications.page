@@ -5,8 +5,8 @@ Icon="notifications.png"
 ---
 <?PHP
 /* Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
- * Copyright 2014, Lime Technology
  * Copyright 2014, Bergware International.
+ * Copyright 2014, Lime Technology
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -16,17 +16,66 @@ Icon="notifications.png"
  * all copies or substantial portions of the Software.
  */
 ?>
+<?
+$events = explode('|', $notify['events']);
+?>
 <script>
 function resetNotify(form) {
   form.date.selectedIndex = 0;
   form.time.selectedIndex = 0;
   form.path.value = "/tmp/notifications";
   form.position.selectedIndex = 1;
+  form.normal1.checked = true;
+  form.normal2.checked = false;
+  form.warning1.checked = true;
+  form.warning2.checked = false;
+  form.alert1.checked = true;
+  form.alert2.checked = false;
+  form.status.selectedIndex = 0;
+  form.report1.checked = false;
+  form.report2.checked = false;
+  for (var i=1; i<=5; i++) form.elements['a'+i].checked = true;
+  form.custom.value = '';
 }
+function prepareNotify(form) {
+  var events = [];
+  form.entity.value = form.normal1.checked | form.warning1.checked | form.alert1.checked;
+  form.normal.value = form.normal1.checked*1 + form.normal2.checked*2;
+  form.warning.value = form.warning1.checked*1 + form.warning2.checked*2;
+  form.alert.value = form.alert1.checked*1 + form.alert2.checked*2;
+  form.report.value = form.report1.checked*1 + form.report2.checked*2;
+  form.normal1.disabled = true;
+  form.normal2.disabled = true;
+  form.warning1.disabled = true;
+  form.warning2.disabled = true;
+  form.alert1.disabled = true;
+  form.alert2.disabled = true;
+  form.report1.disabled = true;
+  form.report2.disabled = true;
+  for (var i=1; i<=5; i++) {
+    if (form.elements['a'+i].checked) events.push(form.elements['a'+i].value);
+    form.elements['a'+i].disabled = true;
+  }
+  if (form.custom.value>0) events.push(form.custom.value);
+  form.events.value = events.join('|');
+}
+function prepareReport(value) {
+  if (value=='') $('.report').hide(); else $('.report').show();
+}
+$(function(){
+  prepareReport(document.notify_settings.status.value);
+});
 </script>
-<form markdown="1" name="notify_settings" method="POST" action="/update.php" target="progressFrame">
-<input type="hidden" name="#file" value="dynamix/dynamix.cfg"/>
-<input type="hidden" name="#section" value="notify"/>
+<form markdown="1" name="notify_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareNotify(this)">
+<input type="hidden" name="#file" value="dynamix/dynamix.cfg">
+<input type="hidden" name="#section" value="notify">
+<input type="hidden" name="#command" value="/usr/local/sbin/notify cron-init">
+<input type="hidden" name="entity">
+<input type="hidden" name="normal">
+<input type="hidden" name="warning">
+<input type="hidden" name="alert">
+<input type="hidden" name="report">
+<input type="hidden" name="events">
 
 Date format:
 : <select name="date" size="1">
@@ -53,13 +102,53 @@ Display position:
 Storage path:
 : <input type="text" name="path" value="<?=$notify['path']?>"><?=(exec("echo {$notify['path']}|grep '^/mnt'") ? 'Permanent storage' : 'Temporary storage')?>
 
-Notification entity:
-: <select name="entity" size="1">
-  <?=mk_option($notify['entity'], "0", "None")?>
-  <?=mk_option($notify['entity'], "1", "Browser")?>
-  <?=mk_option($notify['entity'], "2", "Email")?>
-  <?=mk_option($notify['entity'], "3", "Browser & Email")?>
+Array status notification:
+: <select name="status" size="1" onchange="prepareReport(this.value)">
+  <?=mk_option($notify['status'], "", "Never")?>
+  <?=mk_option($notify['status'], "10 * * * *", "Every hour")?>
+  <?=mk_option($notify['status'], "10 */2 * * *", "Every two hours")?>
+  <?=mk_option($notify['status'], "10 */6 * * *", "Four times a day")?>
+  <?=mk_option($notify['status'], "10 */8 * * *", "Three times a day")?>
+  <?=mk_option($notify['status'], "10 0,12 * * *", "Twice a day")?>
+  <?=mk_option($notify['status'], "10 0 * * *", "Once a day")?>
   </select>
+
+<span class="report" style="display:none">&nbsp;</span>
+: <span class="report" style="display:none"><span style="display:inline-block;width:80px;font-style:italic">Array status</span><input type="checkbox" name="report1"<?=($notify['report'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
+  <input type="checkbox" name="report2"<?=($notify['report'] & 2)==2 ? ' checked' : ''?>>Email &nbsp;</span>
+
+Notification entity:
+: <span style="display:inline-block;width:80px;font-style:italic">Notices</span><input type="checkbox" name="normal1"<?=($notify['normal'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
+  <input type="checkbox" name="normal2"<?=($notify['normal'] & 2)==2 ? ' checked' : ''?>>Email &nbsp;
+
+&nbsp;
+: <span style="display:inline-block;width:80px;font-style:italic">Warnings</span><input type="checkbox" name="warning1"<?=($notify['warning'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
+  <input type="checkbox" name="warning2"<?=($notify['warning'] & 2)==2 ? ' checked' : ''?>>Email &nbsp;
+
+&nbsp;
+: <span style="display:inline-block;width:80px;font-style:italic">Alerts</span><input type="checkbox" name="alert1"<?=($notify['alert'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
+  <input type="checkbox" name="alert2"<?=($notify['alert'] & 2)==2 ? ' checked' : ''?>>Email &nbsp;
+
+Advanced settings:
+: <input type="checkbox" name="#advanced" onchange="if (this.checked) $('.advanced').show(); else $('.advanced').hide();">on / off
+
+<span class="advanced" style="display:none">SMART attribute notifications:</span>
+: <span class="advanced" style="display:none"><input type="checkbox" name="a1" value="5"<?=in_array(5,$events) ? ' checked' : ''?>><span style="display:inline-block;width:62px">5</span>Reallocated sectors count</span>
+
+<span class="advanced" style="display:none">&nbsp;</span>
+: <span class="advanced" style="display:none"><input type="checkbox" name="a2" value="187"<?=in_array(187,$events) ? ' checked' : ''?>><span style="display:inline-block;width:62px">187</span>Reported uncorrectable errors</span>
+
+<span class="advanced" style="display:none">&nbsp;</span>
+: <span class="advanced" style="display:none"><input type="checkbox" name="a3" value="188"<?=in_array(188,$events) ? ' checked' : ''?>><span style="display:inline-block;width:62px">188</span>Command timeout</span>
+
+<span class="advanced" style="display:none">&nbsp;</span>
+: <span class="advanced" style="display:none"><input type="checkbox" name="a4" value="197"<?=in_array(197,$events) ? ' checked' : ''?>><span style="display:inline-block;width:62px">197</span>Current pending sector count</span>
+
+<span class="advanced" style="display:none">&nbsp;</span>
+: <span class="advanced" style="display:none"><input type="checkbox" name="a5" value="198"<?=in_array(198,$events) ? ' checked' : ''?>><span style="display:inline-block;width:62px">198</span>Uncorrectable sector count</span>
+
+<span class="advanced" style="display:none">&nbsp;</span>
+: <span class="advanced" style="display:none"><input type="text" name="custom" value="<?=$notify['custom']?>" maxlength="3" style="width:25px;margin-right:47px">Custom attribute number</span>
 
 <button type="button" onclick="resetNotify(this.form);">Default</button>
 : <input type="submit" name="#apply" value="Apply"><button type="button" onclick="done()">Done</button></td>

@@ -107,17 +107,16 @@ foreach (glob("/var/log/plugins/*.plg", GLOB_NOSORT) as $plugin_link) {
 
   // status info
   $status_info = "no update";
+  $changes_file = $plugin_file;
   $URL = plugin("pluginURL", $plugin_file);
   if ($URL !== false) {
     $filename = "/tmp/plugins/".basename($URL);
     if (file_exists($filename)) {
       $latest = plugin("version", $filename);
       if ($latest && strcmp($latest, $version) > 0) {
-        if (plugin("changes", $filename))
-          $version_info .= "<br><a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=/tmp/plugins/".urlencode(basename($plugin_file, '.plg')).".txt','Release Notes Version $latest',490,430)\"><font color='red'>{$latest}</font>&nbsp;<img src='/webGui/images/information.png' class='icon'></a>";
-        else
-          $version_info .= "<br><font color='red'>{$latest}</font>";
+        $version_info .= "<br><span class='red-text'>{$latest}</span>";
         $status_info = make_link("update", basename($plugin_file));
+        $changes_file = $filename;
       } else {
         $status_info = "up-to-date";
       }
@@ -125,6 +124,7 @@ foreach (glob("/var/log/plugins/*.plg", GLOB_NOSORT) as $plugin_link) {
       if ($tmp_stale) $status_info = "unknown";
     }
   }
+  if (plugin("changes", $changes_file)) $version_info .= "&nbsp;<a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=/tmp/plugins/".urlencode(basename($plugin_file,'.plg')).".txt','Release Notes',490,430)\"><img src='/webGui/images/information.png' class='icon'></a>";
 
   // action
   $action = strpos($plugin_file, "/usr/local/emhttp/plugins") !== 0 ? make_link("remove", basename($plugin_file)) : "built-in";
@@ -132,7 +132,7 @@ foreach (glob("/var/log/plugins/*.plg", GLOB_NOSORT) as $plugin_link) {
   // echo our plugin information
   echo "<tr>";
   echo "<td style=\"vertical-align: top\"><p>{$link}</p></td>";
-  echo "<td><span class=\"desc_readmore\" style=\"display:block\">{$desc}</span></td>";
+  echo "<td><span class='desc_readmore' style='display:block'>{$desc}</span></td>";
   echo "<td>{$author}</td>";
   echo "<td>{$version_info}</td>";
   echo "<td>{$status_info}</td>";

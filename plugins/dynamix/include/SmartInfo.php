@@ -18,8 +18,13 @@ $run   = '/webGui/include/Run.php';
 
 $disk = $_GET['disk'];
 $port = $_GET['port'];
-$spin = exec("hdparm -C /dev/$port|grep 'active'");
 $output = array();
+
+function parse_plugin_cfg($plugin, $sections=false) {
+  $keys = @parse_ini_file("/usr/local/emhttp/plugins/{$plugin}/default.cfg", $sections);
+  $conf = "/boot/config/plugins/{$plugin}/{$plugin}.cfg";
+  return is_file($conf) ? array_replace_recursive($keys, parse_ini_file($conf, $sections)) : $keys;
+}
 
 echo "<div class='label'><span class='left infogap'>" . $disk . " attached to port: $port</span></div>";
 echo "<table class='list infogap'>";
@@ -35,12 +40,14 @@ case "IDENTITY":
   endforeach;
   break;
 case "ATTRIBUTES":
+  $unraid = parse_plugin_cfg("dynamix",true);
+  $events = explode('|', $unraid['notify']['events']);
   exec("smartctl -A /dev/$port|awk 'NR>6'",$output);
   $bold = count($output)<=2 ? "" : " style='font-weight:bold'";
   foreach ($output as $line):
     if (!$line) continue;
     $info = explode(' ', trim(preg_replace('/\s+/',' ',$line)), 10);
-    $color = array_search($info[0], array(5,187,188,197,198))!==false && $info[9]>0 ? " class='red-text'" : "";
+    $color = array_search($info[0], $events)!==false && $info[9]>0 ? " class='orange-text'" : "";
     echo "<tr{$color}{$bold}>";
     $bold = "";
     foreach ($info as $field):
@@ -91,6 +98,7 @@ case "ERRORLOG":
   endif;
   break;
 case "SELFTEST":
+  $spin = exec("hdparm -C /dev/$port|grep 'active'");
   echo "<tr><td ></td></tr>";
   echo "<tr id='update'></tr>";
   echo "<tr><td>SMART short self-test:</td>";
