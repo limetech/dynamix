@@ -1,0 +1,78 @@
+#!/usr/bin/php
+<?PHP
+/* Copyright 2014, Bergware International.
+ * Copyright 2014, Lime Technology
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+$notify = "/usr/local/sbin/notify";
+
+function parse_plugin_cfg($plugin, $sections=false) {
+  $keys = @parse_ini_file("/usr/local/emhttp/plugins/{$plugin}/default.cfg", $sections);
+  $conf = "/boot/config/plugins/{$plugin}/{$plugin}.cfg";
+  return is_file($conf) ? array_replace_recursive($keys, parse_ini_file($conf, $sections)) : $keys;
+}
+
+function my_var($key) {
+  return exec("awk -F= '/^'$key'/ {print $2}' /proc/mdcmd");
+}
+
+function my_temp($value) {
+  global $unraid;
+  if (!$value) return ' - standby';
+  $unit = $unraid['display']['unit'];
+  return ' - active '.($unit=='C' ? str_replace('.', $unraid['display']['number'][0], $value) : round(9/5*$value+32)).$unit;
+}
+
+function my_disk($name) {
+  return ucfirst(preg_replace('/^(disk|cache)([0-9]+)/','$1 $2',$name));
+}
+
+function read_temp($name) {
+  $temp = exec("awk '/Temperature/{print $10}' /var/local/emhttp/smart/$name");
+  return $temp ? $temp : 0;
+}
+
+$disks  = parse_ini_file("/var/local/emhttp/disks.ini",true);
+$var    = parse_ini_file("/var/local/emhttp/var.ini");
+$unraid = parse_plugin_cfg("dynamix",true);
+$report = $unraid['notify']['report'];
+$server = strtoupper($var['NAME']);
+$active = array();
+$parity = false;
+$cache  = false;
+$error  = 0;
+
+foreach ($disks as $disk) {
+  $name = $disk['name'];
+  $status = ' [OK]';
+  if ($name=='flash' || substr($disk['status'],-3)=='_NP') continue;
+  $text = my_disk($name);
+  $temp = read_temp($name);
+  $color = strtok($disk['color'],'-');
+  if ($name=='parity') $parity = true;
+  if ($name=='cache') $cache = true;
+  if ($color=='red'||$color=='yellow') { $error++; $status = ' ['.str_replace(array('NP_','_'),array('',' '),$disk['status']).']'; }
+  if (my_var("rdevNumErrors.{$disk['idx']}")>0) $status += ' (disk has read errors)';
+  $info = "{$disk['id']} ({$disk['device']})";
+  if ($info==" ()") $info = 'No device identification present';
+  $active[] = "$text - $info".my_temp($temp).$status;
+}
+
+$size = count($active);
+$word = $size==1 ? "" : "including ";
+$warn = $error ? "warning" : "normal";
+$stat = $error ? "[FAIL]" : "[PASS]";
+$info = "Array has $size disk".($size==1 ? "" : "s").($parity ? " ({$word}parity".($cache ? " & cache)" : ")") : ($cache ? " ({$word}cache)" : ""));
+$message = implode('\n', $active);
+exec("$notify -s \"Notice [$server] - array health report $stat\" -d \"$info\" -m \"$message\" -i \"$warn $report\"");
+
+exit(0);
+?>

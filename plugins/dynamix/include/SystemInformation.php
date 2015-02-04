@@ -43,8 +43,7 @@ echo empty($var['SYS_MODEL']) ? 'N/A' : "{$var['SYS_MODEL']}";
 </div>
 <div><span style="width:90px;display:inline-block"><strong>System:</strong></span>
 <?
-exec("dmidecode -q -t 2|awk -F: '/Manufacturer:/ {print $2}; /Product Name:/ {print $2}'", $product);
-echo "{$product[0]} - {$product[1]}";
+echo exec("dmidecode -q -t 2|awk -F: '{if(/Manufacturer:/) m=$2; else if(/Product Name:/) p=$2} END{print m\" -\"p}'");
 ?>
 </div>
 <div><span style="width:90px;display:inline-block"><strong>Flash GUID:</strong></span>
@@ -58,10 +57,10 @@ function write($number) {
   $words = array('zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty');
   return $number<=count($words) ? $words[$number] : $number;
 }
-exec("dmidecode -q -t 4|awk -F: '/Version:/ {print $2};/Current Speed:/ {print $2}'",$cpu);
+$cpu = explode('#',exec("dmidecode -q -t 4|awk -F: '{if(/Version:/) v=$2; else if(/Current Speed:/) s=$2} END{print v\"#\"s}'"));
 $cpumodel = str_replace(array("Processor","(C)","(R)","(TM)"),array("","&#169;","&#174;","&#8482;"),$cpu[0]);
 if (strpos($cpumodel,'@')===false):
-  $cpuspeed = explode(' ',trim($cpu[1]));
+  $cpuspeed = explode(' ',$cpu[1]);
   if ($cpuspeed[0]>=1000 && $cpuspeed[1]=='MHz'):
     $cpuspeed[0] /= 1000;
     $cpuspeed[1] = 'GHz';
@@ -74,14 +73,16 @@ endif;
 </div>
 <div><span style="width:90px; display:inline-block"><strong>Cache:</strong></span>
 <?
-exec("dmidecode -q -t 7|awk -F: '/Socket Designation:/ {print $2}; /Installed Size:/ {print $2}'",$cache);
+$cache = explode('#',exec("dmidecode -q -t 7|awk -F: '{if(/Socket Designation:/) c=c$2\";\"; else if(/Installed Size:/) s=s$2\";\"} END{print c\"#\"s}'"));
+$socket = array_map('trim',explode(';',$cache[0]));
+$volume = array_map('trim',explode(';',$cache[1]));
 $name = array();
 $size = "";
-for ($i=0; $i<count($cache); $i+=2):
-  if ($cache[$i+1]!=' 0 kB' && !in_array($cache[$i],$name)):
+for ($i=0; $i<count($socket); $i++):
+  if ($volume[$i] && $volume[$i]!='0 kB' && !in_array($socket[$i],$name)):
     if ($size) $size .= ', ';
-    $size .= $cache[$i+1];
-    $name[] = $cache[$i];
+    $size .= $volume[$i];
+    $name[] = $socket[$i];
   endif;
 endfor;
 echo $size;
@@ -89,8 +90,7 @@ echo $size;
 </div>
 <div><span style="width:90px; display:inline-block"><strong>Memory:</strong></span>
 <?
-exec("dmidecode -q -t memory|awk '/Maximum Capacity:/{print $3,$4};/Size:/{total+=$2;unit=$3} END{print total,unit}'",$memory);
-echo "{$memory[1]} (max. {$memory[0]})";
+echo exec("dmidecode -q -t memory|awk '{if(/Maximum Capacity:/){m=$3;u1=$4} else if(/Size:/){t+=$2;if(length($3)==2){u2=$3}}} END{print t,u2\" (max. installable capacity \"m,u1\")\"}'");
 ?>
 </div>
 <div><span style="width:90px; display:inline-block"><strong>Network:</strong></span>

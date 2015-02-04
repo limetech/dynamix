@@ -20,34 +20,23 @@ case 'init':
 case 'smtp-init':
   shell_exec("$notify smtp-init");
   break;
+case 'cron-init':
+  shell_exec("$notify cron-init");
+  break;
 case 'add':
   foreach ($_POST as $option => $value) {
     switch ($option) {
-     case 'e':
-      $notify .= " -e '$value'";
+    case 'e':
+    case 's':
+    case 'd':
+    case 'i':
+    case 'm':
+      $notify .= " -{$option} \"{$value}\"";
       break;
-     case 's':
-      $notify .= " -s '$value'";
-      $subject = $value;
+    case 'x':
+    case 't':
+      $notify .= " -{$option}";
       break;
-     case 'd':
-      $notify .= " -e '$value'";
-      $description = $value;
-      break;
-     case 'i':
-      $notify .= " -i '$value'";
-      $importance = $value;
-      break;
-     case 'm':
-      $notify .= " -m '$value'";
-      $importance = $value;
-      break;
-     case 'x':
-      $notify .= " -x";
-      break; 
-     case 't':
-      $notify .= " -t";
-      break; 
     }
   }
   shell_exec("$notify add");
