@@ -42,7 +42,7 @@ function presetTime(form) {
 function presetTemp(form) {
   var hot = $('#hot').html();
   var max = $('#max').html();
-  if (form.unit.selectedIndex==0) {;
+  if (form.unit.selectedIndex==0) {
     form.hot.value = Math.round(5/9*(form.hot.value-32));
     form.max.value = Math.round(5/9*(form.max.value-32));
 	$('#hot').html(hot.replace('F)','C)'));
@@ -178,6 +178,13 @@ Show banner image:
   <?=mk_option($display['banner'], "image", "Yes")?>
   </select>
 
+Show Dashboard apps:
+: <select name="dashapps" size="1">
+  <?=mk_option($display['dashapps'], "icons", "Icons")?>
+  <?=mk_option($display['dashapps'], "banners", "Banners")?>
+  <?=mk_option($display['dashapps'], "none", "None")?>
+  </select>
+
 Dynamix color theme:
 : <select name="theme" size="1">
   <?=mk_option($display['theme'], "white", "White")?>
@@ -192,10 +199,10 @@ Used / Free columns:
   </select>
 
 Critical disk utilization level (%):
-: <input type="text" name="critical" class="narrow" maxlength="2" value="<?=$display['critical']?>">
+: <input type="number" min="0" max="100" name="critical" class="narrow" maxlength="3" value="<?=$display['critical']?>">
 
 Warning disk utilization level (%):
-: <input type="text" name="warning" class="narrow" maxlength="2" value="<?=$display['warning']?>">
+: <input type="number" min="0" max="99" name="warning" class="narrow" maxlength="2" value="<?=$display['warning']?>">
 
 Temperature unit:
 : <select name="unit" size="1" onchange="presetTemp(this.form)">
@@ -204,10 +211,10 @@ Temperature unit:
   </select>
 
 <span id="hot">Warning disk temperature threshold (&deg;<?=$display['unit']?>):</span>
-: <input type="text" name="hot" class="narrow" maxlength="3" value="<?=$display['unit']=='C'?$display['hot']:round(9/5*$display['hot']+32)?>" onchange="checkTemp(this.form,true)">
+: <input type="number" min="0" max="300" name="hot" class="narrow" maxlength="3" value="<?=$display['unit']=='C'?$display['hot']:round(9/5*$display['hot']+32)?>" onchange="checkTemp(this.form,true)">
 
 <span id="max">Critical disk temperature threshold (&deg;<?=$display['unit']?>):</span>
-: <input type="text" name="max" class="narrow" maxlength="3" value="<?=$display['unit']=='C'?$display['max']:round(9/5*$display['max']+32)?>" onchange="checkTemp(this.form,false)">
+: <input type="number" min="0" max="300" name="max" class="narrow" maxlength="3" value="<?=$display['unit']=='C'?$display['max']:round(9/5*$display['max']+32)?>" onchange="checkTemp(this.form,false)">
 
 Page update frequency:
 : <select name="refresh" size="1" onchange="presetPassive(this.selectedIndex)">
@@ -216,7 +223,7 @@ Page update frequency:
   <?=mk_option($display['refresh'], $display['refresh']<0?"-10000":"10000", "Regular")?>
   <?=mk_option($display['refresh'], $display['refresh']<0?"-60000":"60000", "Slow")?>
   </select><span id="passive"<?=$display['refresh']==0?" style='display:none'":""?>>&nbsp;<input type="checkbox" name="#passive"<?=$display['refresh']<0?' checked':''?> onchange="presetRefresh(this.form)">disable page updates while parity operation is running.</span>
- 
+
 <button type="button" onclick="resetDisplay(this.form);">Default</button>
-: <input type="submit" name="#apply" value="Apply"><button type="button" onclick="done()">Done</button></td>
+: <input type="submit" name="#apply" value="Apply"><button type="button" onclick="done()">Done</button>
 </form>
