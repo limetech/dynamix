@@ -18,11 +18,7 @@ Enable SMB:
 : <select name="shareSMBEnabled" size="1">
   <?=mk_option($var['shareSMBEnabled'], "no", "No")?>
   <?=mk_option($var['shareSMBEnabled'], "yes", "Yes (Workgroup)")?>
-  <?if ($var['featureSecurityAds']):?>
   <?=mk_option($var['shareSMBEnabled'], "ads", "Yes (Active Directory)")?>
-  <?else:?>
-  <?=mk_option($var['shareSMBEnabled'], "ads", "Yes (Active Directory)", "disabled")?>
-  <?endif;?>
   </select><?if ($var['fsState']=="Started"):?>Array must be **Stopped** to change.<?endif;?>
 
 > Select 'Yes (Workgroup)' to enable SMB (Windows Networking) protocol support. This
