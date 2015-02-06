@@ -16,6 +16,8 @@ hr{border:none;margin:12px 0;}
 input[type=text],input[type=password],input[type=number],input[type=url],input[type=email],textarea{font-family:arimo;font-size:11px;color:#808080;background-color:#000000;border:1px solid #404040;padding:2px 6px;min-height:20px;line-height:20px;outline:none;width:305px;margin:0 10px 0 0;box-shadow:inset 1px 1px 5px #404040;}
 input[type=submit],input[type=reset],input[type=button],button[type=button],a.button{font-family:arimo;font-size:11px;position:relative;display:inline-block;padding:5px 10px;border:1px solid #303030;border-radius:5px;margin:7px 14px 0 0;text-decoration:none;white-space:nowrap;cursor:pointer;outline:none;color:#808080;background:-webkit-radial-gradient(#505050,#181818);background:linear-gradient(#505050,#181818);}
 input[type=checkbox]{vertical-align:middle;margin-right:6px;}
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance: none;}
+input[type=number]{-moz-appearance:textfield;}
 input:focus[type=text],input:focus[type=password],input:focus[type=number],input:focus[type=url],input:focus[type=email],textarea:focus{background:#101010;}
 input:hover[type=submit],input:hover[type=reset],input:hover[type=button],button:hover[type=button],a.button:hover{border-color:#6AB034;color:#FFFFFF;background:-webkit-radial-gradient(#5E9E2E,#8FD956);background:linear-gradient(#5E9E2E,#8FD956);}
 input:active[type=submit],input:active[type=reset],input:active[type=button],button:active[type=button]{border-color:#6AB034;box-shadow:inset 0 0 8px 4px #548C29,0 1px 0 0 #101010;}
