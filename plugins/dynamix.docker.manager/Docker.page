@@ -1,6 +1,5 @@
 Menu="Tasks:60"
 Type="xmenu"
-Tabs="false"
 ---
 <?PHP
 // array must be started since that's where we store the docker volume
