@@ -289,14 +289,14 @@ $('.tabs').append("<span class='status vhshift'><input type='button' value='Refr
     case "NEW_ARRAY":
     if ($disks['parity']['status']=="DISK_NP"):
 ?>  <tr>
-    <td><img src="webGui/style/<?=$var['mdColor'];?>.png" class="icon"><strong>Stopped</strong>. Initial configuration</td>
+    <td><img src="webGui/images/<?=$var['mdColor'];?>.png" class="icon"><strong>Stopped</strong>. Initial configuration</td>
     <td><input type="submit" name="cmdStart" value="Start"></td>
     <td><strong>Start</strong> will record all disk information and bring the array on-line.
     <br>The array will be immediately available, but <strong>unprotected</strong> since <em>parity</em> has not been assigned.</td>
     </tr>
 <?  else:?>
     <tr>
-    <td><img src="webGui/style/<?=$var['mdColor'];?>.png" class="icon"><strong>Stopped</strong>. Initial configuration</td>
+    <td><img src="webGui/images/<?=$var['mdColor'];?>.png" class="icon"><strong>Stopped</strong>. Initial configuration</td>
     <td><input type="button" value="Refresh" onclick="refresh();"><input type="submit" name="cmdStart" value="Start"></td>
     <td><strong>Start</strong> will record all disk information, bring the array on-line, and start Parity-Sync.
     <br>The array will be immediately available, but <strong>unprotected</strong> until Parity-Sync completes.
