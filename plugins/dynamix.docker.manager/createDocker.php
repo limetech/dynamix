@@ -1,6 +1,6 @@
-<?
+<?PHP
 ignore_user_abort(true);
-include_once("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerClient.php");
+require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerClient.php");
 $DockerClient = new DockerClient();
 $DockerUpdate = new DockerUpdate();
 $DockerTemplates = new DockerTemplates();
@@ -126,8 +126,13 @@ function xmlToCommand($xmlFile){
     $Variables[] = $cmdBindTime;
   }
 
-  $cmd = sprintf('/usr/bin/docker run -d %s %s %s %s %s %s %s', $cmdName, $cmdMode, $cmdPrivileged, implode(' -e ', $Variables),
-       implode(' -p ', $Ports), implode(' -v ', $Volumes), $Repository);
+  $templateExtraParams = '';
+  if ( $doc->getElementsByTagName( "ExtraParams" )->length > 0 ) {
+    $templateExtraParams = $doc->getElementsByTagName( "ExtraParams" )->item(0)->nodeValue;
+  }
+
+  $cmd = sprintf('/usr/bin/docker run -d %s %s %s %s %s %s %s %s', $cmdName, $cmdMode, $cmdPrivileged, implode(' -e ', $Variables),
+       implode(' -p ', $Ports), implode(' -v ', $Volumes), $templateExtraParams, $Repository);
   $cmd = preg_replace('/\s+/', ' ', $cmd);
 
   return array($cmd, $Name, $Repository);
@@ -166,40 +171,42 @@ function postToXML($post, $setOwnership = FALSE){
   if ( isset( $post[ 'Banner' ] )) addElement($doc, $root, 'Banner', $post[ 'Banner' ]);
   if ( isset( $post[ 'Icon' ] ))   addElement($doc, $root, 'Icon', $post[ 'Icon' ]);
 
+  if ( isset( $post[ 'ExtraParams' ] ))   addElement($doc, $root, 'ExtraParams', $post[ 'ExtraParams' ]);
+
   $docName->appendChild($doc->createTextNode(addslashes($Name)));
   $docRepository->appendChild($doc->createTextNode(addslashes($post["Repository"])));
   $BindTime->appendChild($doc->createTextNode((strtolower($post["BindTime"])     == 'on') ? 'true' : 'false'));
   $Privileged->appendChild($doc->createTextNode((strtolower($post["Privileged"]) == 'on') ? 'true' : 'false'));
   $Mode->appendChild($doc->createTextNode(strtolower($post["NetworkType"])));
 
-    for ($i = 0; $i < count($post["hostPort"]); $i++){
-      if (! strlen($post["containerPort"][$i])) { continue;}
+  for ($i = 0; $i < count($post["hostPort"]); $i++){
+    if (! strlen($post["containerPort"][$i])) { continue; }
     $protocol      = $post["portProtocol"][$i];
     $Port          = $Publish->appendChild($doc->createElement('Port'));
     $HostPort      = $Port->appendChild($doc->createElement('HostPort'));
     $ContainerPort = $Port->appendChild($doc->createElement('ContainerPort'));
     $Protocol      = $Port->appendChild($doc->createElement('Protocol'));
-      $HostPort->appendChild($doc->createTextNode(trim($post["hostPort"][$i])));
-      $ContainerPort->appendChild($doc->createTextNode($post["containerPort"][$i]));
-      $Protocol->appendChild($doc->createTextNode($protocol));
-    };
+    $HostPort->appendChild($doc->createTextNode(trim($post["hostPort"][$i])));
+    $ContainerPort->appendChild($doc->createTextNode($post["containerPort"][$i]));
+    $Protocol->appendChild($doc->createTextNode($protocol));
+  }
 
-    for ($i = 0; $i < count($post["VariableName"]); $i++){
-      if (! strlen($post["VariableName"][$i])) { continue;}
+  for ($i = 0; $i < count($post["VariableName"]); $i++){
+    if (! strlen($post["VariableName"][$i])) { continue; }
     $Variable      = $Environment->appendChild($doc->createElement('Variable'));
     $VariableName  = $Variable->appendChild($doc->createElement('Name'));
     $VariableValue = $Variable->appendChild($doc->createElement('Value'));
-      $VariableName->appendChild($doc->createTextNode(addslashes(trim($post["VariableName"][$i]))));
-      $VariableValue->appendChild($doc->createTextNode(addslashes(trim($post["VariableValue"][$i]))));
-    }
+    $VariableName->appendChild($doc->createTextNode(addslashes(trim($post["VariableName"][$i]))));
+    $VariableValue->appendChild($doc->createTextNode(addslashes(trim($post["VariableValue"][$i]))));
+  }
 
-    for ($i = 0; $i < count($post["hostPath"]); $i++){
-      if (! strlen($post["hostPath"][$i])) {continue; }
-      if (! strlen($post["containerPath"][$i])) {continue; }
-      $tmpMode = $post["hostWritable"][$i];
-      if ($setOwnership){
-        prepareDir($post["hostPath"][$i]);
-      }
+  for ($i = 0; $i < count($post["hostPath"]); $i++){
+    if (! strlen($post["hostPath"][$i])) { continue; }
+    if (! strlen($post["containerPath"][$i])) { continue; }
+    $tmpMode = $post["hostWritable"][$i];
+    if ($setOwnership){
+      prepareDir($post["hostPath"][$i]);
+    }
     $Volume       = $Data->appendChild($doc->createElement('Volume'));
     $HostDir      = $Volume->appendChild($doc->createElement('HostDir'));
     $ContainerDir = $Volume->appendChild($doc->createElement('ContainerDir'));
@@ -207,12 +214,12 @@ function postToXML($post, $setOwnership = FALSE){
     $HostDir->appendChild($doc->createTextNode(addslashes($post["hostPath"][$i])));
     $ContainerDir->appendChild($doc->createTextNode(addslashes($post["containerPath"][$i])));
     $DirMode->appendChild($doc->createTextNode($tmpMode));
-    }
+  }
 
-    $currentVersion = $DockerUpdate->getRemoteVersion($post["Registry"]);
-    $Version->appendChild($doc->createTextNode($currentVersion));
+  $currentVersion = $DockerUpdate->getRemoteVersion($post["Registry"]);
+  $Version->appendChild($doc->createTextNode($currentVersion));
 
-    return $doc->saveXML();
+  return $doc->saveXML();
 }
 
 if ($_POST){
@@ -247,6 +254,7 @@ if ($_POST){
   include($dockerManPaths['plugin'] . "/exec.php");
   $DockerTemplates->removeInfo($Name);
 
+  echo '<center><button type="button" onclick="done()">Done</button></center><br>';
   die();
 }
 
@@ -305,6 +313,8 @@ if ($_GET['updateContainer']){
 
     $DockerTemplates->removeInfo($Name);
   }
+
+  echo '<center><button type="button" onclick="done()">Done</button></center><br>';
   die();
 }
 
@@ -325,6 +335,7 @@ if($_GET['xmlTemplate']){
     $templatePrivileged   = (strtolower($doc->getElementsByTagName( "Privileged" )->item(0)->nodeValue) == 'true') ? 'checked' : "";
     $templateMode         = $doc->getElementsByTagName( "Mode" )->item(0)->nodeValue;;
     $readonly             = ($xmlType == 'default') ? 'readonly="readonly"' : '';
+    $required             = ($xmlType == 'default') ? 'required' : '';
     $disabled             = ($xmlType == 'default') ? 'disabled="disabled"' : '';
 
     if ( $doc->getElementsByTagName( "Description" )->length > 0 ) {
@@ -357,11 +368,18 @@ if($_GET['xmlTemplate']){
       $templateIcon = $DockerTemplates->getTemplateValue($templateRepository, "Icon", "default");
     }
 
+    if ( $doc->getElementsByTagName( "ExtraParams" )->length > 0 ) {
+      $templateExtraParams = $doc->getElementsByTagName( "ExtraParams" )->item(0)->nodeValue;
+    } else {
+      $templateExtraParams = $DockerTemplates->getTemplateValue($templateRepository, "ExtraParams", "default");
+    }
+
     $templateDescription = stripslashes($templateDescription);
     $templateRegistry    = stripslashes($templateRegistry);
     $templateWebUI       = stripslashes($templateWebUI);
     $templateBanner      = stripslashes($templateBanner);
     $templateIcon        = stripslashes($templateIcon);
+    $templateExtraParams = stripslashes($templateExtraParams);
 
     $templateDescBox      = preg_replace('/\[/', '<', $templateDescription);
     $templateDescBox      = preg_replace('/\]/', '>', $templateDescBox);
@@ -370,19 +388,19 @@ if($_GET['xmlTemplate']){
     $row = '
     <tr id="portNum%s">
       <td>
-        <input type="text" name="containerPort[]" value="%s" class="textPort" %s title="Set the port your app uses inside the container.">
+        <input type="number" min="1" max="65535" name="containerPort[]" value="%s" class="textPort" %s title="Set the port your app uses inside the container."/>
       </td>
       <td>
-        <input type="text" name="hostPort[]" value="%s" class="textPort" title="Set the port you use to interact with the app.">
+        <input type="number" min="1" max="65535" name="hostPort[]" value="%s" class="textPort" %s title="Set the port you use to interact with the app."/>
       </td>
       <td>
         <select name="portProtocol[]">
-          <option value="tcp">tcp</option>
-          <option value="udp" %s>udp</option>
+          <option value="tcp">TCP</option>
+          <option value="udp" %s>UDP</option>
         </select>
       </td>
       <td>
-        <input type="button" value="Remove" onclick="removePort(%s);" %s>
+        <input type="button" value="Remove" onclick="removePort(%s);" %s/>
       </td>
     </tr>';
 
@@ -394,7 +412,7 @@ if($_GET['xmlTemplate']){
       $HostPort       = $port->getElementsByTagName( "HostPort" )->item(0)->nodeValue;
       $Protocol       = $port->getElementsByTagName( "Protocol" )->item(0)->nodeValue;
       $select = ($Protocol == 'udp') ? 'selected' : '';
-      $templatePorts .= sprintf($row, $j, $ContainerPort, $readonly, $HostPort, $select, $j, $disabled);
+      $templatePorts .= sprintf($row, $j, htmlspecialchars($ContainerPort), $readonly, htmlspecialchars($HostPort), $required, $select, $j, $disabled);
       $i++;
     }
 
@@ -402,10 +420,10 @@ if($_GET['xmlTemplate']){
     $row = '
     <tr id="pathNum%s">
       <td>
-        <input type="text" name="containerPath[]" value="%s" class="textPath" onclick="hideBrowser(%s);" %s title="The directory your app uses inside the container. Ex: /config">
+        <input type="text" name="containerPath[]" value="%s" class="textPath" onclick="hideBrowser(%s);" %s title="The directory your app uses inside the container. Ex: /config"/>
       </td>
       <td>
-        <input type="text" id="hostPath%s" name="hostPath[]" value="%s" class="textPath" onclick="toggleBrowser(%s);" title="The directory in your array the app have access to. Ex: /mnt/user/Movies"/>
+        <input type="text" id="hostPath%s" name="hostPath[]" value="%s" class="textPath" onclick="toggleBrowser(%s);" %s title="The directory in your array the app have access to. Ex: /mnt/user/Movies"/>
         <div id="fileTree%s" class="fileTree"></div>
       </td>
       <td>
@@ -415,7 +433,7 @@ if($_GET['xmlTemplate']){
         </select>
       </td>
       <td>
-        <input type="button" value="Remove" onclick="removePath(%s);" %s />
+        <input type="button" value="Remove" onclick="removePath(%s);" %s/>
       </td>
     </tr>';
 
@@ -427,7 +445,7 @@ if($_GET['xmlTemplate']){
       $HostDir          = $volume->getElementsByTagName( "HostDir" )->item(0)->nodeValue;
       $Mode             = $volume->getElementsByTagName( "Mode" )->item(0)->nodeValue;
       $Mode             = ($Mode == "ro") ? "selected" : '';
-      $templateVolumes .= sprintf($row, $j, $ContainerDir, $j, $readonly, $j, $HostDir, $j, $j, $Mode, $j, $disabled);
+      $templateVolumes .= sprintf($row, $j, htmlspecialchars($ContainerDir), $j, $readonly, $j, htmlspecialchars($HostDir), $j, $required, $j, $Mode, $j, $disabled);
       $i++;
     }
 
@@ -438,8 +456,8 @@ if($_GET['xmlTemplate']){
         <input type="text" name="VariableName[]" value="%s" class="textEnv" %s/>
       </td>
       <td>
-        <input type="text" name="VariableValue[]" value="%s" class="textEnv">
-        <input type="button" value="Remove" onclick="removeEnv(%s);" %s>
+        <input type="text" name="VariableValue[]" value="%s" class="textEnv" %s/>
+        <input type="button" value="Remove" onclick="removeEnv(%s);" %s/>
       </td>
     </tr>';
 
@@ -449,73 +467,58 @@ if($_GET['xmlTemplate']){
       $VariableName       = $variable->getElementsByTagName( "Name" )->item(0)->nodeValue;
       if (! strlen($VariableName)){ continue; }
       $VariableValue      = $variable->getElementsByTagName( "Value" )->item(0)->nodeValue;
-      $templateVariables .= sprintf($row, $j, $VariableName, $readonly, $VariableValue, $j, $disabled);
+      $templateVariables .= sprintf($row, $j, htmlspecialchars($VariableName), $readonly, htmlspecialchars($VariableValue), $required, $j, $disabled);
       $i++;
     }
   }
 }
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-  <title></title>
-</head>
-<body>
-<link type="text/css" rel="stylesheet" href="/plugins/dynamix.docker.manager/assets/font-awesome-4.2.0/css/font-awesome.min.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.min.css">
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.docker.manager/assets/jsFileTree/jqueryFileTree.css" media="screen">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/default-fonts.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/default-white.css">
-
-<script type="text/javascript" src="/webGui/scripts/dynamix.js"></script>
-<script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/jsFileTree/jqueryFileTree.js"></script>
-<script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/addDocker.js"> </script>
-
 <style type="text/css">
-  body {
-    width: 780px;
-    margin: 10px;
-    font-size: 14px;
-  }
+  body { -webkit-overflow-scrolling: touch;}
   .fileTree {
     width: 240px;
     height: 150px;
-    border-top: solid 1px #BBB;
-    border-left: solid 1px #BBB;
-    border-bottom: solid 1px #BBB;
-    border-right: solid 1px #BBB;
+    border: solid 1px #BBB;
     background: #FFF;
     overflow: scroll;
     padding: 5px;
     position:absolute;
     z-index:100;
     display:none;
-  };
+  }
   .canvas{
     background: #ffffff;
     width: 100%;
     height: 100%;
   }
-  option.list{
-    padding: 0px 0px 0px 7px;
+  #TemplateSelect {
+    width: 255px;
   }
-  option.bold{
+  option.list{
+    padding: 0 0 0 7px;
+    font-size: 11px;
+  }
+  optgroup.bold{
     font-weight:bold;
     font-size: 12px;
+    margin-top: 5px;
   }
-  option.title{
+  optgroup.title{
     background-color: #625D5D;
     color:#FFFFFF;
     text-align: center;
+    margin-top: 10px;
   }
   input.textPath{
     width: 240px;
   }
   input.textTemplate{
     width: 555px;
-  }
-  #Template {
-    display: block;
   }
   input.textEnv{
     width: 230px;
@@ -558,92 +561,80 @@ if($_GET['xmlTemplate']){
   .toggleMode {
     cursor: pointer;
     color: #a3a3a3;
-    letter-spacing: 0px;
-    padding: 0px;
+    letter-spacing: 0;
+    padding: 0;
     padding-right: 10px;
     font-family: "Raleway",sans-serif;
     font-size: 12px;
     line-height: 1.3em;
     font-weight: bold;
-    margin: 0px;
+    margin: 0;
   }
   .toggleMode:hover,
   .toggleMode:focus,
   .toggleMode:active,
-  .toggleMode.active{
-    color:#625D5D;
+  .toggleMode .active {
+    color: #625D5D;
   }
 </style>
-
 <form method="GET" id="formTemplate">
-  <input type="hidden" id="#xmlTemplate" name="xmlTemplate" value="" />
-  <input type="hidden" id="#rmTemplate" name="rmTemplate" value="" />
+  <input type="hidden" id="xmlTemplate" name="xmlTemplate" value="" />
+  <input type="hidden" id="rmTemplate" name="rmTemplate" value="" />
 </form>
 
 <div id="canvas" class="canvas" style="z-index:1;">
-
-  <div id="title">
-    <span class="left" style='cursor:pointer;'><img src="/plugins/dynamix.docker.manager/icons/preferences.png" class="icon">Preferences:</span>
-  </div>
-  <div style="text-align:right;vertical-align:top;position:relative;top:-46px;height:0;">
-    <span class="toggleMode" onclick="toggleMode();"><i id="toggleMode" class='fa fa-lg'></i> Advanced Mode</span>
-  </div>
-  <form method="post" id="createContainer" >
+  <form method="post" id="createContainer">
     <table class="Preferences">
       <? if($xmlType != "edit") {?>
       <tr>
         <td style="width: 150px;">Template:</td>
         <td >
-          <select id="TemplateSelect" size="1" style="width:255px">
-            <option value="" selected>Select a template</option>
+          <select id="TemplateSelect" size="1">
+            <option value="">Select a template</option>
             <?
+            $showAdditionalInfo = true;
             $rmadd = '';
-            $prefix = '';
-            $type = "";
             $all_templates = array();
             $all_templates['user'] = $DockerTemplates->getTemplates("user");
             $all_templates['default'] = $DockerTemplates->getTemplates("default");
             foreach ($all_templates as $key => $templates) {
-              foreach ( $templates as $value){
-                if ($key != $type){
-                  $type = $key;
-                  if ($type == "default") $title = "Default templates";
-                  if ($type == "user") $title = "User defined templates";
-                  printf("\t\t\t\t\t\t<option value=''></option><option class='title bold' value=''>[ %s ]</option>\n", $title);
-                  if ($value["prefix"] != $prefix && $prefix != ''){
-                    $prefix = $value["prefix"];
-                    printf("\t\t\t\t\t\t<option class='bold' value=''>[ %s ]</option>\n", $prefix);
+              if ($key == "default") $title = "Default templates";
+              if ($key == "user") $title = "User defined templates";
+              printf("\t\t\t\t\t<optgroup class=\"title bold\" label=\"[ %s ]\"></optgroup>\n", htmlspecialchars($title));
+              $prefix = '';
+              foreach ($templates as $value){
+                if ($value["prefix"] != $prefix) {
+                  if ($prefix != '') {
+                    printf("\t\t\t\t\t</optgroup>\n");
                   }
-                }
-                if ($value["prefix"] != $prefix && $value["prefix"] != ''){
                   $prefix = $value["prefix"];
-                  printf("\t\t\t\t\t\t<option value=''></option><option class='bold' value=''>[ %s ]</option>\n", $prefix);
+                  printf("\t\t\t\t\t<optgroup class=\"bold\" label=\"[ %s ]\">\n", htmlspecialchars($prefix));
                 }
                 //$value['name'] = str_replace("my-", '', $value['name']);
                 $selected = (isset($xmlTemplate) && $value['path'] == $xmlTemplate) ? ' selected ' : '';
-                if (strlen($selected) && $type == 'user' ){ $rmadd = $value['path']; }
-                printf("\t\t\t\t\t\t<option class='list' value='%s:%s' {$selected} >%s</option>\n", $type, $value['path'], $value['name']);
-              };
+                if ($selected && ($key == "default")) $showAdditionalInfo = false;
+                if (strlen($selected) && $key == 'user' ){ $rmadd = $value['path']; }
+                printf("\t\t\t\t\t\t<option class=\"list\" value=\"%s:%s\" {$selected} >%s</option>\n", htmlspecialchars($key), htmlspecialchars($value['path']), htmlspecialchars($value['name']));
+              }
+              printf("\t\t\t\t\t</optgroup>\n");
             }
             ?>
           </select>
-          <? if (strlen($rmadd)) {
-            echo "<a onclick=\"rmTemplate('$rmadd');\" style=\"cursor:pointer;\"><img src=\"/plugins/dynamix.docker.manager/assets/images/remove.png\" title=\"$rmadd\" width=\"30px\"></a>";
-          };?>
+          <? if (!empty($rmadd)) {
+            echo "<a onclick=\"rmTemplate('" . addslashes($rmadd) . "');\" style=\"cursor:pointer;\"><img src=\"/plugins/dynamix.docker.manager/assets/images/remove.png\" title=\"" . htmlspecialchars($rmadd) . "\" width=\"30px\"></a>";
+          }?>
         </td>
       </tr>
-      <?};?>
-      <?if(isset($templateDescBox) && strlen($templateDescBox) && $xmlType == 'default' ){?>
+      <?}?>
+      <?if(!empty($templateDescBox) && $xmlType == 'default'){?>
       <tr>
-        <td style="vertical-align: top;">
-          Description:
-        </td>
+        <td style="vertical-align: top;">Description:</td>
         <td>
           <div class="desc">
             <?
             echo $templateDescBox;
-            if(isset($Registry)){
-              echo "<br><br>Container Page: <a href=\"{$Registry}\" target=\"_blank\">{$Registry}</a>";
+            if(!empty($Registry)){
+              echo "<br><br>Container Page: <a href=\"" . htmlspecialchars($Registry) . "\" target=\"_blank\">" . htmlspecialchars($Registry) . "</a>";
             }
             ?>
           </div>
@@ -653,13 +644,13 @@ if($_GET['xmlTemplate']){
       <tr>
         <td>Name:</td>
 
-        <td><input type="text" name="containerName" class="textPath" value="<? if(isset($templateName)){ echo $templateName;} ?>"></td>
+        <td><input type="text" name="containerName" class="textPath" value="<? if(isset($templateName)){ echo htmlspecialchars(trim($templateName));} ?>"></td>
       </tr>
 
-      <tr>
+      <tr class="additionalFields" style="display:none">
         <td>Repository:</td>
 
-        <td><input type="text" name="Repository" class="textPath" value="<? if(isset($templateRepository)){ echo $templateRepository;} ?>"></td>
+        <td><input type="text" name="Repository" class="textPath" value="<? if(isset($templateRepository)){ echo htmlspecialchars(trim($templateRepository));} ?>"></td>
       </tr>
 
       <tr>
@@ -673,69 +664,21 @@ if($_GET['xmlTemplate']){
         </select></td>
       </tr>
 
-      <tr>
+      <tr class="additionalFields" style="display:none">
         <td>Privileged:</td>
 
         <td><input type="checkbox" name="Privileged" <?if(isset($templatePrivileged)) {echo $templatePrivileged;}?>></td>
       </tr>
 
-      <tr>
+      <tr class="additionalFields" style="display:none">
         <td>Bind time:</td>
 
         <td><input type="checkbox" name="BindTime" checked></td>
       </tr>
     </table>
 
-    <div id="additionalFields" style="display:none">
-      <div id="title">
-        <span class="left"><img src="/plugins/dynamix.docker.manager/icons/default.png" class="icon">Additional fields:</span>
-      </div>
-      <table class="Template">
-        <tr>
-          <td style="width: 150px;">
-            Docker Hub URL:
-          </td>
-          <td>
-            <input type="text" name="Registry" class="textTemplate" placeholder="https://registry.hub.docker.com/u/username/image" value="<? if(isset($templateRegistry)){ echo trimLine( $templateRegistry );} ?>"/>
-          </td>
-        </tr>
-        <tr>
-          <td style="width: 150px;">
-            WebUI:
-          </td>
-          <td>
-            <input type="text" name="WebUI" class="textTemplate"/  placeholder="http://[IP]:[PORT:8080]/" value="<? if(isset($templateWebUI)){ echo trim( $templateWebUI );} ?>">
-          </td>
-        </tr>
-        <tr>
-          <td style="width: 150px;">
-            Banner:
-          </td>
-          <td>
-            <input type="text" name="Banner" class="textTemplate"  placeholder="http://address.to/banner.png" value="<? if(isset($templateBanner)){ echo trim( $templateBanner );} ?>"/>
-          </td>
-        </tr>
-        <tr>
-          <td style="width: 150px;">
-            Icon:
-          </td>
-          <td>
-            <input type="text" name="Icon" class="textTemplate" placeholder="http://address.to/icon.png" value="<? if(isset($templateIcon)){ echo trim( $templateIcon );} ?>"/>
-          </td>
-        </tr>
-        <tr>
-          <td style="width: 150px; vertical-align: top;">
-            Description:
-          </td>
-          <td>
-            <textarea name="Description" rows="10" cols="71" class="desc"><? if(isset($templateDescription)){ echo trimLine($templateDescription);} ?></textarea>
-          </td>
-        </tr>
-      </table>
-    </div>
-
     <div id="title">
-      <span class="left"><img src="/plugins/dynamix.docker.manager/icons/paths.png" class="icon">Paths</span>
+      <span class="left"><img src="/plugins/dynamix.docker.manager/icons/paths.png" class="icon">Volume Mappings</span>
     </div>
 
     <table id="pathRows" class="pathTab">
@@ -743,7 +686,7 @@ if($_GET['xmlTemplate']){
         <tr>
           <td>Container volume:</td>
           <td>Host path:</td>
-          <td>Mode:</td>
+          <td>Access:</td>
         </tr>
       </thead>
 
@@ -762,15 +705,16 @@ if($_GET['xmlTemplate']){
             </select>
           </td>
           <td>
-            <input onclick="addPath(this.form);" type="button" value="Add Path" class="btn">
+            <input onclick="addPath(this.form);" type="button" value="Add path" class="btn">
           </td>
         </tr>
         <?if(isset($templateVolumes)){echo $templateVolumes;}?>
       </tbody>
     </table>
+
     <div id="titlePort">
       <div id="title">
-        <span class="left"><img src="/plugins/dynamix.docker.manager/icons/network.png" class="icon">Ports</span>
+        <span class="left"><img src="/plugins/dynamix.docker.manager/icons/network.png" class="icon">Port Mappings</span>
       </div>
 
       <table id="portRows" class="portRows">
@@ -783,15 +727,15 @@ if($_GET['xmlTemplate']){
 
           <tr>
             <td>
-              <input type="text" id="containerPort1" name="containerPort[]" class="textPort" title="Set the port your app uses inside the container.">
+              <input type="number" min="1" max="65535" id="containerPort1" name="containerPort[]" class="textPort" title="Set the port your app uses inside the container.">
             </td>
             <td>
-              <input type="text" id="hostPort1" name="hostPort[]" class="textPort" title="Set the port you use to interact with the app.">
+              <input type="number" min="1" max="65535" id="hostPort1" name="hostPort[]" class="textPort" title="Set the port you use to interact with the app.">
             </td>
             <td>
               <select id="portProtocol1" name="portProtocol[]">
-                <option value="tcp" selected="selected">tcp</option>
-                <option value="udp">udp</option>
+                <option value="tcp" selected="selected">TCP</option>
+                <option value="udp">UDP</option>
               </select>
             </td>
             <td>
@@ -803,37 +747,116 @@ if($_GET['xmlTemplate']){
       </table>
     </div>
 
-    <div id="title">
-      <span class="left"><img src="/plugins/dynamix.docker.manager/icons/default.png" class="icon">Environment Variables</span>
+    <div class="additionalFields" style="display:none">
+      <div id="title">
+        <span class="left"><img src="/plugins/dynamix.docker.manager/icons/default.png" class="icon">Environment Variables</span>
+      </div>
+
+      <table id="envRows" class="envTab">
+        <thead>
+          <tr>
+            <td>Variable Name:</td>
+            <td>Variable Value:</td>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td>
+              <input type="text" id="VariableName1" name="VariableName[]" class="textEnv">
+            </td>
+            <td>
+              <input type="text" id="VariableValue1" name="VariableValue[]" class="textEnv">
+              <input onclick="addEnv(this.form);" type="button" value="Add Variable">
+            </td>
+          </tr>
+          <?if(isset($templateVariables)){echo $templateVariables;}?>
+        </tbody>
+      </table>
     </div>
 
-    <table id="envRows" class="envTab">
-      <thead>
-        <tr>
-          <td>Variable Name:</td>
-          <td>Variable Value:</td>
-        </tr>
-      </thead>
+    <div <?= empty($templateExtraParams) ? 'class="additionalFields" style="display:none"' : '' ?>>
+      <div id="title">
+        <span class="left"><img src="/plugins/dynamix.docker.manager/icons/extraparams.png" class="icon">Extra Parameters</span>
+      </div>
 
-      <tbody>
+      <input type="text" name="ExtraParams" class="textTemplate" value="<? if(isset($templateExtraParams)){ echo htmlspecialchars(trim($templateExtraParams));} ?>"/>
+    </div>
+
+    <div <?= $showAdditionalInfo ? 'class="additionalFields"' : '' ?> style="display:none">
+      <div id="title">
+        <span class="left"><img src="/plugins/dynamix.docker.manager/icons/vcard.png" class="icon">Additional Fields</span>
+      </div>
+      <table class="Template">
         <tr>
+          <td style="width: 150px;">Docker Hub URL:</td>
           <td>
-            <input type="text" id="VariableName1" name="VariableName[]" class="textEnv">
-          </td>
-          <td>
-            <input type="text" id="VariableValue1" name="VariableValue[]" class="textEnv">
-            <input onclick="addEnv(this.form);" type="button" value="Add Variable">
+            <input type="url" name="Registry" class="textTemplate" placeholder="e.g. https://registry.hub.docker.com/u/username/image" value="<? if(isset($templateRegistry)){ echo htmlspecialchars(trim($templateRegistry));} ?>"/>
           </td>
         </tr>
-        <?if(isset($templateVariables)){echo $templateVariables;}?>
-      </tbody>
-    </table>
-
+        <tr>
+          <td style="width: 150px;">WebUI:</td>
+          <td>
+            <input type="text" name="WebUI" class="textTemplate" placeholder="e.g. http://[IP]:[PORT:8080]/" value="<? if(isset($templateWebUI)){ echo htmlspecialchars(trim($templateWebUI));} ?>"/>
+          </td>
+        </tr>
+        <tr>
+          <td style="width: 150px;">Banner:</td>
+          <td>
+            <input type="url" name="Banner" class="textTemplate" placeholder="e.g. http://address.to/banner.png" value="<? if(isset($templateBanner)){ echo htmlspecialchars(trim($templateBanner));} ?>"/>
+          </td>
+        </tr>
+        <tr>
+          <td style="width: 150px;">Icon:</td>
+          <td>
+            <input type="url" name="Icon" class="textTemplate" placeholder="e.g. http://address.to/icon.png" value="<? if(isset($templateIcon)){ echo htmlspecialchars(trim($templateIcon));} ?>"/>
+          </td>
+        </tr>
+        <tr>
+          <td style="width: 150px; vertical-align: top;">Description:</td>
+          <td>
+            <textarea name="Description" rows="10" cols="71" class="desc textTemplate"><? if(isset($templateDescription)){ echo htmlspecialchars(trimLine($templateDescription));} ?></textarea>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <br>
     <div>
-      <br><input type="submit" value="Apply" style="font-weight: bold; font-size: 16px;" onclick="$( '#createContainer' ).submit();$(this).prop('disabled', true);">
+      <input type="submit" value="<?= ($xmlType != 'edit') ? 'Create' : 'Save' ?>">
+      <button onclick="done()" type="button">Cancel</button>
     </div>
   </form>
 </div>
 
-</body>
-</html>
+<script type="text/javascript" src="/webGui/scripts/dynamix.js"></script>
+<script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/jsFileTree/jqueryFileTree.js"></script>
+<script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/addDocker.js"></script>
+<script type="text/javascript">
+$(function() {
+  $(document).mouseup(function (e) {
+    var container = $(".fileTree");
+    if (!container.is(e.target) && container.has(e.target).length === 0) {
+      container.hide();
+    }
+  });
+
+  if ($("#NetworkType").val() != 'bridge') {
+    $("#titlePort").css({'display': "none"});
+  }
+  $("#NetworkType").change(function() {
+    if ($(this).val() != "bridge") {
+      $("#titlePort").css({'display': "none"});
+    } else {
+      $("#titlePort").css({'display': "block"});
+    }
+  });
+  $("#TemplateSelect").change(function() {
+    if ($(this).val() !== "") {
+      $("#xmlTemplate").val($(this).val());
+      $("#formTemplate").submit();
+    }
+  });
+  $("#toggleMode").addClass("fa-toggle-off");
+  $("#toggleMode").removeClass("fa-toggle-on");
+});
+</script>
