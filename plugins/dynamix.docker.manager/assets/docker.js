@@ -1,5 +1,44 @@
+function addDockerContainerContext(container, image, template, started, update, autostart, webui){
+  var opts = [{header: container}];
+  if (started && (webui != "#")) {
+    opts.push({text: 'WebUI', icon:'fa-globe', href: webui, target: '_blank' });
+    opts.push({divider: true});
+  }
+  if (! update){
+    opts.push({text: 'Update', icon:'fa-arrow-down', action: function(e){ e.preventDefault(); execUpContainer(container); }});
+    opts.push({divider: true});
+  }
+  if (started){
+    opts.push({text: 'Stop', icon:'fa-stop', action: function(e){ e.preventDefault(); containerControl(container, 'stop'); }});
+  } else {
+    opts.push({text: 'Start', icon:'fa-play', action: function(e){ e.preventDefault(); containerControl(container, 'start'); }});
+  }
+  opts.push({divider: true});
+  opts.push({text: 'Logs', icon:'fa-navicon', action: function(e){ e.preventDefault(); containerLogs(container); }});
+  opts.push({text: 'Edit', icon:'fa-wrench', action: function(e){ e.preventDefault(); editContainer(container, template); }});
+  if (autostart){
+    opts.push({text: 'Disable autostart', icon:'fa-check-square-o', action: function(e){ e.preventDefault();  autoStart(container, e); }});
+  } else {
+    opts.push({text: 'Enable autostart', icon:'fa-square-o', action: function(e){ e.preventDefault(); autoStart(container, e); }});
+  }
+  opts.push({divider: true});
+  opts.push({text: 'Remove', icon:'fa-trash', action: function(e){ e.preventDefault(); rmContainer(container, image); }});
+  context.attach('#context-'+container, opts);
+}
 
-function popupWithIframe( title, cmd, reload) {
+function addDockerImageContext(image, imageTag){
+  var opts = [{header: '(orphan image)'}];
+  opts.push({text: 'Remove', icon:'fa-trash', action: function(e){ e.preventDefault(); rmImage(image, imageTag); }});
+  context.attach('#context-'+image, opts);
+}
+
+function execUpContainer(container){
+  var title = 'Updating the container: ' + container;
+  var address = "/plugins/dynamix.docker.manager/createDocker.php?updateContainer=true&ct[]=" + encodeURIComponent(container);
+  popupWithIframe(title, address, true);
+}
+
+function popupWithIframe(title, cmd, reload) {
   pauseEvents();
 
   $( "#iframe-popup" ).html('<iframe id="myIframe" frameborder="0" scrolling="yes" width="100%" height="99%"></iframe>');
@@ -14,51 +53,52 @@ function popupWithIframe( title, cmd, reload) {
     show : {effect: 'fade' , duration: 250},
     hide : {effect: 'fade' , duration: 250},
     open: function(ev, ui){
-     $('#myIframe').attr('src', cmd);
+      $('#myIframe').attr('src', cmd);
     },
     close: function( event, ui ) {
-      if (reload){
+      if (reload && !$('#myIframe').contents().find('#canvas').length){
         location = window.location.href;
+      } else {
+        resumeEvents();
       }
     }
- });
+  });
   $(".ui-dialog .ui-dialog-titlebar").addClass('menu');
   $(".ui-dialog .ui-dialog-content").css('padding','0');
   $(".ui-dialog .ui-dialog-title").css('text-align','center');
-  $(".ui-dialog .ui-dialog-title" ).css( 'width', "100%");
-  $('.ui-widget-overlay').click(function() { $("#iframe-popup").dialog("close"); });
-};
+  $(".ui-dialog .ui-dialog-title").css('width', "100%");
+  //$('.ui-widget-overlay').click(function() { $("#iframe-popup").dialog("close"); });
+}
 
+function addContainer() {
+  var path = location.pathname;
+  var x = path.indexOf("?");
+  if (x!=-1) path = path.substring(0,x);
 
+  location = path + '/AddContainer';
+}
 
-function addContainer(container, template) {
-  container = (typeof container === "undefined") ? false : container;
-  if (container) {
-    var title = 'Edit container: ' + container;
-    op = "?xmlTemplate=edit:" + template;
-  } else {
-    var title = 'Create Container';
-    op = "";
-  }
-  var cmd = '/plugins/dynamix.docker.manager/createDocker.php' + op;
-  popupWithIframe(title, cmd, true);
-};
+function editContainer(container, template) {
+  var path = location.pathname;
+  var x = path.indexOf("?");
+  if (x!=-1) path = path.substring(0,x);
 
-
+  location = path + '/UpdateContainer?xmlTemplate=edit:' + template;
+}
 
 function rmContainer(containers, images){
-  var ctCmd = "";
-  var imgCmd = "";
-  var ctTitle = ""
+  var ctCmd = "/usr/bin/docker rm -f";
+  var imgCmd = "/usr/bin/docker rmi";
+  var ctTitle = "";
   if (typeof containers === "object") {
     for (var i = 0; i < containers.length; i++) {
-      ctCmd  += "/usr/bin/docker rm -f " + containers[i] + ";";
-      imgCmd += "/usr/bin/docker rmi " + images[i] + ";";
+      ctCmd  += " " + containers[i];
+      imgCmd += " " + images[i];
       ctTitle += containers[i] + "<br>";
-    };
+    }
   } else {
-    ctCmd += "/usr/bin/docker rm -f " + containers + ";";
-    imgCmd += "/usr/bin/docker rmi " + images + ";";
+    ctCmd += " " + containers;
+    imgCmd += " " + images;
     ctTitle += containers + "<br>";
   }
   var title = 'Removing container';
@@ -74,12 +114,12 @@ function rmContainer(containers, images){
     buttons: {
       "Just the container": function() {
         $( this ).dialog( "close" );
-        var cmd = '/plugins/dynamix.docker.manager/exec.php?cmd=' + ctCmd;
+        var cmd = '/plugins/dynamix.docker.manager/exec.php?cmd=' + encodeURIComponent(ctCmd);
         popupWithIframe(title, cmd, true);
       },
       "Container and image": function() {
         $( this ).dialog( "close" );
-        var cmd = '/plugins/dynamix.docker.manager/exec.php?cmd=' + ctCmd + imgCmd;
+        var cmd = '/plugins/dynamix.docker.manager/exec.php?cmd=' + encodeURIComponent(ctCmd + imgCmd);
         popupWithIframe(title, cmd, true);
       },
       Cancel: function() {
@@ -92,20 +132,18 @@ function rmContainer(containers, images){
   $(".ui-dialog .ui-dialog-title").css('text-align','center').css( 'width', "100%");
   $(".ui-dialog .ui-dialog-content").css('padding-top','15px').css('font-weight','bold');
   $(".ui-button-text").css('padding','0px 5px');
-};
-
-
+}
 
 function updateContainer(containers){
   var ctCmd ="";
   var ctTitle = "";
   if (typeof containers === "object") {
     for (var i = 0; i < containers.length; i++) {
-      ctCmd  += "&ct[]=" + containers[i];
+      ctCmd  += "&ct[]=" + encodeURIComponent(containers[i]);
       ctTitle += containers[i] + "<br>";
-    };
+    }
   } else {
-    ctCmd += "&ct[]=" + containers;
+    ctCmd += "&ct[]=" + encodeURIComponent(containers);
     ctTitle += containers + "<br>";
   }
   var title = 'Updating container';
@@ -137,32 +175,16 @@ function updateContainer(containers){
   $( ".ui-dialog .ui-dialog-title" ).css( 'width', "100%");
 }
 
-
-function containerControl(container, action){
-  document.getElementById("#cmdStartStop").value = "/usr/bin/docker " + action + " " + container;
-  document.forms["formStartStop"].submit();
-};
-
-
-
-function containerLogs(container){
-  var title = 'Log for: ' + container;
-  var address = "/plugins/dynamix.docker.manager/exec.php?cmd=/usr/bin/docker logs --tail=350 " + container;
-  popupWithIframe(title, address, false);
-}
-
-
-
 function rmImage(images, imageName){
-  var imgCmd   = "";
+  var imgCmd   = "/usr/bin/docker rmi";
   var imgTitle = "";
   if (typeof images === "object") {
     for (var i = 0; i < images.length; i++) {
-      imgCmd += "/usr/bin/docker rmi " + images[i] + ";";
+      imgCmd += " " + images[i];
       imgTitle += imageName[i] + "<br>";
-    };
+    }
   } else {
-    imgCmd += "/usr/bin/docker rmi " + images + ";";
+    imgCmd += " " + images;
     imgTitle += imageName + "<br>";
   }
   var title = "Removing image";
@@ -179,7 +201,7 @@ function rmImage(images, imageName){
     buttons: {
       "Just do it!": function() {
         $( this ).dialog( "close" );
-        var cmd = '/plugins/dynamix.docker.manager/exec.php?cmd=' + imgCmd;
+        var cmd = '/plugins/dynamix.docker.manager/exec.php?cmd=' + encodeURIComponent(imgCmd);
         popupWithIframe(title, cmd, true);
       },
       Cancel: function() {
@@ -195,18 +217,22 @@ function rmImage(images, imageName){
   $( ".ui-dialog .ui-dialog-title" ).css( 'width', "100%");
 }
 
+function containerControl(container, action){
+  $("#cmdStartStop").val("/usr/bin/docker " + action + " " + container);
+  $("#formStartStop").submit();
+}
 
+function reloadUpdate(){
+  $(".updatecolumn").html("<span style=\"color:#267CA8;white-space:nowrap;\"><i class=\"fa fa-spin fa-refresh\"></i> checking...</span>");
+  $("#cmdStartStop").val("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerupdate.php");
+  $("#formStartStop").submit();
+}
 
 function autoStart(container, event){
   document.getElementsByName("container")[0].value = container;
-  document.forms["formAutostart"].submit();
-};
+  $("#formStartStop").submit();
+}
 
-
-
-function reloadUpdate(){
-  document.getElementById("#cmdStartStop").value = "/usr/local/emhttp/plugins/dynamix.docker.manager/dockerupdate.php";
-  $("#refreshToggle").addClass("fa-spin");
-  $("#refreshToggle").parent().css('color','#625D5D');
-  document.forms["formStartStop"].submit();
-};
+function containerLogs(container){
+  openWindow('/usr/bin/docker logs --tail=350 -f ' + container, 'Log for: ' + container, 600, 900);
+}

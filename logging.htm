@@ -10,13 +10,20 @@ button:hover[type=button],a.button:hover{border-color:#6AB034;text-shadow:-1px -
 button:active[type=button]{border-color:#6AB034;box-shadow:inset 0 0 8px 4px #548C29,0 1px 0 0 #E0E0E0;}
 </style>
 <script>
-parent.document.getElementById('progressFrame').style.zIndex = 10;
+var progressframe = parent.document.getElementById('progressFrame');
+if (progressframe) progressframe.style.zIndex = 10;
 function addLog(logLine) {
+  var scrollTop = (window.pageYOffset !== undefined) ? window.pageYOffset : (document.documentElement || document.body.parentNode).scrollTop;
+  var clientHeight = (document.documentElement || document.body.parentNode).clientHeight;
+  var scrollHeight = (document.documentElement || document.body.parentNode).scrollHeight;
+  var isScrolledToBottom = scrollHeight - clientHeight <= scrollTop + 1;
   document.body.innerHTML += logLine;
-  window.scrollTo(0,document.body.scrollHeight);
+  if (isScrolledToBottom) {
+    window.scrollTo(0,document.body.scrollHeight);
+  }
 }
 function addCloseButton() {
-  addLog("<br><center><button class='logLine' type='button' onclick='top.Shadowbox.close()'>Done</button></center>");
+  addLog("<br><center><button class='logLine' type='button' onclick='" + (top.Shadowbox ? "top.Shadowbox" : "window") + ".close()'>Done</button></center>");
 }
 </script>
 </head>

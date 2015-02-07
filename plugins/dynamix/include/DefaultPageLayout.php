@@ -134,6 +134,7 @@ function notifier() {
           position: '<?=$notify['position']?>',
           header: notify.event+': '+notify.timestamp,
           theme: notify.importance+' '+notify.file,
+          themeState: '',
           beforeOpen: function(e,m,o) {if ($('.jGrowl-notify').hasClass(notify.file)) {return(false);}},
           close: function(e,m,o) {$.post('/webGui/include/Notify.php',{cmd:'archive',file:notify.file}); return(false);}
         });
@@ -267,7 +268,10 @@ foreach ($pages as $page) {
       echo "<div class=\"Panel\"><a href=\"$link\" onclick=\"$.cookie('one','tab1',{path:'/'})\"><img class=\"PanelImg\" src=\"$icon\" title=\"$title\"><br><div class=\"PanelText\">$title</div></a></div>";
     }
   }
-  $text = Markdown($page['text']);
+  $text = $page['text'];
+  if (!isset($page['Markdown']) || $page['Markdown'] == 'true') {
+    $text = Markdown($text);
+  }
   eval("?>$text");
   if ($close) echo "</div></div>";
 }

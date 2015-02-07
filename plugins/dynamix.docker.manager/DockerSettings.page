@@ -1,41 +1,10 @@
 Menu="Docker"
-Title="Docker Service Settings"
+Title="Docker Settings"
 Cond="($var['fsState'] == 'Started')"
 ---
-<script type="text/javascript">
-var isError;
-$.ajaxSetup({ async: false });
-$(document).ready(function() {
-  $("#startBtn ").click(function(event){
-    isError = false;
-    var size = $("input[name='DOCKER_IMAGE_SIZE']").val();
-    var target = $("#SIZE_ERROR");
-    if (! $.isNumeric( size )){
-      target.html('Error: value must be a number.');
-      target.css('color','#EF3D47');
-      isError = true;   
-    } else {
-      target.html('');
-    }
-    var image = $("#DOCKER_IMAGE_FILE").val();
-    var target = $("#IMAGE_ERROR");
-    $.getJSON( "/plugins/dynamix.docker.manager/update_cfg.php?is_dir=" + image).done(function( json ) {
-      if (json.is_dir == true){
-        target.html('Error: must be a file; directory provided.');
-        target.css('color','#EF3D47');
-        isError = true;
-      } else {
-        target.html('');
-      }
-    });
-
-    if (!isError) {$("#settingsForm").submit();}
-  }); 
-}); 
-</script>
 <?PHP
 // Add the Docker JSON client
-include_once("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerClient.php");
+require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerClient.php");
 $docker          = new DockerClient();
 $DockerUpdate    = new DockerUpdate();
 $DockerTemplates = new DockerTemplates();
@@ -59,24 +28,24 @@ $dockercfg = parse_ini_file($cfgfile);
 
 <form id="settingsForm" markdown="1" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#file" value="<?=$cfgfile;?>" />
-<input type="hidden" name="#command" value="/etc/rc.d/rc.docker start" />  
+<input type="hidden" name="#command" value="/etc/rc.d/rc.docker start" />
 
 Service Status:
-: **Stopped**
+: **Stopped** <input type="button" value="Start" id="startBtn" style="margin-left: 15px"/>
 
 > Before you can start the Docker service for the first time, please specify an image
-> file for Docker to install to.  Once started, Docker will always automatically start 
+> file for Docker to install to.  Once started, Docker will always automatically start
 > after the array has been started.
 
 Docker image:
-: <input type="text" name="DOCKER_IMAGE_FILE" id="DOCKER_IMAGE_FILE" value="<?=$dockercfg['DOCKER_IMAGE_FILE'];?>" placeholder="/mnt/disk1/docker.img" />
+: <input type="text" name="DOCKER_IMAGE_FILE" id="DOCKER_IMAGE_FILE" value="<?=$dockercfg['DOCKER_IMAGE_FILE'];?>" placeholder="e.g. /mnt/disk1/docker.img" required="required" />
 
 > You must specify an image file for Docker.  The system will automatically
 > create this file when the Docker service is first started.  If you do not want Docker
 > to run at all, set this field blank and click **Start**.
 
 Default image size:
-: <input type="text" name="DOCKER_IMAGE_SIZE" value="<?=$dockercfg['DOCKER_IMAGE_SIZE'];?>" />GB
+: <input type="number" name="DOCKER_IMAGE_SIZE" value="<?=$dockercfg['DOCKER_IMAGE_SIZE'];?>" required="required" />GB
 
 > If the system needs to create a new docker image file, this is the default size to use
 > specified in GB.
@@ -84,16 +53,22 @@ Default image size:
 > To resize an existing image file, specify the new size here.  Next time the Docker service is
 > started the file (and file system) will increased to the new size (but never decreased).
 
-&nbsp;
-: <input type="button" value="Start" id="startBtn"/>
 </form>
 
 <?else:?>
 
+<form markdown="1" method="POST" action="/update.php" target="progressFrame">
+<input type="hidden" name="#command" value="/etc/rc.d/rc.docker stop" />
 Service Status:
-: **Started**
+: **Started** <input type="submit" value="Stop" style="margin-left: 15px"/>
+</form>
 
 > Stopping the Docker service will first stop all the running containers.
+
+Docker version:
+: <? $arrInfo = $docker->getInfo(); echo $arrInfo['Version']; ?>
+
+> This is the docker version.
 
 Docker image:
 : <?=$dockercfg['DOCKER_IMAGE_FILE'];?>
@@ -140,11 +115,6 @@ Docker volume info:
 
 </form>
 
-<form markdown="1" method="POST" action="/update.php" target="progressFrame">
-<input type="hidden" name="#command" value="/etc/rc.d/rc.docker stop" />
-&nbsp;
-: <input type="submit" value="Stop" />
-</form>
 
 <?endif;?>
 <?endif;?>
@@ -153,9 +123,9 @@ Docker volume info:
 <input type="hidden" name="#action" value="templates" />
 
 Template repositories:
-: <textarea name="template_repos" rows="10" cols="100"><?=@file_get_contents($template_repos);?></textarea>
+: <textarea name="template_repos" rows="5" cols="100" style="width:550px"><?=@file_get_contents($template_repos);?></textarea>
 
-> Use this field to add template repositories. 
+> Use this field to add template repositories.
 > Docker templates are used to facilitate the creation and re-creation of Docker containers.
 >
 > Please setup one per line.
@@ -163,3 +133,33 @@ Template repositories:
 &nbsp;
 : <input type="submit" value="Save" />
 </form>
+<script type="text/javascript">
+$(function() {
+  //$.ajaxSetup({ async: false });
+  $("#startBtn").click(function(event){
+    var isError = false;
+    var size = $("input[name='DOCKER_IMAGE_SIZE']").val();
+    var target = $("#SIZE_ERROR");
+    if (! $.isNumeric( size )){
+      target.html('Error: value must be a number.');
+      target.css('color','#EF3D47');
+      isError = true;
+    } else {
+      target.html('');
+    }
+    var image = $("#DOCKER_IMAGE_FILE").val();
+    target = $("#IMAGE_ERROR");
+    $.getJSON( "/plugins/dynamix.docker.manager/update_cfg.php?is_dir=" + image).done(function( json ) {
+      if (json.is_dir === true){
+        target.html('Error: must be a file; directory provided.');
+        target.css('color','#EF3D47');
+        isError = true;
+      } else {
+        target.html('');
+      }
+    });
+
+    if (!isError) {$("#settingsForm").submit();}
+  });
+});
+</script>

@@ -1,11 +1,11 @@
-/* 
+/*
  * Context.js
  * Copyright Jacob Kelley
  * MIT License
  */
 
 var context = context || (function () {
-    
+
 	var options = {
 		fadeSpeed: 100,
 		filter: function ($obj) {
@@ -17,9 +17,9 @@ var context = context || (function () {
 	};
 
 	function initialize(opts) {
-		
+
 		options = $.extend({}, options, opts);
-		
+
 		$(document).on('click', 'html', function () {
 			$('.dropdown-context').fadeOut(options.fadeSpeed, function(){
 				$('.dropdown-context').css({display:''}).find('.drop-left').removeClass('drop-left');
@@ -39,7 +39,7 @@ var context = context || (function () {
 				$sub.addClass('drop-left');
 			}
 		});
-		
+
 	}
 
 	function updateOptions(opts){
@@ -48,20 +48,19 @@ var context = context || (function () {
 
 	function buildMenu(data, id, subMenu) {
 		var subClass = (subMenu) ? ' dropdown-context-sub' : '',
-		compressed = options.compress ? ' compressed-context' : '',
-		$menu = $('<ul class="dropdown-menu dropdown-context' + subClass + compressed+'" id="dropdown-' + id + '"></ul>');
-    var i = 0, linkTarget = '', useIcons = false;
-    for(i; i<data.length; i++) {
-    	if (typeof data[i].icon !== 'undefined' && data[i].icon !== '' ) {
-    		$menu.addClass('fa-ul');
-    		useIcons = true;
-    		break;
-    	}
-    }
-    var i = 0;
-    for(i; i<data.length; i++) {
-      var icon = '';
-      if (typeof data[i].divider !== 'undefined') {
+			compressed = options.compress ? ' compressed-context' : '',
+			$menu = $('<ul class="dropdown-menu dropdown-context' + subClass + compressed+'" id="dropdown-' + id + '"></ul>');
+		var i = 0, linkTarget = '', useIcons = false;
+		for(i; i<data.length; i++) {
+			if (typeof data[i].icon !== 'undefined' && data[i].icon !== '' ) {
+				$menu.addClass('fa-ul');
+				useIcons = true;
+				break;
+			}
+		}
+		for(i = 0; i<data.length; i++) {
+			var icon = '';
+			if (typeof data[i].divider !== 'undefined') {
 				$menu.append('<li class="divider"></li>');
 			} else if (typeof data[i].header !== 'undefined') {
 				$menu.append('<li class="nav-header">' + data[i].header + '</li>');
@@ -111,20 +110,19 @@ var context = context || (function () {
 	}
 
 	function addContext(selector, data) {
-		
-		var d = new Date(),
-			id = d.getTime(),
+
+		var id = selector.replace('#', ''),
 			$menu = buildMenu(data, id);
-			
+
 		$('body').append($menu);
-		
-		
+
+
 		$(document).on('click', selector, function (e) {
 			e.preventDefault();
 			e.stopPropagation();
-			
+
 			$('.dropdown-context:not(.dropdown-context-sub)').hide();
-			
+
 			$dd = $('#dropdown-' + id);
 			if (typeof options.above == 'boolean' && options.above) {
 				$dd.addClass('dropdown-context-up').css({
@@ -139,20 +137,23 @@ var context = context || (function () {
 						top: e.pageY - 20 - autoH,
 						left: e.pageX - 13
 					}).fadeIn(options.fadeSpeed);
-				} 
+				}
 			} else if (typeof options.above == 'boolean' && ! options.above) {
 				$dd.css({
 					top: e.pageY + 25,
-					left: e.pageX - 40
+					left: e.pageX - 13
 				}).fadeIn(options.fadeSpeed);
 			}
 		});
 	}
-	
+
 	function destroyContext(selector) {
+		var id = selector.replace('#', '');
+
 		$(document).off('contextmenu', selector).off('click', '.context-event');
+		$('#dropdown-' + id).remove();
 	}
-	
+
 	return {
 		init: initialize,
 		settings: updateOptions,

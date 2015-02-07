@@ -1,5 +1,5 @@
 <?
-include_once("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerClient.php");
+require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerClient.php");
 
 // Autostart file
 global $dockerManPaths;
@@ -34,7 +34,7 @@ if ($_POST['#action'] == "templates" ){
   $repos = $_POST['template_repos'];
   file_put_contents($template_repos, $repos);
   $DockerTemplates = new DockerTemplates();
-  $DockerTemplates->downloadTemplates(TRUE);
+  $DockerTemplates->downloadTemplates();
 }
 
 if ( isset($_GET['is_dir'] )) {

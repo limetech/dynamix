@@ -118,7 +118,7 @@ function render_used_and_free($disk) {
       echo "<td>".my_scale($disk['fsUsed']*1024, $unit)." $unit</td>";
       echo "<td>".my_scale($disk['fsFree']*1024, $unit)." $unit</td>";
     } else {
-      $free = round(100*$disk['fsFree']/$disk['sizeSb']);
+      $free = round(100*$disk['fsFree']/$disk['fsSize']);
       $used = 100-$free;
       echo "<td><div class='usage-disk'><span style='margin:0;width:{$used}%' class='".usage_color($used,false)."'><span>".my_scale($disk['fsUsed']*1024, $unit)." $unit</span></span></div></td>";
       echo "<td><div class='usage-disk'><span style='margin:0;width:{$free}%' class='".usage_color($free,true)."'><span>".my_scale($disk['fsFree']*1024, $unit)." $unit</span></span></div></td>";
@@ -270,7 +270,7 @@ function array_online($disk) {
   $errors += $disk['numErrors'];
   if (isset($disk['fsFree']) && $disk['name']!='parity') {
     $disk['fsUsed'] = $disk['fsSize'] - $disk['fsFree'];
-    $fsSize += $disk['size'];
+    $fsSize += $disk['fsSize'];
     $fsFree += $disk['fsFree'];
     $fsUsed += $disk['fsUsed'];
   }
