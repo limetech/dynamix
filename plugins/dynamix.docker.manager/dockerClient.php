@@ -48,7 +48,7 @@ class DockerTemplates {
 
 	public function download_url($url, $path = ""){
 		if ($path) $path = " -o '$path' ";
-		return shell_exec("curl -s -k -L $path $url 2>/dev/null" );
+		return shell_exec("curl --connect-timeout 5 --max-time 30 -s -k -L $path $url 2>/dev/null" );
 	}
 
 
@@ -123,6 +123,7 @@ class DockerTemplates {
 
 	public function downloadTemplates(){
 		global $dockerManPaths;
+		$repotemplates = array();
 		$msg = array('');
 		$urls = @file($dockerManPaths['template-repos'], FILE_IGNORE_NEW_LINES);
 		if ( ! is_array($urls)) return false;
@@ -156,20 +157,40 @@ class DockerTemplates {
 
 			$templates = $this->getTemplates($tmp_dir);
 			foreach ($templates as $template) {
-				$template = $template['path'];
-				$storPath = sprintf("%s/%s/%s", $dockerManPaths['templates-storage'], $github_user, str_replace($tmp_dir."/", "", $template) );
+				$storPath = sprintf("%s/%s", $dockerManPaths['templates-storage'], str_replace($tmp_dir."/", "", $template['path']) );
+				$repotemplates[] = $storPath;
 				if (! is_dir( dirname( $storPath ))) @mkdir( dirname( $storPath ), 0777, true);
 				if ( is_file($storPath) ){
-					if ( sha1_file( $template )  ===  sha1_file( $storPath )) {
-						$msg[] = sprintf("   Skipped: %s\n", basename($template));
+					if ( sha1_file( $template['path'] )  ===  sha1_file( $storPath )) {
+						$msg[] = sprintf("   Skipped: %s\n", $template['prefix'] . '/' . $template['name']);
 						continue;
+					} else {
+						@copy($template['path'], $storPath);
+						$msg[] = sprintf("   Updated: %s\n", $template['prefix'] . '/' . $template['name']);
 					}
+				} else {
+					@copy($template['path'], $storPath);
+					$msg[] = sprintf("   Added: %s\n", $template['prefix'] . '/' . $template['name']);
 				}
-				@copy($template, $storPath );
-				$msg[] = sprintf("   Updated: %s\n", basename($storPath));
 			}
 			$this->removeDir($tmp_dir);
 		}
+
+		// Delete any templates not in the repos
+		foreach ($this->listDir($dockerManPaths['templates-storage'], "xml") as $arrLocalTemplate) {
+			if (!in_array($arrLocalTemplate['path'], $repotemplates)) {
+				unlink($arrLocalTemplate['path']);
+				$msg[] = sprintf("   Removed: %s\n", $arrLocalTemplate['prefix'] . '/' . $arrLocalTemplate['name']);
+
+				// Any other files left in this template folder? if not delete the folder too
+				$files = array_diff(scandir(dirname($arrLocalTemplate['path'])), array('.', '..'));
+				if (empty($files)) {
+					rmdir(dirname($arrLocalTemplate['path']));
+					$msg[] = sprintf("   Removed: %s\n", $arrLocalTemplate['prefix']);
+				}
+			}
+		}
+
 		return $msg;
 	}
 
@@ -279,33 +300,35 @@ class DockerTemplates {
 		foreach ($containers as $ct) {
 			$name           = $ct['Name'];
 			$image          = $ct['Image'];
-			$tmp            = $info[$name];
 			$tmp            = ( count($info[$name]) ) ?  $info[$name] : array() ;
 
 			$tmp['running'] = $ct['Running'];
 			$tmp['autostart'] = in_array($name, $allAutoStart);
 
-			if (! $tmp['icon'] || ! $tmp['banner'] || $reload) {
+			if (!array_key_exists('icon', $tmp) || !array_key_exists('banner', $tmp) || $reload) {
 				$img = $this->getBannerIcon( $image );
 				$tmp['banner'] = ( $img['banner'] ) ? $img['banner'] : "#";
 				$tmp['icon']   = ( $img['icon'] )   ? $img['icon'] : "#";
 			}
 
-			if (! $tmp['url'] || $reload) {
+			if (!array_key_exists('url', $tmp) || $reload) {
 				$WebUI      = $this->getControlURL($name);
 				$tmp['url'] = ($WebUI) ? $WebUI : "#";
 			}
 
-			if (! $tmp['registry'] || $reload ){
+			if (!array_key_exists('registry', $tmp) || $reload ){
 				$Registry = $this->getTemplateValue($image, "Registry");
 				$tmp['registry'] = ( $Registry ) ? $Registry : "#";
 			}
 
-			if (! $tmp['updated'] || $reload){
-				$tmp['updated'] = $DockerUpdate->getUpdateStatus($name, $image);
+			if (!array_key_exists('updated', $tmp) || $reload) {
+				$tmp['updated'] = "true";
+				if ($reload){
+					$tmp['updated'] = $DockerUpdate->getUpdateStatus($name, $image);
+				}
 			}
 
-			if (! $tmp['template'] || $reload){
+			if (!array_key_exists('template', $tmp) || $reload){
 				$tmp['template'] = $this->getUserTemplate($name);
 			}
 
@@ -352,14 +375,14 @@ class DockerTemplates {
 
 
 ######################################
-##   	    DOCKERUPDATE CLASS        ##
+##   	  DOCKERUPDATE CLASS        ##
 ######################################
 class DockerUpdate{
 
 	public $updateFile = "/tmp/dockerUpdateStatus.json";
 
 	public function download_url($url){
-		return shell_exec("curl -s -k -L $url 2>/dev/null" );
+		return shell_exec("curl --connect-timeout 5 --max-time 30 -s -k -L $url 2>/dev/null" );
 	}
 
 
@@ -478,6 +501,13 @@ class DockerClient {
 			$json[] = json_decode( $x, true );
 		}
 		return $json;
+	}
+
+
+	public function getInfo(){
+		$info = $this->getDockerJSON("/info");
+		$version = $this->getDockerJSON("/version");
+		return array_merge($info[0], $version[0]);
 	}
 
 

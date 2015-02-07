@@ -27,7 +27,7 @@ function build_pages($pattern) {
 }
 
 function find_pages($item) {
-  global $site,$var,$disks,$devs,$users,$shares,$sec,$sec_nfs,$sec_afp,$name;
+  global $site,$var,$disks,$devs,$users,$shares,$sec,$sec_nfs,$sec_afp,$name,$display;
   $pages = array();
   foreach ($site as $page) {
     $menu = strtok($page['Menu'], ' ');
