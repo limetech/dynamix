@@ -15,35 +15,29 @@ Title="Archived Notifications"
  */
 ?>
 <?
-$log = "{$notify['path']}/archive/*.notify";
-$files = glob($log);
-usort($files, create_function('$a,$b', 'return filemtime($b)-filemtime($a);'));
+$path = "{$notify['path']}/archive/*.notify";
+$files = count(glob($path, GLOB_NOSORT));
 ?>
 <script>
+function archiveList() {
+  $.post('/webGui/include/NotificationsArchive.php',{log:'<?=$path?>',date:'<?=$notify['date']?>',time:'<?=$notify['time']?>'},function(data) {
+    if (data) $('#archive_list').html(data);
+<?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
+    setTimeout(archiveList,<?=max(abs($display['refresh']),15000)?>);
+<?endif;?>
+  });
+}
 function askConfirmation() {
   return confirm('This will delete all notification files!\n\nAre you sure?');
 }
 $(function() {
   $('#archive_table').tablesorter({headers:{5:{sorter:false}}});
+  archiveList();
 });
 </script>
 
-<table class="tablesorter shift<?if ($display['tabs']==0):?>2<?endif;?>" id="archive_table">
-<thead><tr><th>Time</th><th>Event</th><th>Subject</th><th>Description</th><th style='width:7%'>Importance</th><th style='width:5%;text-align:center'>Delete<?if (count($files)>1):?> <a href='/webGui/include/DeleteLogFile.php?log=<?=$log?>' target='progressFrame' onclick='return askConfirmation()' title='Delete all notifications'>[x]</a><?endif;?></th></tr></thead>
-<tbody>
-<?
-foreach ($files as $file) {
-  $fields = preg_split('/\n/', file_get_contents($file));
-  $c = 0;
-  foreach ($fields as $field) {
-    if (!$field) continue;
-    $item = explode('=', $field);
-    if (!$c++) echo "<tr><td>".date("{$notify['date']} {$notify['time']}", $item[1])."</td>"; else echo "<td>{$item[1]}</td>";
-  }
-  echo "<td style='text-align:center'><a href='/webGui/include/DeleteLogFile.php?log=$file' target='progressFrame'><img src='/webGui/images/delete.png' title='Delete notification'></a></td></tr>";
-}
-if (empty($files)) echo "<tr><td colspan='6' style='text-align:center'><em>No notifications available</em></td></tr>";
-?>
-</tbody>
+<table class="tablesorter shift" id="archive_table">
+<thead><tr><th>Time</th><th>Event</th><th>Subject</th><th>Description</th><th style='width:7%'>Importance</th><th style='width:5%;text-align:center'>Delete<?if ($files>1):?> <a href='/webGui/include/DeleteLogFile.php?log=<?=$path?>' target='progressFrame' onclick='return askConfirmation()' title='Delete all notifications'>[x]</a><?endif;?></th></tr></thead>
+<tbody id="archive_list"></tbody>
 </table>
 <button type="button" onclick="done()">Done</button>
