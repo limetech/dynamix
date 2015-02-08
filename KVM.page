@@ -6,30 +6,43 @@ Tabs="true"
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.kvm.manager/styles/dynamix.kvm.manager.css">
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.kvm.manager/styles/jqueryFileTree.css">
 <script type="text/javascript" src="/plugins/dynamix.kvm.manager/scripts/jqueryFileTree.js"></script>
-<script type="text/javascript" src="/plugins/dynamix.kvm.manager/scripts/kvm.js"></script>
+<script type="text/javascript" src="/plugins/dynamix.kvm.manager/scripts/dynamix.kvm.manager.js"></script>
 
 <?php
-require('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php');
-$uri = is_dir('/proc/xen') ? 'xen:///system' : 'qemu:///system';
-$lv = new Libvirt($uri, null, null, false);
-$info = $lv->host_get_node_info();
-$maxcpu = (int)$info['cores']*(int)$info['threads'];
-$maxmem = number_format(($info['memory'] / 1048576), 1, '.', ' ');
-$doms = $lv->get_domains();
-if(is_array($doms))
-	sort($doms);
+require_once('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php');
 
-$libvirt_running = trim ( shell_exec ( "[ -f /proc/`cat /var/run/libvirt/libvirtd.pid 2> /dev/null`/exe ] && echo 'yes' || echo 'no' 2> /dev/null" ) );
+// Check if program is running and get config info
+$libvirt_running = trim(shell_exec( "[ -f /proc/`cat /var/run/libvirt/libvirtd.pid 2> /dev/null`/exe ] && echo 'yes' || echo 'no' 2> /dev/null" ));
+$libvirt_service = isset($domain_cfg['SERVICE']) ?	$domain_cfg['SERVICE'] : "enable";
 $domain_cfgfile = "/boot/config/domain.cfg";
 if(!file_exists($domain_cfgfile)){
 	$fp = fopen("$domain_cfgfile", 'w');
 	fwrite($fp, 'DEBUG="no"'."\n".'MEDIADIR="/mnt/"'."\n".'DISKDIR="/mnt/"'."\n");
 	fclose($fp);
 }
+// This will clean any ^M characters caused by windows from the config file
+if (file_exists("$domain_cfgfile"))
+	shell_exec("sed -i 's!\r!!g' '$domain_cfgfile'");
 $domain_cfg = parse_ini_file( "$domain_cfgfile" );
-$domain_debug = $domain_cfg['DEBUG'];
+$domain_debug = isset($domain_cfg['DEBUG']) ? $domain_cfg['DEBUG'] : "no"; 
 if($domain_debug != "yes")
 	error_reporting(0);
+	
+// Check if kvm.img exists
+$libvirt_filecheck = (file_exists( "/boot/config/plugins/dynamix.kvm.manager/domain.img" )) ? true : false;
+
+// if kvm.img exists check if mounted then mount
+if ($libvirt_filecheck) {
+	if (!shell_exec("mount | grep domain.img" )) {
+		shell_exec("mount -t ext4 /boot/config/plugins/dynamix.kvm.manager/domain.img /etc/libvirt" );
+	}
+}
+
+$uri = is_dir('/proc/xen') ? 'xen:///system' : 'qemu:///system';
+$lv = new Libvirt($uri, null, null, false);
+$info = $lv->host_get_node_info();
+$maxcpu = (int)$info['cores']*(int)$info['threads'];
+$maxmem = number_format(($info['memory'] / 1048576), 1, '.', ' ');
 $theme = $display['theme'];
 $action = array_key_exists('action', $_GET) ? $_GET['action'] : '';
 $subaction = array_key_exists('subaction', $_GET) ? $_GET['subaction'] : '';
@@ -97,6 +110,10 @@ if ($action) {
          	"$domName has been destroyed" : 
          	"Error: ".$lv->get_last_error();
       }
+      elseif ($subaction == 'domain-delete') {
+         $msg = $lv->domain_delete($domName) ? "$domName has been deleted" : 
+         	"Error: ".$lv->get_last_error();
+      }
       elseif ($subaction == 'domain-undefine') {
          $msg = $lv->domain_undefine($domName) ? "$domName has been undefined" : 
          	"Error: ".$lv->get_last_error();
@@ -111,13 +128,6 @@ if ($action) {
       elseif ($subaction == 'domain-create') {
          if (@$_POST['xmldesc']) {
          	$xml = $_POST['xmldesc'];
-         	if (strpos($xml,'<qemu:commandline>')) {
-	  				$tmp = explode("\n", $xml);
-					for ($i = 0; $i < sizeof($tmp); $i++)
-						if (strpos('.'.$tmp[$i], "<domain type='kvm'"))
-							$tmp[$i] = "<domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>";
-					$xml = join("\n", $tmp);
-				}
            	$msg = $lv->domain_define($xml) ? "$domName definition has been changed" :
          	  	"Error: ".$lv->get_last_error();
          }
@@ -169,23 +179,23 @@ if ($action) {
 				'Error: '.$lv->get_last_error();
 		}
 		elseif ($subaction == 'snap-delete') {    
-			$msg = $lv->domain_snapshot_delete($domName, $_GET['sname']) ? 
+			$msg = $lv->domain_snapshot_delete($domName, $_GET['snap']) ? 
 				"Snapshot for $domName has been deleted" : 
 				'Error: '.$lv->get_last_error();
 		}
 		elseif ($subaction == 'snap-revert') {         
-			$msg = $lv->domain_snapshot_revert($domName, $_GET['sname']) ? 
+			$msg = $lv->domain_snapshot_revert($domName, $_GET['snap']) ? 
 				"$domName has been reverted" : 
 				'Error: '.$lv->get_last_error();
 		}
 		elseif ($subaction == 'snap-desc') {
-			$msg = $lv->snapshot_set_metadata($domName, $_GET['sname'], $_POST['snapdesc']) ? 
+			$msg = $lv->snapshot_set_metadata($domName, $_GET['snap'], $_POST['snapdesc']) ? 
 				"Snapshot description for $domName has been saved":
 				'Error: '.$lv->get_last_error();
 		}
 	echo "<script>clearHistory();</script>";
 	}
-	echo "<table class='tablesorter kvm id='kvm_table'>
+	echo "<table class='tablesorter kvm' id='kvm_table'>
   	      			<tr>
   	      				<thead>
   	      				<th class='header'><i class='glyphicon glyphicon-th-list'></i></th>
@@ -200,12 +210,14 @@ if ($action) {
               			<tbody>
             		</tr>";
    //Get domain variables for each domain
-   if(!is_array($doms)){
+	$doms = $lv->get_domains();
+	if(!is_array($doms)){
 		if ($libvirt_running == "yes")
 			$msg = "No domains defined. Create from template or add XML.";
 		else 
 			$msg = "Libvirt is not running. Goto Settings tab then click Start.";
 	} else {
+	sort($doms);
    for ($i = 0; $i < sizeof($doms); $i++) {
    	$name = $doms[$i];
       $res = $lv->get_domain_by_name($name);
@@ -316,7 +328,7 @@ if ($action) {
       if ($state == 'shutoff')
       	echo " | <a class='btn btn-sm btn-warning' href='?subaction=domain-undefine&amp;uuid=$uuid' 
           		 onClick=\"return confirm('Remove $name definition?')\" title='remove $name definition'><i class='glyphicon glyphicon-minus'></i></a>
-					 | <a class='btn btn-sm btn-danger' href='?subaction=domain-remove&amp;uuid=$uuid' 
+					 | <a class='btn btn-sm btn-danger' href='?subaction=domain-delete&amp;uuid=$uuid' 
           		 onClick=\"return confirm('Completely remove $name xml and image?')\" title='remove $name xml and image'><i class=' glyphicon glyphicon-remove'></i></a>          		  
           		  | <button class='btn btn-sm btn-info' onClick=\"javascript:location.href='?action=domain-edit&amp;uuid=$uuid'\" 
 		  		title='edit domain XML'><i class='glyphicon glyphicon-pencil'></i></button>";
@@ -327,7 +339,7 @@ if ($action) {
 			</tr>
 			<tr id='name$i' style='display: none'>";
 		/* Disk device information */
-         echo "<td colspan='8'><table class='tablesorter domdisk id='domdisk_table'>
+         echo "<td colspan='8'><table class='tablesorter domdisk' id='domdisk_table'>
          			<tr>
          				<thead>
                   	<th class='header'><i class='glyphicon glyphicon-hdd '></i><b> Disk devices &nbsp;</b>
@@ -423,7 +435,7 @@ if ($action) {
          }
 			/*end display cdrom display*/
          echo "</table>";
-         
+			unset($capacity, $dev, $disk, $type, $vcpu);
 			/* Backup  information */
          	echo "<table class='tablesorter domsnap' id='backup_table'>
 		        	      <tr>
@@ -445,30 +457,30 @@ if ($action) {
          if (false) {
          	sort($tmp);
 				for ($ii = 0; $ii < sizeof($tmp); $ii++) {
-					$sname = $tmp[$ii];
-					$date = date("D d M  Y",$sname);
-					$time = date("H:i:s",$sname);
-					$sinfo = $lv->domain_snapshot_get_info($name, $sname);
-					if(empty($sinfo)){
-						$sinfo = "Click to change description";
-						$sval = "";}
+					$backup = $tmp[$ii];
+					$date = date("D d M  Y",$name);
+					$time = date("H:i:s",$backup);
+					$info = $lv->domain_backup_get_info($name, $backup);
+					if(empty($info)){
+						$info = "Click to change description";
+						$val = "";}
 					else 
-						$sval = $sinfo;
+						$val = $info;
             	echo "<tr style='background-color:".$lv->bcolor($ii,$theme)."'>
             		   	<td>".($ii+1)."</td>
-                  	   <td>$sname</td>
+                  	   <td>$backup</td>
                   	   <td>$date</td>
                   	   <td>$time</td>
-                  	   <td><form method='post' action='?subaction=snap-desc&amp;uuid=$uuid&amp;sname=$sname' /><span class='snapdesc'>
-    									<span class='text'><a href='#'> $sinfo </a></span>
-    									<input class='input' type='text' name='snapdesc' value='$sval' val='snapdesc' hidden placeholder='Click to change description' title='Click to change description'/>
+                  	   <td><form method='post' action='?subaction=backup-desc&amp;uuid=$uuid&amp;backup=$backup' /><span class='backdesc'>
+    									<span class='text'><a href='#'> $info </a></span>
+    									<input class='input' type='text' name='backdesc' value='$val' val='backdesc' hidden placeholder='Click to change description' title='Click to change description'/>
 									 </span></form>
 								</td>
    	                  <td>
-   	                  	revert &nbsp;<a href='?subaction=snap-revert&amp;uuid=$uuid&amp;sname=$sname'><i class='glyphicon glyphicon-refresh lightblue'></i></a>
+   	                  	revert &nbsp;<a href='?subaction=backup-revert&amp;uuid=$uuid&amp;backup=$backup'><i class='glyphicon glyphicon-refresh lightblue'></i></a>
             	         </td>                               
    	                  <td>
-									delete&nbsp;<a href='?subaction=snap-delete&amp;uuid=$uuid&amp;sname=$sname'><i class='glyphicon glyphicon-remove red'></i></a>
+									delete&nbsp;<a href='?subaction=backup-delete&amp;uuid=$uuid&amp;backup=$backup'><i class='glyphicon glyphicon-remove red'></i></a>
             	          </td>                               
                	   </tr>";
 				}
@@ -507,30 +519,30 @@ if ($action) {
          if (!empty($tmp)) {
          	sort($tmp);
 				for ($ii = 0; $ii < sizeof($tmp); $ii++) {
-					$sname = $tmp[$ii];
-					$date = date("D d M  Y",$sname);
-					$time = date("H:i:s",$sname);
-					$sinfo = $lv->domain_snapshot_get_info($name, $sname);
-					if(empty($sinfo)){
-						$sinfo = "Click to change description";
-						$sval = "";}
+					$snap = $tmp[$ii];
+					$date = date("D d M  Y",$snap);
+					$time = date("H:i:s",$snap);
+					$info = $lv->domain_snapshot_get_info($name, $snap);
+					if(empty($info)){
+						$info = "Click to change description";
+						$val = "";}
 					else 
-						$sval = $sinfo;
+						$val = $info;
             	echo "<tr style='background-color:".$lv->bcolor($ii,$theme)."'>
             		   	<td>".($ii+1)."</td>
-                  	   <td>$sname</td>
+                  	   <td>$snap</td>
                   	   <td>$date</td>
                   	   <td>$time</td>
-                  	   <td><form method='post' action='?subaction=snap-desc&amp;uuid=$uuid&amp;sname=$sname' /><span class='snapdesc'>
-    									<span class='text'><a href='#'> $sinfo </a></span>
-    									<input class='input' type='text' name='snapdesc' value='$sval' val='snapdesc' hidden placeholder='Click to change description' title='Click to change description'/>
+                  	   <td><form method='post' action='?subaction=snap-desc&amp;uuid=$uuid&amp;snap=$snap' /><span class='snapdesc'>
+    									<span class='text'><a href='#'> $info </a></span>
+    									<input class='input' type='text' name='snapdesc' value='$val' val='snapdesc' hidden placeholder='Click to change description' title='Click to change description'/>
 									 </span></form>
 								</td>
    	                  <td>
-   	                  	revert &nbsp;<a href='?subaction=snap-revert&amp;uuid=$uuid&amp;sname=$sname'><i class='glyphicon glyphicon-refresh lightblue'></i></a>
+   	                  	revert &nbsp;<a href='?subaction=snap-revert&amp;uuid=$uuid&amp;snap=$snap'><i class='glyphicon glyphicon-refresh lightblue'></i></a>
             	         </td>                               
    	                  <td>
-									delete&nbsp;<a href='?subaction=snap-delete&amp;uuid=$uuid&amp;sname=$sname'><i class='glyphicon glyphicon-remove red'></i></a>
+									delete&nbsp;<a href='?subaction=snap-delete&amp;uuid=$uuid&amp;snap=$snap'><i class='glyphicon glyphicon-remove red'></i></a>
             	          </td>                               
                	   </tr>";
 				}
@@ -547,9 +559,12 @@ if ($action) {
 			</tr>';
 		}
 	}
-	echo '</table>';
+	echo '</tbody></table>';
 }
 /* End Snapshot information */
+unset($name, $info, $val);
+if ($var['BRIDGING'] == "no")
+	$msg = "Error: You must enable bridging in network settings";
 if($msg){
 	if(strpos($msg, "rror:"))
 		$color = 'red';

@@ -177,7 +177,7 @@ if (array_key_exists('sent', $_POST)) {
 	<tr>
 		<td>
 			<label style="margin-top:0px;margin-left:-28px">Directory location:&nbsp;</label>
-			<input type="text" onclick='newTree(new_tree, new_file, "/mnt/");' id="new_file" name="disk[new]" placeholder="Separate sub-folder and image will be created based on Name">
+			<input type="text" onclick='dirTree(new_tree, new_file, "/mnt/");' id="new_file" name="disk[new]" placeholder="Separate sub-folder and image will be created based on Name">
 			<div style="margin-top:10px;margin-left:0px" id="new_tree" hidden></div>
 		</td>
 	</tr>
@@ -285,8 +285,7 @@ if (array_key_exists('sent', $_POST)) {
 
 function usb_checkbox($usb, $key)
 {
-	$deviceid = strstr($usb, 'ID');
-	$deviceid = substr($usb,3,9);
+	$deviceid = substr(strstr($usb, 'ID'),3,9);
 	echo '<input class="checkbox" type="checkbox" value="'.$deviceid.'" name="usb['.$key.']" />';
 	echo "<label>$usb</label><br />";
 }
@@ -347,10 +346,3 @@ array_walk($usb, 'usb_checkbox');
 	</form>
 
 </div>
-
-<script type="text/javascript">
-
-$(function(){
-	$('#new_tree').dblclick(hideNew);
-});
-</script>

@@ -1,80 +1,46 @@
 Menu="KVM:4"
 Title="Settings"
 ---
-<?php
-$libvirt_service = isset($domain_cfg['SERVICE']) ?	$domain_cfg['SERVICE'] : "enable";
-$domain_debug = isset($domain_cfg['DEBUG']) ? $domain_cfg['DEBUG'] : "no";
-$libvirt_curversion = trim ( shell_exec ( "virsh --version" ) );
-if ($libvirt_curversion == "")
-	$libvirt_curversion = "couldn't determine the libvirt version";
-?>
-<table class="tablesorter" style="margin-top:-21px"><thead><th colspan="2">Status:&#32;
-			<?if ($libvirt_running=="yes"):?>
-					<span class="green"><b>RUNNING</b></span>
-				<span style="font-size:12px;"> with libvirt version: <b><?=$libvirt_curversion?></b></span>
-			<?else:?>
-				<span class="red"><b>STOPPED</b></span>
-			<?endif;?>
-</th><th></th></thead></table>
-<div style="width: 39%; float:left;margin-top:-10px">
+<div style="margin-top:-41px">
 	<div id="title">
-		<span class="left">Libvirt Control:&#32;
-		</span>
+		<span class="left">Libvirt Control:&#32;</span>
 	</div>  
 		<?if ($libvirt_running=="yes"):?>
-			<div style="position:relative;float:left;width:50%;text-align:right; margin-bottom:24px">
+		<div align="center" style="margin-top:-10px;width:75%">
+			<table>
+				<tr>
 				<form name="libvirt_start_stop" method="POST" action="/update.htm" target="progressFrame">
 					<input type="hidden" name="cmd" value="/etc/rc.d/rc.libvirt stop  ">
 					<input type="submit" value="Stop">
 				</form>
-			</div>
-			<div style="position:relative;float:left;width:50%;margin-bottom:24px">
 				<form name="libvirt_restart" method="POST" action="/update.htm" target="progressFrame">
 					<input type="hidden" name="cmd" value="/etc/rc.d/rc.libvirt restart  ">
 					<input type="submit" value="Restart">
 				</form>
-			</div>
+				</tr>
+			</table>
+		</div>
 		<?else:?>
-			<div style="position:relative;float:left;width:100%;text-align:center;margin-bottom:24px">
+			<div align="center" style="margin-top:-10px;margin-bottom:-20px;width:75%">
 				<form name="libvirt_start" method="POST" action="/update.php" target="progressFrame">
 					<input type="hidden" name="#command" value="/etc/rc.d/rc.libvirt start  " />
 					<input type="submit" value="Start">
 				</form>
 			</div>
 		<?endif;?>
-	<div id="title">
-		<span class="left">Information:&#32;</span>
-	</div>
-	<?if ($var['BRIDGING'] == "no"):?>
-		<p class="red" style="margin-left:10px;"><b>WARNING:</b> You must enable bridging in network settings</p>
-	<?else:?>
-		<p class="green" style="margin-left:10px;">Network Bridge <?=$var['BRNAME'];?> enabled</p>
-	<?endif;?>
-	<div id="title">
-		<span class="left">Logfile:&#32;</span>
-	</div>
-		<p style="margin-left:15px;">
-        <a id="openlog" title="/var/log/libvirt/libvirtd.log" href="#" onclick="openWindow('/usr/bin/tail -n 42 -f /var/log/libvirt/libvirtd.log','Log Information',600,900);">/var/log/libvirt/libvirtd.log</a>
-		</p>
-</div>
 
-<div style="width: 59%; float:right;margin-top:-10px">
-	<div id="title">
+	<div id="title" style="margin-top:35px">
 		<span class="left">Configuration:&#32;</span>
 	</div>
 	<form name="domain_settings" method="POST" action="/update.php" target="progressFrame">
 		<input type="hidden" name="#file" value="<?=$domain_cfgfile;?>" />
 		<table class="settings">
-<!--			<tr>
+			<tr>
 				<td align="right"> Enable libvirt:&nbsp;&nbsp; </td>
 				<td>
 					<input type="checkbox" id="enable" <?=($libvirt_service=="enable")?"checked=\"checked\"":"";?> onChange="checkENABLE(this.form);">
 					<input type="hidden" name="SERVICE" value="<?=$libvirt_service;?>">     
-				</td>
-			</tr>-->
-			<tr>
-				<td align="right"> Enable Debugging:&nbsp;&nbsp; </td>
-				<td align="left">
+					<label style="margin-left:30px"><b>Enable Debugging:&nbsp;</b></label>
 					<input type="checkbox" id="debug" <?=($domain_debug == yes) ? 'checked="checked"':'';?> onChange="checkDebug(this.form);">
 					<input type="hidden" name="DEBUG" value="<?=$domain_debug?>">     
 				</td>
@@ -82,7 +48,7 @@ if ($libvirt_curversion == "")
 
 			<tr>
 				<td align="right"> Default Media directory:&nbsp;&nbsp; </td>
-				<td><input type="text" id="mediadir_file" name="MEDIADIR" maxlength="60" value="<?=$domain_cfg['MEDIADIR']?>" placeholder="ie. /mnt/disk1/media  Double Click to Select"></td>
+				<td><input type="text" onclick='dirTree(mediadir_tree, mediadir_file, "/mnt/");' id="mediadir_file" name="MEDIADIR" maxlength="60" value="<?=$domain_cfg['MEDIADIR']?>" placeholder="Double Click to Select (ie. /mnt/disk1/media)" title="Double Click to Select (ie. /mnt/disk1/media)"></td>
 			</tr>
 			<tr>
 				<td></td>
@@ -92,7 +58,7 @@ if ($libvirt_curversion == "")
 			</tr>
 			<tr>
 				<td align="right"> Default Existing VM directory:&nbsp;&nbsp;</td>
-				<td><input type="text" id="dir_file" name="DISKDIR" maxlength="60" value="<?=$domain_cfg['DISKDIR']?>" placeholder="ie. /mnt/cache/images  Double Click to Select"></td>
+				<td><input type="text" onclick='dirTree(dir_tree, dir_file, "/mnt/");' id="dir_file" name="DISKDIR" maxlength="60" value="<?=$domain_cfg['DISKDIR']?>" placeholder="Double Click to Select (ie. /mnt/cache/images)" title="Double Click to Select (ie. /mnt/cache/images)"></td>
 			</tr>
 			<tr>
 				<td></td>
@@ -100,96 +66,16 @@ if ($libvirt_curversion == "")
 					<div style="margin-top:0px;margin-left:-75px" id="dir_tree" hidden></div>
 				</td>
 			</tr>
-
-			<br />
-			<td></td>
 		</table>
-		<div align="center">
+		<div align="center" style="margin-top:-10px;width:75%">
 			<input type="submit" value="Apply" style="margin-bottom:8px" onClick="verifyDATA(this.form);">
-			<button type="button" style="margin-bottom:35px" onClick="done();">Done</button>
+			<button type="button" style="margin-bottom:20px" onClick="this.form.reset();location.reload()">Reset</button>
 		</div>
 	</form>
+	<div id="title" style="margin-top:-5px">
+		<span class="left">Logfile:&#32;</span>
+	</div>
+		<p style="margin-top:-5px;margin-left:15px;margin-bottom:0px">
+        <a id="openlog" title="/var/log/libvirt/libvirtd.log" href="#" onclick="openWindow('/usr/bin/tail -n 42 -f /var/log/libvirt/libvirtd.log','Log Information',600,900);">/var/log/libvirt/libvirtd.log</a>
+		</p>
 </div>
-<div hidden>
-	<div id="title"><span class="left">Log File:</span></div>  
-   	<table class="share_status wide">
-			<tr>
-         <td><a id="openlog" title="/var/log/libvirt/libvirtd.log" href="#" onclick="openWindow('/usr/bin/tail -n 42 -f /var/log/libvirt/libvirtd.log','Log Information',600,900);">/var/log/libvirt/libvirtd.log</a></td>
-         </tr>
-  </table>
-</div>
-
-<script>
-function checkDebug(form) {
-	if (form.debug.checked == false ) {
-		form.DEBUG.value = "no";
-	} else {
-		form.DEBUG.value = "yes";
-	}
-}
-
-function checkENABLE(form) {
-	if (form.enable.checked == false ) {
-		form.SERVICE.value = "disable";
-	} else {
-		form.SERVICE.value = "enable";
-	}
-}
-
-function verifyDATA(form) {
-	if (form.mediadir_file.value == ""){
-		form.mediadir_file.value = "/mnt/";
-	}
-	if (form.dir_file.value == ""){
-		form.dir_file.value = "/mnt/";
-	}
-	form.mediadir_file.value = form.mediadir_file.value.replace(/ /g,"_");
-	form.dir_file.value = form.dir_file.value.replace(/ /g,"_");
-}
-
-function showDir(){
-    $('#dir_file').on('click');
-    $('#dir_tree').show();
-    $('#dir_tree').focus();
-}
-
-function hideDir(){
-    $('#dir_tree').on('dblclick');
-    $('#dir_tree').hide();
-}
-
-function showMediaDir(){
-    $('#mediadir_file').on('click');
-    $('#mediadir_tree').show();
-    $('#mediadir_tree').focus();
-}
-
-function hideMediaDir(){
-    $('#mediadir_tree').on('dblclick');
-    $('#mediadir_tree').hide();
-}
-
-$(function(){
-	$('#mediadir_tree').fileTree(
-		{root:'/mnt/',filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false,multiSelect:false},
-		function(file) {$('#mediadir_file').val(file);$('#mediadir_tree').hide();},
-		function(directory) {$('#mediadir_file').val(directory);});
-	$('#dir_tree').fileTree(
-		{root:'/mnt/',filter:['.'],script:'/plugins/dynamix.kvm.manager/classes/jqueryFileTree.php',multiFolder:false,multiSelect:false},
-		function(file) {$('#dir_file').val(file);$('#dir_tree').hide();},
-		function(directory) {$('#dir_file').val(directory);});
-	$('#dir_file').click(showDir);
-	$('#dir_tree').dblclick(hideDir);
-	$('#mediadir_file').click(showMediaDir);
-	$('#mediadir_tree').dblclick(hideMediaDir);
-		
-   $('body').click(function(event) {
-    	if (!$(event.target).closest('#dir_file').length) {
-      	  $('#dir_tree').hide();
-    	};
-    	if (!$(event.target).closest('#mediadir_file').length) {
-      	  $('#mediadir_tree').hide();
-    	};
-	});
-});
-</script>

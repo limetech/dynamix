@@ -6,13 +6,13 @@ Title="Add XML"
 		<table class="tablesorter kvm-span" style="margin-top:-21px"><thead><th colspan="2">Create New Domain XML Description</th></thead>
 			<tr>
 				<td>
-					<textarea autofocus spellcheck="false" name="xmldesc" rows="15" cols="100%" placeholder="Copy & Paste Domain XML Configuration Here."></textarea>
+					<textarea autofocus spellcheck="false" style="margin-left:140px" name="xmldesc" rows="15" cols="100%" placeholder="Copy & Paste Domain XML Configuration Here."></textarea>
 				</td>
 			</tr>
 			<tr>
 				<td>
 					<div>
-						<input type="submit" value="Save">
+						<input type="submit" style="margin-left:140px" value="Save">
 					</div>
 				</td>
 			</tr>

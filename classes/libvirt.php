@@ -51,7 +51,6 @@
 			$uuid = $this->domain_generate_uuid();
 			$machine = $domain['machine'];
     		$emulator = $this->get_default_emulator();
-			$password = $domain['password'];
 			$arch = $domain['arch'];
 			$pae = '';
 			if ($arch == 'i686'){
@@ -119,7 +118,7 @@
 					$driver = $disk['driver'];
 					$img .= $name.'.'.$driver;
 					$size = strtoupper($disk['size']);
-					shell_exec("qemu-img create -q -f $driver $img $size");
+					shell_exec("qemu-img create -q -f $driver ".escapeshellarg($img)." $size");
 				}
 				$diskstr = "<disk type='file' device='disk'>
 						<driver name='qemu' type='$driver' />
@@ -166,6 +165,12 @@
                            </filesystem>";
 				
 			}
+			
+			$passwdstr='';
+			if (!empty( $domain['password'])){
+				$passwdstr = "passwd='$password'";
+			}
+			
 			if (!empty($diskstr) | !empty($mediastr)) {
 				$xml = "<domain type='$type'>
 				<name>$name</name>
@@ -199,7 +204,7 @@
 					$netstr
                $usbtabstr
 					<input type='mouse' bus='ps2'/>
-					<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0' passwd='$password'>
+					<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0' $passwdstr>
 						<listen type='address' address='0.0.0.0'/>
 					</graphics>
 					<console type='pty'/>
@@ -245,7 +250,7 @@
 						$netstr
 	               $usbtabstr
 						<input type='mouse' bus='ps2'/>
-						<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0' passwd='$password'>
+						<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0' $passwdstr>
 							<listen type='address' address='0.0.0.0'/>
 						</graphics>
 						<console type='pty'/>
@@ -840,6 +845,13 @@
 		}
 
 		function domain_define($xml) {
+        	if (strpos($xml,'<qemu:commandline>')) {
+  				$tmp = explode("\n", $xml);
+				for ($i = 0; $i < sizeof($tmp); $i++)
+					if (strpos('.'.$tmp[$i], "<domain type='kvm'"))
+						$tmp[$i] = "<domain type='kvm' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>";
+				$xml = join("\n", $tmp);
+			}
 			$tmp = libvirt_domain_define_xml($this->conn, $xml);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
@@ -948,6 +960,41 @@
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
+		function domain_delete($domain) {
+			$dom = $this->get_domain_object($domain);
+			if (!$dom)
+				return false;
+			$tmp = $this->get_disk_stats($domain);
+			if (array_key_exists('file', $tmp[0])) {
+				$disk = $tmp[0]['file'];
+				$tmp = pathinfo($disk);
+				$pathinfo = $tmp['dirname'];
+				$cfg = $pathinfo.'/'.$tmp['filename'].'.cfg';
+				$xml = $pathinfo.'/'.$tmp['filename'].'.xml';
+					if (file_exists($disk));
+						unlink($disk);
+					if (file_exists($cfg));
+						unlink($cfg);
+					if (file_exists($xml));
+						unlink($xml);
+					if (is_dir($pathinfo) && $this->is_dir_empty($pathinfo))
+						rmdir($pathinfo);
+			}
+			$tmp = libvirt_domain_undefine($dom);
+			return ($tmp) ? $tmp : $this->_set_last_error();
+		}
+
+		function is_dir_empty($dir) {
+  			if (!is_readable($dir)) return NULL; 
+			  $handle = opendir($dir);
+		  	while (false !== ($entry = readdir($handle))) {
+    			if ($entry != "." && $entry != "..") {
+			      return FALSE;
+    			}
+  			}
+  			return TRUE;
+		}
+		
 		function domain_is_running($domain, $name = false) {
 			$dom = $this->get_domain_object($domain);
 			if (!$dom)
