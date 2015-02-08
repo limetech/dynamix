@@ -437,7 +437,7 @@ if ($action) {
          echo "</table>";
 			unset($capacity, $dev, $disk, $type, $vcpu);
 			/* Backup  information */
-         	echo "<table class='tablesorter domsnap' id='backup_table'>
+         /*	echo "<table class='tablesorter domsnap' id='backup_table'>
 		        	      <tr>
 		        	      <thead>
       	      	   	<th class='header'><i class='glyphicon glyphicon-floppy-disk '></i><b> Backups &nbsp;&nbsp;&nbsp;</b>";
@@ -496,7 +496,7 @@ if ($action) {
      	echo '</table>';
 
 /* End Backup information*/
-
+*/
 			/* Snapshot  information */
          	echo "<table class='tablesorter domsnap' id='domsnap_table'>
 		        	      <tr>
