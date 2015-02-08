@@ -11,8 +11,7 @@
  */
 ?>
 <?
-$log = $_GET['log'];
-if (basename($log,'.notify')=='*') exec("rm -f $log"); else exec("rm -f '$log'");
+array_map('unlink', glob($_GET['log'], GLOB_NOSORT));
 ?>
 <html>
 <head><script>var enablePage=parent.location;</script></head>
