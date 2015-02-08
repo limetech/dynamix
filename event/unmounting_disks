@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Shutdown libvirt
+if [ -x /etc/rc.d/rc.libvirt ]; then
+  logger "Stopping libvirt"
+  /etc/rc.d/rc.libvirt stop | logger
+fi
