@@ -13,7 +13,6 @@ require_once('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php'
 
 // Check if program is running and get config info
 $libvirt_running = trim(shell_exec( "[ -f /proc/`cat /var/run/libvirt/libvirtd.pid 2> /dev/null`/exe ] && echo 'yes' || echo 'no' 2> /dev/null" ));
-$libvirt_service = isset($domain_cfg['SERVICE']) ?	$domain_cfg['SERVICE'] : "enable";
 $domain_cfgfile = "/boot/config/domain.cfg";
 if(!file_exists($domain_cfgfile)){
 	$fp = fopen("$domain_cfgfile", 'w');
@@ -24,6 +23,7 @@ if(!file_exists($domain_cfgfile)){
 if (file_exists("$domain_cfgfile"))
 	shell_exec("sed -i 's!\r!!g' '$domain_cfgfile'");
 $domain_cfg = parse_ini_file( "$domain_cfgfile" );
+$libvirt_service = isset($domain_cfg['SERVICE']) ?	$domain_cfg['SERVICE'] : "enable";
 $domain_debug = isset($domain_cfg['DEBUG']) ? $domain_cfg['DEBUG'] : "no"; 
 if($domain_debug != "yes")
 	error_reporting(0);
