@@ -493,10 +493,10 @@ if ($action) {
    	                <td>N/A</td>                               
    	                <td>N/A</td>
    	            </tr>";                              
-     	echo '</table>';
+     	echo '</table>';*/
 
 /* End Backup information*/
-*/
+
 			/* Snapshot  information */
          	echo "<table class='tablesorter domsnap' id='domsnap_table'>
 		        	      <tr>
