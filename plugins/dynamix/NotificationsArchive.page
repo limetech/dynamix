@@ -14,9 +14,13 @@ Title="Archived Notifications"
  * all copies or substantial portions of the Software.
  */
 ?>
+<?
+$path = "{$notify['path']}/archive/*.notify";
+$files = count(glob($path, GLOB_NOSORT));
+?>
 <script>
 function archiveList() {
-  $.post('/webGui/include/NotificationsArchive.php',{log:'<?="{$notify['path']}/archive/*.notify"?>',date:'<?=$notify['date']?>',time:'<?=$notify['time']?>'},function(data) {
+  $.post('/webGui/include/NotificationsArchive.php',{log:'<?=$path?>',date:'<?=$notify['date']?>',time:'<?=$notify['time']?>'},function(data) {
     if (data) $('#archive_list').html(data);
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
     setTimeout(archiveList,<?=max(abs($display['refresh']),15000)?>);
@@ -33,7 +37,7 @@ $(function() {
 </script>
 
 <table class="tablesorter shift" id="archive_table">
-<thead><tr><th>Time</th><th>Event</th><th>Subject</th><th>Description</th><th style='width:7%'>Importance</th><th style='width:5%;text-align:center'>Delete<?if (count($files)>1):?> <a href='/webGui/include/DeleteLogFile.php?log=<?=$log?>' target='progressFrame' onclick='return askConfirmation()' title='Delete all notifications'>[x]</a><?endif;?></th></tr></thead>
+<thead><tr><th>Time</th><th>Event</th><th>Subject</th><th>Description</th><th style='width:7%'>Importance</th><th style='width:5%;text-align:center'>Delete<?if ($files>1):?> <a href='/webGui/include/DeleteLogFile.php?log=<?=$log?>' target='progressFrame' onclick='return askConfirmation()' title='Delete all notifications'>[x]</a><?endif;?></th></tr></thead>
 <tbody id="archive_list"></tbody>
 </table>
 <button type="button" onclick="done()">Done</button>
