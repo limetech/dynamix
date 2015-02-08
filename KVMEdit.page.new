@@ -1,0 +1,381 @@
+Menu="KVM:2"
+Title="Edit VM"
+---
+<?php
+$editaction = array_key_exists('edaction', $_GET) ? $_GET['edaction'] : '';
+array_key_exists('edsubaction', $_GET) ? $_GET['edsubaction'] : '';
+$domain = array();
+if ($edaction){
+	if ($edaction == 'load' && $_GET['name']) {
+		$name = 	$_GET['name'];
+	   $res = $lv->get_domain_by_name($name);
+		$dom = $lv->domain_get_info($res);
+		$domain['arch'] = $lv->domain_get_arch($name);
+		$domain['autostart'] = $lv->domain_get_autostart($res) ? 1 : 0;
+		$domain['clock'] = $lv->domain_get_clock_offset($name);
+		$domain['desc'] = $lv->domain_get_description($name);	  	
+		$domain['machine'] = $lv->domain_get_machine($name);
+		$domain['mem'] = $lv->domain_get_current_memory($res);
+		$domain['maxmem'] = $lv->domain_get_memory($res);
+		$domain['vcpus'] = $dom['nrVirtCpu'];
+		$tmp = $lv->get_disk_stats($name);
+  	 if (!empty($tmp)) {
+  	   	$domain['capacity'] = $lv->format_size($tmp[0]['capacity'], 0);
+ 	 	   $domain['file'] = (array_key_exists('file', $tmp[0])) ? $tmp[0]['file'] : $tmp[0]['partition'];
+		}
+	   $tmp = $lv->get_cdrom_stats($name);
+	   if (!empty($tmp)) {
+   		$domain['cdrom'] = (array_key_exists('file', $tmp[0])) ? $tmp[0]['file'] : $tmp[0]['partition'];
+			$dev = $tmp[0]['device'];
+			$bus = $tmp[0]['bus'];
+   	}
+		$tmp = $lv->get_nic_info($name);
+		if (!empty($tmp)){
+			$domain['mac'] = $tmp[0]['mac'];
+			$domain['network'] = $tmp[0]['network'];    
+  		}
+	}
+	if ($edsubaction == 'edit') {
+		if ($domain){
+			$domain = array_diff_assoc($_POST['domain'], $domain);
+			foreach ($domain as $key => $value) {
+			    switch ($key) {
+        			case 'arch' :
+			         $msg = "arch changed to $value";
+         		   break ;
+			      case 'autostart' :
+         		   // do something
+			         break ;
+			      case 'clock' :
+           			// do something
+         		   break ;
+			      case 'desc' :
+         		   // do something
+			         break ;
+			      case 'machine' :
+           			// do something
+         		   break ;
+			      case 'mem' :
+         		   // do something
+			         break ;
+			      case 'maxmem' :
+           			// do something
+         		   break ;
+			      case 'vcpus' :
+         		   // do something
+			         break ;
+			      case 'capacity' :
+           			// do something
+         		   break ;
+			      case 'file' :
+         		   // do something
+			         break ;
+			      case 'cdrom' :
+           			$lv->domain_change_cdrom($name, $value, $dev, $bus);
+         		   break ;
+			      case 'mac' :
+           			// do something
+         		   break ;
+			      case 'network' :
+           			// do something
+         		   break ;
+			     }
+ 			}
+
+		}
+	unset($domain, $name, $password);
+	echo '<meta http-equiv="refresh" content="1; url=/KVM">';
+  }
+}
+
+
+function arrayOptions($array, $array2, $value) {
+		for ($i = 0; $i < sizeof($array); $i++) {
+		echo "<option value='$array[$i]'";
+		if ($array[$i] == $value)
+			echo " selected='selected'>$array2[$i] *</option>";
+		else
+  			echo ">$array2[$i]</option>";
+	}
+}
+
+function memOptions($maxmem, $mem) {
+	for ($i = 1; $i <= ($maxmem*2); $i++) {
+  		$mem2 = ($i*512);
+  		echo "<option value=".($mem2*1024);
+		if ((int)($mem/1024) == $mem2)
+			echo " selected='selected'>$mem2 *</option>";
+		else
+        	echo ">$mem2</option>";
+	}
+}
+?>
+
+<div id="content">
+
+<form id="editform" method="POST" action="?edaction=load&amp;edsubaction=edit&amp;name=<?=$name;?>">
+
+<table class="tablesorter" id="editvm" style="margin-top:-21px;margin-left:0px"><thead><th colspan="2">Edit Virtual Machine From Template</th></thead>
+</table>
+<table style="margin-top:-5px;margin-left:0px">
+
+<tr>
+	<td align="right"><b>Select Domain:&nbsp;</b></td>
+	<td>
+		<select name="dom" onchange="location = this.options[this.selectedIndex].value;" autofocus title="Select domain">
+			<option value='?'>*****</option>;
+<?php
+   for ($i = 0; $i < sizeof($doms); $i++) {
+   	echo "<option value='?edaction=load&amp;name=$doms[$i]'";
+			if ($doms[$i] == $name)
+     			echo ' selected="selected"';   	
+   	echo ">$doms[$i]</option>";
+	} 
+?>
+		</select>
+		<label style="margin-top:0px;margin-left:54px">Architecture:&nbsp;</label>
+		<select name="domain[arch]" title="Select domain Architecture 32bit or 64bit">
+		<?php arrayOptions(['x86_64', 'i686'], ['64bit', '32bit'], $domain['arch']);?>
+		</select>
+	</td>
+</tr>
+
+<tr>
+    <td align="right">vCPUs:&nbsp; </td>
+    <td>
+		<select name="domain[vcpus]" title="define number of vpus for domain">
+		<?php
+				echo "<option value=''>***</option>";
+	  			for ($i = 1; $i <= $maxcpu; $i++) {
+        			echo "<option value='$i'";
+        			if ($i == $domain['vcpus'])
+     	   			echo " selected='selected'>$i *</option>";
+     	   		else
+          			echo ">$i</option>";
+           	}
+		?>
+		</select>
+		<label style="margin-top:0px;margin-left:105px">Machine:&nbsp;</label>
+		<select name="domain[machine]" title="Select the machine model.  pc-i440fx will work for most.  Q35 for a newer machine model with PCIE">
+		<?php arrayOptions(['pc-i440fx-2.1', 'pc-q35-2.1'], ['pc', 'q35'], $domain['machine']);?>
+		</select>
+	</td> 
+</tr>
+
+<tr>
+    <td align="right"> Memory (MiB):&nbsp; </td>
+    <td>
+		<select name="domain[mem]" title="define the amount memory">
+		<?php
+			echo "<option value=''>*****</option>";
+			memOptions($maxmem, $domain['mem']);
+		?>
+		</select>
+		<label style="margin-top:0px;margin-left:45px">Max. Mem (MiB):&nbsp;</label>
+		<select name="domain[maxmem]" title="define the maximun amount of memory">
+		<?php
+			echo "<option value=''>*****</option>";
+			memOptions($maxmem, $domain['maxmem']);
+		?>
+		</select>
+	</td> 
+</tr>
+
+<tr>
+    <td align="right">Autostart on boot:&nbsp;</td>
+    <td>
+        <select name="domain[autostart]" title="Select domain autostart on boot">
+		<?php arrayOptions([0, 1], ['No', 'Yes'], $domain['autostart']);?>
+        </select>
+    <label style="margin-top:0px;margin-left:47px">Clock offset:&nbsp;</label>
+		<select name="domain[clock]" title="how the guest clock is synchronized to the host">
+		<?php arrayOptions(['localtime', 'utc'], ['localtime', 'utc'], $domain['clock']);?>
+		</select>
+    </td>
+</tr>
+
+<tr>
+    <td align="right">Name:&nbsp; </td>
+    <td><input type="text" readonly name="name" value="<?=$name;?>" title="name of vitual machine" placeholder="name of vitual machine" /></td>
+</tr>
+
+<tr>
+    <td align="right">Description:&nbsp; </td>
+    <td><input type="text" name="domain[desc]" value="<?=$domain['desc'];?>" title="description of vitual machine" placeholder="description of vitual machine (optional)" /></td>
+</tr>
+
+<tr>
+    <td  align="right"><input type="checkbox" id="password" onChange="checkPass(this.form);">&nbsp;Password:&nbsp; </td>
+    <td><input type="password" name="password[password]" title="change password for VNC" placeholder="Check to change password for VNC (optional)" />
+    <input type="hidden" id="PASSWORD" name="password[change]" value="0"></td>
+</tr>
+
+<tr>
+    <td align="right">CDRom (iso):&nbsp; </td>
+    <td>
+		<input type="text" name="domain[cdrom]" value="<?=$domain['cdrom'];?>" onclick='mediaTree(edit_media_tree, edit_media_file, "<?php echo $domain_cfg['MEDIADIR'];?>");' id="edit_media_file" placeholder="Click and Select cdrom image to install operating system">
+	</td>
+</tr>
+
+<tr>
+	<td></td>
+	<td>
+		<div style="margin-top:0px;margin-left:-75px" id="edit_media_tree" hidden></div>
+	</td>
+</tr>
+
+<tr>
+    <td align="right"><b>Disk Settings:&nbsp;</b></td>
+    <td>
+      <select name="disk[settings]" onchange="toggleRows('edit_disk', this.value);">
+			<option value="0">Existing</option>
+			<option value="1">New</option>
+      </select>
+    </td>
+</tr>
+
+	<tr>
+		<td align="right">Disk:&nbsp;</td>
+		<td>
+			<input type="text" name="domain[file]" value="<?=$domain['file'];?>" onclick='diskTree(edit_existing_tree, edit_existing_file, "/mnt/");' id="edit_existing_file" placeholder="Select existing image to use for virtual machine">
+			<div style="margin-top:10px;margin-left:0px" id="edit_existing_tree" hidden></div>			
+		</td>
+	</tr>
+
+<tr class="edit_disk" hidden>
+    <td>&nbsp;</td>
+    <td>
+        <table style="margin-top:0px;margin-left:-76px" >
+
+	<tr>
+		<td>
+			<label style="margin-top:0px;margin-left:45px">Size:&nbsp;</label>
+			<input type="text" name="domain[capacity]" value="<?=$domain['capacity'];?>" placeholder="e.g. 10M, 1G, 10G...">
+		</td>
+	</tr>
+
+	<tr>
+		<td>
+			<label style="margin-top:0px;margin-left:19px">Disk type:&nbsp;</label>
+		   <select name="domain[type]" title="type of storage image">
+			<?php
+				arrayOptions(['qcow2', 'raw', 'qcow'], ['qcow2', 'raw', 'qcow'], $domain['type']);
+			?>
+		   </select>
+		</td>
+	</tr>	
+
+	<tr>
+		<td>
+			<label style="margin-top:0px;margin-left:-9px">Disk dev name:&nbsp;</label>
+			<input type="text" name="domain[device]" value="hda" placeholder="name of disk inside vm" title="name of disk inside vm" />
+		</td>
+	</tr>
+	</table>
+    </td>
+</tr>
+
+<tr>
+    <td align="right"><b>Network Settings:&nbsp;</b></td>
+    <td>
+      <select onchange="toggleRows('edit_network', this.value)">
+	<option value="0">No</option>
+	<option value="1">Yes</option>
+      </select>
+    </td>
+</tr>	
+
+<tr class="edit_network" hidden>
+    <td>&nbsp;</td>
+    <td>
+        <table style="margin-top:0px;margin-left:-105px">
+			<tr>
+		   	<td align="right">MAC:&nbsp;</td>
+   			<td>
+					<input type="text" value="<?=$domain[mac];?>" name="domain[mac]" title="random mac, you can supply your own" id="edit_nic_mac_addr" />
+				</td>
+			</tr>
+
+			<tr>
+   			<td align="right" >Bridge:&nbsp;</td>
+			   <td>
+					<input type="text" value="<?=$domain['network'];?>" name="domain[network]" placeholder="name of bridge in unRAID" title="name of bridge in unRAID automatically filled in" />			
+			   </td>
+			</tr>
+        </table>
+    </td>
+</tr>
+
+<tr hidden>
+    <td align="right"><b>USB Devices:&nbsp;</b></td>
+    <td>
+      <select onchange="toggleRows('edit_usb', this.value)">
+	<option value="0">No</option>
+	<option value="1">Yes</option>
+      </select>
+    </td>
+</tr>
+
+<tr class="edit_usb" hidden>
+    <td>&nbsp;</td>
+    <td>
+        <table style="margin-top:0px;margin-left:-50px;width:auto; max-width:382px; word-wrap: break-word;" >
+<tr>
+	<td align="left">
+
+<?php
+$usb = trim(shell_exec('lsusb'));
+$usb = explode("\n", $usb);
+array_walk($usb, 'usb_checkbox');
+?>
+	<input class="checkbox" type="checkbox" value="1" name="usbtab" title="mouse coordinates in vm match the pointer position on the real desktop" checked="checked"/> VNC Mouse/USB Tablet (uncheck for OS without desktop)
+   </td>
+</tr>
+	</table>
+    </td>
+</tr>
+
+<tr class="edit_other" hidden>
+    <td align="right"><b>unRAID Shares:&nbsp;</b></td>
+    <td>
+      <select onchange="toggleRows('edit_shares', this.value)">
+	<option value="0">No</option>
+	<option value="1">Yes</option>
+      </select>
+    </td>
+</tr>
+	
+<tr class="edit_shares" hidden>
+    <td>&nbsp;</td>
+    <td>
+        <table style="margin-top:0px;margin-left:-129px">
+<tr>
+	<td align="right">Share:&nbsp;</td>
+	<td>
+		<input type="text" value="<?=$source;?>" name="source" placeholder="e.g. /mnt...(won't work with windows)" title="path of unRAID share" />
+	</td>
+</tr>
+
+<tr>
+	<td align="right">Mount tag:&nbsp;</td>
+	<td>
+		<input type="text" value="<?=$target;?>" name="target" placeholder="e.g. shares (name of mount tag inside vm)" title="mount tag inside vm" />
+	</td>
+</tr>
+        </table>
+    </td>
+</tr>
+
+<tr align="left">
+	<td align="right">
+	</td>
+    <td>
+ 	   <input type="submit" value="Save VM" />
+ 	   <input type="button" value="Reset Form" onClick="this.form.reset();location.reload()" />
+    </td>
+</tr>
+
+	</table>
+		<input type="hidden" name="hypervisor" value="<?php echo is_dir('/proc/xen') ? 'xen' : 'kvm'; ?>" />
+	</form>
+</div>
