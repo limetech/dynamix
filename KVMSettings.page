@@ -38,10 +38,10 @@ Title="Settings"
 			<tr>
 				<td align="right"> Enable libvirt:&nbsp;&nbsp; </td>
 				<td>
-					<input type="checkbox" id="enable" <?=($libvirt_service=="enable")?"checked=\"checked\"":"";?> onChange="checkENABLE(this.form);">
+					<input type="checkbox" id="enable" <?=($libvirt_service=="enable") ? 'checked="checked"':'';?> onChange="checkENABLE(this.form);">
 					<input type="hidden" name="SERVICE" value="<?=$libvirt_service;?>">     
 					<label style="margin-left:30px"><b>Enable Debugging:&nbsp;</b></label>
-					<input type="checkbox" id="debug" <?=($domain_debug == yes) ? 'checked="checked"':'';?> onChange="checkDebug(this.form);">
+					<input type="checkbox" id="debug" <?=($domain_debug == "yes") ? 'checked="checked"':'';?> onChange="checkDebug(this.form);">
 					<input type="hidden" name="DEBUG" value="<?=$domain_debug?>">     
 				</td>
 			</tr>
