@@ -22,14 +22,14 @@ function parse_plugin_cfg($plugin, $sections=false) {
 }
 
 function my_var($key) {
-  return exec("awk -F= '/^'$key'/ {print $2}' /proc/mdcmd");
+  return exec("awk -F= '/^'$key'=/ {print $2}' /proc/mdcmd");
 }
 
 function my_temp($value) {
   global $unraid;
   if (!$value) return ' - standby';
   $unit = $unraid['display']['unit'];
-  return ' - active '.($unit=='C' ? str_replace('.', $unraid['display']['number'][0], $value) : round(9/5*$value+32)).$unit;
+  return ' - active '.($unit=='C' ? str_replace('.', $unraid['display']['number'][0], $value) : round(9/5*$value+32)).'°'.$unit;
 }
 
 function my_disk($name) {
@@ -45,32 +45,51 @@ $disks  = parse_ini_file("/var/local/emhttp/disks.ini",true);
 $var    = parse_ini_file("/var/local/emhttp/var.ini");
 $unraid = parse_plugin_cfg("dynamix",true);
 $report = $unraid['notify']['report'];
+$hot    = $unraid['display']['hot'];
+$max    = $unraid['display']['max'];
 $server = strtoupper($var['NAME']);
 $active = array();
 $parity = false;
 $cache  = false;
-$error  = 0;
+$error0 = 0;
+$error1 = 0;
+$error2 = 0;
+$error3 = 0;
 
 foreach ($disks as $disk) {
   $name = $disk['name'];
-  $status = ' [OK]';
   if ($name=='flash' || substr($disk['status'],-3)=='_NP') continue;
   $text = my_disk($name);
   $temp = read_temp($name);
+  if ($temp>=$max) {
+    $fail = ' (disk is overheated';
+    $error0++;
+  } else if ($temp>=$hot) {
+    $fail = ' (disk is hot';
+    $error1++;
+  } else {
+    $fail = '';
+  }
+  if (my_var("rdevNumErrors.{$disk['idx']}")>0) {
+    if ($fail) $fail .= ', '; else $fail = ' (';
+    $fail .= 'disk has read errors';
+    $error2++;
+  }
+  if ($fail) $fail .= ')';
+  $status = $fail ? ' [NOK]' : ' [OK]';
   $color = strtok($disk['color'],'-');
   if ($name=='parity') $parity = true;
   if ($name=='cache') $cache = true;
-  if ($color=='red'||$color=='yellow') { $error++; $status = ' ['.str_replace(array('NP_','_'),array('',' '),$disk['status']).']'; }
-  if (my_var("rdevNumErrors.{$disk['idx']}")>0) $status += ' (disk has read errors)';
+  if ($color=='red'||$color=='yellow') { $error3++; $status = ' ['.str_replace(array('NP_','_'),array('',' '),$disk['status']).']'; }
   $info = "{$disk['id']} ({$disk['device']})";
   if ($info==" ()") $info = 'No device identification present';
-  $active[] = "$text - $info".my_temp($temp).$status;
+  $active[] = "$text - $info".my_temp($temp).$fail.$status;
 }
 
 $size = count($active);
 $word = $size==1 ? "" : "including ";
-$warn = $error ? "warning" : "normal";
-$stat = $error ? "[FAIL]" : "[PASS]";
+$warn = ($error0 || $error3) ? "alert" : (($error1 || $error2) ? "warning" : "normal");
+$stat = $warn=="normal" ? "[PASS]" : "[FAIL]";
 $info = "Array has $size disk".($size==1 ? "" : "s").($parity ? " ({$word}parity".($cache ? " & cache)" : ")") : ($cache ? " ({$word}cache)" : ""));
 $message = implode('\n', $active);
 exec("$notify -s \"Notice [$server] - array health report $stat\" -d \"$info\" -m \"$message\" -i \"$warn $report\"");
