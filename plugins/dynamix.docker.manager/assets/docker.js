@@ -119,7 +119,7 @@ function rmContainer(containers, images){
       },
       "Container and image": function() {
         $( this ).dialog( "close" );
-        var cmd = '/plugins/dynamix.docker.manager/exec.php?cmd=' + encodeURIComponent(ctCmd + imgCmd);
+        var cmd = '/plugins/dynamix.docker.manager/exec.php?cmd=' + encodeURIComponent(ctCmd + ";" + imgCmd);
         popupWithIframe(title, cmd, true);
       },
       Cancel: function() {
