@@ -197,9 +197,10 @@ function input_private_users($sec) {
 // our variables from this file. We then look for an existing persistent cfg file and if present, merge
 // those values.
 //
-function parse_plugin_cfg($plugin, $sections=FALSE) {
-  $keys = @parse_ini_file("plugins/{$plugin}/default.cfg", $sections);
-  $conf = "/boot/config/plugins/{$plugin}/{$plugin}.cfg";
-  return is_file($conf) ? array_replace_recursive($keys, parse_ini_file($conf, $sections)) : $keys;
+function parse_plugin_cfg($plugin, $sections=false) {
+  $ram = "plugins/$plugin/default.cfg";
+  $rom = "/boot/config/plugins/$plugin/$plugin.cfg";
+  $cfg = file_exists($ram) ? parse_ini_file($ram, $sections) : array();
+  return file_exists($rom) ? array_replace_recursive($cfg, parse_ini_file($rom, $sections)) : $cfg;
 }
 ?>

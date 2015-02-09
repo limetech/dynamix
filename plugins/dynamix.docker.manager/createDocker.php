@@ -476,8 +476,6 @@ if($_GET['xmlTemplate']){
 
 <link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.min.css">
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.docker.manager/assets/jsFileTree/jqueryFileTree.css" media="screen">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/default-fonts.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/default-white.css">
 <style type="text/css">
   body { -webkit-overflow-scrolling: touch;}
   .fileTree {
@@ -490,11 +488,6 @@ if($_GET['xmlTemplate']){
     position:absolute;
     z-index:100;
     display:none;
-  }
-  .canvas{
-    background: #ffffff;
-    width: 100%;
-    height: 100%;
   }
   #TemplateSelect {
     width: 255px;
@@ -547,16 +540,9 @@ if($_GET['xmlTemplate']){
     text-align: left;
   }
   .desc {
-    background: #FFF;
-    border: 1px solid #dcdcdc;
-    padding: 2px 6px;
-    line-height: 20px;
-    outline: none;
-    -webkit-box-shadow: inset 2px 2px 6px #eef0f0;
-    -moz-box-shadow: inset 2px 2px 6px #eef0f0;
-    box-shadow: inset 2px 2px 6px #eef0f0;
-    margin-top:0;
-    margin-right: 10px;
+    padding: 6px;
+    line-height: 15px;
+    width: inherit;
   }
   .toggleMode {
     cursor: pointer;
@@ -582,7 +568,7 @@ if($_GET['xmlTemplate']){
   <input type="hidden" id="rmTemplate" name="rmTemplate" value="" />
 </form>
 
-<div id="canvas" class="canvas" style="z-index:1;">
+<div id="canvas" style="z-index:1;">
   <form method="post" id="createContainer">
     <table class="Preferences">
       <? if($xmlType != "edit") {?>
@@ -630,7 +616,7 @@ if($_GET['xmlTemplate']){
       <tr>
         <td style="vertical-align: top;">Description:</td>
         <td>
-          <div class="desc">
+          <div class="textarea desc">
             <?
             echo $templateDescBox;
             if(!empty($Registry)){
@@ -815,7 +801,7 @@ if($_GET['xmlTemplate']){
         <tr>
           <td style="width: 150px; vertical-align: top;">Description:</td>
           <td>
-            <textarea name="Description" rows="10" cols="71" class="desc textTemplate"><? if(isset($templateDescription)){ echo htmlspecialchars(trimLine($templateDescription));} ?></textarea>
+            <textarea name="Description" rows="10" cols="71" class="textTemplate"><? if(isset($templateDescription)){ echo htmlspecialchars(trimLine($templateDescription));} ?></textarea>
           </td>
         </tr>
       </table>
@@ -828,7 +814,6 @@ if($_GET['xmlTemplate']){
   </form>
 </div>
 
-<script type="text/javascript" src="/webGui/scripts/dynamix.js"></script>
 <script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/jsFileTree/jqueryFileTree.js"></script>
 <script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/addDocker.js"></script>
 <script type="text/javascript">
