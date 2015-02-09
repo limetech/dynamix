@@ -138,7 +138,7 @@ Number alignment:
 Page view:
 : <select name="tabs" size="1">
   <?=mk_option($display['tabs'], "0", "Tabbed")?>
-  <?=mk_option($display['tabs'], "1", "Plain")?>
+  <?=mk_option($display['tabs'], "1", "Non-tabbed")?>
   </select>
 
 Table view spacing:

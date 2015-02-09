@@ -26,7 +26,7 @@ Flash GUID:
 
 <?else:?>
 Flash Vendor:
-: <?=$var['flashVendor'];?>&nbsp;
+: <?=$var['flashVendor'];?>
 
 Flash Product:
 : <?=$var['flashProduct'];?>&nbsp;
@@ -63,9 +63,12 @@ Registered to:
 <?endif;?>
 <?endif;?>
 
-<?if ($var['regTy']!="Pro"):?>
 <form markdown="1" name="key_install" method="POST" target="progressFrame">
+<?if ($var['regTy']=="Pro"):?>
+&nbsp;
+: <button type="button" onClick="done()">Done</button>
 
+<?else:?>
 Key file URL:
 : <input type="text" name="file" id="key_file" maxlength="1024" value="" style="width:33%">
 
@@ -75,9 +78,5 @@ and click **Install**
 &nbsp;
 : <input type="button" value="Install" onclick="installKey(this.form.file.value)">
   <button type="button" onClick="done()">Done</button>
-</form>
-
-<?else:?>
-&nbsp;
-: <button type="button" onClick="done()">Done</button>
 <?endif;?>
+</form>
