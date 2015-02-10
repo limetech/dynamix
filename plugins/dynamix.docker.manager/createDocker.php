@@ -472,6 +472,8 @@ if($_GET['xmlTemplate']){
     }
   }
 }
+
+$showAdditionalInfo = true;
 ?>
 
 <link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.min.css">
@@ -510,7 +512,7 @@ if($_GET['xmlTemplate']){
   input.textPath{
     width: 240px;
   }
-  input.textTemplate{
+  input.textTemplate,textarea.textTemplate{
     width: 555px;
   }
   input.textEnv{
@@ -578,7 +580,6 @@ if($_GET['xmlTemplate']){
           <select id="TemplateSelect" size="1">
             <option value="">Select a template</option>
             <?
-            $showAdditionalInfo = true;
             $rmadd = '';
             $all_templates = array();
             $all_templates['user'] = $DockerTemplates->getTemplates("user");
