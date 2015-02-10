@@ -2,7 +2,7 @@ Title="Update Container"
 Cond="(pgrep('docker')!==false)"
 Markdown="false"
 ---
-<div style="text-align:right;vertical-align:top;position:relative;top:-44px;height:0;">
+<div style="text-align:right;vertical-align:top;position:relative;top:-44px;height:0;display:none;">
 	<span class="toggleMode" onclick="toggleMode();"><i id="toggleMode" class="fa fa-lg"></i> Advanced Mode</span>
 </div>
 <?PHP

@@ -843,5 +843,6 @@ $(function() {
   });
   $("#toggleMode").addClass("fa-toggle-off");
   $("#toggleMode").removeClass("fa-toggle-on");
+  $("#toggleMode").closest("div").fadeIn('slow');
 });
 </script>
