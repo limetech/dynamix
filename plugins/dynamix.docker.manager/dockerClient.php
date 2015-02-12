@@ -386,13 +386,14 @@ class DockerUpdate{
 	}
 
 
-	public function getRemoteVersion($RegistryUrl){
+	public function getRemoteVersion($RegistryUrl, $image){
+		preg_match_all("/:([\w]*$)/i", $image, $matches);
+		$tag        = count($matches) ? $matches[1][0] : "latest";
 		preg_match("#/u/([^/]*)/([^/]*)#", $RegistryUrl, $matches);
-
-		$apiUrl       = sprintf("http://index.docker.io/v1/repositories/%s/%s/images", $matches[1] , $matches[2]) ;
-		$apiContent   = $this->download_url($apiUrl);
-		$json         = json_decode($apiContent, TRUE);
-		$currentId    = substr($json[0]['id'],0,16);
+		$apiUrl     = sprintf("http://index.docker.io/v1/repositories/%s/%s/tags/%s", $matches[1], $matches[2], $tag);
+		$apiContent = $this->download_url($apiUrl);
+		$json       = json_decode($apiContent, TRUE);
+		$currentId  = substr($json[0]['id'],0,16);
 		return $currentId;
 	}
 
@@ -415,7 +416,7 @@ class DockerUpdate{
 		$RegistryUrl = $DockerTemplates->getTemplateValue($image, "Registry");
 		$userFile    = $DockerTemplates->getUserTemplate($container);
 		$localVersion = $this->getLocalVersion($userFile);
-		$remoteVersion = $this->getRemoteVersion($RegistryUrl);
+		$remoteVersion = $this->getRemoteVersion($RegistryUrl, $image);
 		if ($localVersion && $remoteVersion) {
 			if ($remoteVersion == $localVersion){
 				$update = "true";
