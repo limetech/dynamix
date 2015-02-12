@@ -216,7 +216,7 @@ function postToXML($post, $setOwnership = FALSE){
     $DirMode->appendChild($doc->createTextNode($tmpMode));
   }
 
-  $currentVersion = $DockerUpdate->getRemoteVersion($post["Registry"]);
+  $currentVersion = $DockerUpdate->getRemoteVersion($post["Registry"], $post["Repository"]);
   $Version->appendChild($doc->createTextNode($currentVersion));
 
   return $doc->saveXML();
@@ -277,7 +277,7 @@ if ($_GET['updateContainer']){
     $Repository = $doc->getElementsByTagName( "Repository" )->item(0)->nodeValue;
     $Registry = $doc->getElementsByTagName( "Registry" )->item(0)->nodeValue;
 
-    $CurrentVersion = $DockerUpdate->getRemoteVersion($Registry);
+    $CurrentVersion = $DockerUpdate->getRemoteVersion($Registry, $Repository);
 
     if ($CurrentVersion){
       if ( $doc->getElementsByTagName( "Version" )->length == 0 ) {

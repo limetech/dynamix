@@ -203,13 +203,18 @@ class DockerTemplates {
 		if ($scope == "user" || $scope == "all") {
 			$tmpls = array_merge($tmpls, $this->getTemplates("user"));
 		}
+
 		foreach ($tmpls as $file) {
 			$doc = new DOMDocument();
 			$doc->load($file['path']);
 			$TemplateRepository = $doc->getElementsByTagName( "Repository" )->item(0)->nodeValue;
-			$Repository = preg_replace("/:[\w]*$/i", "", $Repository);
-			$TemplateRepository = preg_replace("/:[\w]*$/i", "", $TemplateRepository);
-			if ( $Repository == $TemplateRepository ) {
+			if (! preg_match("/:[\w]*$/i", $TemplateRepository)) {
+				$Repo = preg_replace("/:[\w]*$/i", "", $Repository);
+			}else{
+				$Repo = $Repository;
+			}
+
+			if ( $Repo == $TemplateRepository ) {
 				$TemplateField = $doc->getElementsByTagName( $field )->item(0)->nodeValue;
 				return trim($TemplateField);
 				break;
@@ -413,10 +418,10 @@ class DockerUpdate{
 
 	public function getUpdateStatus($container, $image) {
 		$DockerTemplates = new DockerTemplates();
-		$RegistryUrl = $DockerTemplates->getTemplateValue($image, "Registry");
-		$userFile    = $DockerTemplates->getUserTemplate($container);
-		$localVersion = $this->getLocalVersion($userFile);
-		$remoteVersion = $this->getRemoteVersion($RegistryUrl, $image);
+		$RegistryUrl     = $DockerTemplates->getTemplateValue($image, "Registry");
+		$userFile        = $DockerTemplates->getUserTemplate($container);
+		$localVersion    = $this->getLocalVersion($userFile);
+		$remoteVersion   = $this->getRemoteVersion($RegistryUrl, $image);
 		if ($localVersion && $remoteVersion) {
 			if ($remoteVersion == $localVersion){
 				$update = "true";
