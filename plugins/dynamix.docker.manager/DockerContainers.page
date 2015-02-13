@@ -142,7 +142,7 @@ $DockerTemplates = new DockerTemplates();
 				} else if ($updateStatus == "true"){
 					echo "<span style=\"color:#44B012;white-space:nowrap;\"><i class=\"fa fa-check\"></i> up-to-date</span>";
 				} else {
-					echo "<span style=\"color:#FF2400;white-space:nowrap;\">N/A</span>";
+					echo "<span style=\"color:#FF2400;white-space:nowrap;\"><i class=\"fa fa-exclamation-triangle\"></i> not available</span>";
 				}
 				?>
 			</td>
