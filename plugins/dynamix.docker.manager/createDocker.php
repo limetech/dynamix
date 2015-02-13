@@ -35,6 +35,7 @@ function trimLine($text){
 }
 
 function pullImage($image) {
+  if (! preg_match("/:[\w]*$/i", $image)) $image .= ":latest";
   readfile("/usr/local/emhttp/plugins/dynamix.docker.manager/log.htm");
   echo '<script>function add_to_id(m){$(".id:last").append(" "+m);}</script>';
   echo "<script>addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Pulling image: " . $image . "</legend><p class=\"logLine\" id=\"logBody\"></p></fieldset>');</script>";
