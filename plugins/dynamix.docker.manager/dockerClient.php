@@ -291,7 +291,7 @@ class DockerTemplates {
 		global $dockerManPaths;
 		$DockerClient = new DockerClient();
 		$DockerUpdate = new DockerUpdate();
-		$out = array();
+		$new_info     = array();
 
 		$dockerIni = $dockerManPaths['webui-info'];
 		if (! is_dir( dirname( $dockerIni ))) @mkdir( dirname( $dockerIni ), 0770, true);
@@ -341,11 +341,14 @@ class DockerTemplates {
 				$tmp['template'] = $this->getUserTemplate($name);
 			}
 
-			$out[$name] = $tmp;
+			$new_info[$name] = $tmp;
 		}
-		file_put_contents($dockerIni, json_encode($out, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-		if($reload) file_put_contents($update_file, json_encode($updateStatus, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-		return $out;
+		file_put_contents($dockerIni, json_encode($new_info, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+		if($reload) {
+			foreach ($updateStatus as $ct => $update)	if (!isset($new_info[$ct])) unset($updateStatus[$ct]);
+			file_put_contents($update_file, json_encode($updateStatus, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+		}
+		return $new_info;
 	}
 
 
@@ -568,9 +571,7 @@ class DockerClient {
 			$running = $matches ? TRUE : FALSE;
 			$details = $this->getContainerDetails($obj['Id']);
 
-			// echo "<pre>";
-			// print_r($details);
-			// echo "</pre>";
+			// echo "<pre>".print_r($details,TRUE)."</pre>";
 
 			$c["Image"]       = $obj['Image'];
 			$c["ImageId"]     = substr($details[0]["Image"],0,12);
