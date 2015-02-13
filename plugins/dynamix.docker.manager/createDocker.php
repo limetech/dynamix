@@ -253,7 +253,9 @@ if ($_POST){
   // Injecting the command in $_GET variable and executing.
   $_GET['cmd'] = $cmd;
   include($dockerManPaths['plugin'] . "/exec.php");
+  
   $DockerTemplates->removeInfo($Name);
+  $DockerUpdate->syncVersions($Name);
 
   echo '<center><button type="button" onclick="done()">Done</button></center><br>';
   die();
@@ -313,6 +315,7 @@ if ($_GET['updateContainer']){
     }
 
     $DockerTemplates->removeInfo($Name);
+    $DockerUpdate->syncVersions($Name);
   }
 
   echo '<center><button type="button" onclick="done()">Done</button></center><br>';

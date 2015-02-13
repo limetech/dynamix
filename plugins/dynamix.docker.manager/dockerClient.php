@@ -10,6 +10,7 @@
 	'images-ram'        => '/usr/local/emhttp/state/plugins/dynamix.docker.manager/images',
 	'images-storage'    => '/boot/config/plugins/dockerMan/images',
 	'webui-info'        => '/usr/local/emhttp/state/plugins/dynamix.docker.manager/docker.json',
+	'update-status'     => '/var/lib/docker/unraid-update-status.json',
 	);
 
 //## BETA 9
@@ -175,7 +176,6 @@ class DockerTemplates {
 			}
 			$this->removeDir($tmp_dir);
 		}
-
 		// Delete any templates not in the repos
 		foreach ($this->listDir($dockerManPaths['templates-storage'], "xml") as $arrLocalTemplate) {
 			if (!in_array($arrLocalTemplate['path'], $repotemplates)) {
@@ -190,7 +190,6 @@ class DockerTemplates {
 				}
 			}
 		}
-
 		return $msg;
 	}
 
@@ -279,8 +278,12 @@ class DockerTemplates {
 		if (! count($info) ) $info = array();
 
 		if (isset($info[$container])) unset($info[$container]);
-
 		file_put_contents($dockerIni, json_encode($info, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+		$update_file = $dockerManPaths['update-status'];
+		$updateStatus = (is_file($update_file)) ? json_decode(file_get_contents($update_file), TRUE) : array();
+		if (isset($updateStatus[$container])) unset($updateStatus[$container]);
+		file_put_contents($update_file, json_encode($updateStatus, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 	}
 
 
@@ -301,6 +304,9 @@ class DockerTemplates {
 		$autostart_file = $dockerManPaths['autostart-file'];
 		$allAutoStart = @file($autostart_file, FILE_IGNORE_NEW_LINES);
 		if ($allAutoStart===FALSE) $allAutoStart = array();
+
+		$update_file = $dockerManPaths['update-status'];
+		$updateStatus = (is_file($update_file)) ? json_decode(file_get_contents($update_file), TRUE) : array();
 
 		foreach ($containers as $ct) {
 			$name           = $ct['Name'];
@@ -327,10 +333,8 @@ class DockerTemplates {
 			}
 
 			if (!array_key_exists('updated', $tmp) || $reload) {
-				$tmp['updated'] = "true";
-				if ($reload){
-					$tmp['updated'] = $DockerUpdate->getUpdateStatus($name, $image);
-				}
+				if ($reload) $updateStatus[$name] = $DockerUpdate->getUpdateStatus($name, $image);
+				$tmp['updated'] = (array_key_exists($name, $updateStatus)) ? $updateStatus[$name] : 'undef';
 			}
 
 			if (!array_key_exists('template', $tmp) || $reload){
@@ -340,6 +344,7 @@ class DockerTemplates {
 			$out[$name] = $tmp;
 		}
 		file_put_contents($dockerIni, json_encode($out, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+		if($reload) file_put_contents($update_file, json_encode($updateStatus, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 		return $out;
 	}
 
@@ -388,7 +393,7 @@ class DockerUpdate{
 
 	public function getRemoteVersion($RegistryUrl, $image){
 		preg_match_all("/:([\w]*$)/i", $image, $matches);
-		$tag        = count($matches) ? $matches[1][0] : "latest";
+		$tag        = isset($matches[1][0]) ? $matches[1][0] : "latest";
 		preg_match("#/u/([^/]*)/([^/]*)#", $RegistryUrl, $matches);
 		$apiUrl     = sprintf("http://index.docker.io/v1/repositories/%s/%s/tags/%s", $matches[1], $matches[2], $tag);
 		$apiContent = $this->download_url($apiUrl);
@@ -417,6 +422,7 @@ class DockerUpdate{
 		$userFile        = $DockerTemplates->getUserTemplate($container);
 		$localVersion    = $this->getLocalVersion($userFile);
 		$remoteVersion   = $this->getRemoteVersion($RegistryUrl, $image);
+		echo "\n$localVersion => $remoteVersion";
 		if ($localVersion && $remoteVersion) {
 			if ($remoteVersion == $localVersion){
 				$update = "true";
@@ -427,7 +433,14 @@ class DockerUpdate{
 			$update = "undef";
 		}
 		return $update;
+	}
 
+	public function syncVersions($container) {
+		global $dockerManPaths;
+		$update_file              = $dockerManPaths['update-status'];
+		$updateStatus             = (is_file($update_file)) ? json_decode(file_get_contents($update_file), TRUE) : array();
+		$updateStatus[$container] = 'true';
+		file_put_contents($update_file, json_encode($updateStatus, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 	}
 }
 
