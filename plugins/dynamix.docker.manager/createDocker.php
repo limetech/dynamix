@@ -35,7 +35,9 @@ function trimLine($text){
 }
 
 function pullImage($image) {
+  if (! preg_match("/:[\w]*$/i", $image)) $image .= ":latest";
   readfile("/usr/local/emhttp/plugins/dynamix.docker.manager/log.htm");
+  echo '<script>function add_to_id(m){$(".id:last").append(" "+m);}</script>';
   echo "<script>addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Pulling image: " . $image . "</legend><p class=\"logLine\" id=\"logBody\"></p></fieldset>');</script>";
   @flush();
 
@@ -52,24 +54,24 @@ function pullImage($image) {
   while (!feof($fp)) {
     $cnt =  json_decode( fgets($fp, 5000), TRUE );
     $id = ( isset( $cnt['id'] )) ? $cnt['id'] : "";
-    if ($id != $cid && strlen($id)){
+    if ($id != $cid && strlen($id)) {
       $cid = $id;
       $cstatus = "";
-      echo "<script>addLog('IMAGE ID: " . $id ."');</script>";
+      echo "<script>addLog('IMAGE ID [". $id ."]: <span class=\"id\"></span>');</script>";
       @flush();
     }
     $status = ( isset( $cnt['status'] )) ? $cnt['status'] : "";
-    if ($status != $cstatus && strlen($status)){
+    if ($status != $cstatus && strlen($status)) {
       $cstatus = $status;
       if ( isset($cnt['progressDetail']['total']) ) $gtotal += $cnt['progressDetail']['total'];
-      echo "<script>addLog('STATUS: " . $status . " <span class=\"progress\"></span>');</script>\n";
+      echo "<script>add_to_id('". $status ."<span class=\"progress\"></span>.');</script>";
       @flush();
     }
-    if ($status == "Downloading"){
+    if ($status == "Downloading") {
       $total = $cnt['progressDetail']['total'];
       $current = $cnt['progressDetail']['current'];
       $percentage = round(($current/$total) * 100);
-      echo "<script>show_Prog(' " . $percentage . "% of " . ceil($total/1024/1024) . "MB');</script>\n";
+      echo "<script>show_Prog(' ". $percentage ."% of " . ceil($total/1024/1024) . "MB');</script>\n";
       @flush();
     }
   }
@@ -216,7 +218,7 @@ function postToXML($post, $setOwnership = FALSE){
     $DirMode->appendChild($doc->createTextNode($tmpMode));
   }
 
-  $currentVersion = $DockerUpdate->getRemoteVersion($post["Registry"]);
+  $currentVersion = $DockerUpdate->getRemoteVersion($post["Registry"], $post["Repository"]);
   $Version->appendChild($doc->createTextNode($currentVersion));
 
   return $doc->saveXML();
@@ -252,7 +254,9 @@ if ($_POST){
   // Injecting the command in $_GET variable and executing.
   $_GET['cmd'] = $cmd;
   include($dockerManPaths['plugin'] . "/exec.php");
+  
   $DockerTemplates->removeInfo($Name);
+  $DockerUpdate->syncVersions($Name);
 
   echo '<center><button type="button" onclick="done()">Done</button></center><br>';
   die();
@@ -277,7 +281,7 @@ if ($_GET['updateContainer']){
     $Repository = $doc->getElementsByTagName( "Repository" )->item(0)->nodeValue;
     $Registry = $doc->getElementsByTagName( "Registry" )->item(0)->nodeValue;
 
-    $CurrentVersion = $DockerUpdate->getRemoteVersion($Registry);
+    $CurrentVersion = $DockerUpdate->getRemoteVersion($Registry, $Repository);
 
     if ($CurrentVersion){
       if ( $doc->getElementsByTagName( "Version" )->length == 0 ) {
@@ -312,6 +316,7 @@ if ($_GET['updateContainer']){
     }
 
     $DockerTemplates->removeInfo($Name);
+    $DockerUpdate->syncVersions($Name);
   }
 
   echo '<center><button type="button" onclick="done()">Done</button></center><br>';
