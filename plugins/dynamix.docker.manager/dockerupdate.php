@@ -7,8 +7,21 @@ $DockerTemplates = new DockerTemplates();
 $verbose = ($argv[1] == "-v") ? TRUE : FALSE;
 
 echo " Updating templates... ";
-$DockerTemplates->downloadTemplates();
+$out = $DockerTemplates->downloadTemplates();
+if ($verbose) foreach ($out as $value) echo "\n$value";
+
 echo " Updating info... ";
-$DockerTemplates->getAllInfo(TRUE);
+$out = $DockerTemplates->getAllInfo(TRUE);
+if ($verbose) {
+  echo "\n\nUpdating info... ";
+  foreach ($out as $key => $value){
+    echo "\n$key" ;
+    foreach ($value as $k => $v){
+      printf("\n   %-10s: %s", $k, $v);
+    }
+    echo "\n";
+  }
+}
+
 echo " Done. ";
 ?>
