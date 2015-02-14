@@ -1,7 +1,7 @@
 Menu="KVM:4"
 Title="Settings"
 ---
-<div style="margin-top:-41px">
+<div style="margin-top:-42px">
 	<div id="title">
 		<span class="left">Libvirt Control:&#32;</span>
 	</div>  
