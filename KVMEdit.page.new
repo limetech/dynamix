@@ -1,5 +1,6 @@
 Menu="KVM:2"
 Title="Edit VM"
+Cond="(pgrep('libvirtd')!==false)"
 ---
 <?php
 $editaction = array_key_exists('edaction', $_GET) ? $_GET['edaction'] : '';
@@ -11,7 +12,7 @@ if ($edaction){
 	   $res = $lv->get_domain_by_name($name);
 		$dom = $lv->domain_get_info($res);
 		$domain['arch'] = $lv->domain_get_arch($name);
-		$domain['autostart'] = $lv->domain_get_autostart($res) ? 1 : 0;
+		$domain['autostart'] = $lv->domain_get_autostart($name) ? 1 : 0;
 		$domain['clock'] = $lv->domain_get_clock_offset($name);
 		$domain['desc'] = $lv->domain_get_description($name);	  	
 		$domain['machine'] = $lv->domain_get_machine($name);
@@ -44,7 +45,7 @@ if ($edaction){
 			         $msg = "arch changed to $value";
          		   break ;
 			      case 'autostart' :
-         		   // do something
+         		   $lv->domain_set_autostart($name, $value);
 			         break ;
 			      case 'clock' :
            			// do something
@@ -56,13 +57,13 @@ if ($edaction){
            			// do something
          		   break ;
 			      case 'mem' :
-         		   // do something
+         		  $lv->domain_set_current_memory($domName, $value*1024);
 			         break ;
 			      case 'maxmem' :
-           			// do something
+          			$lv->domain_set_memory($domName, $value*1024);
          		   break ;
 			      case 'vcpus' :
-         		   // do something
+          $lv->domain_set_vcpu($name, $value);
 			         break ;
 			      case 'capacity' :
            			// do something
@@ -86,28 +87,6 @@ if ($edaction){
 	unset($domain, $name, $password);
 	echo '<meta http-equiv="refresh" content="1; url=/KVM">';
   }
-}
-
-
-function arrayOptions($array, $array2, $value) {
-		for ($i = 0; $i < sizeof($array); $i++) {
-		echo "<option value='$array[$i]'";
-		if ($array[$i] == $value)
-			echo " selected='selected'>$array2[$i] *</option>";
-		else
-  			echo ">$array2[$i]</option>";
-	}
-}
-
-function memOptions($maxmem, $mem) {
-	for ($i = 1; $i <= ($maxmem*2); $i++) {
-  		$mem2 = ($i*512);
-  		echo "<option value=".($mem2*1024);
-		if ((int)($mem/1024) == $mem2)
-			echo " selected='selected'>$mem2 *</option>";
-		else
-        	echo ">$mem2</option>";
-	}
 }
 ?>
 
