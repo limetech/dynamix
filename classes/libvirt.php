@@ -116,7 +116,8 @@
 							fclose($fp);
 					}
 					$driver = $disk['driver'];
-					$img .= $name.'.'.$driver;
+					$ext = ($driver == 'raw') ? 'img' : $driver;
+					$img .= $name.'.'.$ext;
 					$size = strtoupper($disk['size']);
 					shell_exec("qemu-img create -q -f $driver ".escapeshellarg($img)." $size");
 				}
@@ -1417,8 +1418,9 @@
 		}
 
 //set domain to start with libvirt
-		function domain_set_autostart($res,$flags) {
-			$tmp = libvirt_domain_set_autostart($res,$flags);
+		function domain_set_autostart($domain,$flags) {
+			$domain = $this->get_domain_object($domain);			
+			$tmp = libvirt_domain_set_autostart($domain,$flags);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
@@ -1519,15 +1521,5 @@
 
 			return $this->domain_define($xml);
 		}
-
-//set color on even rows for white or black theme
-		function bcolor($row, $color) { 
-	      if ($color == "white")
-   		   $color = ($row % 2 == 0) ? "transparent" : "#F8F8F8";
-			else 
-	      	$color = ($row % 2 == 0) ? "transparent" : "#0C0C0C";
-	      return $color;
-	   }
-
 	}
 ?>
