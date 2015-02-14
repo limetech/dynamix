@@ -17,7 +17,7 @@ Title="Flash Device Settings"
 function installKey(name) {
   var file = name.trim();
   if (file)
-    openBox('/usr/bin/wget --no-check-certificate -q -O /boot/config/'+file.replace(/.*\//,"")+' '+file,'Install Key',600,900,true);
+    openBox('/usr/bin/wget -q -O /boot/config/'+file.replace(/.*\//,"")+' '+file,'Install Key',600,900,true);
 }
 </script>
 <?if (strstr($var['flashGUID'], "No flash")):?>
@@ -44,17 +44,26 @@ Flash GUID:
 : <a href="http://lime-technology.com/v6regkey?TrialGUID=<?=$var['flashGUID'];?>" target="_blank">Purchase Registration Key</a>
 
 <?else:?>
+***<?=$var['regTy'];?>*** key registered to:
+: <?=$var['regTo'];?>&nbsp;
+
 Date Registered:
 : <?=my_time($var['regTm']);?>&nbsp;
 
-Registered to:
-: <?=$var['regTo'];?>&nbsp;
+<?if ($var['regTm2']==0):?>
+Replaceable:
+: *Anytime*
 
+<?else:?>
+Replaceable:
+: <?=my_time($var['regTm2']);?>&nbsp;
+
+<?endif;?>
 <?if ($var['regTy']=="Basic"):?>
 &nbsp;
 : <a href="http://lime-technology.com/v6regkey?BasicGUID=<?=$var['flashGUID'];?>" target="_blank">Upgrade to ***Plus*** or go ***Pro!***</a>
-<?endif;?>
 
+<?endif;?>
 <?if ($var['regTy']=="Plus"):?>
 &nbsp;
 : <a href="http://lime-technology.com/v6regkey?PlusGUID=<?=$var['flashGUID'];?>" target="_blank">Upgrade to ***Pro***</a>
@@ -62,7 +71,6 @@ Registered to:
 <?endif;?>
 <?endif;?>
 <?endif;?>
-
 <form markdown="1" name="key_install" method="POST" target="progressFrame">
 <?if ($var['regTy']=="Pro"):?>
 &nbsp;

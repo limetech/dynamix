@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.01.21">
+<!ENTITY version   "2015.02.14">
 <!ENTITY pluginURL "https://raw.github.com/limetech/&name;/master/plugins/&name;/&name;.plg">
 ]>
 
@@ -18,8 +18,8 @@ Pre-install checks.
 <FILE Run="/bin/bash">
 <INLINE>
 source /etc/unraid-version
-if [ "${version:0:10}" != "6.0-beta12" ]; then
-  echo "this plugin is only valid for unRAID OS 6.0-beta12 or higher"
+if [ "${version:0:10}" != "6.0-beta13" ]; then
+  echo "this plugin is only valid for unRAID OS 6.0-beta13"
   exit 1
 fi
 </INLINE>
