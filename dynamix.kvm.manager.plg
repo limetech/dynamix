@@ -3,8 +3,8 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.kvm.manager">
 <!ENTITY author    "dmacias72">
-<!ENTITY version   "2015.02.08b">
-<!ENTITY pluginURL "https://github.com/dmacias72/&name;/raw/master/&name;.plg">
+<!ENTITY version   "2015.02.13">
+<!ENTITY pluginURL "https://github.com/eschultz/&name;/raw/master/&name;.plg">
 <!ENTITY plugin	   "/boot/config/plugins/&name;">
 <!ENTITY emhttp	   "/usr/local/emhttp/plugins/&name;">
 ]>
@@ -24,17 +24,17 @@ This plugin installs an a virtual machine management interface
 get from github as tarball
 -->
 <FILE Name="&plugin;/&name;-&version;.tar.gz">
-<URL>"https://github.com/&author;/&name;/archive/&version;.tar.gz"</URL>
+<URL>"https://github.com/eschultz/&name;/archive/&version;.tar.gz"</URL>
 </FILE>
 
 <!--
 The 'install' script.
 -->
 <FILE Run="/bin/bash" Method="install">
-<INLINE> 
+<INLINE>
 if [ ! -d &emhttp; ]; then
  	mkdir -p &emhttp;
-fi 
+fi
 
 #copy old image to new
 if [ -f /boot/config/plugins/virtMan/virtMan.img ]; then
@@ -50,7 +50,7 @@ tar -zxf &plugin;/&name;-&version;.tar.gz --strip=1 -C &emhttp;/
 find &plugin; -type f -iname "*.tar.gz" ! -iname "&name;-&version;.tar.gz" -delete
 cp -nr /usr/local/emhttp/plugins/&name;/&name; /boot/config/plugins
 
-# mount xml/conf image if not already mounted 
+# mount xml/conf image if not already mounted
 if [ ! "$(mount | grep domain.img)" ]; then
   mount -t ext4 &plugin;/domain.img /etc/libvirt
 fi
