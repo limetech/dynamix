@@ -1,5 +1,6 @@
 Menu="KVM:3"
 Title="Add XML"
+Cond="(pgrep('libvirtd')!==false)"
 ---
 <div>
 	<form method="POST" id="addxml" action="?subaction=domain-define" >
