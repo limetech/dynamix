@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix.kvm.manager">
 <!ENTITY author    "dmacias72">
-<!ENTITY version   "2015.02.13">
+<!ENTITY version   "2015.02.15">
 <!ENTITY pluginURL "https://github.com/eschultz/&name;/raw/master/&name;.plg">
 <!ENTITY plugin	   "/boot/config/plugins/&name;">
 <!ENTITY emhttp	   "/usr/local/emhttp/plugins/&name;">
@@ -19,6 +19,12 @@
 <!--
 This plugin installs an a virtual machine management interface
 -->
+
+<CHANGES>
+###2015.02.15
+- Updated XML editors to use CodeMirror library
+</CHANGES>
+
 
 <!--
 get from github as tarball
