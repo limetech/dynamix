@@ -281,6 +281,10 @@ if ($_GET['updateContainer']){
     $Repository = $doc->getElementsByTagName( "Repository" )->item(0)->nodeValue;
     $Registry = $doc->getElementsByTagName( "Registry" )->item(0)->nodeValue;
 
+    readfile("/usr/local/emhttp/plugins/dynamix.docker.manager/log.htm");
+    echo "<script>addLog('<p>Preparing to update: " . $Repository . "</p>');</script>";
+    @flush();
+
     $CurrentVersion = $DockerUpdate->getRemoteVersion($Registry, $Repository);
 
     if ($CurrentVersion){
