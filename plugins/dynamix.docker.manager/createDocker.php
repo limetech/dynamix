@@ -254,7 +254,7 @@ if ($_POST){
   // Injecting the command in $_GET variable and executing.
   $_GET['cmd'] = $cmd;
   include($dockerManPaths['plugin'] . "/exec.php");
-  
+
   $DockerTemplates->removeInfo($Name);
   $DockerUpdate->syncVersions($Name);
 
@@ -319,7 +319,7 @@ if ($_GET['updateContainer']){
     $DockerUpdate->syncVersions($Name);
   }
 
-  echo '<center><button type="button" onclick="done()">Done</button></center><br>';
+  echo '<center><button type="button" onclick="window.parent.jQuery(\'#iframe-popup\').dialog(\'close\');">Done</button></center><br>';
   die();
 }
 
