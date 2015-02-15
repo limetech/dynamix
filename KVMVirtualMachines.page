@@ -6,7 +6,6 @@ Cond="(pgrep('libvirtd')!==false)"
 <?php
 $action = array_key_exists('action', $_GET) ? $_GET['action'] : '';
 $subaction = array_key_exists('subaction', $_GET) ? $_GET['subaction'] : '';
-$msg = false;
 $uuid = $_GET['uuid'];
 if ($_GET['refresh']) {
 	$name = $_GET['name'];
@@ -523,8 +522,6 @@ if ($action) {
 }
 /* End Snapshot information */
 unset($name, $info, $val);
-if (!($bridge))
-	$msg = "Error: You must have a network bridge enabled";
 if($msg){
 	if(strpos($msg, "rror:"))
 		$color = 'red';

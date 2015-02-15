@@ -17,7 +17,6 @@ require_once('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php'
 
 // Check if program is running and get config info
 $libvirt_running = trim(shell_exec( "[ -f /proc/`cat /var/run/libvirt/libvirtd.pid 2> /dev/null`/exe ] && echo 'yes' || echo 'no' 2> /dev/null" ));
-$bridge = exec( 'brctl show | grep -v "bridge name" | grep -v peth | awk "/^[^\\t]/ { print \$1 }"');
 $domain_cfgfile = "/boot/config/domain.cfg";
 if(!file_exists($domain_cfgfile)){
 	$fp = fopen("$domain_cfgfile", 'w');
@@ -31,6 +30,8 @@ $domain_cfg = parse_ini_file( "$domain_cfgfile" );
 $domain_debug = isset($domain_cfg['DEBUG']) ? $domain_cfg['DEBUG'] : "no"; 
 if($domain_debug != "yes")
 	error_reporting(0);
+$domain_bridge = (!($domain_cfg['BRNAME'])) ? $var['BRNAME'] : $domain_cfg['BRNAME'];
+$msg = (empty($domain_bridge)) ? "Error: Setup Bridge in Settings/Network Settings" : false;
 $libvirt_service = isset($domain_cfg['SERVICE']) ?	$domain_cfg['SERVICE'] : "enable";
 	
 // Check if domain.img exists

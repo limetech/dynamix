@@ -251,7 +251,7 @@ if (array_key_exists('sent', $_POST)) {
 			<tr>
    			<td align="right" >Bridge:&nbsp;</td>
 			   <td>
-					<input type="text" value="<?=$bridge?>" name="nic[net]" placeholder="name of bridge in unRAID" title="name of bridge in unRAID automatically filled in" />			
+					<input type="text" value="<?=$domain_bridge?>" name="nic[net]" placeholder="name of bridge in unRAID" title="name of bridge in unRAID automatically filled in" />			
 			   </td>
 			</tr>
         </table>

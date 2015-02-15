@@ -47,7 +47,7 @@ Title="Settings"
 			</tr>
 
 			<tr>
-				<td align="right"> Default Media directory:&nbsp;&nbsp; </td>
+				<td align="right"> Media directory:&nbsp;&nbsp; </td>
 				<td><input type="text" onclick='dirTree(mediadir_tree, mediadir_file, "/mnt/");' id="mediadir_file" name="MEDIADIR" maxlength="60" value="<?=$domain_cfg['MEDIADIR']?>" placeholder="Double Click to Select (ie. /mnt/disk1/media)" title="Double Click to Select (ie. /mnt/disk1/media)"></td>
 			</tr>
 			<tr>
@@ -57,7 +57,7 @@ Title="Settings"
 				</td>
 			</tr>
 			<tr>
-				<td align="right"> Default Existing VM directory:&nbsp;&nbsp;</td>
+				<td align="right"> Existing VM directory:&nbsp;&nbsp;</td>
 				<td><input type="text" onclick='dirTree(dir_tree, dir_file, "/mnt/");' id="dir_file" name="DISKDIR" maxlength="60" value="<?=$domain_cfg['DISKDIR']?>" placeholder="Double Click to Select (ie. /mnt/cache/images)" title="Double Click to Select (ie. /mnt/cache/images)"></td>
 			</tr>
 			<tr>
@@ -66,8 +66,12 @@ Title="Settings"
 					<div style="margin-top:0px;margin-left:-75px" id="dir_tree" hidden></div>
 				</td>
 			</tr>
+			<tr>
+				<td align="right"> Network Bridge:&nbsp;&nbsp;</td>
+				<td><input type="text" id="bridge" name="BRNAME" maxlength="60" value="<?=$domain_cfg['BRNAME']?>" placeholder="Leave Blank for Default unRAID Network Bridge" title="Leave Blank for Default unRAID Network Bridge"></td>
+			</tr>
 		</table>
-		<div align="center" style="margin-top:-10px;width:75%">
+		<div align="center" style="margin-top:0px;width:75%">
 			<input type="submit" value="Apply" style="margin-bottom:8px" onClick="verifyDATA(this.form);">
 			<button type="button" style="margin-bottom:20px" onClick="this.form.reset();location.reload()">Reset</button>
 		</div>
