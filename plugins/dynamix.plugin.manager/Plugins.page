@@ -124,7 +124,7 @@ foreach (glob("/var/log/plugins/*.plg", GLOB_NOSORT) as $plugin_link) {
       if ($tmp_stale) $status_info = "unknown";
     }
   }
-  if (plugin("changes", $changes_file)) $version_info .= "&nbsp;<a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=/tmp/plugins/".urlencode(basename($plugin_file,'.plg')).".txt','Release Notes',490,430)\"><img src='/webGui/images/information.png' class='icon'></a>";
+  if (plugin("changes", $changes_file)) $version_info .= "&nbsp;<a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=/tmp/plugins/".urlencode(basename($plugin_file,'.plg')).".txt','Release Notes',490,430); return false\"><img src='/webGui/images/information.png' class='icon'></a>";
 
   // action
   $action = strpos($plugin_file, "/usr/local/emhttp/plugins") !== 0 ? make_link("remove", basename($plugin_file)) : "built-in";
