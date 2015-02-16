@@ -66,7 +66,7 @@ $DockerTemplates = new DockerTemplates();
 	.appblock.stopped {
 		box-shadow: 0 0 10px 1px #EF3D47;
 	}
-	.status {
+	.bannerstatus {
 		background-color: #FFF;
 		position: absolute;
 		z-index: 1;
@@ -167,11 +167,11 @@ if (empty($display['dashapps']) || $display['dashapps'] == 'icons') {
 
 		$updateStatus = $info[$ct['Name']]['updated'];
 		if ($updateStatus == "true" or $updateStatus == "undef"){
-			$statusbadge = ($ct["Running"]) ? "<div class=\"status started\"><i class=\"fa fa-check-circle fa-lg\"></i></div>" :
-																				"<div class=\"status stopped\"><i class=\"fa fa-times-circle fa-lg\"></i></div>";
+			$statusbadge = ($ct["Running"]) ? "<div class=\"bannerstatus started\"><i class=\"fa fa-check-circle fa-lg\"></i></div>" :
+																				"<div class=\"bannerstatus stopped\"><i class=\"fa fa-times-circle fa-lg\"></i></div>";
 		} else {
-			$statusbadge = ($ct["Running"]) ? "<div class=\"status update\"><i class=\"fa fa-arrow-circle-down fa-lg\"></i></div>" :
-																				"<div class=\"status stopped\"><i class=\"fa fa-arrow-circle-down fa-lg\"></i></div>";
+			$statusbadge = ($ct["Running"]) ? "<div class=\"bannerstatus update\"><i class=\"fa fa-arrow-circle-down fa-lg\"></i></div>" :
+																				"<div class=\"bannerstatus stopped\"><i class=\"fa fa-arrow-circle-down fa-lg\"></i></div>";
 			# Add update button
 			$ctrbtn = "<i class=\"button blue\" onclick=\"execUpContainer('".$ct['Name']."');\" title=\"Update\"><i class=\"fa  fa-arrow-down fa-lg\"></i></i>$ctrbtn";
 		}
