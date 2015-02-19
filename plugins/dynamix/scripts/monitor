@@ -12,14 +12,9 @@
  */
 ?>
 <?
-$notify = "/usr/local/sbin/notify";
+require_once "/usr/local/emhttp/webGui/include/Wrappers.php";
 
-function parse_plugin_cfg($plugin, $sections=false) {
-  $ram = "plugins/$plugin/default.cfg";
-  $rom = "/boot/config/plugins/$plugin/$plugin.cfg";
-  $cfg = file_exists($ram) ? parse_ini_file($ram, $sections) : array();
-  return file_exists($rom) ? array_replace_recursive($cfg, parse_ini_file($rom, $sections)) : $cfg;
-}
+$notify = "/usr/local/sbin/notify";
 
 function my_var($key) {
   return exec("awk -F= '/^'$key'/ {print $2}' /proc/mdcmd");

@@ -67,7 +67,7 @@ function prepareParity(form) {
 }
 <?endif;?>
 $(function() {
-  showStatus('crontab');
+  showStatus('crontab','dynamix','parity-check');
   presetParity(document.parity_settings);
 });
 function presetParity(form) {
