@@ -18,8 +18,8 @@ Pre-install checks.
 <FILE Run="/bin/bash">
 <INLINE>
 source /etc/unraid-version
-if [ "${version:0:10}" != "6.0-beta13" ]; then
-  echo "this plugin is only valid for unRAID OS 6.0-beta13"
+if [ "${version:0:10}" != "6.0-beta14" ]; then
+  echo "this plugin is only valid for unRAID OS 6.0-beta14"
   exit 1
 fi
 </INLINE>
