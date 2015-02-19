@@ -118,6 +118,8 @@ case 'smtp-init':
 case 'cron-init':
   $text = empty($notify['status']) ? "" : "# Array status notification\n{$notify['status']} /usr/local/sbin/statuscheck 1>/dev/null 2>&1\n";
   parse_cron_cfg("dynamix", "status-check", $text);
+  $text = empty($notify['version']) ? "" : "# Plugins status notification\n{$notify['version']} /usr/local/sbin/plugincheck 1>/dev/null 2>&1\n";
+  parse_cron_cfg("dynamix", "plugin-check", $text);
   break;
 
 case 'add':

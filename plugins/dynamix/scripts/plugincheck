@@ -11,10 +11,15 @@
  */
 ?>
 <?
+require_once "/usr/local/emhttp/webGui/include/Wrappers.php";
+
 $plugin = "/usr/local/sbin/plugin";
 $notify = "/usr/local/sbin/notify";
+
 $var    = parse_ini_file("/var/local/emhttp/var.ini");
+$unraid = parse_plugin_cfg("dynamix",true);
 $server = strtoupper($var['NAME']);
+$output = $unraid['notify']['plugin'];
 
 exec("$plugin checkall >/dev/null");
 foreach (glob("/tmp/plugins/*.plg", GLOB_NOSORT) as $file) {
@@ -23,7 +28,7 @@ foreach (glob("/tmp/plugins/*.plg", GLOB_NOSORT) as $file) {
   $new = exec("$plugin version '$file'");
   if ($new && strcmp($new, $old) > 0) {
     $name = basename($file, '.plg');
-    exec("$notify -e 'Plugin: $name' -s 'Notice [$server] - New version available' -d 'Version $old updated to version $new' -x");
+    exec("$notify -e 'Plugin: $name' -s 'Notice [$server] - New version available' -d 'Version $old updated to version $new' -i 'normal $output' -x");
   }
   unlink($file);
 }
