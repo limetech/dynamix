@@ -116,8 +116,8 @@ function openWindow(cmd,title,height,width) {
   var options = 'resizeable=yes,scrollbars=yes,height='+height+',width='+width+',top='+top+',left='+left;
   window.open(run, 'log', options);
 }
-function showStatus(name) {
-  $.post('/webGui/include/ProcessStatus.php',{name:name},function(status){$(".tabs").append(status);});
+function showStatus(name,plugin,job) {
+  $.post('/webGui/include/ProcessStatus.php',{name:name,plugin:plugin,job:job},function(status){$(".tabs").append(status);});
 }
 function showFooter(data, id) {
   if (id !== undefined) $('#'+id).remove();

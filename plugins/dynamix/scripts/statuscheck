@@ -12,14 +12,9 @@
  */
 ?>
 <?
-$notify = "/usr/local/sbin/notify";
+require_once "/usr/local/emhttp/webGui/include/Wrappers.php";
 
-function parse_plugin_cfg($plugin, $sections=false) {
-  $ram = "plugins/$plugin/default.cfg";
-  $rom = "/boot/config/plugins/$plugin/$plugin.cfg";
-  $cfg = file_exists($ram) ? parse_ini_file($ram, $sections) : array();
-  return file_exists($rom) ? array_replace_recursive($cfg, parse_ini_file($rom, $sections)) : $cfg;
-}
+$notify = "/usr/local/sbin/notify";
 
 function my_var($key) {
   return exec("awk -F= '/^'$key'=/ {print $2}' /proc/mdcmd");
@@ -44,10 +39,12 @@ function read_temp($name) {
 $disks  = parse_ini_file("/var/local/emhttp/disks.ini",true);
 $var    = parse_ini_file("/var/local/emhttp/var.ini");
 $unraid = parse_plugin_cfg("dynamix",true);
-$report = $unraid['notify']['report'];
+
+$output = $unraid['notify']['report'];
 $hot    = $unraid['display']['hot'];
 $max    = $unraid['display']['max'];
 $server = strtoupper($var['NAME']);
+
 $active = array();
 $parity = false;
 $cache  = false;
@@ -92,7 +89,7 @@ $warn = ($error0 || $error3) ? "alert" : (($error1 || $error2) ? "warning" : "no
 $stat = $warn=="normal" ? "[PASS]" : "[FAIL]";
 $info = "Array has $size disk".($size==1 ? "" : "s").($parity ? " ({$word}parity".($cache ? " & cache)" : ")") : ($cache ? " ({$word}cache)" : ""));
 $message = implode('\n', $active);
-exec("$notify -s \"Notice [$server] - array health report $stat\" -d \"$info\" -m \"$message\" -i \"$warn $report\"");
+exec("$notify -s \"Notice [$server] - array health report $stat\" -d \"$info\" -m \"$message\" -i \"$warn $output\"");
 
 exit(0);
 ?>

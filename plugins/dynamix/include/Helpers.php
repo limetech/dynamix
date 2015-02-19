@@ -11,6 +11,8 @@
  */
 ?>
 <?
+require_once "Wrappers.php";
+
 // Helper functions
 function my_scale($value, &$unit, $precision = NULL) {
   global $display;
@@ -191,16 +193,5 @@ function input_private_users($sec) {
     echo "</select></td></tr>";
   }
   echo "</table>";
-}
-// parse_plugin_cfg() takes the name of the plugin along with a boolean indication if the cfg file has
-// sections or not. We first look for a "default configuration" file in the plugin directory and initialze
-// our variables from this file. We then look for an existing persistent cfg file and if present, merge
-// those values.
-//
-function parse_plugin_cfg($plugin, $sections=false) {
-  $ram = "plugins/$plugin/default.cfg";
-  $rom = "/boot/config/plugins/$plugin/$plugin.cfg";
-  $cfg = file_exists($ram) ? parse_ini_file($ram, $sections) : array();
-  return file_exists($rom) ? array_replace_recursive($cfg, parse_ini_file($rom, $sections)) : $cfg;
 }
 ?>

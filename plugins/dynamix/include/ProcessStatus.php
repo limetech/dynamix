@@ -14,7 +14,7 @@
 $name = $_POST['name'];
 switch ($name) {
 case 'crontab':
-  $pid = exec("crontab -l | grep 'mdcmd'");
+  $pid = file_exists("/boot/config/plugins/{$_POST['plugin']}/{$_POST['job']}.cron");
   break;
 case 'preclear_disk':
   $pid = exec("ps -o pid,command --ppid 1 | awk -F/ '/$name .*{$_POST['device']}$/ {print $1}'");
