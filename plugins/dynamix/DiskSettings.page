@@ -60,10 +60,10 @@ Default partition format:
   <?=mk_option($var['defaultFormat'], "2", "MBR: 4K-aligned")?>
   </select>
 
-> Defines the type of partition layout for unformatted hard drives 2TB in size and
+> Defines the type of partition layout to create when formatting hard drives 2TB in size and
 > smaller **only**. (All devices larger then 2TB are always set up with GPT partition tables.)
 >
-> **MBR: 4K-unaligned** setting will create MBR-style partition table, where the single
+> **MBR: unaligned** setting will create MBR-style partition table, where the single
 > partition 1 will start in the **63rd sector** from the start of the disk.  This is the *traditional*
 > setting for virtually all MBR-style partition tables.
 >
@@ -81,7 +81,7 @@ Default file system:
   <?=mk_option($var['defaultFsType'], "xfs", "XFS");?>
   </select>
 
-> Defines the default file system type to create when an *unformatted* array device is formatted.
+> Defines the default file system type to create when an *unmountable* array device is formatted.
 >
 > The default file system type for a single or multi-device cache is always Btrfs.
 

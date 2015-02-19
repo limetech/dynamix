@@ -291,7 +291,7 @@ default:
 }
 echo "</span>&bullet;&nbsp;<span class='bitstream'>Dynamix webGui v";
 echo exec("/usr/local/sbin/plugin version /var/log/plugins/dynamix.plg");
-echo "</span></span><span id='countdown'></span><span id='copyright'>unRAID&trade; webGui &copy; 2014, Lime Technology LLC.";
+echo "</span></span><span id='countdown'></span><span id='copyright'>unRAID&trade; webGui &copy; 2015, Lime Technology, Inc.";
 if (isset($myPage['Author'])) {
   echo "&nbsp;|&nbsp;Page author: {$myPage['Author']}";
   if (isset($myPage['Version'])) echo ", version: {$myPage['Version']}";

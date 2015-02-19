@@ -90,12 +90,12 @@ $('.tabs').append("<span class='status vhshift'><input type='button' value='Refr
 <?endif;?>
   </td>
   </tr>
-<?if ($var['fsNumUnformatted']>0):?>
+<?if ($var['fsNumUnmountable']>0):?>
     <tr>
-    <td><strong>Unformatted disk<?=$var['fsNumUnformatted']==1?'':'s'?> present:</strong><br>
-<?  foreach ($disks as $disk) if ($disk['fsStatus']=='Unformatted') echo "<br><font color='#3B5998'>".my_disk($disk['name'])."</font> &bullet; {$disk['id']} ({$disk['device']})";?></td>
-    <td><input type="submit" id="cmdFormat" name="cmdFormat" value="Format" disabled><input type="hidden" name="unformatted_mask" value="<?=$var['fsUnformattedMask']?>"></td>
-    <td><strong>Format</strong> will create a file system in all <strong>Unformatted</strong> disks, discarding all data currently on those disks.<br>
+    <td><strong>Unmountable disk<?=$var['fsNumUnmountable']==1?'':'s'?> present:</strong><br>
+<?  foreach ($disks as $disk) if ($disk['fsStatus']=='Unmountable') echo "<br><font color='#3B5998'>".my_disk($disk['name'])."</font> &bullet; {$disk['id']} ({$disk['device']})";?></td>
+    <td><input type="submit" id="cmdFormat" name="cmdFormat" value="Format" disabled><input type="hidden" name="unmountable_mask" value="<?=$var['fsUnmountableMask']?>"></td>
+    <td><strong>Format</strong> will create a file system in all <strong>Unmountable</strong> disks, discarding all data currently on those disks.<br>
     <input type="checkbox" name="confirmFormat" value="OFF" onClick="arrayOps.cmdFormat.disabled=!arrayOps.confirmFormat.checked"><small>Yes I want to do this</small>
     </td>
     </tr>
