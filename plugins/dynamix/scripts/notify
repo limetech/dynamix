@@ -13,12 +13,7 @@
  */
 ?>
 <?
-function parse_plugin_cfg($plugin, $sections=false) {
-  $ram = "plugins/$plugin/default.cfg";
-  $rom = "/boot/config/plugins/$plugin/$plugin.cfg";
-  $cfg = file_exists($ram) ? parse_ini_file($ram, $sections) : array();
-  return file_exists($rom) ? array_replace_recursive($cfg, parse_ini_file($rom, $sections)) : $cfg;
-}
+require_once "/usr/local/emhttp/webGui/include/Wrappers.php";
 
 function usage() {
   echo <<<EOT
@@ -121,13 +116,8 @@ case 'smtp-init':
   break;
 
 case 'cron-init':
-  $cron = "/tmp/cron.tmp";
-  $note = "# Array status notification";
-  $util = "/usr/local/sbin/statuscheck";
-  exec("crontab -l|grep -v '$note'|grep -v '$util' >$cron");
-  if (!empty($notify['status'])) file_put_contents($cron, "$note\n{$notify['status']} $util 1>/dev/null 2>&1\n", FILE_APPEND);
-  exec("crontab $cron");
-  unlink($cron);
+  $text = empty($notify['status']) ? "" : "# Array status notification\n{$notify['status']} /usr/local/sbin/statuscheck 1>/dev/null 2>&1\n";
+  parse_cron_cfg("dynamix", "status-check", $text);
   break;
 
 case 'add':

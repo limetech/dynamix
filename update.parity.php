@@ -11,11 +11,11 @@
  */
 ?>
 <?
+require_once "webGui/include/Wrappers.php";
+
 $memory = '/tmp/memory.tmp';
-$crontab = '/tmp/crontab.tmp';
-$cron = '';
 if (isset($_POST['#apply'])) {
-  exec("crontab -l | grep -v 'Scheduled Parity Check' | grep -v '/root/mdcmd check' >$crontab");
+  $cron = "";
   if ($_POST['mode']>0) {
     $hour = isset($_POST['hour']) ? $_POST['hour'] : '* *';
     $dotm = isset($_POST['dotm']) ? $_POST['dotm'] : '*';
@@ -49,13 +49,10 @@ if (isset($_POST['#apply'])) {
     $month = isset($_POST['month']) ? $_POST['month'] : '*';
     $day = isset($_POST['day']) ? $_POST['day'] : '*';
     $write = isset($_POST['write']) ? $_POST['write'] : '';
-    $cron = "'$hour $dotm $month $day $term/root/mdcmd check $write 1>/dev/null 2>&1'";
-    exec("echo '# Scheduled Parity Check' >>$crontab");
-    exec("echo $cron >>$crontab");
+    $cron = "# Scheduled Parity Check\n$hour $dotm $month $day $term/root/mdcmd check $write 1>/dev/null 2>&1\n";
   }
-  $keys[$section]['cron'] = $cron;
-  exec("crontab $crontab");
-  exec("rm -f $crontab $memory");
+  parse_cron_cfg("dynamix", "parity-check", $cron);
+  unlink($memory);
 } else {
   file_put_contents($memory, http_build_query($_POST));
   $save = false;

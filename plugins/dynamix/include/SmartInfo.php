@@ -11,6 +11,8 @@
  */
 ?>
 <?
+require_once "Wrappers.php";
+
 $start = 'Start Test';
 $stop  = 'Cancel Test';
 $check = 'Checking...';
@@ -19,13 +21,6 @@ $run   = '/webGui/include/Run.php';
 $disk = $_GET['disk'];
 $port = $_GET['port'];
 $output = array();
-
-function parse_plugin_cfg($plugin, $sections=false) {
-  $ram = "plugins/$plugin/default.cfg";
-  $rom = "/boot/config/plugins/$plugin/$plugin.cfg";
-  $cfg = file_exists($ram) ? parse_ini_file($ram, $sections) : array();
-  return file_exists($rom) ? array_replace_recursive($cfg, parse_ini_file($rom, $sections)) : $cfg;
-}
 
 echo "<div class='label'><span class='left infogap'>" . $disk . " attached to port: $port</span></div>";
 echo "<table class='list infogap'>";
