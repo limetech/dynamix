@@ -49,7 +49,7 @@ if (isset($_POST['#apply'])) {
     $month = isset($_POST['month']) ? $_POST['month'] : '*';
     $day = isset($_POST['day']) ? $_POST['day'] : '*';
     $write = isset($_POST['write']) ? $_POST['write'] : '';
-    $cron = "# Scheduled Parity Check\n$hour $dotm $month $day $term/root/mdcmd check $write 1>/dev/null 2>&1\n";
+    $cron = "# Generated parity check schedule:\n$hour $dotm $month $day $term/root/mdcmd check $write >/dev/null\n\n";
   }
   parse_cron_cfg("dynamix", "parity-check", $cron);
   unlink($memory);

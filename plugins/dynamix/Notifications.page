@@ -18,13 +18,17 @@ Icon="notifications.png"
 ?>
 <?
 $events = explode('|', $notify['events']);
+$disabled = $notify['system'] ? '' : 'disabled';
 ?>
 <script>
 function resetNotify(form) {
   form.date.selectedIndex = 0;
   form.time.selectedIndex = 0;
-  form.path.value = "/tmp/notifications";
   form.position.selectedIndex = 1;
+  form.path.value = "/tmp/notifications";
+  form.system.selectedIndex = 0;
+  form.version.selectedIndex = 0;
+  form.status.selectedIndex = 0;
   form.normal1.checked = true;
   form.normal2.checked = false;
   form.warning1.checked = true;
@@ -36,8 +40,11 @@ function resetNotify(form) {
   form.plugin2.checked = false;
   form.report1.checked = true;
   form.report2.checked = false;
-  for (var i=1; i<=5; i++) form.elements['a'+i].checked = true;
   form.custom.value = '';
+  prepareCheckbox(0);
+  preparePlugin('');
+  prepareReport('');
+  for (var i=1; i<=5; i++) form.elements['a'+i].checked = true;
 }
 function prepareNotify(form) {
   var events = [];
@@ -63,6 +70,9 @@ function prepareNotify(form) {
   }
   if (form.custom.value>0) events.push(form.custom.value);
   form.events.value = events.join('|');
+}
+function prepareCheckbox(index) {
+  if (index==0) $('.checkbox').attr('disabled','disabled'); else $('.checkbox').removeAttr('disabled');
 }
 function preparePlugin(value) {
   if (value=='') $('.plugin').hide(); else $('.plugin').show();
@@ -112,7 +122,13 @@ Display position:
 Storage path:
 : <input type="text" name="path" value="<?=$notify['path']?>"><?=(exec("echo {$notify['path']}|grep '^/mnt'") ? 'Permanent storage' : 'Temporary storage')?>
 
-Plugins status notification:
+System notifications:
+: <select name="system" size="1" onchange="prepareCheckbox(this.selectedIndex)">
+  <?=mk_option($notify['system'], "", "Disabled")?>
+  <?=mk_option($notify['system'], "*/1 * * * *", "Enabled")?>
+  </select>
+
+Plugins version notification:
 : <select name="version" size="1" onchange="preparePlugin(this.value)">
   <?=mk_option($notify['version'], "", "Never check")?>
   <?=mk_option($notify['version'], "10 */6 * * *", "Check four times a day")?>
@@ -134,24 +150,24 @@ Array status notification:
   </select>
 
 <span class="plugin" style="display:none">&nbsp;</span>
-: <span class="plugin" style="display:none"><span style="display:inline-block;width:90px;font-style:italic">Plugins status</span><input type="checkbox" name="plugin1"<?=($notify['plugin'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
+: <span class="plugin" style="display:none"><span style="display:inline-block;width:90px;font-style:italic">Plugins version</span><input type="checkbox" name="plugin1"<?=($notify['plugin'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
   <input type="checkbox" name="plugin2"<?=($notify['plugin'] & 2)==2 ? ' checked' : ''?>>Email &nbsp;</span>
 
 <span class="report" style="display:none">&nbsp;</span>
-: <span class="report" style="display:none"><span style="display:inline-block;width:90px;font-style:italic">Array status</span><input type="checkbox" name="report1"<?=($notify['report'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
-  <input type="checkbox" name="report2"<?=($notify['report'] & 2)==2 ? ' checked' : ''?>>Email &nbsp;</span>
+: <span class="report" style="display:none"><span style="display:inline-block;width:90px;font-style:italic">Array status</span><input type="checkbox" class="checkbox" name="report1"<?=($notify['report'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
+  <input type="checkbox" class="checkbox" name="report2"<?=($notify['report'] & 2)==2 ? " checked $disabled" : $disabled?>>Email &nbsp;</span>
 
 Notification entity:
-: <span style="display:inline-block;width:90px;font-style:italic">Notices</span><input type="checkbox" name="normal1"<?=($notify['normal'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
-  <input type="checkbox" name="normal2"<?=($notify['normal'] & 2)==2 ? ' checked' : ''?>>Email &nbsp;
+: <span style="display:inline-block;width:90px;font-style:italic">Notices</span><input type="checkbox" class="checkbox" name="normal1"<?=($notify['normal'] & 1)==1 ? " checked $disabled" : $disabled?>>Browser &nbsp;
+  <input type="checkbox" class="checkbox" name="normal2"<?=($notify['normal'] & 2)==2 ? " checked $disabled" : $disabled?>>Email &nbsp;
 
 &nbsp;
-: <span style="display:inline-block;width:90px;font-style:italic">Warnings</span><input type="checkbox" name="warning1"<?=($notify['warning'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
-  <input type="checkbox" name="warning2"<?=($notify['warning'] & 2)==2 ? ' checked' : ''?>>Email &nbsp;
+: <span style="display:inline-block;width:90px;font-style:italic">Warnings</span><input type="checkbox" class="checkbox" name="warning1"<?=($notify['warning'] & 1)==1 ? " checked $disabled" : $disabled?>>Browser &nbsp;
+  <input type="checkbox" class="checkbox" name="warning2"<?=($notify['warning'] & 2)==2 ? " checked $disabled" : $disabled?>>Email &nbsp;
 
 &nbsp;
-: <span style="display:inline-block;width:90px;font-style:italic">Alerts</span><input type="checkbox" name="alert1"<?=($notify['alert'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
-  <input type="checkbox" name="alert2"<?=($notify['alert'] & 2)==2 ? ' checked' : ''?>>Email &nbsp;
+: <span style="display:inline-block;width:90px;font-style:italic">Alerts</span><input type="checkbox" class="checkbox" name="alert1"<?=($notify['alert'] & 1)==1 ? " checked $disabled" : $disabled?>>Browser &nbsp;
+  <input type="checkbox" class="checkbox" name="alert2"<?=($notify['alert'] & 2)==2 ? " checked $disabled" : $disabled?>>Email &nbsp;
 
 &nbsp;
 : <button type="button" name="#advanced" onclick="if ($('.advanced').css('display')=='none') {$('.advanced').show(); $(this).html('Basic view');} else {$('.advanced').hide(); $(this).html('Advanced view');}">Advanced view</button>
