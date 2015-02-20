@@ -154,8 +154,8 @@ Array status notification:
   <input type="checkbox" name="plugin2"<?=($notify['plugin'] & 2)==2 ? ' checked' : ''?>>Email &nbsp;</span>
 
 <span class="report" style="display:none">&nbsp;</span>
-: <span class="report" style="display:none"><span style="display:inline-block;width:90px;font-style:italic">Array status</span><input type="checkbox" class="checkbox" name="report1"<?=($notify['report'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
-  <input type="checkbox" class="checkbox" name="report2"<?=($notify['report'] & 2)==2 ? " checked $disabled" : $disabled?>>Email &nbsp;</span>
+: <span class="report" style="display:none"><span style="display:inline-block;width:90px;font-style:italic">Array status</span><input type="checkbox" name="report1"<?=($notify['report'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
+  <input type="checkbox" name="report2"<?=($notify['report'] & 2)==2 ? ' checked' : ''?>>Email &nbsp;</span>
 
 Notification entity:
 : <span style="display:inline-block;width:90px;font-style:italic">Notices</span><input type="checkbox" class="checkbox" name="normal1"<?=($notify['normal'] & 1)==1 ? " checked $disabled" : $disabled?>>Browser &nbsp;
