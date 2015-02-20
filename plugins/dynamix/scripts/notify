@@ -116,10 +116,12 @@ case 'smtp-init':
   break;
 
 case 'cron-init':
-  $text = empty($notify['status']) ? "" : "# Array status notification\n{$notify['status']} /usr/local/sbin/statuscheck 1>/dev/null 2>&1\n";
+  $text = empty($notify['status']) ? "" : "# Generated array status check schedule:\n{$notify['status']} /usr/local/sbin/statuscheck &> /dev/null\n\n";
   parse_cron_cfg("dynamix", "status-check", $text);
-  $text = empty($notify['version']) ? "" : "# Plugins status notification\n{$notify['version']} /usr/local/sbin/plugincheck 1>/dev/null 2>&1\n";
+  $text = empty($notify['version']) ? "" : "# Generated plugins version check schedule:\n{$notify['version']} /usr/local/sbin/plugincheck &> /dev/null\n\n";
   parse_cron_cfg("dynamix", "plugin-check", $text);
+  $text = empty($notify['system']) ? "" : "# Generated system monitoring schedule:\n{$notify['system']} /usr/local/sbin/monitor &> /dev/null\n\n";
+  parse_cron_cfg("dynamix", "monitor", $text);
   break;
 
 case 'add':
