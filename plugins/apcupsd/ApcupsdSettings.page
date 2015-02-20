@@ -1,0 +1,383 @@
+Menu="UpsSettings:1"
+Title="UPS Settings"
+---
+<?PHP
+/* Copyright 2014, Dan Landon.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+
+<?
+	$sName = "apcupsd";
+	$apcupsd_cfg = parse_plugin_cfg($sName);
+	$apcupsd_running = file_exists( "/var/run/$sName.pid") ? "yes" : "no";
+
+	$status="";
+	$bcharge="";
+	$timeleft="";
+
+	if ($apcupsd_running=="yes") {
+		$apcaccessoutput=`/sbin/apcaccess`;
+   
+		if ($apcaccessoutput != "") {
+			//status
+			$statusstartpos = strpos($apcaccessoutput, "STATUS   :") + 11;
+			$statusendpos = strpos($apcaccessoutput, "\n", $statusstartpos) -1;
+			$status = substr($apcaccessoutput, $statusstartpos, $statusendpos-$statusstartpos);
+
+			//bcharge
+			$bchargestartpos = strpos($apcaccessoutput, "BCHARGE  :") +11;
+			$bchargeendpos = strpos($apcaccessoutput, "\n", $bchargestartpos);
+			$bcharge = substr($apcaccessoutput, $bchargestartpos, $bchargeendpos-$bchargestartpos);
+			$bcharge = str_replace(" Percent", "", $bcharge);
+			$bchargecolour = (round($bcharge) <= 10 ? 'red' : 'green');
+
+			//timeleft
+			$timeleftstartpos = strpos($apcaccessoutput, "TIMELEFT :") +11;
+			$timeleftendpos = strpos($apcaccessoutput, "\n", $timeleftstartpos);
+			$timeleft = substr($apcaccessoutput, $timeleftstartpos, $timeleftendpos-$timeleftstartpos);
+			$timeleftcolour = (round($timeleft) <= 5 ? 'red' : 'green');
+
+			//loadpct
+			$loadpctstartpos = strpos($apcaccessoutput, "LOADPCT  :") +11;
+			$loadpctendpos = strpos($apcaccessoutput, "\n", $loadpctstartpos);
+			$loadpct = substr($apcaccessoutput, $loadpctstartpos, $loadpctendpos-$loadpctstartpos);
+			$loadpctint = preg_replace('/[^0-9\.]/', '', $loadpct);
+
+			//nompower
+			$nompowerstartpos = strpos($apcaccessoutput, "NOMPOWER :") +11;
+			$nompowerendpos = strpos($apcaccessoutput, "\n", $nompowerstartpos);
+			$nompower = substr($apcaccessoutput, $nompowerstartpos, $nompowerendpos-$nompowerstartpos);
+			$nompowerint = preg_replace('/[^0-9\.]/', '', $nompower);
+
+			//load
+			if ($nompowerstartpos != "11")
+			{
+				$load=($loadpctint/100)*$nompowerint;
+				$loadcolour='green';
+			}
+			else 
+			{
+				$load="N/A";
+				$loadcolour='red';
+			}
+			$load .= " Watts";
+		}     
+	}
+?>
+
+<style>
+.green {
+	color: #6FA239;
+	font-size: 14px;
+}
+.red {
+	color: #CC3300;
+	font-size: 14px;
+}
+.status_head {
+	font-size: 14px;
+	font-weight: bold;
+}
+</style>
+
+<form name="apcupsd_settings" method="POST" action="/plugins/apcupsd/apcupsdctl.php" target="progressFrame">
+	<input type="hidden" name="cmd" value="apply">
+	<table>
+		<tr>
+			<td>
+				<span class="status_head">Status: </span><?=($apcupsd_running=="yes")?"<span class=\"green\">Running</span>":"<span class=\"red\">Stopped</span>";?>
+			</td>
+			<td>
+			<span class="status_head">UPS: </span>
+			<?
+			switch ($status) {
+				case '':
+					if ($apcupsd_running=="yes") {
+						echo("<span class=\"red\">Unknown</span>");
+					} else {
+						echo("<span class=\"red\">Offline</span>");
+					}
+				break;
+
+				case 'TRIM ONLINE':
+					echo("<span class=\"green\">Online (Trim)</span>");
+				break;
+
+				case 'BOOST ONLINE':
+					echo("<span class=\"green\">Online (Boost)</span>");
+				break;
+	
+				case 'ONLINE':
+						echo("<span class=\"green\">Online</span>");
+				break;
+
+				case 'ONBATT':
+					echo("<span class=\"red\">On Battery</span>");
+				break;
+
+				case 'COMMLOST':
+					echo("<span class=\"red\">Lost Communication</span>");
+				break;
+
+				case 'NOBATT':
+					echo("<span class=\"red\">No Battery Detected</span>");
+				break;
+
+				default:
+					echo("<span class=\"red\">$status</span>");
+				break;
+			}
+			?>      
+			</td>
+
+			<td>
+			<? if ($status=="ONLINE" || $status=="BOOST ONLINE" || $status=="TRIM ONLINE" || $status=="ONBATT"): ?><span class="status_head">Battery Charge: </span><span class="<?=$bchargecolour;?>"><?=$bcharge;?>%</span><? endif; ?>
+			</td>
+
+			<td>
+			<? if ($status=="ONLINE" || $status=="BOOST ONLINE" || $status=="TRIM ONLINE" || $status=="ONBATT"): ?><span class="status_head">Time Left: </span><span class="<?=$timeleftcolour;?>"><?=$timeleft;?></span><? endif; ?>
+			</td>
+
+			<td>
+			<? if ($status=="ONLINE" || $status=="BOOST ONLINE" || $status=="TRIM ONLINE" || $status=="ONBATT"): ?><span class="status_head">Nominal: </span><span class="green"><?=$nompower;?></span><? endif; ?>
+			</td>
+
+			<td>
+			<? if ($status=="ONLINE" || $status=="BOOST ONLINE" || $status=="TRIM ONLINE" || $status=="ONBATT"): ?><span class="status_head">Load: </span><span class="<?=$loadcolour;?>"><?=$load;?></span><? endif; ?>
+			</td>
+
+			<td>
+			<? if ($status=="ONLINE" || $status=="BOOST ONLINE" || $status=="TRIM ONLINE" || $status=="ONBATT"): ?><span class="status_head">Load %: </span><span class="<?=$loadcolour;?>"><?=$loadpct;?></span><? endif; ?>
+			</td>
+		</tr>
+	</table>
+
+	<br />
+	<br />
+
+	<table class="settings">
+		<dl>
+			<dt>Start APC UPS Daemon:</dt>
+			<dd>
+				<select name="SERVICE" size="1">
+				<?=mk_option($apcupsd_cfg['SERVICE'], "disable", "No");?>
+				<?=mk_option($apcupsd_cfg['SERVICE'], "enable", "Yes");?>
+				</select>
+			</dd>
+		</dl>
+		<blockquote class='inline_help'>
+		<p>
+			<strong>Start APC UPS Daemon:</strong>
+			<br />Set to 'Yes' to enable apcupsd and start the daemon, set to 'No' to disable apcupsd and stop the daemon.
+		</p>
+		</blockquote>
+
+		<dl>
+			<dt>UPS Cable:</dt>
+			<dd>
+				<select id="UPSCABLESELECT" name="UPSCABLESELECT" size="1" onChange="toggleCustomTextBoxDisplay(form); form.UPSCABLE.value = form.UPSCABLESELECT.value;">
+				<?=mk_option($apcupsd_cfg['UPSCABLE'], "usb", "usb");?>
+				<?=mk_option($apcupsd_cfg['UPSCABLE'], "simple", "simple");?>
+				<?=mk_option($apcupsd_cfg['UPSCABLE'], "smart", "smart");?>
+				<?=mk_option($apcupsd_cfg['UPSCABLE'], "ether", "ether");?>
+				<?=mk_option($apcupsd_cfg['UPSCABLE'], "custom", "custom");?>
+				</select>
+				<input type="hidden" name="UPSCABLE" value="<?=$apcupsd_cfg['UPSCABLE'];?>">
+			</dd>
+		</dl>
+		<blockquote class='inline_help'>
+		<p>
+			<strong>UPS Cable:</strong>
+			<br />Defines the type of cable connecting the UPS to your computer.
+			<br /><br />Possible generic choices for 'cable' are:
+			<br />usb, simple, smart, ether, or custom to specify a specific cable.
+		</p>
+		</blockquote>
+
+		<dl>
+			<dt>Custom UPS Cable:</dt>
+			<dd>
+				<input type="text" id="CUSTOMUPSCABLE" readonly name="CUSTOMUPSCABLE" maxlength="40" value="<?=$apcupsd_cfg['CUSTOMUPSCABLE'];?>">
+			</dd>
+		</dl>
+		<blockquote class='inline_help'>
+		<p>
+			<strong>Custom UPS Cable:</strong>
+			<br />Specify a specific cable by model number:
+			<br />940-0119A, 940-0127A, 940-0128A, 940-0020B,
+			<br />940-0020C, 940-0023A, 940-0024B, 940-0024C,
+			<br />940-1524C, 940-0024G, 940-0095A, 940-0095B,
+			<br />940-0095C, 940-0625A, M-04-02-2000
+		</p>
+		</blockquote>
+
+		<dl>
+			<dt>UPS Type:</dt>
+			<dd>
+				<select id="UPSTYPESELECT" name="UPSTYPESELECT" size="1" onChange=" toggleDeviceTextBoxDisplay(form); form.UPSTYPE.value = form.UPSTYPESELECT.value;">
+				<?=mk_option($apcupsd_cfg['UPSTYPE'], "usb", "usb");?>
+				<?=mk_option($apcupsd_cfg['UPSTYPE'], "apcsmart", "apcsmart");?>
+				<?=mk_option($apcupsd_cfg['UPSTYPE'], "net", "net");?>
+				<?=mk_option($apcupsd_cfg['UPSTYPE'], "snmp", "snmp");?>
+				<?=mk_option($apcupsd_cfg['UPSTYPE'], "dumb", "dumb");?>
+				<?=mk_option($apcupsd_cfg['UPSTYPE'], "pcnet", "pcnet");?>
+				<?=mk_option($apcupsd_cfg['UPSTYPE'], "modbus", "modbus");?>
+				</select>
+				<input type="hidden" name="UPSTYPE" value="<?=$apcupsd_cfg['UPSTYPE'];?>">
+			</dd>
+		</dl>
+		<blockquote class='inline_help'>
+		<p>
+			<strong>UPS Type:</strong>
+			<br />Define a 'UPS Type', which corresponds to the type of UPS you have (see the Description for more details).
+			<br /><strong>usb</strong> - Most new UPSes are USB.
+			<br /><strong>apcsmart</strong> - Newer serial character device, appropriate for SmartUPS models using a serial cable (not USB).
+			<br /><strong>net</strong> - Network link to a master apcupsd through apcupsd's Network Information Server. This is used if the UPS powering your computer is connected to a different computer for monitoring.
+			<br /><strong>snmp</strong> - SNMP network link to an SNMP-enabled UPS device.
+			<br /><strong>dumb</strong> - Old serial character device for use with simple-signaling UPSes.
+			<br /><strong>pcnet</strong> - PowerChute Network Shutdown protocol which can be used as an alternative to SNMP with the AP9617 family of smart slot cards.
+			<br /><strong>modbus</strong> - Serial device for use with newest SmartUPS models supporting the MODBUS protocol.
+		</p>
+		</blockquote>
+
+		<dl>
+			<dt>Device:</dt>
+			<dd>
+				<input type="text" readonly name="DEVICE" maxlength="40" value="<?=$apcupsd_cfg['DEVICE'];?>">
+			</dd>
+		</dl>
+		<blockquote class='inline_help'>
+		<p>
+			<strong>Device:</strong>
+			<br /><strong>apcsmart</strong> - /dev/tty**.
+			<br /><strong>net</strong> - hostname:port.  Hostname is the IP address of the NIS server.  The deafult port is 3551.
+			<br /><strong>snmp</strong> - hostname:port:vendor:community.  Hostname is the ip address or hostname of the UPS on the network. Vendor can be can be "APC" or "APC_NOTRAP". "APC_NOTRAP" will disable SNMP trap catching; you usually want "APC". Port is usually 161. Community is usually "private".
+			<br /><strong>dumb</strong> - /dev/tty**.
+			<br /><strong>pcnet</strong> - ipaddr:username:passphrase:port.  ipaddr is the IP address of the UPS management card. username and passphrase are the credentials for which the card has been configured. port is the port number on which to listen for messages from the UPS, normally 3052. If this parameter is empty or missing, the default of 3052 will be used.
+			<br /><strong>modbus</strong> - /dev/tty**.
+		</p>
+		</blockquote>
+
+		<blockquote class='inline_help'>
+		<p>
+			<strong>Note:</strong> 'Battery Level', 'Runtime Left', and 'Time on Battery' work in conjunction, so the first that occurs will cause the initiation of a shutdown.
+		</p>
+		</blockquote>
+
+		<dl>
+			<dt>Battery Level to Initiate a Shutdown (%):</dt>
+			<dd>
+				<input type="text" name="BATTERYLEVEL" class="narrow" maxlength="3" value="<?=$apcupsd_cfg['BATTERYLEVEL'];?>">
+			</dd>
+		</dl>
+		<blockquote class='inline_help'>
+		<p>
+			<strong>Battery Level:</strong>
+			<br />If during a power failure, the remaining battery percentage (as reported by the UPS) is below or equal to 'Battery Level', apcupsd will initiate a system shutdown.
+		</p>
+		</blockquote>
+
+		<dl>
+			<dt>Runtime Left to Initiate a Shutdown (minutes):</dt>
+			<dd>
+				<input type="text" name="MINUTES" class="narrow" maxlength="3" value="<?=$apcupsd_cfg['MINUTES'];?>">
+			</dd>
+		</dl>
+		<blockquote class='inline_help'>
+		<p>
+			<strong>Runtime Left:</strong>
+			<br />If during a power failure, the remaining runtime in minutes (as calculated internally by the UPS) is below or equal to 'Minutes', apcupsd, will initiate a system shutdown.
+		</p>
+		</blockquote>
+
+		<dl>
+			<dt>Time on Battery Before Shutdown (seconds):</dt>
+			<dd>
+				<input type="text" name="TIMEOUT" class="narrow" maxlength="4" value="<?=$apcupsd_cfg['TIMEOUT'];?>">
+			</dd>
+		</dl>
+		<blockquote class='inline_help'>
+		<p>
+			<strong>Time on Battery:</strong>
+			<br />If during a power failure, the UPS has run on batteries for 'Timeout' many seconds or longer; apcupsd will initiate a system shutdown. A value of zero disables this timer.
+			<br /><br />Note, if you have a Smart UPS, you will most likely want to disable this timer by setting it to zero. That way, your UPS will continue on batteries until either the % charge remaining drops to or below 'Battery Level' or the remaining battery runtime drops to or below 'Minutes'.  Of course, if you are testing, setting this to 60 causes a quick system shutdown if you pull the power plug.  If you have an older dumb UPS, you will want to set this to less than the time you know you can run on batteries.
+		</p>
+		</blockquote>
+
+		<dl>
+			<dt>Turn Off UPS After Shutdown:</dt>
+			<dd>
+				<select name="KILLUPSSELECT" size="1" onChange="form.KILLUPS.value = form.KILLUPSSELECT.value;">
+				<?=mk_option($apcupsd_cfg['KILLUPS'], "no", "No");?>
+				<?=mk_option($apcupsd_cfg['KILLUPS'], "yes", "Yes");?>
+				</select>
+				<input type="hidden" name="KILLUPS" value="<?=$apcupsd_cfg['KILLUPS'];?>">     
+			</dd>
+		</dl>
+		<blockquote class='inline_help'>
+		<p>
+			<strong>Turn Off UPS After Shutdown:</strong>
+			<br />Set to 'Yes' to turn off the power to the UPS after a shutdown.
+		</p>
+		</blockquote>
+
+		<tr>
+			<td>
+				<u><a href="http://apcupsd.org/manual/manual.html" target="_blank">Online Manual</a></u>
+			</td>
+			<td>
+				<input type="submit" name="runCmd" value="Apply">
+				<button type="button" onClick="done();">Done</button>
+			</td>
+		</tr>
+	</table>
+</form>
+
+<script type="text/javascript">
+function toggleTextBoxDisplay(ddlID, tboxID, hidevalue ) { 
+	if (document.getElementById(ddlID).value == hidevalue) {
+		document.getElementById(tboxID).style.display="block";
+		document.getElementById(ddlID).focus();
+	} else {
+		document.getElementById(tboxID).style.display="none";
+		document.getElementById(tboxID).focus();
+	}
+}
+
+function toggleDivDisplay(ddlID, divID, hidevalue) { 
+	if (document.getElementById(ddlID).value == hidevalue) {
+		document.getElementById(divID).style.visibility = 'hidden';
+	} else {
+		document.getElementById(divID).style.visibility = 'visible';
+	}
+}
+
+function toggleCustomTextBoxDisplay(form) {
+	if (form.UPSCABLESELECT.value == "custom") {
+		form.CUSTOMUPSCABLE.readOnly = false;
+	} else {
+		form.CUSTOMUPSCABLE.readOnly = true;
+		form.CUSTOMUPSCABLE.value = "";
+	}
+}
+
+function toggleDeviceTextBoxDisplay(form) {
+	if (form.UPSTYPESELECT.value == "usb") {
+		form.DEVICE.readOnly = true;
+		form.DEVICE.value = "";
+	} else {
+		form.DEVICE.readOnly = false;
+	}
+}
+
+document.apcupsd_settings.form.UPSTYPE.value = document.apcupsd_settings.form.UPSUPSTYPESELECT.value;
+document.apcupsd_settings.form.UPSCABLE.value = document.apcupsd_settings.form.UPSCABLESELECT.value;
+document.apcupsd_settings.form.KILLUPS.value = document.apcupsd_settings.form.KILLUPSSELECT.value;
+</script>

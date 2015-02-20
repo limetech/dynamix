@@ -1,0 +1,6 @@
+Menu="OtherSettings"
+Title="UPS Settings"
+Type="xmenu"
+Icon="apcupsd.png"
+Tabs="true"
+---
