@@ -13,9 +13,6 @@ Title="Share Settings"
  * all copies or substantial portions of the Software.
  */
 ?>
-> A *Share*, also called a *User Share*, is simply the name of a top-level directory that exists on one or more of your
-> storage devices (array and cache).  Each share can be exported for network access.  When browsing a share, we return the
-> composite view of all files and subdirectories for which that top-level directory exists on each storage device.
 <?
 if ($name == "") {
   /* default values when adding new share */
@@ -57,6 +54,9 @@ if ($var['shareUserExclude']) {
   }
 }
 ?>
+> A *Share*, also called a *User Share*, is simply the name of a top-level directory that exists on one or more of your
+> storage devices (array and cache).  Each share can be exported for network access.  When browsing a share, we return the
+> composite view of all files and subdirectories for which that top-level directory exists on each storage device.
 <script>
 $(function() {
   $("#s1").dropdownchecklist({emptyText:'All', width:300, explicitClose:'...close'});
