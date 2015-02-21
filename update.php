@@ -28,8 +28,14 @@
  * #command : a shell command to execute after updating the configuration file
  */
 function write_log($string) {
-  echo "<script>addLog(\"{$string}\");</script>";
+  if (empty($string)) {
+    return;
+  }
   syslog(LOG_INFO, $string);
+  $string = str_replace("\n", "<br>", $string);
+  $string = str_replace('"', "\\\"", trim($string));
+  echo "<script>addLog(\"{$string}\");</script>";
+  @flush();
 }
 // unRAID update control
 readfile('update.htm');
