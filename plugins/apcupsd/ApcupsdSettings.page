@@ -59,15 +59,15 @@ Title="UPS Settings"
 			//load
 			if ($nompowerstartpos != "11")
 			{
-				$load=($loadpctint/100)*$nompowerint;
-				$loadcolour='green';
+				$load=($loadpctint/100)*$nompowerint . " Watts";
+				$loadcolour='green'; //what load would warrant red?
 			}
 			else 
 			{
+				$nompower="N/A";
 				$load="N/A";
-				$loadcolour='red';
+				$loadcolour='green';
 			}
-			$load .= " Watts";
 		}     
 	}
 ?>

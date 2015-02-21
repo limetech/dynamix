@@ -19,7 +19,7 @@
 
 	if ($argv[1] == "autostart") {
                 // only do this once
-                if ($apcupsd_running) return 1;
+		if ($apcupsd_running == "yes") return 1;
 		$CMD = $argv[1];
                 $apcupsd_installing = "yes";
 	} else {
@@ -175,7 +175,7 @@
 				unlink($file);
 			}
 		} else {
-                        mkdir(dirname($file), 0755, TRUE);
+                        @mkdir(dirname($file), 0755, TRUE);
 			touch($file);
 		}
 
