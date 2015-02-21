@@ -3,12 +3,6 @@ Title="Apps"
 Cond="((pgrep('docker')!==false) && ($display['dashapps']!='none'))"
 Markdown="false"
 ---
-<?PHP
-require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerClient.php");
-$DockerClient    = new DockerClient();
-$DockerUpdate    = new DockerUpdate();
-$DockerTemplates = new DockerTemplates();
-?>
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.docker.manager/assets/gh-buttons.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.min.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery-ui.min.css">
@@ -116,6 +110,11 @@ $DockerTemplates = new DockerTemplates();
 <div id="dialog-confirm" style="display:none;" title="Dialog Title"></div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
 <?
+require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerClient.php");
+$DockerClient    = new DockerClient();
+$DockerUpdate    = new DockerUpdate();
+$DockerTemplates = new DockerTemplates();
+
 $allContainers = $DockerClient->getDockerContainers();
 if ( ! $allContainers) { $allContainers = array(); }
 
