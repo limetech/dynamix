@@ -2,6 +2,8 @@
 
 # Start Docker.io
 if [ -x /etc/rc.d/rc.docker ]; then
-  logger "Starting docker.io"
-  /etc/rc.d/rc.docker start | logger
+  if [ ! -z "$(grep DOCKER_ENABLED=\"yes\" /boot/config/docker.cfg)" ]; then
+    logger "Starting docker.io"
+    /etc/rc.d/rc.docker start | logger
+  fi
 fi

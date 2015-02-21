@@ -67,7 +67,10 @@ $DockerTemplates = new DockerTemplates();
 	<tbody>
 		<?
 		$all_containers = $docker->getDockerContainers();
-		if ( ! $all_containers) { $all_containers = array(); }
+		if ( ! $all_containers) {
+			$all_containers = array();
+			echo "<tr><td></td><td colspan=\"7\">No Docker Containers Installed</td></tr>";
+		}
 		$info = $DockerTemplates->getAllInfo();
 		$contextMenus = array();
 

@@ -3,7 +3,7 @@ Cond="(pgrep('docker')!==false)"
 Markdown="false"
 ---
 <div style="text-align:right;vertical-align:top;position:relative;top:-44px;height:0;display:none;">
-	<span class="toggleMode" onclick="toggleMode();"><i id="toggleMode" class="fa fa-lg"></i> Advanced Mode</span>
+	<span class="toggleMode" onclick="toggleMode();"><i id="toggleMode" class="fa fa-lg"></i> Advanced View</span>
 </div>
 <?PHP
 require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/createDocker.php");

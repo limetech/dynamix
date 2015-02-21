@@ -9,12 +9,6 @@ $docker          = new DockerClient();
 $DockerUpdate    = new DockerUpdate();
 $DockerTemplates = new DockerTemplates();
 
-// Autostart file
-$autostart_file = $dockerManPaths['autostart-file'];
-
-// Repos file
-$template_repos = $dockerManPaths['template-repos'];
-
 // Docker configuration file
 $cfgfile = "/boot/config/docker.cfg";
 
@@ -23,29 +17,51 @@ if (!file_exists($cfgfile)) {
   return;
 }
 $dockercfg = parse_ini_file($cfgfile);
+
+
+if (!array_key_exists('DOCKER_ENABLED', $dockercfg)) {
+  $dockercfg['DOCKER_ENABLED'] = 'no';
+}
+
+// Check for nodatacow flag on Docker file; display warning
+$realfile = $dockercfg['DOCKER_IMAGE_FILE'];
+if (file_exists($realfile)) {
+  if (strpos($realfile, '/mnt/user/') === 0) {
+    $tmp = parse_ini_string(shell_exec("getfattr -n user.LOCATION " . $dockercfg['DOCKER_IMAGE_FILE'] . " | grep user.LOCATION"));
+    $realfile = str_replace('user', $tmp['user.LOCATION'], $realfile);  // replace 'user' with say 'cache' or 'disk1' etc
+  }
+
+  if (exec("stat -c %T -f " . $realfile) == "btrfs") {
+    if (shell_exec("lsattr " . $realfile . " | grep \"\\-C\"") == "") {
+      echo '<p class="notice">Your existing Docker image file needs to be recreated due to an issue from an earlier beta of unRAID 6.  Failure to do so may result in your docker image suffering corruption at a later time.  Please do this NOW!</p>';
+    }
+  }
+}
 ?>
+<style type="text/css">
+  .errortext {
+    color: #EF3D47;
+    display: none;
+  }
+</style>
 <?if (pgrep('docker') === false):?>
 
 <form id="settingsForm" markdown="1" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#file" value="<?=$cfgfile;?>" />
-<input type="hidden" name="#command" value="/etc/rc.d/rc.docker start" />
+<input type="hidden" id="command" name="#command" value="/etc/rc.d/rc.docker stop" />
 
-Service Status:
-: **Stopped** <input type="button" value="Start" id="startBtn" style="margin-left: 15px"/>
+Enable Docker:
+: <select id="DOCKER_ENABLED" name="DOCKER_ENABLED" size="1">
+<?= mk_option($dockercfg['DOCKER_ENABLED'], 'no', 'No'); ?>
+<?= mk_option($dockercfg['DOCKER_ENABLED'], 'yes', 'Yes'); ?>
+</select>
 
 > Before you can start the Docker service for the first time, please specify an image
 > file for Docker to install to.  Once started, Docker will always automatically start
 > after the array has been started.
 
-Docker image:
-: <input type="text" name="DOCKER_IMAGE_FILE" id="DOCKER_IMAGE_FILE" value="<?=$dockercfg['DOCKER_IMAGE_FILE'];?>" placeholder="e.g. /mnt/disk1/docker.img" required="required" />
-
-> You must specify an image file for Docker.  The system will automatically
-> create this file when the Docker service is first started.  If you do not want Docker
-> to run at all, set this field blank and click **Start**.
-
 Default image size:
-: <input type="number" name="DOCKER_IMAGE_SIZE" value="<?=$dockercfg['DOCKER_IMAGE_SIZE'];?>" required="required" />GB
+: <input id="DOCKER_IMAGE_SIZE" type="number" name="DOCKER_IMAGE_SIZE" value="<?=$dockercfg['DOCKER_IMAGE_SIZE'];?>" required="required" />GB <span id="SIZE_ERROR" class="errortext"></span>
 
 > If the system needs to create a new docker image file, this is the default size to use
 > specified in GB.
@@ -53,15 +69,29 @@ Default image size:
 > To resize an existing image file, specify the new size here.  Next time the Docker service is
 > started the file (and file system) will increased to the new size (but never decreased).
 
+Docker image:
+: <input id="DOCKER_IMAGE_FILE" type="text" name="DOCKER_IMAGE_FILE" value="<?=$dockercfg['DOCKER_IMAGE_FILE'];?>" placeholder="e.g. /mnt/disk1/docker.img" required="required" /> <?php if (file_exists($dockercfg['DOCKER_IMAGE_FILE'])) { ?><span id="deletePanel"><label><input type="checkbox" id="deleteCheckbox" /> Delete Image File</label></span><?php } ?> <span id="IMAGE_ERROR" class="errortext"></span>
+
+> You must specify an image file for Docker.  The system will automatically
+> create this file when the Docker service is first started.  If you do not want Docker
+> to run at all, set this field blank and click **Start**.
+
+&nbsp;
+: <input id="applyBtn" type="button" value="Apply" />
 </form>
 
-<?else:?>
+<?else:
+// IF DOCKER STARTED
+?>
 
-<form markdown="1" method="POST" action="/update.php" target="progressFrame">
-<input type="hidden" name="#command" value="/etc/rc.d/rc.docker stop" />
-Service Status:
-: **Started** <input type="submit" value="Stop" style="margin-left: 15px"/>
-</form>
+<form id="settingsForm" markdown="1" method="POST" action="/update.php" target="progressFrame">
+<input type="hidden" name="#file" value="<?=$cfgfile;?>" />
+<input type="hidden" id="command" name="#command" value="/etc/rc.d/rc.docker start" />
+Enable Docker:
+: <select id="DOCKER_ENABLED" name="DOCKER_ENABLED" size="1">
+<?= mk_option($dockercfg['DOCKER_ENABLED'], 'no', 'No'); ?>
+<?= mk_option($dockercfg['DOCKER_ENABLED'], 'yes', 'Yes'); ?>
+</select>
 
 > Stopping the Docker service will first stop all the running containers.
 
@@ -74,6 +104,10 @@ Docker image:
 : <?=$dockercfg['DOCKER_IMAGE_FILE'];?>
 
 > This is the docker volume.
+
+&nbsp;
+: <input id="applyBtn" type="button" value="Apply" />
+</form>
 
 Docker volume info:
 : <?echo "<pre>".shell_exec("btrfs filesystem show /var/lib/docker")."</pre>";?>
@@ -119,47 +153,78 @@ Docker volume info:
 <?endif;?>
 <?endif;?>
 
-<form markdown="1" method="POST" action="/plugins/dynamix.docker.manager/update_cfg.php" target="progressFrame">
-<input type="hidden" name="#action" value="templates" />
-
-Template repositories:
-: <textarea name="template_repos" rows="5" cols="100" style="width:550px"><?=@file_get_contents($template_repos);?></textarea>
-
-> Use this field to add template repositories.
-> Docker templates are used to facilitate the creation and re-creation of Docker containers.
->
-> Please setup one per line.
-
-&nbsp;
-: <input type="submit" value="Save" />
-</form>
 <script type="text/javascript">
 $(function() {
   //$.ajaxSetup({ async: false });
-  $("#startBtn").click(function(event){
-    var isError = false;
-    var size = $("input[name='DOCKER_IMAGE_SIZE']").val();
-    var target = $("#SIZE_ERROR");
-    if (! $.isNumeric( size )){
-      target.html('Error: value must be a number.');
-      target.css('color','#EF3D47');
-      isError = true;
-    } else {
-      target.html('');
+  $("#applyBtn").click(function(){
+    if ($("#deleteCheckbox").length && $("#deleteCheckbox").is(":checked")) {
+      $("#command").val("rm \"" + $("#DOCKER_IMAGE_FILE").val() + "\"");
+      $("#DOCKER_IMAGE_FILE").val("");
+      $("#settingsForm").submit();
+      return;
     }
-    var image = $("#DOCKER_IMAGE_FILE").val();
-    target = $("#IMAGE_ERROR");
-    $.getJSON( "/plugins/dynamix.docker.manager/update_cfg.php?is_dir=" + image).done(function( json ) {
-      if (json.is_dir === true){
-        target.html('Error: must be a file; directory provided.');
-        target.css('color','#EF3D47');
+
+    $("#command").val("/etc/rc.d/rc.docker " + ($("#DOCKER_ENABLED").val()=="yes" ? "start" : "stop"));
+
+    if ($("#DOCKER_IMAGE_SIZE").length && $("#DOCKER_IMAGE_FILE").length) {
+      var isError = false;
+      var size = $("#DOCKER_IMAGE_SIZE").val();
+      var target = $("#SIZE_ERROR");
+      if (! $.isNumeric( size )){
+        target.fadeIn().html('Error: value must be a number.');
         isError = true;
       } else {
-        target.html('');
+        target.fadeOut();
       }
+      var image = $("#DOCKER_IMAGE_FILE").val();
+      if (image.indexOf('/mnt/user/') === 0) {
+        return;
+      }
+
+      target = $("#IMAGE_ERROR");
+      $.getJSON( "/plugins/dynamix.docker.manager/update_cfg.php?is_dir=" + image).done(function( json ) {
+        if (json.is_dir === true){
+          target.fadeIn().html('Error: must be a file; directory provided.');
+          isError = true;
+        } else {
+          target.fadeOut();
+        }
+
+        if (!isError) {$("#settingsForm").submit();}
+      });
+      return;
+    }
+
+    $("#settingsForm").submit();
+  });
+
+  if ($("#DOCKER_IMAGE_FILE").length) {
+    $("#DOCKER_IMAGE_FILE").keyup(function(){
+      if ($(this).val().indexOf('/mnt/user/') === 0) {
+        $("#IMAGE_ERROR").fadeIn().html('Error: cannot specify user share (instead use cache, disk1, disk2, etc).');
+        $("#applyBtn").prop("disabled", true);
+      } else {
+        $("#IMAGE_ERROR").fadeOut();
+        $("#applyBtn").prop("disabled", false);
+      }
+      <? if (file_exists($dockercfg['DOCKER_IMAGE_FILE'])) { ?>
+      if ($(this).val() != "<?=$dockercfg['DOCKER_IMAGE_FILE']?>") {
+        $("#deleteCheckbox").prop("disabled", true).attr("checked", false);
+        $("#deletePanel").fadeOut();
+      } else {
+        $("#deleteCheckbox").attr("checked", false).prop("disabled", false);
+        $("#deletePanel").fadeIn();
+      }
+      <? } ?>
     });
 
-    if (!isError) {$("#settingsForm").submit();}
-  });
+    $("#deleteCheckbox").change(function(){
+      var checked = $(this).is(":checked");
+      $("#DOCKER_ENABLED").prop("disabled", checked).val('no');
+      $("#DOCKER_IMAGE_SIZE").prop("disabled", checked);
+      $("#DOCKER_IMAGE_FILE").prop("disabled", checked).val("<?=$dockercfg['DOCKER_IMAGE_FILE']?>");
+      $("#applyBtn").val(checked ? "Delete" : "Apply");
+    });
+  }
 });
 </script>
