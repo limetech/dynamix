@@ -1,6 +1,6 @@
 Menu="Main:2"
 Title="Cache Devices"
-Cond="($var['fsState']=='Stopped' || isset($disks['cache']))"
+Cond="($var['fsState']=='Stopped' || (is_dir('/mnt/cache') && is_dir('/mnt/user0')))"
 ---
 <?PHP
 /* Copyright 2014, Lime Technology
