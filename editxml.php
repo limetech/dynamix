@@ -16,7 +16,7 @@ else {
 <link rel="stylesheet" href="/plugins/dynamix.kvm.manager/scripts/codemirror/lib/codemirror.css">
 <link rel="stylesheet" href="/plugins/dynamix.kvm.manager/scripts/codemirror/addon/hint/show-hint.css">
 <style type="text/css">
-	.CodeMirror { border: 1px solid #eee; }
+	.CodeMirror { border: 1px solid #eee; cursor: text; }
 </style>
 <div>
 	<form method="POST" id="editXML" action="?subaction=domain-create&uuid=<?=$uuid;?>" >
@@ -24,7 +24,7 @@ else {
 			<thead><th><b><?=$method;?> Domain <?=$domName;?> XML Description</b></th></thead>
 			<tr>
 				<td style="padding: 4px 0;">
-					<textarea autofocus spellcheck="false" <?=$readonly?> id="code" name="xmldesc" rows="15" cols="100%"><?=$xml;?></textarea>
+					<textarea autofocus spellcheck="false" <?=$readonly?> id="editcode" name="xmldesc" rows="15" cols="100%"><?=$xml;?></textarea>
 				</td>
 			</tr>
 			<tr>
@@ -70,7 +70,7 @@ else {
 			});
 		}
 
-		var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+		var editor = CodeMirror.fromTextArea(document.getElementById("editcode"), {
 			mode: "xml",
 			lineNumbers: true,
 			extraKeys: {
