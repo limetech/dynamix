@@ -21,7 +21,7 @@ $(function() {
   $("#s2").dropdownchecklist({emptyText:'None', width:300, explicitClose:'...close'});
   presetShare(document.share_settings);
 });
-// Fool unRAID by simulating the original input field
+// Simulate the original input field
 function prepareShare(form) {
   var include = '';
   for (var i=0,item; item=form.shareUserInclude.options[i]; i++) {
@@ -55,9 +55,10 @@ function presetShare(form) {
   $("#s2").dropdownchecklist(onOff);
 }
 </script>
+<?$disabled = $var['fsState']!="Stopped" ? 'disabled' : ''?>
 <form markdown="1" name="share_settings" method="POST" action="/update.htm" target="progressFrame" onsubmit="prepareShare(this)">
 Enable user shares:
-: <select name="shareUser" size="1" onchange="presetShare(this.form)">
+: <select name="shareUser" size="1" onchange="presetShare(this.form)" <?=$disabled?>>
   <?=mk_option($var['shareUser'], "e", "Yes")?>
   <?=mk_option($var['shareUser'], "-", "No")?>
   </select>
@@ -65,7 +66,7 @@ Enable user shares:
 > If set to 'Yes' the User Shares feature is activated.
 
 Included disk(s):
-: <select id="s1" name="shareUserInclude" size="1" multiple="multiple" style="display:none">
+: <select id="s1" name="shareUserInclude" size="1" multiple="multiple" style="display:none" <?=$disabled?>>
   <?foreach ($disks as $disk):?>
   <?=mk_option_check($disk['name'], $var['shareUserInclude'])?>
   <?endforeach;?>
@@ -80,7 +81,7 @@ Included disk(s):
 > * disk2,disk4-6,disk10 *another example*
 
 Excluded disk(s):
-: <select id="s2" name="shareUserExclude" size="1" multiple="multiple" style="display:none">
+: <select id="s2" name="shareUserExclude" size="1" multiple="multiple" style="display:none" <?=$disabled?>>
   <?foreach ($disks as $disk):?>
   <?=mk_option_check($disk['name'], $var['shareUserExclude'])?>
   <?endforeach;?>
@@ -94,5 +95,5 @@ Excluded disk(s):
 > a subset of the Included/Excluded disks defined here.
 
 &nbsp;
-: <input type="submit" name="changeShare" value="Apply"><button type="button" onclick="done()">Done</button></td>
+: <input type="submit" name="changeShare" value="Apply" <?=$disabled?>><button type="button" onclick="done()">Done</button> <?=$disabled ? "Array must be Stopped to change" : ""?>
 </form>
