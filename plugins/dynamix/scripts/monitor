@@ -17,7 +17,7 @@ require_once "/usr/local/emhttp/webGui/include/Wrappers.php";
 $notify = "/usr/local/sbin/notify";
 
 function my_var($key) {
-  return exec("awk -F= '/^'$key'/ {print $2}' /proc/mdcmd");
+  return exec("awk -F= '/^'$key='/ {print $2}' /proc/mdcmd");
 }
 
 function my_scale($value, &$unit, $precision = NULL) {
