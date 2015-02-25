@@ -521,7 +521,7 @@ if ($action) {
 	echo '</tbody></table>';
 }
 /* End Snapshot information */
-unset($name, $info, $val);
+unset($name, $val);
 if($msg){
 	if(strpos($msg, "rror:"))
 		$color = 'red';
