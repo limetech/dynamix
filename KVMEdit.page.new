@@ -20,16 +20,23 @@ if ($edaction){
 		$domain['maxmem'] = $lv->domain_get_memory($res);
 		$domain['vcpus'] = $dom['nrVirtCpu'];
 		$tmp = $lv->get_disk_stats($name);
+	 $domain['capacity'] = "";
+	 $domain['file'] = "";
   	 if (!empty($tmp)) {
   	   	$domain['capacity'] = $lv->format_size($tmp[0]['capacity'], 0);
  	 	   $domain['file'] = (array_key_exists('file', $tmp[0])) ? $tmp[0]['file'] : $tmp[0]['partition'];
 		}
+		$domain['cdrom']= "";
+		$dev = "hdc";
+		$bus = "ide";	   
 	   $tmp = $lv->get_cdrom_stats($name);
 	   if (!empty($tmp)) {
    		$domain['cdrom'] = (array_key_exists('file', $tmp[0])) ? $tmp[0]['file'] : $tmp[0]['partition'];
 			$dev = $tmp[0]['device'];
 			$bus = $tmp[0]['bus'];
    	}
+   	$domain['mac'] = "";
+   	$domain['network'] = "";
 		$tmp = $lv->get_nic_info($name);
 		if (!empty($tmp)){
 			$domain['mac'] = $tmp[0]['mac'];
@@ -38,32 +45,36 @@ if ($edaction){
 	}
 	if ($edsubaction == 'edit') {
 		if ($domain){
+			$d = $domain;
+			$dp = $_POST['domain'];
+		
 			$domain = array_diff_assoc($_POST['domain'], $domain);
+			$dpd = $domain;
 			foreach ($domain as $key => $value) {
 			    switch ($key) {
         			case 'arch' :
-			         $msg = "arch changed to $value";
+			         // do something
          		   break ;
 			      case 'autostart' :
          		   $lv->domain_set_autostart($name, $value);
 			         break ;
 			      case 'clock' :
-           			// do something
+           			$lv->domain_set_clock_offset($name, $value);
          		   break ;
 			      case 'desc' :
-         		   // do something
+         		   $lv->domain_set_description($name, $value);
 			         break ;
 			      case 'machine' :
            			// do something
          		   break ;
-			      case 'mem' :
-         		  $lv->domain_set_current_memory($domName, $value*1024);
-			         break ;
 			      case 'maxmem' :
-          			$lv->domain_set_memory($domName, $value*1024);
+          			$lv->domain_set_memory($name, $value);
          		   break ;
+			      case 'mem' :
+						$lv->domain_set_current_memory($name, $value);
+			         break ;
 			      case 'vcpus' :
-          $lv->domain_set_vcpu($name, $value);
+						$lv->domain_set_vcpu($name, $value);
 			         break ;
 			      case 'capacity' :
            			// do something
@@ -85,7 +96,7 @@ if ($edaction){
 
 		}
 	unset($domain, $name, $password);
-	echo '<meta http-equiv="refresh" content="1; url=/KVM">';
+	//echo '<meta http-equiv="refresh" content="1; url=/KVM">';
   }
 }
 ?>
@@ -112,7 +123,7 @@ if ($edaction){
 	} 
 ?>
 		</select>
-		<label style="margin-top:0px;margin-left:54px">Architecture:&nbsp;</label>
+		<label style="margin-top:0px;margin-left:50px">Architecture:&nbsp;</label>
 		<select name="domain[arch]" title="Select domain Architecture 32bit or 64bit">
 		<?php arrayOptions(['x86_64', 'i686'], ['64bit', '32bit'], $domain['arch']);?>
 		</select>
@@ -166,7 +177,7 @@ if ($edaction){
         <select name="domain[autostart]" title="Select domain autostart on boot">
 		<?php arrayOptions([0, 1], ['No', 'Yes'], $domain['autostart']);?>
         </select>
-    <label style="margin-top:0px;margin-left:47px">Clock offset:&nbsp;</label>
+    <label style="margin-top:0px;margin-left:75px">Clock offset:&nbsp;</label>
 		<select name="domain[clock]" title="how the guest clock is synchronized to the host">
 		<?php arrayOptions(['localtime', 'utc'], ['localtime', 'utc'], $domain['clock']);?>
 		</select>
@@ -184,7 +195,7 @@ if ($edaction){
 </tr>
 
 <tr>
-    <td  align="right"><input type="checkbox" id="password" onChange="checkPass(this.form);">&nbsp;Password:&nbsp; </td>
+    <td  align="right">Password:&nbsp; </td>
     <td><input type="password" name="password[password]" title="change password for VNC" placeholder="Check to change password for VNC (optional)" />
     <input type="hidden" id="PASSWORD" name="password[change]" value="0"></td>
 </tr>
@@ -214,8 +225,9 @@ if ($edaction){
 </tr>
 
 	<tr>
-		<td align="right">Disk:&nbsp;</td>
+		<td></td>
 		<td>
+			<label style="margin-top:0px;margin-left:-32px">Disk:&nbsp;</label>
 			<input type="text" name="domain[file]" value="<?=$domain['file'];?>" onclick='diskTree(edit_existing_tree, edit_existing_file, "/mnt/");' id="edit_existing_file" placeholder="Select existing image to use for virtual machine">
 			<div style="margin-top:10px;margin-left:0px" id="edit_existing_tree" hidden></div>			
 		</td>
@@ -358,3 +370,12 @@ array_walk($usb, 'usb_checkbox');
 		<input type="hidden" name="hypervisor" value="<?php echo is_dir('/proc/xen') ? 'xen' : 'kvm'; ?>" />
 	</form>
 </div>
+<?php
+print_r($d);
+echo "<br>";
+print_r($dp);
+echo "<br>";
+print_r($dpd);
+			
+
+?>
