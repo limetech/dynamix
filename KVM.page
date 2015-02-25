@@ -23,6 +23,7 @@ if(!file_exists($domain_cfgfile)){
 	fwrite($fp, 'DEBUG="no"'."\n".'MEDIADIR="/mnt/"'."\n".'DISKDIR="/mnt/"'."\n");
 	fclose($fp);
 }
+
 // This will clean any ^M characters caused by windows from the config file
 if (file_exists("$domain_cfgfile"))
 	shell_exec("sed -i 's!\r!!g' '$domain_cfgfile'");
@@ -37,7 +38,7 @@ $libvirt_service = isset($domain_cfg['SERVICE']) ?	$domain_cfg['SERVICE'] : "ena
 // Check if domain.img exists
 $libvirt_filecheck = (file_exists( "/boot/config/plugins/dynamix.kvm.manager/domain.img" )) ? true : false;
 
-// if domain.img exists check if not mounted then mount
+// if domain.img exists check if it's not mounted then mount
 if ($libvirt_filecheck) {
 	if (!shell_exec("mount | grep domain.img" )) {
 		shell_exec("mount -t ext4 /boot/config/plugins/dynamix.kvm.manager/domain.img /etc/libvirt" );
@@ -93,8 +94,8 @@ function arrayOptions($ValueArray, $DisplayArray, $value) {
 function memOptions($maxmem, $mem) {
 	for ($i = 1; $i <= ($maxmem*2); $i++) {
   		$mem2 = ($i*512);
-  		echo "<option value=".$mem2;
-		if ((int)$mem == $mem2)
+  		echo "<option value=".$mem2*1024;
+		if ((int)$mem == $mem2*1024)
 			echo " selected='selected'>$mem2 *</option>";
 		else
         	echo ">$mem2</option>";
