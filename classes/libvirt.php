@@ -387,7 +387,7 @@
 
 			$ret = array();
 			for ($i = 0; $i < $disks['num']; $i++) {
-				$tmp = libvirt_domain_get_block_info($dom, $disks[$i]);
+				$tmp = ($this->get_uri == "xen:///system") ? false : libvirt_domain_get_block_info($dom, $disks[$i]);
 				if ($tmp) {
 					$tmp['bus'] = $buses[$i];
 					$ret[] = $tmp;
@@ -435,7 +435,7 @@
 		
 			$ret = array();
 			for ($i = 0; $i < $disks['num']; $i++) {
-				$tmp = libvirt_domain_get_block_info($dom, $disks[$i]);
+				$tmp = ($this->get_uri == "xen:///system") ? false : libvirt_domain_get_block_info($dom, $disks[$i]);
 				if ($tmp) {
 					$tmp['bus'] = $buses[$i];
 					$ret[] = $tmp;
@@ -1323,6 +1323,18 @@
 
 			$xml = $this->domain_get_xml($domain, true);
 			$xml = str_replace("$old_memory</memory>", "$memory</memory>", $xml);
+
+			return $this->domain_define($xml);
+		}
+
+//change memory for domain
+		function domain_set_current_memory($domain, $memory) {
+			$domain = $this->get_domain_object($domain);
+			if (($old_memory = $this->domain_get_current_memory($domain)) == $memory)
+				return true;
+
+			$xml = $this->domain_get_xml($domain, true);
+			$xml = str_replace("$old_memory</currentMemory>", "$memory</currentMemory>", $xml);
 
 			return $this->domain_define($xml);
 		}
