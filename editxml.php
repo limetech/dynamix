@@ -15,7 +15,7 @@ else {
 ?>
 <div>
 	<form method="POST" id="editXML" action="?subaction=domain-create&uuid=<?=$uuid;?>" >
-		<table class="tablesorter" style="margin-top:-33px"><thead><th colspan="2"><b><?=$method;?> Domain <?=$domName;?> XML Description</b></th></thead>
+		<table class="tablesorter" style="margin-top:-21px"><thead><th colspan="2"><?=$method;?> Domain <?=$domName;?> XML Description</th></thead>
 			<tr>
 				<td>
 					<textarea autofocus spellcheck="false" <?=$readonly?> name="xmldesc" rows="15" cols="100%"><?=$xml;?></textarea>
