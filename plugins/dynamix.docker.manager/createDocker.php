@@ -622,7 +622,7 @@ $showAdditionalInfo = true;
         </td>
       </tr>
       <?}?>
-      <?if(!empty($templateDescBox) && $xmlType == 'default'){?>
+      <?if(!empty($templateDescBox)){?>
       <tr>
         <td style="vertical-align: top;">Description:</td>
         <td>
