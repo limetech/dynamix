@@ -13,26 +13,36 @@ Title="Health"
  * all copies or substantial portions of the Software.
  */
 ?>
+<?
+$disk  = $disks[$name];
+$cname = my_disk($disk['name']);
+$dev   = $disk['device'];
+$file  = "/var/tmp/{$disk['name']}-attributes";
+exec("smartctl -A /dev/$dev >$file");
+?>
 <link type="text/css" rel="stylesheet" href="/webGui/styles/disk.health.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.stylesidebar.css">
 <script type="text/javascript" src="/webGui/scripts/jquery.stylesidebar.js"></script>
-<?
-$disk = $disks[$name];
-$diskname = my_disk($disk['name']);
-$dev = $disk['device'];
-?>
+
+<script>
+function saveSMART() {
+  $.post('/webGui/include/Download.php',{cmd:'save',root:'<?=$docroot?>',file:'<?=$file?>'},function(data) {
+    window.location.href = data;
+  });
+}
+
+$(function(){$('li').StyleSidebar({displayDivId:'mainContent',pageMinHeight:'auto'});});
+</script>
+
 <div id="menuDiv" style="overflow:hidden">
 <ul id="SystemProfilerStyleSidebar">
-<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=IDENTITY&disk=<?=$diskname?>&port=<?=$dev?>">Disk identity</a></li>
-<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=ATTRIBUTES&disk=<?=$diskname?>&port=<?=$dev?>">Disk attributes</a></li>
-<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=CAPABILITIES&disk=<?=$diskname?>&port=<?=$dev?>">Disk capabilities</a></li>
-<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=TESTLOG&disk=<?=$diskname?>&port=<?=$dev?>">Disk self-test log</a></li>
-<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=ERRORLOG&disk=<?=$diskname?>&port=<?=$dev?>">Disk error log</a></li>
-<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=SELFTEST&disk=<?=$diskname?>&port=<?=$dev?>">Run disk self-test</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=IDENTITY&disk=<?=$cname?>&port=<?=$dev?>">Disk identity</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=ATTRIBUTES&disk=<?=$cname?>&port=<?=$dev?>">Disk attributes</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=CAPABILITIES&disk=<?=$cname?>&port=<?=$dev?>">Disk capabilities</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=TESTLOG&disk=<?=$cname?>&port=<?=$dev?>">Disk self-test log</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=ERRORLOG&disk=<?=$cname?>&port=<?=$dev?>">Disk error log</a></li>
+<li class="ajaxlink"><a href="/webGui/include/SmartInfo.php?cmd=SELFTEST&disk=<?=$cname?>&port=<?=$dev?>">Run disk self-test</a></li>
 </ul>
 <div id="mainContent"><!-- content  --></div>
 </div>
-<button type="button" onclick="done()">Done</button>
-<script>
-$(function(){$('li').StyleSidebar({displayDivId:'mainContent',pageMinHeight:'auto'});});
-</script>
+<button type="button" onclick="saveSMART()">Attributes</button><button type="button" onclick="done()">Done</button>
