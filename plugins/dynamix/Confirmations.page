@@ -64,13 +64,13 @@ Confirm preclear stop command:
   </select>
 <?endif;?>
 
-Uncommitted changes warning:
+Uncommitted changes protection:
 : <select name="warn" size="1">
   <?=mk_option($confirm['warn'], "0", "No")?>
   <?=mk_option($confirm['warn'], "1", "Yes")?>
   </select>
 
-> Choose if changes to input or selection fields give a warning message.
+> Disable the 'Apply' button until changes are made in the settings fields.
 
 <button type="button" onclick="resetConfirm(this.form)">Default</button>
 : <input type="submit" name="#apply" value="Apply"><button type="button" onclick="done()">Done</button>
