@@ -185,7 +185,7 @@ function plugin($method, $plugin_file, &$error) {
   // release notes
   if ($method == 'changes') {
     if (!$xml->CHANGES) return false;
-    return file_put_contents("/tmp/plugins/".basename($plugin_file, '.plg').".txt", trim($xml->CHANGES))>0;
+    return trim($xml->CHANGES);
   }
 
   // check if $method is an attribute

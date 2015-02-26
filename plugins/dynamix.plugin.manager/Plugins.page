@@ -32,9 +32,9 @@ Click <strong><big>check for updates</big></strong> to check all plugins. This p
 <?
 // Invoke the plugin command with indicated method
 function plugin($method, $arg) {
-  $value = exec("/usr/local/sbin/plugin $method $arg", $output, $retval);
-  if ($retval != 0) $value = false;
-  return $value;
+  exec("/usr/local/sbin/plugin $method $arg", $output, $retval);
+  if ($retval != 0) return false;
+  return implode("\n", $output);
 }
 
 function make_link($method, $arg) {
@@ -124,7 +124,11 @@ foreach (glob("/var/log/plugins/*.plg", GLOB_NOSORT) as $plugin_link) {
       if ($tmp_stale) $status_info = "unknown";
     }
   }
-  if (plugin("changes", $changes_file)) $version_info .= "&nbsp;<a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=/tmp/plugins/".urlencode(basename($plugin_file,'.plg')).".txt','Release Notes',490,430); return false\"><img src='/webGui/images/information.png' class='icon'></a>";
+  $changes = plugin("changes", $changes_file);
+  if ($changes !== false) {
+    file_put_contents("/tmp/plugins/".basename($plugin_file, '.plg').".txt", $changes);
+    $version_info .= "&nbsp;<a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=/tmp/plugins/".urlencode(basename($plugin_file,'.plg')).".txt','Release Notes',600,900); return false\"><img src='/webGui/images/information.png' class='icon'></a>";
+  }
 
   // action
   $action = strpos($plugin_file, "/usr/local/emhttp/plugins") !== 0 ? make_link("remove", basename($plugin_file)) : "built-in";
