@@ -150,12 +150,18 @@ EOF;
 // Returns TRUE if success else FALSE and fills in error.
 //
 function download($URL, $name, &$error) {
-  passthru("wget --no-check-certificate -q -O $name $URL", $retval);
-  if ($retval) {
-    $error = "wget: $URL retval: $retval";
+  if ($file = popen("wget --no-check-certificate --progress=dot -O $name $URL 2>&1", 'r')) {
+    $level = -1;
+    while (!feof($file)) {
+      $line = preg_split('/\s+/', fgets($file, 256));
+      if (count($line)>=7 && strpos($line[7],'%') && substr($line[7],0,-1)>$level) { echo "Download progress: {$line[7]}\n"; $level += 10; }
+    }
+    pclose($file);
+    return true;
+  } else {
+    $error = "wget: $URL failed";
     return false;
   }
-  return true;
 }
 
 // Interpret a plugin file

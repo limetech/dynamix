@@ -181,7 +181,8 @@ $(function() {
 <?endif;?>
   Shadowbox.setup('a.sb-enable', {modal:true});
 <?if ($confirm['warn']):?>
-  $('form').find('select,input[type=text],input[type=password]').each(function() {$(this).change(function() {$.jGrowl('You have uncommitted form changes',{sticky:false,theme:'bottom',position:'bottom',life:5000});});});
+  $('input[value="Apply"]').attr('disabled','disabled');
+  $('form').find('select,input[type=text],input[type=password],input[type=checkbox]').each(function(){$(this).change(function(){$(this).parentsUntil('form').parent().find('input[value="Apply"]').removeAttr('disabled');});});
 <?endif;?>
   timers.watchdog = setTimeout(watchdog,50);
 });

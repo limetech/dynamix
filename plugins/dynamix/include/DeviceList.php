@@ -44,7 +44,7 @@ function device_info($disk) {
   $a = "<a href='#' class='info nohand' onclick='return false'>";
   $spin_disk = "";
   $title = "";
-  if ($display['spin'] && $var['fsState']=='Started') {
+  if ($display['spin'] && $disk['rotational']==1 && $var['fsState']=='Started') {
     $a = "<a href='update.htm?cmdSpin{$action}={$href}' class='info' target='progressFrame'>";
     $title = "Spin $action";
     $spin_disk = "<img src='/webGui/images/$action.png' class='iconwide'>Spin $action disk<br>";
