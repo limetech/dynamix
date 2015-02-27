@@ -116,7 +116,8 @@
 							fclose($fp);
 					}
 					$driver = $disk['driver'];
-					$img .= $name.'.'.$driver;
+					$ext = ($driver == 'raw') ? 'img' : $driver;
+					$img .= $name.'.'.$ext;
 					$size = strtoupper($disk['size']);
 					shell_exec("qemu-img create -q -f $driver ".escapeshellarg($img)." $size");
 				}
@@ -386,7 +387,7 @@
 
 			$ret = array();
 			for ($i = 0; $i < $disks['num']; $i++) {
-				$tmp = libvirt_domain_get_block_info($dom, $disks[$i]);
+				$tmp = ($this->get_uri == "xen:///system") ? false : libvirt_domain_get_block_info($dom, $disks[$i]);
 				if ($tmp) {
 					$tmp['bus'] = $buses[$i];
 					$ret[] = $tmp;
@@ -434,7 +435,7 @@
 		
 			$ret = array();
 			for ($i = 0; $i < $disks['num']; $i++) {
-				$tmp = libvirt_domain_get_block_info($dom, $disks[$i]);
+				$tmp = ($this->get_uri == "xen:///system") ? false : libvirt_domain_get_block_info($dom, $disks[$i]);
 				if ($tmp) {
 					$tmp['bus'] = $buses[$i];
 					$ret[] = $tmp;
@@ -1326,6 +1327,18 @@
 			return $this->domain_define($xml);
 		}
 
+//change memory for domain
+		function domain_set_current_memory($domain, $memory) {
+			$domain = $this->get_domain_object($domain);
+			if (($old_memory = $this->domain_get_current_memory($domain)) == $memory)
+				return true;
+
+			$xml = $this->domain_get_xml($domain, true);
+			$xml = str_replace("$old_memory</currentMemory>", "$memory</currentMemory>", $xml);
+
+			return $this->domain_define($xml);
+		}
+
 //change domain disk dev name
 		function domain_set_disk_dev($domain, $olddev, $dev) {
 			$domain = $this->get_domain_object($domain);
@@ -1417,8 +1430,9 @@
 		}
 
 //set domain to start with libvirt
-		function domain_set_autostart($res,$flags) {
-			$tmp = libvirt_domain_set_autostart($res,$flags);
+		function domain_set_autostart($domain,$flags) {
+			$domain = $this->get_domain_object($domain);			
+			$tmp = libvirt_domain_set_autostart($domain,$flags);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
@@ -1519,15 +1533,5 @@
 
 			return $this->domain_define($xml);
 		}
-
-//set color on even rows for white or black theme
-		function bcolor($row, $color) { 
-	      if ($color == "white")
-   		   $color = ($row % 2 == 0) ? "transparent" : "#F8F8F8";
-			else 
-	      	$color = ($row % 2 == 0) ? "transparent" : "#0C0C0C";
-	      return $color;
-	   }
-
 	}
 ?>

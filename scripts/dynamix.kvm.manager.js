@@ -1,3 +1,12 @@
+$(function(){
+	showStatus('libvirtd');
+	$('#new_tree').dblclick(hideNew);
+	$('#dir_tree').dblclick(hideDir);
+	$('#mediadir_tree').dblclick(hideMediaDir);
+   $('.text').click(showInput);
+   $('.input').blur(hideInput);
+});
+
 function clearHistory(){
 	window.history.pushState('KVM', 'Title', '/KVM');
 }
@@ -130,14 +139,6 @@ function checkENABLE(form) {
 	}
 }
 
-function checkPass(form) {
-	if (form.password.checked == false ) {
-		form.PASSWORD.value = 0;
-	} else {
-		form.PASSWORD.value = 1;
-	}
-}
-
 function verifyDATA(form) {
 	if (form.mediadir_file.value == ""){
 		form.mediadir_file.value = "/mnt/";
@@ -149,11 +150,3 @@ function verifyDATA(form) {
 	form.dir_file.value = form.dir_file.value.replace(/ /g,"_");
 }
 
-$(function(){
-	showStatus('libvirtd');
-	$('#new_tree').dblclick(hideNew);
-	$('#dir_tree').dblclick(hideDir);
-	$('#mediadir_tree').dblclick(hideMediaDir);
-   $('.text').click(showInput);
-   $('.input').blur(hideInput);
-});

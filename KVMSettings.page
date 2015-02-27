@@ -3,7 +3,7 @@ Title="Settings"
 ---
 <div style="margin-top:-41px">
 	<div id="title">
-		<span class="left">Libvirt Control:&#32;</span>
+		<span class="left">Libvirt Control</span>
 	</div>  
 		<?if ($libvirt_running=="yes"):?>
 		<div align="center" style="margin-top:-10px;width:75%">
@@ -30,7 +30,7 @@ Title="Settings"
 		<?endif;?>
 
 	<div id="title" style="margin-top:35px">
-		<span class="left">Configuration:&#32;</span>
+		<span class="left">Configuration</span>
 	</div>
 	<form name="domain_settings" method="POST" action="/update.php" target="progressFrame">
 		<input type="hidden" name="#file" value="<?=$domain_cfgfile;?>" />
@@ -47,7 +47,7 @@ Title="Settings"
 			</tr>
 
 			<tr>
-				<td align="right"> Default Media directory:&nbsp;&nbsp; </td>
+				<td align="right"> Media directory (optional):&nbsp;&nbsp; </td>
 				<td><input type="text" onclick='dirTree(mediadir_tree, mediadir_file, "/mnt/");' id="mediadir_file" name="MEDIADIR" maxlength="60" value="<?=$domain_cfg['MEDIADIR']?>" placeholder="Double Click to Select (ie. /mnt/disk1/media)" title="Double Click to Select (ie. /mnt/disk1/media)"></td>
 			</tr>
 			<tr>
@@ -57,7 +57,7 @@ Title="Settings"
 				</td>
 			</tr>
 			<tr>
-				<td align="right"> Default Existing VM directory:&nbsp;&nbsp;</td>
+				<td align="right"> Existing VM directory (optional):&nbsp;&nbsp;</td>
 				<td><input type="text" onclick='dirTree(dir_tree, dir_file, "/mnt/");' id="dir_file" name="DISKDIR" maxlength="60" value="<?=$domain_cfg['DISKDIR']?>" placeholder="Double Click to Select (ie. /mnt/cache/images)" title="Double Click to Select (ie. /mnt/cache/images)"></td>
 			</tr>
 			<tr>
@@ -66,14 +66,18 @@ Title="Settings"
 					<div style="margin-top:0px;margin-left:-75px" id="dir_tree" hidden></div>
 				</td>
 			</tr>
+			<tr>
+				<td align="right">Alternate Network Bridge:&nbsp;&nbsp;</td>
+				<td><input type="text" id="bridge" name="BRNAME" maxlength="60" value="<?=$domain_cfg['BRNAME']?>" placeholder="Leave Blank for Default unRAID Network Bridge" title="Leave Blank for Default unRAID Network Bridge"></td>
+			</tr>
 		</table>
-		<div align="center" style="margin-top:-10px;width:75%">
+		<div align="center" style="margin-top:0px;width:75%">
 			<input type="submit" value="Apply" style="margin-bottom:8px" onClick="verifyDATA(this.form);">
 			<button type="button" style="margin-bottom:20px" onClick="this.form.reset();location.reload()">Reset</button>
 		</div>
 	</form>
 	<div id="title" style="margin-top:-5px">
-		<span class="left">Logfile:&#32;</span>
+		<span class="left">Logfile</span>
 	</div>
 		<p style="margin-top:-5px;margin-left:15px;margin-bottom:0px">
         <a id="openlog" title="/var/log/libvirt/libvirtd.log" href="#" onclick="openWindow('/usr/bin/tail -n 42 -f /var/log/libvirt/libvirtd.log','Log Information',600,900);">/var/log/libvirt/libvirtd.log</a>

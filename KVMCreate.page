@@ -1,5 +1,6 @@
 Menu="KVM:1"
 Title="Create VM"
+Cond="(pgrep('libvirtd')!==false)"
 ---
 <?php
 if (array_key_exists('sent', $_POST)) {
@@ -15,13 +16,6 @@ if (array_key_exists('sent', $_POST)) {
 		echo '<meta http-equiv="refresh" content="1; url=/KVM">';
 	}
 }
-
-	function memOption($maxmem) {
-   	for ($i = 1; $i <= ($maxmem*2); $i++) {
-      	$mem = ($i*512);
-         echo "<option value='$mem'>$mem</option>";
-		}
-	}
 ?>
 
 <div id="content">
@@ -257,7 +251,7 @@ if (array_key_exists('sent', $_POST)) {
 			<tr>
    			<td align="right" >Bridge:&nbsp;</td>
 			   <td>
-					<input type="text" value="<?=$var['BRNAME'];?>" name="nic[net]" placeholder="name of bridge in unRAID" title="name of bridge in unRAID automatically filled in" />			
+					<input type="text" value="<?=$domain_bridge?>" name="nic[net]" placeholder="name of bridge in unRAID" title="name of bridge in unRAID automatically filled in" />			
 			   </td>
 			</tr>
         </table>
@@ -282,13 +276,6 @@ if (array_key_exists('sent', $_POST)) {
 	<td align="left">
 
 <?php
-
-function usb_checkbox($usb, $key)
-{
-	$deviceid = substr(strstr($usb, 'ID'),3,9);
-	echo '<input class="checkbox" type="checkbox" value="'.$deviceid.'" name="usb['.$key.']" />';
-	echo "<label>$usb</label><br />";
-}
 $usb = trim(shell_exec('lsusb'));
 $usb = explode("\n", $usb);
 array_walk($usb, 'usb_checkbox');

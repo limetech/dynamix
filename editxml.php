@@ -20,7 +20,7 @@ else {
 </style>
 <div>
 	<form method="POST" id="editXML" action="?subaction=domain-create&uuid=<?=$uuid;?>" >
-		<table class="tablesorter" style="margin-top:-33px">
+		<table class="tablesorter" style="margin-top:-21px">
 			<thead><th><b><?=$method;?> Domain <?=$domName;?> XML Description</b></th></thead>
 			<tr>
 				<td style="padding: 4px 0;">

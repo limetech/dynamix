@@ -1,5 +1,6 @@
 Menu="KVM:3"
 Title="Add XML"
+Cond="(pgrep('libvirtd')!==false)"
 Markdown="false"
 ---
 <link rel="stylesheet" href="/plugins/dynamix.kvm.manager/scripts/codemirror/lib/codemirror.css">
