@@ -69,11 +69,6 @@ $(function() {
   $('form[name="parity_settings"]').find('input[value="Apply"]').removeAttr('disabled');
 <?unlink($memory);?>
 <?endif;?>
-  showStatus('crontab','dynamix','parity-check');
-<?if (!$display['tabs']):?>
-  $('input[id^=tab]').bind({click:function(){$('#progress').hide();}});
-  $('#tab1').bind({click:function(){$('#progress').show();}});
-<?endif;?>
   presetParity(document.parity_settings);
 });
 function presetParity(form) {

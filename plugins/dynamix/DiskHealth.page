@@ -15,10 +15,20 @@ Title="Health"
 ?>
 <?
 $disk  = $disks[$name];
-$cname = my_disk($disk['name']);
+$cname = my_disk($name);
 $dev   = $disk['device'];
-$file  = "/var/tmp/{$disk['name']}-attributes";
+$file  = "/var/tmp/$name-attributes";
 exec("smartctl -A /dev/$dev >$file");
+$refs = array(); $n = 0;
+foreach ($disks as $ref) {
+  if ($ref['name']=='flash') continue;
+  $refs[] = $ref['name'];
+  if ($ref['name']==$name) $i = $n;
+  $n++;
+}
+$end = count($refs)-1;
+$prev = $i>0 ? $refs[$i-1] : $refs[$end];
+$next = $i<$end ? $refs[$i+1] : $refs[0];
 ?>
 <link type="text/css" rel="stylesheet" href="/webGui/styles/disk.health.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.stylesidebar.css">
@@ -45,4 +55,4 @@ $(function(){$('li').StyleSidebar({displayDivId:'mainContent',pageMinHeight:'aut
 </ul>
 <div id="mainContent"><!-- content  --></div>
 </div>
-<button type="button" onclick="saveSMART()">Attributes</button><button type="button" onclick="done()">Done</button>
+<a href='/Main/Data?name=<?=$prev?>'><input type='button' value='Previous'></a><a href='/Main/Data?name=<?=$next?>'><input type='button' value='Next'></a><button type="button" onclick="saveSMART()">Attributes</button><button type="button" onclick="done()">Done</button>
