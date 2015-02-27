@@ -22,7 +22,7 @@ function my_smart(&$source,$name) {
   $last = isset($saved["smart"]["$name.5"]) ? $saved["smart"]["$name.5"] : 0;
   $smart = exec("awk '$1==5 {print $10}' /var/local/emhttp/smart/$name");
   $thumb = $smart>$last ? 'bad' : 'good';
-  my_insert($source, "<a href=\"Main/Data?name=$name\" onclick=\"$.cookie('one','tab2',{path:'/'})\" title=\"$smart reallocated sectors\"><img src=\"$path/$thumb.png\"></a>");
+  my_insert($source, "<a href=\"/Main/Data?name=$name\" onclick=\"$.cookie('one','tab2',{path:'/'})\" title=\"$smart reallocated sectors\"><img src=\"$path/$thumb.png\"></a>");
 }
 function my_usage(&$source,$used) {
   my_insert($source, $used ? "<div class='usage-disk all'><span style='width:$used'>$used</span></div>" : "-");
