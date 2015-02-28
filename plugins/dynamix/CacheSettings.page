@@ -47,9 +47,11 @@ Min. free space:
 > **KB** = 1,000<br>
 > **MB** = 1,000,000<br>
 > **GB** = 1,000,000,000<br>
-> **TB** = 1,000,000,000,000<br>
+> **TB** = 1,000,000,000,000
 >
-> If no suffix, a count of 1024-byte blocks is assumed. Examples:
+> If no suffix, a count of 1024-byte blocks is assumed.<br>
+>
+> Examples:
 >
 > **2GB** => 2,000,000,000 bytes<br>
 > **2000000** => 2,048,000,000 bytes
