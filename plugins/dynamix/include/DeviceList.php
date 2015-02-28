@@ -333,9 +333,8 @@ function my_clock($time) {
 }
 function show_totals($text) {
   global $var, $display, $temps, $counts, $fsSize, $fsUsed, $fsFree, $reads, $writes, $errors;
-  $icon = ($display['spin'] && $var['fsState']=='Started') ? 'iconwide' : 'icon';
   echo "<tr class='tr_last'>";
-  echo "<td><img src='/webGui/images/sum.png' class='$icon'>Total</td>";
+  echo "<td><img src='/webGui/images/sum.png' class='icon'>Total</td>";
   echo "<td>$text</td>";
   echo "<td>".($counts>0?my_temp(round($temps/$counts, 1)):'*')."</td>";
   if ($var['startMode'] == "Normal") {
