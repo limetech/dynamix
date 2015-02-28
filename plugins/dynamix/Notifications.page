@@ -147,6 +147,8 @@ Array status notification:
   <?=mk_option($notify['status'], "20 */8 * * *", "Send three times a day")?>
   <?=mk_option($notify['status'], "20 0,12 * * *", "Send twice a day")?>
   <?=mk_option($notify['status'], "20 0 * * *", "Send once a day")?>
+  <?=mk_option($notify['status'], "20 0 * * 1", "Send once a week")?>
+  <?=mk_option($notify['status'], "20 0 1 * *", "Send once a month")?>
   </select>
 
 <span class="plugin" style="display:none">&nbsp;</span>
