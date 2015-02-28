@@ -42,34 +42,34 @@ function device_info($disk) {
   }
   $action = strpos($disk['color'],'blink')===false ? "down" : "up";
   $a = "<a href='#' class='info nohand' onclick='return false'>";
-  $spin_disk = "";
   $title = "";
+  $arrow = "";
   if ($display['spin'] && $disk['rotational']==1 && $var['fsState']=='Started') {
     $a = "<a href='update.htm?cmdSpin{$action}={$href}' class='info' target='progressFrame'>";
     $title = "Spin $action";
-    $spin_disk = "<img src='/webGui/images/$action.png' class='iconwide'>Spin $action disk<br>";
+    $arrow = "<i class='fa fa-sort-$action spacing'></i>";
   }
   $ball = "/webGui/images/{$disk['color']}.png";
-  $left = ($width>1590 && $display['spin']) ? " class='left'" : "";
+  $left = $width>1590 ? " class='left'" : "";
 
   if ($type=='Parity' || $type=='Data' || $type=='Preclear') {
-    $status = "{$a}
+    $status = "$arrow{$a}
     <img src='$ball' title='$title' class='icon' onclick=\"$.removeCookie('one',{path:'/'});\"><span{$left}>
     <img src='/webGui/images/green-on.png' class='icon'>Normal operation<br>
     <img src='/webGui/images/yellow-on.png' class='icon'>Invalid data content<br>
-    <img src='/webGui/images/red-on.png' class='icon'>Device disabled<br>
+    <img src='/webGui/images/red-off.png' class='icon'>Device disabled<br>
     <img src='/webGui/images/blue-on.png' class='icon'>New device not in array<br>
     <img src='/webGui/images/green-blink.png' class='icon'>Device spun-down<br>
     <img src='/webGui/images/grey-off.png' class='icon'>No device present<br>
-    {$spin_disk}</span></a>";
+    </span></a>";
   } else if ($type=='Cache') {
-    $status = "{$a}
+    $status = "$arrow{$a}
     <img src='$ball' title='$title' class='icon' onclick=\"$.removeCookie('one',{path:'/'});\"><span{$left}>
     <img src='/webGui/images/green-on.png' class='icon'>Normal operation<br>
     <img src='/webGui/images/blue-on.png' class='icon'>New device, not in pool<br>
     <img src='/webGui/images/green-blink.png' class='icon'>Device spun-down<br>
     <img src='/webGui/images/grey-off.png' class='icon'>No device present<br>
-    {$spin_disk}</span></a>";
+    </span></a>";
   } else {
     $status = "<img src='$ball' class='icon'>";
   }
@@ -333,8 +333,9 @@ function my_clock($time) {
 }
 function show_totals($text) {
   global $var, $display, $temps, $counts, $fsSize, $fsUsed, $fsFree, $reads, $writes, $errors;
+  $icon = ($display['spin'] && $var['fsState']=='Started') ? 'iconwide' : 'icon';
   echo "<tr class='tr_last'>";
-  echo "<td><img src='/webGui/images/sum.png' class='icon'>Total</td>";
+  echo "<td><img src='/webGui/images/sum.png' class='$icon'>Total</td>";
   echo "<td>$text</td>";
   echo "<td>".($counts>0?my_temp(round($temps/$counts, 1)):'*')."</td>";
   if ($var['startMode'] == "Normal") {
