@@ -9,8 +9,8 @@ a.img{text-decoration:none;border:none;}
 a.info{position:relative;z-index:1;}
 a.info:hover{}
 a.info span{display:none;}
-a.info:hover span{display:block;white-space:nowrap;font-variant:small-caps;position:absolute;top:-42px;left:28px;opacity:0.96;font-size:11px;color:#FFFFFF;padding:5px;border:1px solid rgba(255,255,255,0.25);border-radius:3px;background-color:rgba(25,25,25,0.92);box-shadow:0 0 3px #505050;}
-a.info:hover span.left{left:-180px;}
+a.info:hover span{display:block;white-space:nowrap;font-variant:small-caps;position:absolute;top:-42px;left:28px;opacity:0.96;font-size:11px;line-height:20px;color:#FFFFFF;padding:5px 8px;border:1px solid rgba(255,255,255,0.25);border-radius:3px;background-color:rgba(25,25,25,0.92);box-shadow:0 0 3px #505050;}
+a.info:hover span.left{left:-182px;}
 a.nohand{cursor:default;}
 hr{border:none;margin:12px 0;}
 input[type=text],input[type=password],input[type=number],input[type=url],input[type=email],textarea,.textarea{font-family:arimo;font-size:11px;color:#808080;background-color:#000000;border:1px solid #404040;padding:2px 6px;min-height:20px;line-height:20px;outline:none;width:305px;margin:0 10px 0 0;box-shadow:inset 1px 1px 5px #404040;}
