@@ -48,8 +48,8 @@ $var = (isset($var)) ? $var : parse_ini_file("/usr/local/emhttp/state/var.ini");
 class DockerTemplates {
 
 	public function download_url($url, $path = ""){
-		if ($path) $path = " -o '$path' ";
-		return shell_exec("curl --connect-timeout 15 --max-time 60 -s -k -L $path $url 2>/dev/null" );
+		exec("curl --connect-timeout 15 --max-time 60 -s -k -L ". ($path ? " -o '$path' " : "") ." $url 2>/dev/null", $out, $exit_code );
+		return ($exit_code === 0 ) ? implode("\n", $out) : FALSE;
 	}
 
 
@@ -128,7 +128,7 @@ class DockerTemplates {
 		$msg = array('');
 		$urls = @file($dockerManPaths['template-repos'], FILE_IGNORE_NEW_LINES);
 		if ( ! is_array($urls)) return false;
-		$msg[] = " Updating templates\n URLs:\n   " . implode("\n   ", $urls) . "\n Files:";
+		$msg[] = " Updating templates\n URLs:\n   " . implode("\n   ", $urls) ;
 
 		foreach ($urls as $url) {
 			$tmp_dir = "/tmp/tmp-".mt_rand();
@@ -152,15 +152,15 @@ class DockerTemplates {
 				}
 			}
 
-			$this->download_url($github_api['url'], "$tmp_dir.tar.gz");
-			if (is_file( "$tmp_dir.tar.gz")) {
+			if ( $this->download_url($github_api['url'], "$tmp_dir.tar.gz") === FALSE) {
+				$msg[] = "\n Download ". $github_api['url'] ." has failed.";
+				continue;
+			} else {
 				shell_exec("tar -zxf $tmp_dir.tar.gz --strip=1 -C $tmp_dir/ 2>&1");
 				unlink("$tmp_dir.tar.gz");
-			} else {
-				$msg[] = "   Downloading ". $github_api['url'] ." has failed.";
-				continue;
 			}
 
+			$msg[] = "\n Templates found in ". $github_api['url'];
 
 			$templates = $this->getTemplates($tmp_dir);
 			foreach ($templates as $template) {
@@ -364,7 +364,7 @@ class DockerTemplates {
 		$Images = array();
 
 		$Images    		 = array('banner' => $this->getTemplateValue($Repository, "Banner"),
-												'icon' => $this->getTemplateValue($Repository, "Icon") );
+													 'icon' => $this->getTemplateValue($Repository, "Icon") );
 
 		$defaultImages = array('banner' => '/plugins/dynamix.docker.manager/assets/images/spacer.png',
 													 'icon'   => '/plugins/dynamix.docker.manager/assets/images/question.png');
@@ -395,8 +395,9 @@ class DockerTemplates {
 ######################################
 class DockerUpdate{
 
-	public function download_url($url){
-		return shell_exec("curl --connect-timeout 5 --max-time 30 -s -k -L $url 2>/dev/null" );
+	public function download_url($url, $path = ""){
+		exec("curl --connect-timeout 15 --max-time 30 -s -k -L ". ($path ? " -o '$path' " : "") ." $url 2>/dev/null", $out, $exit_code );
+		return ($exit_code === 0 ) ? implode("\n", $out) : FALSE;
 	}
 
 
@@ -406,9 +407,7 @@ class DockerUpdate{
 		preg_match("#/u/([^/]*)/([^/]*)#", $RegistryUrl, $matches);
 		$apiUrl     = sprintf("http://index.docker.io/v1/repositories/%s/%s/tags/%s", $matches[1], $matches[2], $tag);
 		$apiContent = $this->download_url($apiUrl);
-		$json       = json_decode($apiContent, TRUE);
-		$currentId  = substr($json[0]['id'],0,16);
-		return $currentId;
+		return ( $apiContent === FALSE ) ? NULL : substr(json_decode($apiContent, TRUE)[0]['id'],0,16);
 	}
 
 
@@ -431,16 +430,9 @@ class DockerUpdate{
 		$userFile        = $DockerTemplates->getUserTemplate($container);
 		$localVersion    = $this->getLocalVersion($userFile);
 		$remoteVersion   = $this->getRemoteVersion($RegistryUrl, $image);
-		if ($localVersion && $remoteVersion) {
-			if ($remoteVersion == $localVersion){
-				$update = "true";
-			} else {
-				$update = "false";
-			}
-		} else {
-			$update = "undef";
-		}
-		return $update;
+		// echo "\n $localVersion => $remoteVersion";
+		return ($localVersion && $remoteVersion) ? (($remoteVersion == $localVersion) ? "true" : "false") : "undef" ;
+
 	}
 
 	public function syncVersions($container) {
