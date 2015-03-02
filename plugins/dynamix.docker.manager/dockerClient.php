@@ -49,7 +49,7 @@ class DockerTemplates {
 
 	public function download_url($url, $path = ""){
 		if ($path) $path = " -o '$path' ";
-		return shell_exec("curl --connect-timeout 5 --max-time 30 -s -k -L $path $url 2>/dev/null" );
+		return shell_exec("curl --connect-timeout 15 --max-time 60 -s -k -L $path $url 2>/dev/null" );
 	}
 
 
@@ -151,10 +151,16 @@ class DockerTemplates {
 					break;
 				}
 			}
+
 			$this->download_url($github_api['url'], "$tmp_dir.tar.gz");
-			$cmd = "tar -zxf $tmp_dir.tar.gz --strip=1 -C $tmp_dir/ 2>&1";
-			shell_exec($cmd);
-			unlink("$tmp_dir.tar.gz");
+			if (is_file( "$tmp_dir.tar.gz")) {
+				shell_exec("tar -zxf $tmp_dir.tar.gz --strip=1 -C $tmp_dir/ 2>&1");
+				unlink("$tmp_dir.tar.gz");
+			} else {
+				$msg[] = "   Downloading ". $github_api['url'] ." has failed.";
+				continue;
+			}
+
 
 			$templates = $this->getTemplates($tmp_dir);
 			foreach ($templates as $template) {
@@ -425,7 +431,6 @@ class DockerUpdate{
 		$userFile        = $DockerTemplates->getUserTemplate($container);
 		$localVersion    = $this->getLocalVersion($userFile);
 		$remoteVersion   = $this->getRemoteVersion($RegistryUrl, $image);
-		echo "\n$localVersion => $remoteVersion";
 		if ($localVersion && $remoteVersion) {
 			if ($remoteVersion == $localVersion){
 				$update = "true";
