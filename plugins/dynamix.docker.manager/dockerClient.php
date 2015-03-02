@@ -141,7 +141,7 @@ class DockerTemplates {
 				3 => '%/.*github.com/([^/]*)/(.*)%i',
 				);
 
-			for ($i=0; $i <= count($api_regexes); $i++) {
+			for ($i=0; $i < count($api_regexes); $i++) {
 				if ( preg_match($api_regexes[$i], $url, $matches) ){
 					$github_api['user']   = ( isset( $matches[1] )) ? $matches[1] : "";
 					$github_api['repo']   = ( isset( $matches[2] )) ? $matches[2] : "";
