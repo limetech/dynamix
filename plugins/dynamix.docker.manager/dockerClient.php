@@ -48,7 +48,7 @@ $var = (isset($var)) ? $var : parse_ini_file("/usr/local/emhttp/state/var.ini");
 class DockerTemplates {
 
 	public function download_url($url, $path = ""){
-		exec("curl --connect-timeout 15 --max-time 60 -s -k -L ". ($path ? " -o '$path' " : "") ." $url 2>/dev/null", $out, $exit_code );
+		exec("curl --max-time 60 -s -k -L ". ($path ? " -o '$path' " : "") ." $url 2>/dev/null", $out, $exit_code );
 		return ($exit_code === 0 ) ? implode("\n", $out) : FALSE;
 	}
 
@@ -154,7 +154,7 @@ class DockerTemplates {
 
 			if ( $this->download_url($github_api['url'], "$tmp_dir.tar.gz") === FALSE) {
 				$msg[] = "\n Download ". $github_api['url'] ." has failed.";
-				continue;
+				return $msg;
 			} else {
 				shell_exec("tar -zxf $tmp_dir.tar.gz --strip=1 -C $tmp_dir/ 2>&1");
 				unlink("$tmp_dir.tar.gz");
@@ -396,7 +396,7 @@ class DockerTemplates {
 class DockerUpdate{
 
 	public function download_url($url, $path = ""){
-		exec("curl --connect-timeout 15 --max-time 30 -s -k -L ". ($path ? " -o '$path' " : "") ." $url 2>/dev/null", $out, $exit_code );
+		exec("curl --max-time 30 -s -k -L ". ($path ? " -o '$path' " : "") ." $url 2>/dev/null", $out, $exit_code );
 		return ($exit_code === 0 ) ? implode("\n", $out) : FALSE;
 	}
 
