@@ -45,14 +45,14 @@ if(jQuery) (function($){
 
 			$(this).each( function() {
 
-				function showTree(element, dir, filter) {
+				function showTree(element, dir) {
 					$(element).addClass('wait');
 					$(".jqueryFileTree.start").remove();
 					$.post(options.script,
 					{
 						dir: dir,
 						multiSelect: options.multiSelect,
-						filter: filter || options.filter
+						filter: options.filter
 					})
 					.done(function(data){
 						$(element).find('.start').html('');
