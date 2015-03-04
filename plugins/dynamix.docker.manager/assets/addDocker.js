@@ -23,25 +23,25 @@ function rmTemplate(tmpl){
 
 function toggleBrowser(N) {
 	var el = $('#fileTree' + N);
-	$( el ).fileTree({
-		root: currentPath,
-		script: '/plugins/dynamix.docker.manager/assets/jsFileTree/jqueryFileTree.php',
-		folderEvent: 'click',
-		expandSpeed: 750,
-		collapseSpeed: 750,
-		multiFolder: false,
-	}, function(file) {
-		$("#hostPath" + N).val(file);
-	});
-	$( el ).show();
+	if (el.is(':visible')) {
+		hideBrowser(N);
+	} else {
+		$( el ).fileTree({
+			root: currentPath,
+			filter: 'HIDE_FILES_FILTER'
+		},
+		function(file) {},
+		function(folder) {
+			$("#hostPath" + N).val(folder);
+		});
+		$( el ).slideDown('fast');
+	}
 }
 
 function hideBrowser(N) {
-	$("#fileTree" + N).css({
-		'display': "none"
+	$("#fileTree" + N).slideUp('fast', function () {
+		$(this).html("");
 	});
-	$("#fileTree" + N).html("");
-	brOpen[N] = false;
 }
 
 function addPort(frm) {

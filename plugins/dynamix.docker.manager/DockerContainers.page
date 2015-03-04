@@ -13,8 +13,8 @@ $DockerTemplates = new DockerTemplates();
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.docker.manager/assets/gh-buttons.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.min.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery-ui.min.css">
-<link type="text/css" rel="stylesheet" href="/plugins/dynamix.docker.manager/assets/jquery.switchButton.css">
-<link type="text/css" rel="stylesheet" href="/plugins/dynamix.docker.manager/assets/context.standalone.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/context.standalone.css">
 <style>
 	body { -webkit-overflow-scrolling: touch;}
 	.log{cursor:zoom-in;}
@@ -197,8 +197,8 @@ $DockerTemplates = new DockerTemplates();
 <input type="button" onclick="addContainer()" value="Add Container"/>
 <input type="button" onclick="reloadUpdate()" value="Check for Updates"/>
 
-<script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/jquery.switchButton.js"></script>
-<script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/context.js"></script>
+<script type="text/javascript" src="/webGui/scripts/jquery.switchButton.js"></script>
+<script type="text/javascript" src="/webGui/scripts/context.js"></script>
 <script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/docker.js"></script>
 <script type="text/javascript">
 $(function() {

@@ -486,11 +486,11 @@ $showAdditionalInfo = true;
 ?>
 
 <link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.min.css">
-<link type="text/css" rel="stylesheet" href="/plugins/dynamix.docker.manager/assets/jsFileTree/jqueryFileTree.css" media="screen">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css" media="screen">
 <style type="text/css">
   body { -webkit-overflow-scrolling: touch;}
   .fileTree {
-    width: 240px;
+    width: 242px;
     height: 150px;
     border: solid 1px #BBB;
     background: #FFF;
@@ -824,14 +824,16 @@ $showAdditionalInfo = true;
   </form>
 </div>
 
-<script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/jsFileTree/jqueryFileTree.js"></script>
+<script type="text/javascript" src="/webGui/scripts/jqueryFileTree.js"></script>
 <script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/addDocker.js"></script>
 <script type="text/javascript">
 $(function() {
   $(document).mouseup(function (e) {
     var container = $(".fileTree");
     if (!container.is(e.target) && container.has(e.target).length === 0) {
-      container.hide();
+      container.slideUp('fast', function () {
+        $(this).html("");
+      });
     }
   });
 
