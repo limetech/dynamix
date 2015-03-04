@@ -13,14 +13,14 @@ Markdown="false"
 		<table class="tablesorter kvm-span" style="margin-top:-21px">
 			<thead><th>Create New Domain XML Description</th></thead>
 			<tr>
-				<td style="padding: 4px 0;">
+				<td style="padding: 0 24px 0 0;">
 					<textarea autofocus spellcheck="false" id="addcode" name="xmldesc" rows="15" cols="100%" placeholder="Copy & Paste Domain XML Configuration Here."></textarea>
 				</td>
 			</tr>
 			<tr>
 				<td>
-					<div>
-						<input type="submit" style="margin-left:140px" value="Save">
+					<div style="margin-left:24px">
+						<input type="submit" value="Create">
 					</div>
 				</td>
 			</tr>

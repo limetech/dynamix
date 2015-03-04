@@ -23,13 +23,13 @@ else {
 		<table class="tablesorter" style="margin-top:-21px">
 			<thead><th><b><?=$method;?> Domain <?=$domName;?> XML Description</b></th></thead>
 			<tr>
-				<td style="padding: 4px 0;">
+				<td style="padding: 0 24px 0 0;">
 					<textarea autofocus spellcheck="false" <?=$readonly?> id="editcode" name="xmldesc" rows="15" cols="100%"><?=$xml;?></textarea>
 				</td>
 			</tr>
 			<tr>
 				<td>
-					<div>
+					<div style="margin-left:24px">
 						<input type="<?=$type;?>" value="Save">
 						<button type="button" onclick="javascript:done()" ><?=$return?></button>
 					</div>
