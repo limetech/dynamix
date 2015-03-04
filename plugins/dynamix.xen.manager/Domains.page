@@ -15,13 +15,13 @@ Title="Xen Domains"
  */
 ?>
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.xen.manager/styles/xenman.css">
-<link type="text/css" rel="stylesheet" href="/plugins/plugin.manager/styles/fileTree.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css">
 
-<script type="text/javascript" src="/plugins/plugin.manager/scripts/fileTree.js"></script>
+<script type="text/javascript" src="/webGui/scripts/jqueryFileTree.js"></script>
 <script>
 $(function() {
   $('#domain_table').tablesorter({headers:{0:{sorter:false}}});
-  $('#plugin_tree').fileTree({root:'/boot/',filter:'',script:'/plugins/plugin.manager/include/FileTree.php',multiFolder:false}, function(file) {$('#domain_file').val(file);});
+  $('#plugin_tree').fileTree({root:'/boot/'}, function(file) {$('#domain_file').val(file);});
 });
 </script>
 
