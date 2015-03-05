@@ -144,8 +144,10 @@ $DockerTemplates = new DockerTemplates();
 					echo "<a class=\"exec\" onclick=\"updateContainer('" . addslashes($ct["Name"]) . "');\"><span style=\"white-space:nowrap;\"><i class=\"fa fa-cloud-download\"></i> update ready</span></a>";
 				} else if ($updateStatus == "true"){
 					echo "<span style=\"color:#44B012;white-space:nowrap;\"><i class=\"fa fa-check\"></i> up-to-date</span>";
+					echo "<div class=\"advanced\"><a class=\"exec\" onclick=\"updateContainer('" . addslashes($ct["Name"]) . "');\" style=\"color:#888;\"><span style=\"white-space:nowrap;\"><i class=\"fa fa-cloud-download\"></i> force update</span></a></div>";
 				} else {
 					echo "<span style=\"color:#FF2400;white-space:nowrap;\"><i class=\"fa fa-exclamation-triangle\"></i> not available</span>";
+					echo "<div class=\"advanced\"><a class=\"exec\" onclick=\"updateContainer('" . addslashes($ct["Name"]) . "');\" style=\"color:#888;\"><span style=\"white-space:nowrap;\"><i class=\"fa fa-cloud-download\"></i> force update</span></a></div>";
 				}
 				?>
 			</td>

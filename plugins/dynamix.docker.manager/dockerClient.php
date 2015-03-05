@@ -1,7 +1,7 @@
 <?php
 
 ## BETA 11
-	$dockerManPaths      = array(
+$dockerManPaths      = array(
 	'plugin'            => '/usr/local/emhttp/plugins/dynamix.docker.manager',
 	'autostart-file'    => '/var/lib/docker/unraid-autostart',
 	'template-repos'    => '/boot/config/plugins/dockerMan/template-repos',
@@ -38,8 +38,10 @@
 //	);
 
 #load emhttp variables if needed.
-$var = (isset($var)) ? $var : parse_ini_file("/usr/local/emhttp/state/var.ini");
-
+if (! isset($var)){
+	if (! is_file("/usr/local/emhttp/state/var.ini")) shell_exec("wget -qO /dev/null localhost:$(lsof -nPc emhttp | grep -Po 'TCP[^\d]*\K\d+')");
+	$var = @parse_ini_file("/usr/local/emhttp/state/var.ini");
+}
 
 ######################################
 ##   	  DOCKERTEMPLATES CLASS       ##
@@ -47,40 +49,39 @@ $var = (isset($var)) ? $var : parse_ini_file("/usr/local/emhttp/state/var.ini");
 
 class DockerTemplates {
 
+	public $verbose = FALSE;
+
+	private function debug($m) {
+		if($this->verbose) echo $m."\n";
+	}
+
 	public function download_url($url, $path = ""){
-		exec("curl --connect-timeout 15 --max-time 60 -s -k -L ". ($path ? " -o '$path' " : "") ." $url 2>/dev/null", $out, $exit_code );
+		exec("curl --max-time 60 -s -k -L ". ($path ? " -o '$path' " : "") ." $url 2>/dev/null", $out, $exit_code );
 		return ($exit_code === 0 ) ? implode("\n", $out) : FALSE;
 	}
 
 
-	public function listDir($dir, $ext = FALSE, $prefix = '') {
-		$dir = rtrim($dir, '\\/');
+	public function listDir($dir, $ext = FALSE) {
 		$result = array();
-		$dir_result = array();
 		if (! $dir) return $result;
-		$Files = scandir($dir);
+		$Files = array_diff(scandir($dir), array('.', '..'));
 		if (! $Files) return $result;
 		natcasesort($Files);
 		foreach ($Files as $f) {
-			if ($f !== '.' and $f !== '..') {
-				if (is_dir("$dir/$f")) {
-					$dir_result = array_merge($dir_result, $this->listDir("$dir/$f", $ext, $f));
-				} else {
-					$dirfile = $dir."/".$f;
-					$fext = new SplFileInfo($dirfile);
-					$fext = $fext->getExtension();
-					if ($ext){
-						if ( $ext != $fext ) continue;
-					}
-					$result[] = array(
-						'path' => $dirfile,
-						'prefix' => $prefix,
-						'name' => preg_replace("/\.{$ext}/", '', $f)
-						);
-				}
+			$dirname = realpath($dir).'/'.$f;
+			if (is_dir($dirname)) {
+				$result = array_merge($result, $this->listDir($dirname, $ext));
+			} else {
+				$info = new SplFileInfo($dirname);
+				$fext = $info->getExtension();
+				if ($ext && ( $ext != $fext )) continue;
+				$result[] = array('path'   => $dirname,
+				                  'prefix' => basename(dirname($dirname)),
+				                  'name'   => $info->getBasename(".$fext"),
+				                  );
 			}
 		}
-		return array_merge($result, $dir_result);
+		return $result;
 	}
 
 
@@ -125,15 +126,13 @@ class DockerTemplates {
 	public function downloadTemplates(){
 		global $dockerManPaths;
 		$repotemplates = array();
-		$msg = array('');
+		$tmp_dir = "/tmp/tmp-".mt_rand();
+		
 		$urls = @file($dockerManPaths['template-repos'], FILE_IGNORE_NEW_LINES);
 		if ( ! is_array($urls)) return false;
-		$msg[] = " Updating templates\n URLs:\n   " . implode("\n   ", $urls) ;
-
+		$this->debug("\nURLs:\n   " . implode("\n   ", $urls));
+		
 		foreach ($urls as $url) {
-			$tmp_dir = "/tmp/tmp-".mt_rand();
-			@mkdir($tmp_dir, 0777, TRUE);
-
 			$api_regexes = array(
 				0 => '%/.*github.com/([^/]*)/([^/]*)/tree/([^/]*)/(.*)$%i',
 				1 => '%/.*github.com/([^/]*)/([^/]*)/tree/([^/]*)$%i',
@@ -153,14 +152,15 @@ class DockerTemplates {
 			}
 
 			if ( $this->download_url($github_api['url'], "$tmp_dir.tar.gz") === FALSE) {
-				$msg[] = "\n Download ". $github_api['url'] ." has failed.";
-				continue;
+				$this->debug("\n Download ". $github_api['url'] ." has failed.");
+				return NULL;
 			} else {
+				@mkdir($tmp_dir, 0777, TRUE);
 				shell_exec("tar -zxf $tmp_dir.tar.gz --strip=1 -C $tmp_dir/ 2>&1");
 				unlink("$tmp_dir.tar.gz");
 			}
 
-			$msg[] = "\n Templates found in ". $github_api['url'];
+			$this->debug("\n Templates found in ". $github_api['url']);
 
 			$templates = $this->getTemplates($tmp_dir);
 			foreach ($templates as $template) {
@@ -169,15 +169,15 @@ class DockerTemplates {
 				if (! is_dir( dirname( $storPath ))) @mkdir( dirname( $storPath ), 0777, true);
 				if ( is_file($storPath) ){
 					if ( sha1_file( $template['path'] )  ===  sha1_file( $storPath )) {
-						$msg[] = sprintf("   Skipped: %s", $template['prefix'] . '/' . $template['name']);
+						$this->debug("   Skipped: ".$template['prefix'].'/'.$template['name']);
 						continue;
 					} else {
 						@copy($template['path'], $storPath);
-						$msg[] = sprintf("   Updated: %s", $template['prefix'] . '/' . $template['name']);
+						$this->debug("   Updated: ".$template['prefix'].'/'.$template['name']);
 					}
 				} else {
 					@copy($template['path'], $storPath);
-					$msg[] = sprintf("   Added: %s", $template['prefix'] . '/' . $template['name']);
+					$this->debug("   Added: ".$template['prefix'].'/'.$template['name']);
 				}
 			}
 			$this->removeDir($tmp_dir);
@@ -186,17 +186,16 @@ class DockerTemplates {
 		foreach ($this->listDir($dockerManPaths['templates-storage'], "xml") as $arrLocalTemplate) {
 			if (!in_array($arrLocalTemplate['path'], $repotemplates)) {
 				unlink($arrLocalTemplate['path']);
-				$msg[] = sprintf("   Removed: %s\n", $arrLocalTemplate['prefix'] . '/' . $arrLocalTemplate['name']);
+				$this->debug("   Removed: ".$arrLocalTemplate['prefix'].'/'.$arrLocalTemplate['name']."\n");
 
 				// Any other files left in this template folder? if not delete the folder too
 				$files = array_diff(scandir(dirname($arrLocalTemplate['path'])), array('.', '..'));
 				if (empty($files)) {
 					rmdir(dirname($arrLocalTemplate['path']));
-					$msg[] = sprintf("   Removed: %s\n", $arrLocalTemplate['prefix']);
+					$this->debug("   Removed: ".$arrLocalTemplate['prefix']);
 				}
 			}
 		}
-		return $msg;
 	}
 
 
@@ -256,10 +255,9 @@ class DockerTemplates {
 			}
 		}
 
-		$WebUI      = $this->getTemplateValue($Repository, "WebUI");
-		$isEditable = preg_match("%\[IP\]%", $WebUI);
+		$WebUI = $this->getTemplateValue($Repository, "WebUI");
 
-		if ($isEditable) {
+		if (preg_match("%\[IP\]%", $WebUI)) {
 			$WebUI = preg_replace("%\[IP\]%", $IP, $WebUI);
 			preg_match("%\[PORT:(\d+)\]%", $WebUI, $matches);
 			$ConfigPort = $matches[1];
@@ -339,14 +337,19 @@ class DockerTemplates {
 			}
 
 			if (!array_key_exists('updated', $tmp) || $reload) {
-				if ($reload) $updateStatus[$name] = $DockerUpdate->getUpdateStatus($name, $image);
+				if ($reload) {
+					$nv = $DockerUpdate->getUpdateStatus($name, $image);
+					if ($nv != 'undef'){
+						$updateStatus[$name] = $nv;
+					}
+				}
 				$tmp['updated'] = (array_key_exists($name, $updateStatus)) ? $updateStatus[$name] : 'undef';
 			}
 
 			if (!array_key_exists('template', $tmp) || $reload){
 				$tmp['template'] = $this->getUserTemplate($name);
 			}
-
+  		$this->debug("\n$name");foreach ($tmp as $c => $d) $this->debug(sprintf("   %-10s: %s", $c, $d));
 			$new_info[$name] = $tmp;
 		}
 		file_put_contents($dockerIni, json_encode($new_info, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
@@ -364,10 +367,10 @@ class DockerTemplates {
 		$Images = array();
 
 		$Images    		 = array('banner' => $this->getTemplateValue($Repository, "Banner"),
-													 'icon' => $this->getTemplateValue($Repository, "Icon") );
+		                       'icon' => $this->getTemplateValue($Repository, "Icon") );
 
 		$defaultImages = array('banner' => '/plugins/dynamix.docker.manager/assets/images/spacer.png',
-													 'icon'   => '/plugins/dynamix.docker.manager/assets/images/question.png');
+		                       'icon'   => '/plugins/dynamix.docker.manager/assets/images/question.png');
 
 		foreach ($Images as $type => $imgUrl) {
 			preg_match_all("/(.*?):([\w]*$)/i", $Repository, $matches);
@@ -396,7 +399,7 @@ class DockerTemplates {
 class DockerUpdate{
 
 	public function download_url($url, $path = ""){
-		exec("curl --connect-timeout 15 --max-time 30 -s -k -L ". ($path ? " -o '$path' " : "") ." $url 2>/dev/null", $out, $exit_code );
+		exec("curl --max-time 30 -s -k -L ". ($path ? " -o '$path' " : "") ." $url 2>/dev/null", $out, $exit_code );
 		return ($exit_code === 0 ) ? implode("\n", $out) : FALSE;
 	}
 
@@ -432,8 +435,8 @@ class DockerUpdate{
 		$remoteVersion   = $this->getRemoteVersion($RegistryUrl, $image);
 		// echo "\n $localVersion => $remoteVersion";
 		return ($localVersion && $remoteVersion) ? (($remoteVersion == $localVersion) ? "true" : "false") : "undef" ;
-
 	}
+
 
 	public function syncVersions($container) {
 		global $dockerManPaths;
@@ -459,15 +462,14 @@ class DockerClient {
 
 	private function humanTiming ($time){
 		$time = time() - $time; // to get the time since that moment
-		$tokens = array (
-			31536000 => 'year',
-			2592000 => 'month',
-			604800 => 'week',
-			86400 => 'day',
-			3600 => 'hour',
-			60 => 'minute',
-			1 => 'second'
-		);
+		$tokens = array (31536000 => 'year',
+		                 2592000  => 'month',
+		                 604800   => 'week',
+		                 86400    => 'day',
+		                 3600     => 'hour',
+		                 60       => 'minute',
+		                 1        => 'second'
+		                 );
 		foreach ($tokens as $unit => $text) {
 			if ($time < $unit) continue;
 			$numberOfUnits = floor($time / $unit);
@@ -480,10 +482,7 @@ class DockerClient {
 		return preg_replace_callback(
 			'/(?:(?:\r\n|\n)|^)([0-9A-F]+)(?:\r\n|\n){1,2}(.*?)'
 			.'((?:\r\n|\n)(?:[0-9A-F]+(?:\r\n|\n))|$)/si',
-			create_function('$matches','return hexdec($matches[1]) == strlen($matches[2]) ?
-			$matches[2] :$matches[0];'),
-			$result
-		);
+			create_function('$matches','return hexdec($matches[1]) == strlen($matches[2]) ? $matches[2] :$matches[0];'), $result);
 	}
 
 
@@ -584,13 +583,14 @@ class DockerClient {
 			$Ports = $details[0]['HostConfig']['PortBindings'];
 			$Ports = (count ( $Ports )) ? $Ports : array();
 			$c["Ports"] = array();
-			foreach ($Ports as $port => $value) {
-				list($PrivatePort, $Type) = explode("/", $port);
-				$PublicPort   = $value[0]['HostPort'];
-				$c["Ports"][] = array(
-							'PrivatePort' => $PrivatePort,
-							'PublicPort'  => $PublicPort,
-							'Type'        => $Type );
+			if ($c["NetworkMode"] != 'host'){
+				foreach ($Ports as $port => $value) {
+					list($PrivatePort, $Type) = explode("/", $port);
+					$PublicPort   = $value[0]['HostPort'];
+					$c["Ports"][] = array('PrivatePort' => $PrivatePort,
+					                      'PublicPort'  => $PublicPort,
+					                      'Type'        => $Type );
+				}
 			}
 
 			$containers[] = $c;
@@ -649,6 +649,7 @@ class DockerClient {
 			$c["usedBy"]       = $this->usedBy($c["Id"]);
 
 			$imgDetails = $this->getImageDetails($obj['Id']);
+			// echo "<pre>".print_r($imgDetails,TRUE)."</pre>";
 			$a = $imgDetails[0]['Config']['Volumes'];
 			$b = $imgDetails[0]['Config']['ExposedPorts'];
 			$c['ImageType'] = (! count($a) && ! count($b)) ? 'base' : 'user';
