@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?PHP
-/* Copyright 2014, Bergware International.
- * Copyright 2014, Lime Technology
+/* Copyright 2015, Bergware International.
+ * Copyright 2015, Lime Technology
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -16,8 +16,21 @@ require_once "/usr/local/emhttp/webGui/include/Wrappers.php";
 
 $notify = "/usr/local/sbin/notify";
 
-function my_var($key) {
-  return exec("awk -F= '/^'$key='/ {print $2}' /proc/mdcmd");
+$ram = "/var/local/emhttp/monitor.ini";
+$rom = "/boot/config/plugins/dynamix/monitor.ini";
+
+function plus($val, $word, $last) {
+  return $val>0 ? (($val || $last) ? ($val.' '.$word.($val!=1?'s':'').($last ?'':', ')) : '') : '';
+}
+
+function my_temp($value) {
+  global $unraid;
+  $unit = $unraid['display']['unit'];
+  return ($unit=='F' ? round(9/5*$value+32) : str_replace('.', $unraid['display']['number'][0], $value))." $unit";
+}
+
+function my_disk($name) {
+  return ucfirst(preg_replace('/^(disk|cache)([0-9]+)/','$1 $2',$name));
 }
 
 function my_scale($value, &$unit, $precision = NULL) {
@@ -35,20 +48,6 @@ function my_scale($value, &$unit, $precision = NULL) {
     $value = round($value/pow(1000, $base), $precision ? $precision : 2);
     return number_format($value, $precision ? $precision : (($value-intval($value)==0 || $value>=100) ? 0 : ($value>=10 ? 1 : 2)), $number[0], ($value>=10000 ? $number[1] : ''));
   }
-}
-
-function my_temp($value) {
-  global $unraid;
-  $unit = $unraid['display']['unit'];
-  return ($unit=='C' ? str_replace('.', $unraid['display']['number'][0], $value) : round(9/5*$value+32))." $unit";
-}
-
-function my_disk($name) {
-  return ucfirst(preg_replace('/^(disk|cache)([0-9]+)/','$1 $2',$name));
-}
-
-function plus($val, $word, $last) {
-  return $val>0 ? (($val || $last) ? ($val.' '.$word.($val!=1?'s':'').($last ?'':', ')) : '') : '';
 }
 
 function my_check($time) {
@@ -71,33 +70,22 @@ function my_error($code) {
   }
 }
 
-function read_temp($name) {
-  $temp = exec("awk '/Temperature/{print $10}' /var/local/emhttp/smart/$name");
-  return $temp ? $temp : 0;
-}
+exec("wget -qO /dev/null 127.0.0.1$(lsof -lbnPi4 -sTCP:LISTEN|awk '$1==\"emhttp\"{print substr($9,index($9,\":\"))}')/update.htm?cmdStatus=apply");
 
-function active_state($name) {
-  $state = exec("awk '/STANDBY/{print $4}' /var/local/emhttp/smart/$name");
-  return strlen($state)==0;
-}
-
-$saved  = @parse_ini_file("/var/local/emhttp/monitor.ini",true);
 $disks  = parse_ini_file("/var/local/emhttp/disks.ini",true);
 $var    = parse_ini_file("/var/local/emhttp/var.ini");
+$saved  = @parse_ini_file($ram,true);
 $unraid = parse_plugin_cfg("dynamix",true);
 $events = $unraid['notify']['events'];
 $max    = $unraid['display']['max'];
 $hot    = $unraid['display']['hot'];
 $server = strtoupper($var['NAME']);
-$active = array();
 $errors = array();
-$parity = false;
-$cache  = false;
 
 foreach ($disks as $disk) {
   $name = $disk['name'];
-  if ($name=='flash' || substr(my_var("rdevStatus.{$disk['idx']}"),-3)=='_NP') continue;
-  $temp = read_temp($name);
+  if ($name=='flash' || substr($disk['status'],-3)=='_NP') continue;
+  $temp = $disk['temp'];
   $info = "{$disk['id']} ({$disk['device']})";
   if ($info==" ()") $info = 'No device identification present';
   $text = my_disk($name).($name=='cache'||$name=='parity'?' disk':'');
@@ -143,15 +131,8 @@ foreach ($disks as $disk) {
     }
   break;}
 
-// Count number of active disks, excluding flash drive
-  if (active_state($name)) {
-    $active[] = "$text - $info (".my_temp($temp).")";
-    if ($name == 'parity') $parity = true;
-    if ($name == 'cache') $cache = true;
-  }
-
 // Count errors
-  if ($numErrors = my_var("rdevNumErrors.{$disk['idx']}")) $errors[] = "$text - $info (errors $numErrors)";
+if ($disk['numErrors']>0) $errors[] = "$text - $info (errors {$disk['numErrors']})";
 
 // process disk SMART notifications. Give messages only when changes occur!
   unset($codes);
@@ -197,33 +178,13 @@ if ($warn>0) {
   }
 }
 
-$name = 'active';
-$last = isset($saved[$item][$name]) ? $saved[$item][$name] : 0;
-$warn = count($active);
-$word = $warn==1 ? "" : "including ";
-$info = "Array has $warn active disk".($warn==1 ? "" : "s").($parity ? " ({$word}parity".($cache ? " & cache)" : ")") : ($cache ? " ({$word}cache)" : ""));
-
-// report array active status. Give messages on active/inactive changes.
-if ($warn>0) {
-  if (!$last) {
-    $message = implode('\n', $active);
-    exec("$notify -e \"unRAID active array\" -s \"Notice [$server] - array is active\" -d \"$info\" -m \"$message\"");
-    $saved[$item][$name] = $warn;
-  }
-} else {
-  if ($last) {
-    exec("$notify -e \"unRAID inactive array\" -s \"Notice [$server] - array turned inactive\" -d \"$info\"");
-    unset($saved[$item][$name]);
-  }
-}
-
 $name = 'parity';
 $last = isset($saved[$item][$name]) ? $saved[$item][$name] : '';
 
 // process parity check, parity sync and data-rebuild notifications. Give messages on start/stop conditions.
-if (my_var('mdResync')>0) {
+if ($var['mdResync']>0) {
   if (!$last) {
-    $last = my_var('mdNumInvalid')==0 ? 'Parity check' : (my_var('mdInvalidDisk')==0 ? 'Parity sync:' : 'Data rebuild:');
+    $last = $var['mdNumInvalid']==0 ? 'Parity check' : ($var['mdInvalidDisk']==0 ? 'Parity sync:' : 'Data rebuild:');
     $info = isset($disks['parity']['sizeSb']) ? "Parity size: ".my_scale($disks['parity']['sizeSb']*1024, $unit)." $unit" : "No parity disk present";
     exec("$notify -e \"unRAID $last\" -s \"Notice [$server] - $last started\" -d \"$info\" -i \"warning\"");
     $saved[$item][$name] = $last;
@@ -247,7 +208,6 @@ $info = "{$disks['flash']['id']} ({$disks['flash']['device']})";
 
 if ($warn!="rw") {
   if ($warn!=$last) {
-    $message = implode('\n', $active);
     exec("$notify -e \"USB flash drive failure\" -s \"Alert [$server] - USB drive is not read-write\" -d \"$info\" -i \"alert\"");
     $saved[$item][$name] = $warn;
   }
@@ -265,8 +225,13 @@ if ($saved) {
     if ($block) $text .= "[$item]\n";
     foreach ($block as $key => $value) $text .= "$key=\"$value\"\n";
   }
-  if ($text) file_put_contents('/var/local/emhttp/monitor.ini', $text); else unlink('/var/local/emhttp/monitor.ini');
+  if ($text) {
+    file_put_contents($ram, $text);
+    if (!file_exists($rom) || exec("diff -q $ram $rom")) file_put_contents($rom, $text);
+  } else {
+    @unlink($ram);
+    @unlink($rom);
+  }
 }
-
 exit(0);
 ?>
