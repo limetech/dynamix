@@ -15,12 +15,15 @@ Tabs="true"
  * all copies or substantial portions of the Software.
  */
 ?>
-<link type="text/css" rel="stylesheet" href="/plugins/dynamix.plugin.manager/styles/fileTree.css">
-<script type="text/javascript" src="/plugins/dynamix.plugin.manager/scripts/fileTree.js"></script>
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css">
+<style type="text/css">
+  #plugin_tree{width:33%;border:1px solid #E0E0E0;padding:10px 6px;}
+</style>
+<script type="text/javascript" src="/webGui/scripts/jqueryFileTree.js"></script>
 <script>
 $(function() {
   $('#plugin_table').tablesorter({headers:{0:{sorter:false},5:{sorter:false}}});
-  $('#plugin_tree').fileTree({root:'/boot/',filter:'plg',script:'/plugins/dynamix.plugin.manager/include/FileTree.php',multiFolder:false}, function(file) {$('#plugin_file').val(file);});
+  $('#plugin_tree').fileTree({root:'/boot/',filter:'plg'}, function(file) {$('#plugin_file').val(file);});
   $('.desc_readmore').readmore({maxHeight: 100});
 });
 $('.tabs').append("<span class='status vhshift'><input type='button' value='Check for Updates' onclick='openBox(\"/usr/local/sbin/plugin checkall\",\"Plugin Update Check\",490,430,true)'></span>");
