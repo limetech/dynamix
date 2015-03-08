@@ -55,7 +55,6 @@ UL.jqueryFileTree A:hover {
 .jqueryFileTree LI.ext_html { background: url(../images/html.png) left top no-repeat; }
 .jqueryFileTree LI.ext_img { background: url(../images/disk-image.png) left top no-repeat; }
 .jqueryFileTree LI.ext_iso { background: url(../images/cdrom.png) left top no-repeat; }
-.jqueryFileTree LI.ext_ISO { background: url(../images/cdrom.png) left top no-repeat; }
 .jqueryFileTree LI.ext_jar { background: url(../images/java.png) left top no-repeat; }
 .jqueryFileTree LI.ext_jpg { background: url(../images/picture.png) left top no-repeat; }
 .jqueryFileTree LI.ext_jpeg { background: url(../images/picture.png) left top no-repeat; }
