@@ -43,11 +43,14 @@
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
-		function domain_new($domain, $media, $nic, $disk, $usb, $usbtab, $shares) {
+		function domain_new($domain, $media, $nics, $disks, $usb, $shares, $gpus, $audios) {
 			$type = $domain['type'];
 			$name = $domain['name'];
 			$mem = $domain['mem'] * 1024;
-			$maxmem = $domain['maxmem'] * 1024;
+			$maxmem = $mem;
+			if (!empty($domain['maxmem'])) {
+				$maxmem = $domain['maxmem'] * 1024;
+			}
 			$uuid = $this->domain_generate_uuid();
 			$machine = $domain['machine'];
     		$emulator = $this->get_default_emulator();
@@ -56,14 +59,25 @@
 			if ($arch == 'i686'){
 				$pae = '<pae/>';
 			}
+
+			$cpustr = "<cpu mode='host-passthrough'>
+							<topology sockets='1' cores='{$domain['vcpus']}' threads='1'/>
+						</cpu>
+						<vcpu placement='static'>{$domain['vcpus']}</vcpu>
+						<cputune>";
+			for ($i=0; $i < $domain['vcpus']; $i++) {
+				$cpustr .= "<vcpupin vcpu='$i' cpuset='$i'/>";
+			}
+			$cpustr .= "</cputune>";
+
 			$bus = "ide";
 			$ctrl = '';
-			if ($machine == 'pc-q35-2.1'){
+			if ($machine == 'q35'){
 				$bus = "sata";
 	         $ctrl = "<controller type='usb' index='0' model='ich9-ehci1'/>
             	<controller type='usb' index='0' model='ich9-uhci1'/>";
 			}
-			$clock =	"<clock offset=\"{$domain['clock']}\">
+			$clock =	"<clock offset='" . $domain['clock'] . "'>
 				  	<timer name='rtc' tickpolicy='catchup'/>
 					<timer name='pit' tickpolicy='delay'/>
 					<timer name='hpet' present='yes'/>
@@ -72,12 +86,13 @@
 			$hyperv = '';
 			if ($domain['os']){
 				if ($domain['hyperv']){
-				$hyperv = "<hyperv> <relaxed state='on'/>
-						<vapic state='on'/>
-						<spinlocks state='on'
-						retries='8191'/>
-					</hyperv>";}
-				$clock = "<clock offset=\"{$domain['clock']}\">
+					$hyperv = "<hyperv>
+							<relaxed state='on'/>
+							<vapic state='on'/>
+							<spinlocks state='on' retries='8191'/>
+						</hyperv>";
+				}
+				$clock = "<clock offset='" . $domain['clock'] . "'>
 						<timer name='hypervclock' present='yes'/>
 						<timer name='hpet' present='no'/>
 					</clock>";
@@ -86,8 +101,8 @@
 			$usbstr = '';
 			if (!empty($usb)) {
 				foreach($usb as $i => $v){
-					$usbx = explode(':', $v);	
-					$usbstr .="<hostdev mode='subsystem' type='usb' managed='no'>
+					$usbx = explode(':', $v);
+					$usbstr .="<hostdev mode='subsystem' type='usb' managed='yes'>
                           <source>
                              <vendor id='0x".$usbx[0]."'/>
                              <product id='0x".$usbx[1]."'/>
@@ -95,46 +110,50 @@
                        </hostdev>";
 				}
 			}
-			$usbtabstr = (!empty($usbtab)) ? "<input type='tablet' bus='usb'/>" : '';
-			//disk settings
 
+			//disk settings
 			$diskstr = '';
-			if (!empty($disk['image']) | !empty($disk['new']) ) {
-				if (!$disk['settings']) {
-					$img = $disk['image'];
-					$cmd = "qemu-img info $img | grep 'file format:'";
-					$driver = trim(shell_exec($cmd));
-					$driver = ltrim($driver, 'file format: ');
-				}else {
-					$img = $disk['new'].$name."/"; 
-					if (!is_dir($img))
-						mkdir($img);
-					$cfg = $img.$name.".cfg";
-					if (!file_exists($cfg)){
-							$fp = fopen("$cfg", 'w');
-							fwrite($fp, 'AUTOSTART="no"'."\n");
-							fclose($fp);
+			if (!empty($disks)) {
+				foreach ($disks as $i => $disk) {
+					if (!empty($disk['image']) | !empty($disk['new']) ) {
+						if (!empty($disk['image'])) {
+							$img = $disk['image'];
+							$cmd = "qemu-img info $img | grep 'file format:'";
+							$driver = trim(shell_exec($cmd));
+							$driver = ltrim($driver, 'file format: ');
+						} else {
+							$img = $disk['new'].$name."/";
+							if (!is_dir($img))
+								mkdir($img);
+							$cfg = $img.$name.".cfg";
+							if (!file_exists($cfg)){
+								file_put_contents($cfg, 'AUTOSTART="no"' . "\n" . 'TEMPLATE="' . $domain['template'] . '"' . "\n");
+							}
+							$driver = $disk['driver'];
+							$ext = ($driver == 'raw') ? 'img' : $driver;
+							$img .= $name.'.'.$ext;
+							$size = strtoupper($disk['size']);
+							shell_exec("qemu-img create -q -f $driver ".escapeshellarg($img)." $size");
+						}
+						$diskstr .= "<disk type='file' device='disk'>
+											<driver name='qemu' type='$driver' cache='none' io='native'/>
+											<source file='$img'/>
+											<target bus='virtio' dev='{$disk['dev']}' />
+											<boot order='1'/>
+										</disk>";
 					}
-					$driver = $disk['driver'];
-					$ext = ($driver == 'raw') ? 'img' : $driver;
-					$img .= $name.'.'.$ext;
-					$size = strtoupper($disk['size']);
-					shell_exec("qemu-img create -q -f $driver ".escapeshellarg($img)." $size");
 				}
-				$diskstr = "<disk type='file' device='disk'>
-						<driver name='qemu' type='$driver' />
-                                                <source file='$img'/>
-                                                <target bus='virtio' dev='{$disk['dev']}' />
-                                         </disk>";
 			}
 
+			//media settings
 			$mediastr = '';
 			if (!empty($media['cdrom'])) {
 				$mediastr = "<disk type='file' device='cdrom'>
 						<driver name='qemu'/>
 						<source file='{$media['cdrom']}'/>
-						<target dev='hdc' bus='$bus'/>
+						<target dev='hda' bus='$bus'/>
 						<readonly/>
+						<boot order='2'/>
 					</disk>";
 			}
 
@@ -143,46 +162,177 @@
 				$driverstr = "<disk type='file' device='cdrom'>
 						<driver name='qemu'/>
 						<source file='{$media['drivers']}'/>
-						<target dev='hdd' bus='$bus'/>
+						<target dev='hdb' bus='$bus'/>
 						<readonly/>
 					</disk>";
 			}
 
 			$netstr = '';
-			if (!empty($nic)) {
-				$netstr = "
-					    <interface type='bridge'>
-					      <mac address='{$nic['mac']}'/>
-					      <source bridge='{$nic['net']}'/>
-					      <model type='virtio'/>
-					    </interface>";
+			if (!empty($nics)) {
+				foreach ($nics as $i => $nic) {
+					$netstr .= "
+						    <interface type='bridge'>
+						      <mac address='{$nic['mac']}'/>
+						      <source bridge='{$nic['net']}'/>
+						      <model type='virtio'/>
+						    </interface>";
+				}
 			}
-	
+
 			$sharestr = '';
 			if (!empty($shares['source']) && !empty($shares['target']) ) {
 					$sharestr = "<filesystem type='mount' accessmode='passthrough'>
          						<source dir='".$shares['source']."'/>
       							<target dir='".$shares['target']."'/>
                            </filesystem>";
-				
+
 			}
-			
+
 			$passwdstr='';
 			if (!empty( $domain['password'])){
 				$passwdstr = "passwd='$password'";
 			}
-			
+
+			$pcidevs='';
+			$gpuargs='';
+			$gpuincr=0;
+			$gpuaudio=[];
+			$vnc='';
+			if (!empty($gpus)) {
+				foreach ($gpus as $i => $gpu) {
+					if ($gpu['id'] == 'vnc') {
+						$vnc = "<input type='tablet' bus='usb'/>
+									<input type='mouse' bus='ps2'/>
+									<input type='keyboard' bus='ps2'/>
+									<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0' $passwdstr>
+										<listen type='address' address='0.0.0.0'/>
+									</graphics>
+									<video>
+										<model type='vmvga'/>
+									</video>";
+						continue;
+					}
+
+					list($gpu_bus, $gpu_slot, $gpu_function) = explode(":", str_replace('.', ':', $gpu['id']));
+
+					switch ($machine) {
+
+						case 'q35':
+							if (vfio_bind($gpu['id'])) {
+								$gpuargs .= "<qemu:arg value='-device'/>
+												<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=pcie.0,multifunction=on,x-vga=on'/>";
+
+								// GPU Audio function
+								if (file_exists("/sys/bus/pci/devices/0000:{$gpu_bus}:{$gpu_slot}.1/iommu_group/")) {
+									if (vfio_bind($gpu['id'])) {
+										$gpuargs .= "<qemu:arg value='-device'/>
+														<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.1,bus=pcie.0'/>";
+
+										$gpuaudio[] = "{$gpu_bus}:{$gpu_slot}.1";
+									}
+								}
+							}
+							break;
+
+						case 'pc':
+							if (vfio_bind($gpu['id'])) {
+								$gpuargs .= "<qemu:arg value='-device'/>
+												<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=root.1,addr=0{$gpuincr}.0,multifunction=on,x-vga=on'/>";
+
+								// GPU Audio function
+								if (file_exists("/sys/bus/pci/devices/0000:{$gpu_bus}:{$gpu_slot}.1/iommu_group/")) {
+									if (vfio_bind($gpu['id'])) {
+										$gpuargs .= "<qemu:arg value='-device'/>
+														<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.1,bus=root.1,addr=0{$gpuincr}.1'/>";
+
+										$gpuaudio[] = "{$gpu_bus}:{$gpu_slot}.1";
+									}
+								}
+							}
+							break;
+
+						//TODO - OVMF
+						/*
+
+						$pcidevs .= "<hostdev mode='subsystem' type='pci' managed='yes'>
+											<driver name='vfio'/>
+											<source>
+												<address domain='0x0000' bus='0x" . $gpu_bus . "' slot='0x" . $gpu_slot . "' function='0x" . $gpu_function . "'/>
+											</source>
+										</hostdev>";
+
+						// GPU Audio function
+						if (file_exists("/sys/bus/pci/devices/0000:{$gpu_bus}:{$gpu_slot}.1/iommu_group/")) {
+							$pcidevs .= "<hostdev mode='subsystem' type='pci' managed='yes'>
+												<driver name='vfio'/>
+												<source>
+													<address domain='0x0000' bus='0x" . $gpu_bus . "' slot='0x" . $gpu_slot . "' function='0x1'/>
+												</source>
+											</hostdev>";
+
+							$gpuaudio[] = "{$gpu_bus}:{$gpu_slot}.1";
+						}
+						*/
+					}
+
+					$gpuincr++;
+				}
+			}
+
+			if (!empty($audios)) {
+				foreach ($audios as $i => $audio) {
+					// Since we pass through the gpu audio, dont pass this audio device if it's already passed through
+					if (!in_array($audio['id'], $gpuaudio)) {
+						list($audio_bus, $audio_slot, $audio_function) = explode(":", str_replace('.', ':', $audio['id']));
+
+						$pcidevs .= "<hostdev mode='subsystem' type='pci' managed='yes'>
+											<driver name='vfio'/>
+											<source>
+												<address domain='0x0000' bus='0x" . $audio_bus . "' slot='0x" . $audio_slot . "' function='0x" . $audio_function . "'/>
+											</source>
+										</hostdev>";
+					}
+				}
+			}
+
+			$cmdargs='';
+			if (!empty($gpuargs)) {
+				switch ($machine) {
+
+					case 'q35':
+						$cmdargs .= "<qemu:commandline>
+											<qemu:arg value='-device'/>
+											<qemu:arg value='ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=2,chassis=1,id=root.1'/>
+											$gpuargs
+										</qemu:commandline>";
+						break;
+
+					case 'pc':
+						$cmdargs .= "<qemu:commandline>
+											<qemu:arg value='-device'/>
+											<qemu:arg value='ioh3420,bus=pci.0,addr=1c.0,multifunction=on,port=2,chassis=1,id=root.1'/>
+											$gpuargs
+										</qemu:commandline>";
+						break;
+
+				}
+			}
+
+
 			if (!empty($diskstr) | !empty($mediastr)) {
-				$xml = "<domain type='$type'>
+				$xml = "<domain type='$type' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
+				<uuid>$uuid</uuid>
 				<name>$name</name>
+				<description>{$domain['desc']}</description>
 				<currentMemory>$mem</currentMemory>
 				<memory>$maxmem</memory>
-				<uuid>$uuid</uuid>
-				<description>{$domain['desc']}</description>
+				<memoryBacking>
+					<nosharepages/>
+					<locked/>
+				</memoryBacking>
+				$cpustr
 				<os>
 					<type arch='$arch' machine='$machine'>hvm</type>
-					<boot dev='cdrom'/>
-					<boot dev='hd'/>
 				</os>
 				<features>
 					<acpi/>
@@ -194,7 +344,6 @@
 				<on_poweroff>destroy</on_poweroff>
 				<on_reboot>restart</on_reboot>
 				<on_crash>restart</on_crash>
-				<vcpu>{$domain['vcpus']}</vcpu>
 				<devices>
 					<emulator>$emulator</emulator>
 					$diskstr
@@ -203,33 +352,37 @@
 					$ctrl
 					$sharestr
 					$netstr
-               $usbtabstr
-					<input type='mouse' bus='ps2'/>
-					<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0' $passwdstr>
-						<listen type='address' address='0.0.0.0'/>
-					</graphics>
+					$vnc
 					<console type='pty'/>
-					<video>
-						<model type='vmvga'/>
-					</video>
 					$usbstr
+					<memballoon model='virtio'>
+						<alias name='balloon0'/>
+					</memballoon>
 				</devices>
-				</domain>";
+				$cmdargs
+			</domain>";
+
+			file_put_contents(str_replace(".cfg", ".xml", $cfg), $xml);
+
 			$tmp = libvirt_domain_create_xml($this->conn, $xml);
 			if (!$tmp)
 				return $this->_set_last_error();
 				}
 
 			if ($domain['persistent']) {
-				$xml = "<domain type='$type'>
+				$xml = "<domain type='$type' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
+					<uuid>$uuid</uuid>
 					<name>$name</name>
+					<description>{$domain['desc']}</description>
 					<currentMemory>$mem</currentMemory>
 					<memory>$maxmem</memory>
-					<uuid>$uuid</uuid>
-					<description>{$domain['desc']}</description>
+					<memoryBacking>
+						<nosharepages/>
+						<locked/>
+					</memoryBacking>
+					$cpustr
 					<os>
 						<type arch='$arch' machine='$machine'>hvm</type>
-						<boot dev='hd'/>
 					</os>
 					<features>
 						<acpi/>
@@ -241,7 +394,6 @@
 					<on_poweroff>destroy</on_poweroff>
 					<on_reboot>restart</on_reboot>
 					<on_crash>restart</on_crash>
-					<vcpu>{$domain['vcpus']}</vcpu>
 					<devices>
 						<emulator>$emulator</emulator>
 						$diskstr
@@ -249,22 +401,56 @@
 						$ctrl
 						$sharestr
 						$netstr
-	               $usbtabstr
-						<input type='mouse' bus='ps2'/>
-						<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0' $passwdstr>
-							<listen type='address' address='0.0.0.0'/>
-						</graphics>
+						$vnc
 						<console type='pty'/>
-						<video>
-							<model type='vmvga'/>
-						</video>
+						$usbstr
+						<memballoon model='virtio'>
+							<alias name='balloon0'/>
+						</memballoon>
 					</devices>
-					</domain>";
+					$cmdargs
+				</domain>";
 				$tmp = libvirt_domain_define_xml($this->conn, $xml);
 				return ($tmp) ? $tmp : $this->_set_last_error();
 			}
 			else
 				return $tmp;
+		}
+
+		function vfio_bind($strPassthruDevice) {
+			// Ensure we have leading 0000:
+			$strPassthruDeviceShort = str_replace('0000:', '', $strPassthruDevice);
+			$strPassthruDeviceLong = '0000:' . $strPassthruDeviceShort;
+
+			// Determine the driver currently assigned to the device
+			$strDriverSymlink = @readlink('/sys/bus/pci/devices/' . $strPassthruDeviceLong . '/driver');
+
+			if ($strDriverSymlink !== false) {
+				// Device is bound to a Driver already
+
+			 	if (strpos($strDriverSymlink, 'vfio-pci') !== false) {
+			 		// Driver bound to vfio-pci already - nothing left to do for this device now regarding vfio
+			 		return true;
+			 	}
+
+		 		// Driver bound to some other driver - attempt to unbind driver
+		 		if (file_put_contents('/sys/bus/pci/devices/' . $strPassthruDeviceLong . '/driver/unbind', $strPassthruDeviceLong) === false) {
+					$this->last_error = 'Failed to unbind device ' . $strPassthruDeviceShort . ' from current driver';
+					return false;
+		 		}
+			}
+
+			// Get Vendor and Device IDs for the passthru device
+			$strVendor = file_get_contents('/sys/bus/pci/devices/' . $strPassthruDeviceLong . '/vendor');
+			$strDevice = file_get_contents('/sys/bus/pci/devices/' . $strPassthruDeviceLong . '/device');
+
+			// Attempt to bind driver to vfio-pci
+			if (file_put_contents('/sys/bus/pci/drivers/vfio-pci/new_id', $strVendor . ' ' . $strDevice) === false) {
+				$this->last_error = 'Failed to bind device ' . $strPassthruDeviceShort . ' to vfio-pci driver';
+				return false;
+			}
+
+			return true;
 		}
 
 		function connect($uri = 'null', $login = false, $password = false) {
@@ -371,7 +557,7 @@
 			if ($inactive)
 				$flags = VIR_DOMAIN_XML_INACTIVE;
 
-			$tmp = libvirt_domain_xml_xpath($dom, $xpath, $flags); 
+			$tmp = libvirt_domain_xml_xpath($dom, $xpath, $flags);
 			if (!$tmp)
 				return $this->_set_last_error();
 
@@ -432,7 +618,7 @@
 			$buses =  $this->get_xpath($dom, '//domain/devices/disk[@device="disk"]/target/@bus', false);
 			$disks =  $this->get_xpath($dom, '//domain/devices/disk[@device="disk"]/target/@dev', false);
 			$files =  $this->get_xpath($dom, '//domain/devices/disk[@device="disk"]/source/@file', false);
-		
+
 			$ret = array();
 			for ($i = 0; $i < $disks['num']; $i++) {
 				$tmp = ($this->get_uri == "xen:///system") ? false : libvirt_domain_get_block_info($dom, $disks[$i]);
@@ -592,7 +778,7 @@
 				if ($bits & 1)
 					$tmp[ ($i * 3) + 2 ] = 'x';
 			}
-			
+
 
 			return $tmp;
 		}
@@ -614,21 +800,21 @@
 
 			return $size;
 		}
-		
+
 		//create a storage volume and add file extension
 		function volume_create($name, $capacity, $allocation, $format) {
 			$capacity = $this->parse_size($capacity);
 			$allocation = $this->parse_size($allocation);
 			($format != 'raw' ) ? $ext = $format : $ext = 'img';
 			($ext == pathinfo($name, PATHINFO_EXTENSION)) ? $ext = '': $name .= '.';
-				
+
 			$xml = "<volume>\n".
                                "   <name>$name$ext</name>\n".
                                "   <capacity>$capacity</capacity>\n".
                                "   <allocation>$allocation</allocation>\n".
                                "   <target>\n".
                                "      <format type='$format'/>\n".
-                               "   </target>\n".   
+                               "   </target>\n".
                                "</volume>";
 
 			$tmp = libvirt_storagevolume_create_xml($pool, $xml);
@@ -736,7 +922,7 @@
 		function get_node_device_information($dev) {
 			$dev = $this->get_node_device_res($dev);
 
-			$tmp = libvirt_nodedev_get_information($dev);			
+			$tmp = libvirt_nodedev_get_information($dev);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
@@ -822,7 +1008,7 @@
 			$tmp = libvirt_domain_get_interface_devices($res);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
-		
+
 		function domain_get_memory_stats($domain) {
 			$dom = $this->get_domain_object($domain);
 			if (!$dom)
@@ -892,7 +1078,7 @@
 			$tmp = libvirt_domain_managedsave($dom);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
-		
+
 		function domain_resume($domain) {
 			$dom = $this->get_domain_object($domain);
 			if (!$dom)
@@ -986,7 +1172,7 @@
 		}
 
 		function is_dir_empty($dir) {
-  			if (!is_readable($dir)) return NULL; 
+  			if (!is_readable($dir)) return NULL;
 			  $handle = opendir($dir);
 		  	while (false !== ($entry = readdir($handle))) {
     			if ($entry != "." && $entry != "..") {
@@ -995,7 +1181,7 @@
   			}
   			return TRUE;
 		}
-		
+
 		function domain_is_running($domain, $name = false) {
 			$dom = $this->get_domain_object($domain);
 			if (!$dom)
@@ -1354,7 +1540,7 @@
 			return $this->domain_define($xml);
 		}
 
-//set domain description 
+//set domain description
 		function domain_set_description($domain, $desc) {
 			$domain = $this->get_domain_object($domain);
 
@@ -1382,7 +1568,7 @@
 			$domain = $this->get_domain_object($domain);
 
 			$xml = $this->domain_get_xml($domain, true);
-			$metadata = $this->get_xpath($domain, '//domain/metadata', false);			
+			$metadata = $this->get_xpath($domain, '//domain/metadata', false);
 			if (empty($metadata)){
 				$description = $this->domain_get_description($domain);
 				if(!$description)
@@ -1401,7 +1587,7 @@
 			$domain = $this->get_domain_object($domain);
 
 			$xml = $this->domain_get_xml($domain, true);
-			$metadata = $this->get_xpath($domain, '//domain/metadata/snapshot'.$name, false);			
+			$metadata = $this->get_xpath($domain, '//domain/metadata/snapshot'.$name, false);
 			if (empty($metadata)){
 				$desc = "<metadata>\n<snapshot$name>$desc</snapshot$name>\n";
 				$xml = str_replace('<metadata>', $desc, $xml);
@@ -1431,7 +1617,7 @@
 
 //set domain to start with libvirt
 		function domain_set_autostart($domain,$flags) {
-			$domain = $this->get_domain_object($domain);			
+			$domain = $this->get_domain_object($domain);
 			$tmp = libvirt_domain_set_autostart($domain,$flags);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
@@ -1469,7 +1655,7 @@
 		function domain_snapshot_revert($domain, $name) {
 			$name = $this->domain_snapshot_lookup_by_name($domain, $name);
 			$tmp = libvirt_domain_snapshot_revert($name);
-			return ($tmp) ? $tmp : $this->_set_last_error();	
+			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
 //get snapshot description
@@ -1496,12 +1682,12 @@
 
 			return $this->domain_define($xml);
 		}
-	
+
 //change cdrom media
 		function domain_change_cdrom($domain, $iso, $dev, $bus) {
 			$domain = $this->get_domain_object($domain);
    		$tmp = libvirt_domain_update_device($domain, "<disk type='file' device='cdrom'><driver name='qemu' type='raw'/><source file=".escapeshellarg($iso)."/><target dev='$dev' bus='$bus'/><readonly/></disk>", VIR_DOMAIN_DEVICE_MODIFY_CONFIG);
-			if ($this->domain_is_active($domain))   		
+			if ($this->domain_is_active($domain))
    			libvirt_domain_update_device($domain, "<disk type='file' device='cdrom'><driver name='qemu' type='raw'/><source file=".escapeshellarg($iso)."/><target dev='$dev' bus='$bus'/><readonly/></disk>", VIR_DOMAIN_DEVICE_MODIFY_LIVE);
 		return ($tmp) ? $tmp : $this->_set_last_error();
 		}
