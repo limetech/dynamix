@@ -1,11 +1,12 @@
-Menu="KVM:1"
+Menu="VMs:1"
 Title="Create VM"
 Cond="(pgrep('libvirtd')!==false)"
+Markdown="false"
 ---
 <?php
 if (array_key_exists('sent', $_POST)) {
 
-	$tmp = $lv->domain_new($_POST['domain'], $_POST['media'], $_POST['nic'], $_POST['disk'], $_POST['usb'], $_POST['usbtab'],$_POST['shares']);
+	$tmp = $lv->domain_new($_POST['domain'], $_POST['media'], $_POST['nic'], $_POST['disk'], $_POST['usb'], $_POST['shares'], $_POST['gpu'], $_POST['audio']);
 	if (!$tmp){
 		echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font class=\"red\">Error: ".$lv->get_last_error()."</font>');}); </script>";
 	} else {
@@ -13,323 +14,109 @@ if (array_key_exists('sent', $_POST)) {
 		$res = $lv->get_domain_by_name($name);
 		$uuid = libvirt_domain_get_uuid_string($res);
 		echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font class=\"green\">Domain $name&nbsp; has been created</font>');}); </script>";
-		echo '<meta http-equiv="refresh" content="1; url=/KVM">';
+		echo '<meta http-equiv="refresh" content="1; url=/VMs">';
 	}
 }
 ?>
 
-<div id="content">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
+<style type="text/css">
+	#createform table + table {
+		margin-top: 0;
+	}
+	#createform table tr {
+		vertical-align: top;
+		line-height: 24px;
+	}
+	#createform table tr td:nth-child(odd) {
+		width: 150px;
+		text-align: right;
+		padding-right: 10px;
+	}
+	#createform table tr td:nth-child(even) {
+		width: 80px;
+	}
+	#createform table tr td:last-child {
+		width: inherit;
+	}
+</style>
+
+<div id="content" style="margin-top:-42px;margin-left:0px">
+
+<!--table class="tablesorter" id="createvm" style="margin-top:-21px;margin-left:0px">
+	<thead><th colspan="2">Create New Virtual Machine From Template</th></thead>
+</table-->
 
 <form id="createform" method="POST">
-
-<table class="tablesorter" id="createvm" style="margin-top:-21px;margin-left:0px"><thead><th colspan="2">Create New Virtual Machine From Template</th></thead>
-</table>
-<table style="margin-top:-5px;margin-left:0px">
-
-<tr>
-	<td align="right">Operating System:&nbsp;</td>
-	<td>
-		<select onchange="toggleRows('windows', this.value, 'other');" name="domain[os]" autofocus title="Select domain operating system type. Windows or Other for Linux, OSX and others">
-			<option value="1">Windows</option>
-			<option value="0">Other</option>
-		</select>
-		<label style="margin-top:0px;margin-left:54px">Architecture:&nbsp;</label>
-		<select name="domain[arch]" title="Select domain Architecture 32bit or 64bit">
-			<option value="x86_64">64bit</option>
-			<option value="i686">32bit</option>
-		</select>
-	</td>
-</tr>
-
-<tr>
-    <td align="right">vCPUs:&nbsp; </td>
-    <td>
-		<select name="domain[vcpus]" title="define number of vpus for domain">
-		<?php
-	        for ($i = 1; $i <= $maxcpu; $i++)
-   	         echo '<option value='.$i.'>'.$i.'</option>';
-		?>
-		</select>
-		<label style="margin-top:0px;margin-left:110px">Machine:&nbsp;</label>
-		<select name="domain[machine]" title="Select the machine model.  pc-i440fx will work for most.  Q35 for a newer machine model with PCIE">
-			<option value="pc-i440fx-2.1">pc</option>
-			<option value="pc-q35-2.1">q35</option>
-		</select>
-	</td> 
-</tr>
-
-<tr>
-    <td align="right"> Memory (MiB):&nbsp; </td>
-    <td>
-		<select name="domain[mem]" title="define the amount memory">
-		<?php memOption($maxmem);?>
-		</select>
-		<label style="margin-top:0px;margin-left:45px">Max. Mem (MiB):&nbsp;</label>
-		<select name="domain[maxmem]" title="define the maximun amount of memory">
-		<?php memOption($maxmem);?>
-		</select>
-	</td> 
-</tr>
-
-<tr>
-    <td align="right">Persistence:&nbsp;</td>
-    <td>
-        <select name="domain[persistent]" title="Select domain to be permanent or temporary">
-			<option value="1">Permanent</option>
-			<option value="0">Temporary</option>
-        </select>
-      <label style="margin-top:0px;margin-left:47px">Clock offset:&nbsp;</label>
-		<select name="domain[clock]" title="how the guest clock is synchronized to the host">
-			<option value="localtime">localtime</option>
-			<option value="utc">UTC</option>
-		</select>
-    </td>
-</tr>
-
-<tr>
-    <td align="right">Autostart on boot:&nbsp;</td>
-    <td>
-        <select name="domain[autostart]" title="Select domain autostart on boot">
-			<option value="0">No</option>
-			<option value="1">Yes</option>
-        </select>
-		   <span class="windows">
-		   <label style="margin-top:0px;margin-left:100px">HyperV: &nbsp;</label>
-	 		<select name="domain[hyperv]" title="Hyperv tweaks for Windows.  Don't select if trying to passthrough Nvidia card">
-				<option value="0">No</option>
-				<option value="1">Yes</option>
-			</select>
-			</span>
-</tr>
-
-<tr>
-    <td align="right">Name:&nbsp; </td>
-    <td><input type="text" name="domain[name]" title="name of vitual machine" placeholder="name of vitual machine" /></td>
-</tr>
-
-<tr>
-    <td align="right">Description:&nbsp; </td>
-    <td><input type="text" name="domain[desc]" title="description of vitual machine" placeholder="description of vitual machine (optional)" /></td>
-</tr>
-
-<tr>
-    <td align="right">Password:&nbsp; </td>
-    <td><input type="password" name="domain[password]" title="password for VNC" placeholder="Password for VNC (optional)" /></td>
-</tr>
-
-<tr>
-    <td align="right">CDRom (iso):&nbsp; </td>
-    <td>
-		<input type="text" onclick='mediaTree(media_tree, media_file, "<?php echo $domain_cfg['MEDIADIR'];?>");' id="media_file" name="media[cdrom]" placeholder="Click and Select cdrom image to install operating system">
-	</td>
-</tr>
-
-<tr>
-	<td></td>
-	<td>
-		<div style="margin-top:0px;margin-left:-75px" id="media_tree" hidden></div>
-	</td>
-</tr>
-
-<tr class="windows">
-    <td align="right"><a href="http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/" target="_blank">Virtio drivers (iso):&nbsp; </a>
-    <br /><font size="-6">(latest drivers)&nbsp;&nbsp;</font>
-</td>
-    <td>
-		<table style="margin-top:0px;margin-left:0px">
-			<tr>
-			    <td>
-					<input type="text" onclick='mediaTree(drivers_tree, drivers_file, "<?php echo $domain_cfg['MEDIADIR'];?>");' id="drivers_file" name="media[drivers]" placeholder="Download, Click and Select virtio drivers image">
-				</td>
-			</tr>
-		</table>
-    </td>
-</tr>
-
-<tr class="windows">
-	<td></td>
-	<td>
-		<div style="margin-top:0px;margin-left:-75px" id="drivers_tree" hidden></div>
-	</td>
-</tr>
-
-<tr>
-    <td align="right"><b>Disk Settings:&nbsp;</b></td>
-    <td>
-      <select name="disk[settings]" onchange="toggleRows('newdisk', this.value, 'existing');">
-	<option value="1">Create New Disk</option>
-	<option value="0">Use Existing Disk</option>
-      </select>
-    </td>
-</tr>
-
-<tr class="newdisk">
-	<td></td>
-   <td>
-   <table style="margin-top:0px;margin-left:-75px" >
-     
-	<tr>
-		<td>
-			<label style="margin-top:0px;margin-left:-28px">Directory location:&nbsp;</label>
-			<input type="text" onclick='dirTree(new_tree, new_file, "/mnt/");' id="new_file" name="disk[new]" placeholder="Separate sub-folder and image will be created based on Name">
-			<div style="margin-top:10px;margin-left:0px" id="new_tree" hidden></div>
-		</td>
-	</tr>
-
-	<tr>
-		<td>
-			<label style="margin-top:0px;margin-left:44px">Size:&nbsp;</label>
-			<input type="text" name="disk[size]" placeholder="e.g. 10M, 1G, 10G...">
-		</td>
-	</tr>
-
-	<tr>
-		<td>
-			<label style="margin-top:0px;margin-left:19px">Disk type:&nbsp;</label>
-		   <select name="disk[driver]" title="type of storage image">
-				<option value="qcow2">qcow2</option>
-				<option value="raw">raw</option>
-				<option value="qcow">qcow</option>
-		   </select>
-		</td>
-	</tr>	
-	</table>
-   </td>
-</tr>
-
-<tr class="existing" hidden>
-    <td>&nbsp;</td>
-    <td>
-        <table style="margin-top:0px;margin-left:-76px" >
-
-	<tr>
-		<td>
-			<label>Existing Disk:&nbsp;</label>
-			<input type="text" onclick='diskTree(existing_tree, existing_file, "/mnt/");' id="existing_file" name="disk[image]" placeholder="Select existing image to use for virtual machine">
-			<div style="margin-top:10px;margin-left:0px" id="existing_tree" hidden></div>			
-		</td>
-	</tr>
-	</table>
-    </td>
-</tr>
-
-<tr>
-	<td>&nbsp;</td>
-	<td>
-   <table style="margin-top:-10px;margin-left:0px" >
-	<tr>
-		<td>
-			<label style="margin-top:0px;margin-left:-87px">Disk dev name:&nbsp;</label>
-			<input type="text" value="hda" name="disk[dev]" placeholder="name of disk inside vm" title="name of disk inside vm" />
-		</td>
-	</tr>
-	</table>
-    </td>
-</tr>
-
-<tr>
-    <td align="right"><b>Network Settings:&nbsp;</b></td>
-    <td>
-      <select onchange="toggleRows('network', this.value)">
-	<option value="0">Auto</option>
-	<option value="1">Manual</option>
-      </select>
-    </td>
-</tr>	
-
-<tr class="network" hidden>
-    <td>&nbsp;</td>
-    <td>
-        <table style="margin-top:0px;margin-left:-105px">
-			<tr>
-		   	<td align="right">MAC:&nbsp;</td>
-   			<td>
-					<input type="text" name="nic[mac]" title="random mac, you can supply your own" value="<?php echo $lv->generate_random_mac_addr() ?>" id="nic_mac_addr" />
-				</td>
-			</tr>
-
-			<tr>
-   			<td align="right" >Bridge:&nbsp;</td>
-			   <td>
-					<input type="text" value="<?=$domain_bridge?>" name="nic[net]" placeholder="name of bridge in unRAID" title="name of bridge in unRAID automatically filled in" />			
-			   </td>
-			</tr>
-        </table>
-    </td>
-</tr>
-
-<tr>
-    <td align="right"><b>USB Devices:&nbsp;</b></td>
-    <td>
-      <select onchange="toggleRows('usb', this.value)">
-	<option value="0">No</option>
-	<option value="1">Yes</option>
-      </select>
-    </td>
-</tr>
-
-<tr class="usb" hidden>
-    <td>&nbsp;</td>
-    <td>
-        <table style="margin-top:0px;margin-left:-50px;width:auto; max-width:382px; word-wrap: break-word;" >
-<tr>
-	<td align="left">
+<input type="hidden" name="sent" value="1" />
+<input type="hidden" name="domain[type]" value="<?php echo is_dir('/proc/xen') ? 'xen' : 'kvm'; ?>" />
 
 <?php
-$usb = trim(shell_exec('lsusb'));
-$usb = explode("\n", $usb);
-array_walk($usb, 'usb_checkbox');
+
+	$arrTemplates = array();
+	$strSelectedTemplate = '';
+
+	// Read files from the templates folder
+	foreach (glob('plugins/dynamix.kvm.manager/templates/*.form.php', GLOB_NOSORT) as $template) {
+		$arrTemplates[] = basename($template, '.form.php');
+	}
+
+	if (!empty($arrTemplates)) {
+		$strSelectedTemplate = $arrTemplates[0];
+	}
+
 ?>
-	<input class="checkbox" type="checkbox" value="1" name="usbtab" title="mouse coordinates in vm match the pointer position on the real desktop" checked="checked"/> VNC Mouse/USB Tablet (uncheck for OS without desktop)
-   </td>
-</tr>
-	</table>
-    </td>
-</tr>
 
-<tr class="other" hidden>
-    <td align="right"><b>unRAID Shares:&nbsp;</b></td>
-    <td>
-      <select onchange="toggleRows('shares', this.value)">
-	<option value="0">No</option>
-	<option value="1">Yes</option>
-      </select>
-    </td>
-</tr>
-	
-<tr class="shares" hidden>
-    <td>&nbsp;</td>
-    <td>
-        <table style="margin-top:0px;margin-left:-129px">
-<tr>
-	<td align="right">Share:&nbsp;</td>
-	<td>
-		<input type="text" value="" name="shares[source]" placeholder="e.g. /mnt...(won't work with windows)" title="path of unRAID share" />
-	</td>
-</tr>
-
-<tr>
-	<td align="right">Mount tag:&nbsp;</td>
-	<td>
-		<input type="text" value="" name="shares[target]" placeholder="e.g. shares (name of mount tag inside vm)" title="mount tag inside vm" />
-	</td>
-</tr>
-        </table>
-    </td>
-</tr>
-
-<tr align="left">
-	<td align="right">
-	</td>
-    <td>
- 	   <input type="submit" value="Create VM" />
- 	   <input type="button" value="Reset Form" onClick="this.form.reset();location.reload()" />
-    </td>
-</tr>
-
-	</table>
-		<input type="hidden" name="sent" value="1" />
-		<input type="hidden" name="domain[type]" value="<?php echo is_dir('/proc/xen') ? 'xen' : 'kvm'; ?>" />
-	</form>
-
+<div id="title">
+	<span class="left"><img src="/plugins/dynamix.docker.manager/icons/vcard.png" class="icon">Identity</span>
 </div>
+
+<table>
+	<tr>
+		<td>Template:</td>
+		<td>
+			<select onchange="loadTemplateForm(this.value);" name="domain[template]" autofocus title="Select domain operating system type. Windows or Other for Linux, OSX and others">
+				<?php
+					foreach ($arrTemplates as $strTemplate) {
+						echo mk_option($strSelectedTemplate, $strTemplate, str_replace('_', ' ', $strTemplate));
+					}
+				?>
+			</select><img src="/webGui/images/spinner.gif" style="display: none">
+		</td>
+	</tr>
+	<tr>
+		<td>Name:</td>
+		<td><input type="text" name="domain[name]" class="textTemplate" title="Name of virtual machine" placeholder="e.g. My Workstation" /></td>
+	</tr>
+	<tr>
+		<td>Description:</td>
+		<td><input type="text" name="domain[desc]" title="description of vitual machine" placeholder="description of vitual machine (optional)" /></td>
+	</tr>
+	<tr style="line-height: 15px; vertical-align: middle;">
+		<td>Autostart:</td>
+		<td><div style="margin-left: -10px"><input type="checkbox" name="domain[autostart]" class="autostart" value="1"></div></td>
+	</tr>
+</table>
+
+<div id="title">
+	<span class="left"><img src="/plugins/dynamix.docker.manager/icons/preferences.png" class="icon">Template Settings</span>
+</div>
+
+<div id="form_content">
+	<?php include('plugins/dynamix.kvm.manager/templates/' . $strSelectedTemplate . '.form.php'); ?>
+</div>
+
+</form>
+</div>
+
+<script type="text/javascript" src="/webGui/scripts/jquery.switchButton.js"></script>
+<script type="text/javascript">
+$(function() {
+	$('.autostart').switchButton({
+		on_label: 'Yes',
+		off_label: 'No',
+		labels_placement: "right"
+	});
+});
+</script>
+
