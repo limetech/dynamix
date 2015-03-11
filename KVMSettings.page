@@ -1,10 +1,10 @@
-Menu="KVM:4"
+Menu="VMs:4"
 Title="Settings"
 ---
 <div style="margin-top:-41px">
 	<div id="title">
 		<span class="left">Libvirt Control</span>
-	</div>  
+	</div>
 		<?if ($libvirt_running=="yes"):?>
 		<div align="center" style="margin-top:-10px;width:75%">
 			<table>
@@ -39,10 +39,10 @@ Title="Settings"
 				<td align="right"> Enable libvirt:&nbsp;&nbsp; </td>
 				<td>
 					<input type="checkbox" id="enable" <?=($libvirt_service=="enable") ? 'checked="checked"':'';?> onChange="checkENABLE(this.form);">
-					<input type="hidden" name="SERVICE" value="<?=$libvirt_service;?>">     
+					<input type="hidden" name="SERVICE" value="<?=$libvirt_service;?>">
 					<label style="margin-left:30px"><b>Enable Debugging:&nbsp;</b></label>
 					<input type="checkbox" id="debug" <?=($domain_debug == "yes") ? 'checked="checked"':'';?> onChange="checkDebug(this.form);">
-					<input type="hidden" name="DEBUG" value="<?=$domain_debug?>">     
+					<input type="hidden" name="DEBUG" value="<?=$domain_debug?>">
 				</td>
 			</tr>
 

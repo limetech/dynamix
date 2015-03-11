@@ -1,4 +1,4 @@
-Menu="KVM:3"
+Menu="VMs:3"
 Title="Add XML"
 Cond="(pgrep('libvirtd')!==false)"
 Markdown="false"

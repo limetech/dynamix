@@ -1,4 +1,4 @@
-Menu="KVM:0"
+Menu="VMs:0"
 Title="Virtual Machines"
 Tabs="true"
 Cond="(pgrep('libvirtd')!==false)"
@@ -10,7 +10,7 @@ $uuid = $_GET['uuid'];
 if ($_GET['refresh']) {
 	$name = $_GET['name'];
 	if($lv->domain_is_active($name)){
-		echo "<meta http-equiv='refresh' content='5; url=/KVM?name=$name&amp;refresh=true'>";
+		echo "<meta http-equiv='refresh' content='5; url=/VMs?name=$name&amp;refresh=true'>";
 		$msg = "Waiting for $name to shutdown...";
 	}else{
 		echo "<script>clearHistory();</script>";
@@ -25,7 +25,7 @@ if ($action) {
    if ($subaction) {
      	$domName = $lv->domain_get_name_by_uuid($uuid);
       if ($subaction == 'domain-start') {
-        	$msg = $lv->domain_start($domName) ? "$domName has been started" : 
+        	$msg = $lv->domain_start($domName) ? "$domName has been started" :
         		"error";
 			 }
 		elseif ($subaction == 'domain-autostart') {
@@ -34,51 +34,51 @@ if ($action) {
 	 				"Error: ".$lv->get_last_error();
 	 		} else {
 	 			$msg = $lv->domain_set_autostart($domName, true) ? "$domName has been set to autostart" :
-       			"Error: ".$lv->get_last_error(); 
+       			"Error: ".$lv->get_last_error();
 			}
 		}
       elseif ($subaction == 'domain-pause') {
-        	$msg = $lv->domain_suspend($domName) ? 
-  	      	"$domName has been paused" : 
+        	$msg = $lv->domain_suspend($domName) ?
+  	      	"$domName has been paused" :
    	     	"Error: ".$lv->get_last_error();
 		}
       elseif ($subaction == 'domain-resume') {
-      	$msg = $lv->domain_resume($domName) ? 
-      		"$domName has been resumed" : 
+      	$msg = $lv->domain_resume($domName) ?
+      		"$domName has been resumed" :
       		"Error: ".$lv->get_last_error();
 		}
       elseif ($subaction == 'domain-restart') {
-        	$msg = $lv->domain_reboot($domName) ? 
-        		"$domName has been restarted" : 
+        	$msg = $lv->domain_reboot($domName) ?
+        		"$domName has been restarted" :
         		"Error: ".$lv->get_last_error();
 		}
       elseif ($subaction == 'domain-save') {
-        	$msg = $lv->domain_save($domName) ? 
-        		"$domName has been shutdown and saved" : 
+        	$msg = $lv->domain_save($domName) ?
+        		"$domName has been shutdown and saved" :
         		'Error: '.$lv->get_last_error();
 		}
 		elseif ($subaction == 'domain-stop') {
-         $msg = $lv->domain_shutdown($domName) ? 
-         	"Waiting for $domName to shutdown..." : 
+         $msg = $lv->domain_shutdown($domName) ?
+         	"Waiting for $domName to shutdown..." :
          	"Error: ".$lv->get_last_error();
-			echo "<meta http-equiv='refresh' content='5; url=/KVM?name=$domName&amp;refresh=true'>";			
+			echo "<meta http-equiv='refresh' content='5; url=/VMs?name=$domName&amp;refresh=true'>";
          	}
       elseif ($subaction == 'domain-destroy') {
-         $msg = $lv->domain_destroy($domName) ? 
-         	"$domName has been destroyed" : 
+         $msg = $lv->domain_destroy($domName) ?
+         	"$domName has been destroyed" :
          	"Error: ".$lv->get_last_error();
       }
       elseif ($subaction == 'domain-delete') {
-         $msg = $lv->domain_delete($domName) ? "$domName has been deleted" : 
+         $msg = $lv->domain_delete($domName) ? "$domName has been deleted" :
          	"Error: ".$lv->get_last_error();
       }
       elseif ($subaction == 'domain-undefine') {
-         $msg = $lv->domain_undefine($domName) ? "$domName has been undefined" : 
+         $msg = $lv->domain_undefine($domName) ? "$domName has been undefined" :
          	"Error: ".$lv->get_last_error();
       }
       elseif ($subaction == 'domain-define') {
          if (@$_POST['xmldesc']) {
-      	   $msg = $lv->domain_define( $_POST['xmldesc']) ? "Domain definition has been added" : 
+      	   $msg = $lv->domain_define( $_POST['xmldesc']) ? "Domain definition has been added" :
    	      	'Error: '.$lv->get_last_error();
          }
       }
@@ -91,7 +91,7 @@ if ($action) {
          }
 		}
 		elseif ($subaction == 'domain-diskdev') {
-			$msg = $lv->domain_set_disk_dev($domName, $_GET['olddev'], $_POST['diskdev']) ? 
+			$msg = $lv->domain_set_disk_dev($domName, $_GET['olddev'], $_POST['diskdev']) ?
 				$domName.' disk dev has been changed from '.$_GET['olddev'].' to '.$_POST['diskdev']:
 				'Error: '.$lv->get_last_error();
 		}
@@ -105,49 +105,49 @@ if ($action) {
 			}
 		}
 		elseif ($subaction == 'cdrom-change') {
-         $msg = $lv->domain_change_cdrom($domName, $_POST['cdrom'], $_GET['dev'], $_GET['bus']) ? 
-         	"$domName cdrom has been changed" : 
+         $msg = $lv->domain_change_cdrom($domName, $_POST['cdrom'], $_GET['dev'], $_GET['bus']) ?
+         	"$domName cdrom has been changed" :
          	"Error: ".$lv->get_last_error();
       }
 		elseif ($subaction == 'memory-change') {
-			$msg = $lv->domain_set_memory($domName, $_GET['memory']*1024) ? 
+			$msg = $lv->domain_set_memory($domName, $_GET['memory']*1024) ?
 				"$domName memory has been changed to ".$_GET['memory']." MiB" :
 				"Error: ".$lv->get_last_error();
 		}
 		elseif ($subaction == 'vcpu-change') {
 			$vcpu = $_GET['vcpu'];
-			$msg = $lv->domain_set_vcpu($domName, $vcpu) ? 
-				"$domName vcpu number has been changed to $vcpu" : 
+			$msg = $lv->domain_set_vcpu($domName, $vcpu) ?
+				"$domName vcpu number has been changed to $vcpu" :
 				"Error: ".$lv->get_last_error();
 		}
 		elseif ($subaction == 'bootdev-change') {
 			$bootdev = $_GET['bootdev'];
-			$msg = $lv->domain_set_boot_device($domName, $bootdev) ? 
-				"$domName boot device has been changed to $bootdev" : 
+			$msg = $lv->domain_set_boot_device($domName, $bootdev) ?
+				"$domName boot device has been changed to $bootdev" :
 				"Error: ".$lv->get_last_error();
 		}
 		elseif ($subaction == 'disk-remove') {
-			$msg = $lv->domain_disk_remove($domName, $_GET['dev']) ? 
-				"$domName disk has been removed" : 
+			$msg = $lv->domain_disk_remove($domName, $_GET['dev']) ?
+				"$domName disk has been removed" :
 				'Error: '.$lv->get_last_error();
 		}
 		elseif ($subaction == 'snap-create') {
-			$msg = $lv->domain_snapshot_create($domName) ? 
-				"Snapshot for $domName has been created" : 
+			$msg = $lv->domain_snapshot_create($domName) ?
+				"Snapshot for $domName has been created" :
 				'Error: '.$lv->get_last_error();
 		}
-		elseif ($subaction == 'snap-delete') {    
-			$msg = $lv->domain_snapshot_delete($domName, $_GET['snap']) ? 
-				"Snapshot for $domName has been deleted" : 
+		elseif ($subaction == 'snap-delete') {
+			$msg = $lv->domain_snapshot_delete($domName, $_GET['snap']) ?
+				"Snapshot for $domName has been deleted" :
 				'Error: '.$lv->get_last_error();
 		}
-		elseif ($subaction == 'snap-revert') {         
-			$msg = $lv->domain_snapshot_revert($domName, $_GET['snap']) ? 
-				"$domName has been reverted" : 
+		elseif ($subaction == 'snap-revert') {
+			$msg = $lv->domain_snapshot_revert($domName, $_GET['snap']) ?
+				"$domName has been reverted" :
 				'Error: '.$lv->get_last_error();
 		}
 		elseif ($subaction == 'snap-desc') {
-			$msg = $lv->snapshot_set_metadata($domName, $_GET['snap'], $_POST['snapdesc']) ? 
+			$msg = $lv->snapshot_set_metadata($domName, $_GET['snap'], $_POST['snapdesc']) ?
 				"Snapshot description for $domName has been saved":
 				'Error: '.$lv->get_last_error();
 		}
@@ -173,7 +173,7 @@ if ($action) {
 	if(!is_array($doms)){
 		if ($libvirt_running == "yes")
 			$msg = "No domains defined. Create from template or add XML.";
-		else 
+		else
 			$msg = "Libvirt is not running. Goto Settings tab then click Start.";
 	} else {
 	sort($doms);
@@ -191,11 +191,11 @@ if ($action) {
 			$mem = $lv->domain_get_memory($res)/1024;
 			if($state == 'paused')
 			 	$color = 'yellow';
-			else 
+			else
       	  	$color = 'red';
-      }               
+      }
    	$vcpu = $dom['nrVirtCpu'];
-		$auto = $lv->domain_get_autostart($name) ? 'checked="checked"':"";  
+		$auto = $lv->domain_get_autostart($name) ? 'checked="checked"':"";
       if (($diskcnt = $lv->get_disk_count($res)) > 0) {
         	$disks = $diskcnt.' / '.$lv->get_disk_capacity($res);
          $diskdesc = 'Current physical size: '.$lv->get_disk_capacity($res, true);
@@ -211,7 +211,7 @@ if ($action) {
         	$vncport = "auto";
       }else
          $vnc = '/plugins/dynamix.kvm.manager/vnc.html?autoconnect=true&host='.$var['IPADDR'].'&port='.$wsport;
-		$bootdev = $lv->domain_get_boot_devices($name)[0];      
+		$bootdev = $lv->domain_get_boot_devices($name)[0];
 
       unset($tmp);
       if (!$id)
@@ -220,7 +220,7 @@ if ($action) {
 		//Domain information
       echo "<tr style='background-color:".bcolor($i,$theme)."'>
       			<td>
-						<img src='/plugins/dynamix.kvm.manager/images/".$color."-on.png' title='$state'>      			
+						<img src='/plugins/dynamix.kvm.manager/images/".$color."-on.png' title='$state'>
       			</td>
         	      <td>
 						<a href='#' onclick=\"toggle_id('name$i')\" title='click for more domain info'>$name</a>
@@ -237,11 +237,11 @@ if ($action) {
            	}
 				echo "</select>";
 			}
-			else 
+			else
 				echo $vcpu;
          echo "</td>
                <td>";
-			/* display memory*/         
+			/* display memory*/
      		if ($state == 'shutoff') {
      			echo '<select name="memory" onchange="location = this.options[this.selectedIndex].value;" title="define the amount memory">';
 				echo "<option value=''>*****</option>";
@@ -262,37 +262,37 @@ if ($action) {
                <td>";
 		//Domain Action Buttons
       if ($state == 'running'){
-			echo "<button class='btn btn-sm btn-primary' onClick=\"window.open('$vnc','_blank','scrollbars=yes,resizable=yes'); return false;\" 
-      	  			title='open VNC connection'><i class='glyphicon glyphicon-eye-open'></i></button> | 
-           		<button class='btn btn-sm btn-warning' onClick=\"javascript:location.href='?subaction=domain-pause&amp;uuid=$uuid'\" 
-        				title='Pause domain'><i class='glyphicon glyphicon-pause'></i></button> | 
-            	<button class='btn btn-sm btn-primary' onClick=\"javascript:location.href='?subaction=domain-restart&amp;uuid=$uuid'\" 
-        				title='restart domain'><i class='glyphicon glyphicon-refresh'></i></button> | 
-        			<button class='btn btn-sm btn-warning' onClick=\"javascript:location.href='?subaction=domain-save&amp;uuid=$uuid'\" 
-        				title='Suspend to disk, save domain state'><i class='glyphicon glyphicon-save'></i></button> | 
-        			<button class='btn btn-sm btn-danger' onClick=\"javascript:location.href='?subaction=domain-stop&amp;uuid=$uuid'\" 
-        				title='safely shutdown domain'><i class='glyphicon glyphicon-stop'></i></button> | 
-              	<a class='btn btn-sm btn-default' href=\"?subaction=domain-destroy&amp;uuid=$uuid\" 
+			echo "<button class='btn btn-sm btn-primary' onClick=\"window.open('$vnc','_blank','scrollbars=yes,resizable=yes'); return false;\"
+      	  			title='open VNC connection'><i class='glyphicon glyphicon-eye-open'></i></button> |
+           		<button class='btn btn-sm btn-warning' onClick=\"javascript:location.href='?subaction=domain-pause&amp;uuid=$uuid'\"
+        				title='Pause domain'><i class='glyphicon glyphicon-pause'></i></button> |
+            	<button class='btn btn-sm btn-primary' onClick=\"javascript:location.href='?subaction=domain-restart&amp;uuid=$uuid'\"
+        				title='restart domain'><i class='glyphicon glyphicon-refresh'></i></button> |
+        			<button class='btn btn-sm btn-warning' onClick=\"javascript:location.href='?subaction=domain-save&amp;uuid=$uuid'\"
+        				title='Suspend to disk, save domain state'><i class='glyphicon glyphicon-save'></i></button> |
+        			<button class='btn btn-sm btn-danger' onClick=\"javascript:location.href='?subaction=domain-stop&amp;uuid=$uuid'\"
+        				title='safely shutdown domain'><i class='glyphicon glyphicon-stop'></i></button> |
+              	<a class='btn btn-sm btn-default' href=\"?subaction=domain-destroy&amp;uuid=$uuid\"
               		onClick=\"return confirm('Are your sure you want to force shutdown $name?')\" title='force domain to shutdown'><i class=\"glyphicon glyphicon-eject\"></i></a>";
  		}else {
         	if ($state == 'paused' | $state == 'unknown')
-        		echo "<button class='btn btn-sm btn-success' onClick=\"javascript:location.href='?subaction=domain-resume&amp;uuid=$uuid'\" 
+        		echo "<button class='btn btn-sm btn-success' onClick=\"javascript:location.href='?subaction=domain-resume&amp;uuid=$uuid'\"
         				title='resume domain'><i class='glyphicon glyphicon-play'></i></button> |
-        			<button class='btn btn-sm btn-warning' onClick=\"javascript:location.href='?subaction=domain-save&amp;uuid=$uuid'\" 
+        			<button class='btn btn-sm btn-warning' onClick=\"javascript:location.href='?subaction=domain-save&amp;uuid=$uuid'\"
         				title='Suspend to disk, save domain state'><i class='glyphicon glyphicon-save'></i></button>";
 			else
-        		echo "<button class='btn btn-sm btn-success' onClick=\"javascript:location.href='?subaction=domain-start&amp;uuid=$uuid'\" 
+        		echo "<button class='btn btn-sm btn-success' onClick=\"javascript:location.href='?subaction=domain-start&amp;uuid=$uuid'\"
         				title='start domain'><i class='glyphicon glyphicon-play'></i></button>";
 		}
       if ($state == 'shutoff')
-      	echo " | <a class='btn btn-sm btn-warning' href='?subaction=domain-undefine&amp;uuid=$uuid' 
+      	echo " | <a class='btn btn-sm btn-warning' href='?subaction=domain-undefine&amp;uuid=$uuid'
           		 onClick=\"return confirm('Remove $name definition?')\" title='remove $name definition'><i class='glyphicon glyphicon-minus'></i></a>
-					 | <a class='btn btn-sm btn-danger' href='?subaction=domain-delete&amp;uuid=$uuid' 
-          		 onClick=\"return confirm('Completely remove $name xml and image?')\" title='remove $name xml and image'><i class=' glyphicon glyphicon-remove'></i></a>          		  
-          		  | <button class='btn btn-sm btn-info' onClick=\"javascript:location.href='?action=domain-edit&amp;uuid=$uuid'\" 
+					 | <a class='btn btn-sm btn-danger' href='?subaction=domain-delete&amp;uuid=$uuid'
+          		 onClick=\"return confirm('Completely remove $name xml and image?')\" title='remove $name xml and image'><i class=' glyphicon glyphicon-remove'></i></a>
+          		  | <button class='btn btn-sm btn-info' onClick=\"javascript:location.href='?action=domain-edit&amp;uuid=$uuid'\"
 		  		title='edit domain XML'><i class='glyphicon glyphicon-pencil'></i></button>";
 		else
-			echo " | <button class='btn btn-sm btn-info' onClick=\"javascript:location.href='?action=domain-edit&amp;uuid=$uuid&amp;readonly=true'\" 
+			echo " | <button class='btn btn-sm btn-info' onClick=\"javascript:location.href='?action=domain-edit&amp;uuid=$uuid&amp;readonly=true'\"
 		  		title='view domain XML'><i class=\"glyphicon glyphicon-share-alt\"></i></button>";
 			echo "</td>
 			</tr>
@@ -306,11 +306,11 @@ if ($action) {
                   	<option ";
                //boot device select
 							if($bootdev == 'hd')
-								echo "selected ";                  	
+								echo "selected ";
               	echo "value='?subaction=bootdev-change&amp;uuid=$uuid&amp;bootdev=hd'>hd</option>
               			<option ";
 							if($bootdev == 'cdrom')
-								echo "selected ";                  	
+								echo "selected ";
                echo "value='?subaction=bootdev-change&amp;uuid=$uuid&amp;bootdev=cdrom'>cd</option>
                   	</select><font size='-6'>(boot)</font>
                   	</th>
@@ -366,7 +366,7 @@ if ($action) {
 						<form method='post' id='cdrom_form$i$ii' name='cdromform' action='?subaction=cdrom-change&amp;uuid=$uuid&amp;dev=$dev&amp;bus=$bus' />
 							<span>
 								<span class='text'><a href='#'>".basename($disk)."</a></span>
-								<input class='input cdrom_file' id='cdrom_file$i$ii' 
+								<input class='input cdrom_file' id='cdrom_file$i$ii'
 								onclick='CDRomTree(cdrom_tree$i$ii, cdrom_file$i$ii, cdrom_form$i$ii);' hidden type='text' name='cdrom' value='$disk' title=change cdrom image'>
 								<div class='cdrom_tree' id='cdrom_tree$i$ii' hidden></div>
 							</span>
@@ -386,7 +386,7 @@ if ($action) {
                  	      echo "remove <a href='?subaction=disk-remove&amp;uuid=$uuid&amp;dev=$dev'
                   	      onclick=\"return confirm('Disk is not deleted. Remove from domain?')\" title='remove disk from domain'>
                   	      <i class='glyphicon glyphicon-remove red'></i></a>";
-                 	   else 
+                 	   else
                  	   	echo "N/A";
 					echo '</td>
 					</tr>';
@@ -423,7 +423,7 @@ if ($action) {
 					if(empty($info)){
 						$info = "Click to change description";
 						$val = "";}
-					else 
+					else
 						$val = $info;
             	echo "<tr style='background-color:".bcolor($ii,$theme)."'>
             		   	<td>".($ii+1)."</td>
@@ -437,21 +437,21 @@ if ($action) {
 								</td>
    	                  <td>
    	                  	revert &nbsp;<a href='?subaction=backup-revert&amp;uuid=$uuid&amp;backup=$backup'><i class='glyphicon glyphicon-refresh lightblue'></i></a>
-            	         </td>                               
+            	         </td>
    	                  <td>
 									delete&nbsp;<a href='?subaction=backup-delete&amp;uuid=$uuid&amp;backup=$backup'><i class='glyphicon glyphicon-remove red'></i></a>
-            	          </td>                               
+            	          </td>
                	   </tr>";
 				}
          }
          else
          	echo "<tr><td>no backups</td>
-   	                <td>none</td>                               
-   	                <td>N/A</td>                               
-   	                <td>N/A</td>                               
-   	                <td>N/A</td>                               
+   	                <td>none</td>
    	                <td>N/A</td>
-   	            </tr>";                              
+   	                <td>N/A</td>
+   	                <td>N/A</td>
+   	                <td>N/A</td>
+   	            </tr>";
      	echo '</table>';*/
 
 /* End Backup information*/
@@ -474,7 +474,7 @@ if ($action) {
                   echo "</th><th class='header'></th><th class='header'></th>
                   		</thead>
 	                  </tr>";
-         $tmp = $lv->domain_snapshots_list($res); 
+         $tmp = $lv->domain_snapshots_list($res);
          if (!empty($tmp)) {
          	sort($tmp);
 				for ($ii = 0; $ii < sizeof($tmp); $ii++) {
@@ -485,7 +485,7 @@ if ($action) {
 					if(empty($info)){
 						$info = "Click to change description";
 						$val = "";}
-					else 
+					else
 						$val = $info;
             	echo "<tr style='background-color:".bcolor($ii,$theme)."'>
             		   	<td>".($ii+1)."</td>
@@ -499,22 +499,22 @@ if ($action) {
 								</td>
    	                  <td>
    	                  	revert &nbsp;<a href='?subaction=snap-revert&amp;uuid=$uuid&amp;snap=$snap'><i class='glyphicon glyphicon-refresh lightblue'></i></a>
-            	         </td>                               
+            	         </td>
    	                  <td>
 									delete&nbsp;<a href='?subaction=snap-delete&amp;uuid=$uuid&amp;snap=$snap'><i class='glyphicon glyphicon-remove red'></i></a>
-            	          </td>                               
+            	          </td>
                	   </tr>";
 				}
          }
          else
          	echo "<tr><td>no snapshots</td>
-   	                <td>none</td>                               
-   	                <td>N/A</td>                               
-   	                <td>N/A</td>                               
-   	                <td>N/A</td>                               
+   	                <td>none</td>
    	                <td>N/A</td>
-   	            </tr>";                              
-     	echo '</table></td>			
+   	                <td>N/A</td>
+   	                <td>N/A</td>
+   	                <td>N/A</td>
+   	            </tr>";
+     	echo '</table></td>
 			</tr>';
 		}
 	}
