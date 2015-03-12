@@ -42,17 +42,19 @@ if(jQuery) (function($){
 			if( options.multiFolder		=== undefined ) options.multiFolder		= false;
 			if( options.loadMessage		=== undefined ) options.loadMessage		= 'Loading...';
 			if( options.multiSelect		=== undefined ) options.multiSelect		= false;
+			if( options.allowBrowsing === undefined ) options.allowBrowsing = false;
 
 			$(this).each( function() {
 
-				function showTree(element, dir) {
+				function showTree(element, dir, show_parent) {
 					$(element).addClass('wait');
 					$(".jqueryFileTree.start").remove();
 					$.post(options.script,
 					{
 						dir: dir,
 						multiSelect: options.multiSelect,
-						filter: options.filter
+						filter: options.filter,
+						show_parent : show_parent
 					})
 					.done(function(data){
 						$(element).find('.start').html('');
@@ -78,8 +80,14 @@ if(jQuery) (function($){
 						data.type = ( data.li.hasClass('directory') ? 'directory' : 'file' );
 						data.value	= $(this).text();
 						data.rel	= $(this).prop('rel');
-
-						if( $(this).parent().hasClass('directory') ) {
+						if ($(this).text() == "..") {
+							// Restart fileTree with the parent dir as root
+							options.root = data.rel;
+							root = $(this).closest('ul.jqueryFileTree');
+							root.html('<ul class="jqueryFileTree start"><li class="wait">' + options.loadMessage + '<li></ul>');
+							showTree( $(root), escape(options.root), options.allowBrowsing );
+              
+						} else if( $(this).parent().hasClass('directory') ) {
 							if( $(this).parent().hasClass('collapsed') ) {
 								// Expand
 								_trigger($(this), 'filetreeexpand', data);
@@ -91,7 +99,7 @@ if(jQuery) (function($){
 
 								$(this).parent().removeClass('collapsed').addClass('expanded');
 								$(this).parent().find('UL').remove(); // cleanup
-								showTree( $(this).parent(), encodeURIComponent($(this).attr('rel').match( /.*\// )) );
+								showTree( $(this).parent(), encodeURIComponent($(this).attr('rel').match( /.*\// )), false );
 							} else {
 								// Collapse
 								_trigger($(this), 'filetreecollapse', data);
@@ -122,7 +130,7 @@ if(jQuery) (function($){
 				$(this).html('<ul class="jqueryFileTree start"><li class="wait">' + options.loadMessage + '<li></ul>');
 
 				// Get the initial file list
-				showTree( $(this), escape(options.root) );
+				showTree( $(this), escape(options.root), options.allowBrowsing );
 
 				// wrapper to append trigger type to data
 				function _trigger(element, eventType, data) {

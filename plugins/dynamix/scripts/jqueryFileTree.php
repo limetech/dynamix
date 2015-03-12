@@ -45,6 +45,7 @@ if( file_exists($postDir) ) {
 		echo "<ul class='jqueryFileTree'>";
 
 		// All dirs
+		if ($_POST['show_parent'] == "true" ) echo "<li class='directory collapsed'>{$checkbox}<a href='#' rel='" .dirname($returnDir). "/'>..</a></li>";
 		foreach( $files as $file ) {
 			if( file_exists($postDir . $file) && $file != '.' && $file != '..' ) {
 				if( is_dir($postDir . $file) ) {
