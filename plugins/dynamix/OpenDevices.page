@@ -14,13 +14,16 @@ Cond="((count($devs)>0)&&($var['fsState']=='Started'))"
  * all copies or substantial portions of the Software.
  */
 ?>
+<?
+$tabX = '#tab'.($var['fsState']=='Stopped'||is_dir('/mnt/cache') ? '4' : '3');
+?>
 <script>
 function open_status() {
   $.post('/webGui/include/DeviceList.php',{path:'<?=$path?>',device:'open',width:window.innerWidth,timer:timer},function(data) {
     if (data) $('#open_devices').html(data);
 <?if (($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)) && $var['fsState']=='Started'):?>
 <?if ($display['tabs']==0):?>
-    if ($('#tab4').is(':checked')) timer = setTimeout(open_status,<?=abs($display['refresh'])?>);
+    if ($('<?=$tabX?>').is(':checked')) timer = setTimeout(open_status,<?=abs($display['refresh'])?>);
 <?else:?>
     setTimeout(open_status,<?=abs($display['refresh'])?>);
 <?endif;?>
@@ -28,7 +31,7 @@ function open_status() {
   });
 }
 <?if (($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)) && $var['fsState']=='Started' && $display['tabs']==0):?>
-$('#tab4').bind({click:function() {clearTimeout(timer); open_status();}});
+$('<?=$tabX?>').bind({click:function() {clearTimeout(timer); open_status();}});
 <?endif;?>
 
 open_status();

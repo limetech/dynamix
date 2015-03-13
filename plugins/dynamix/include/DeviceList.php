@@ -331,6 +331,16 @@ function my_clock($time) {
   $mins = $time%60;
   return plus($days,'day',($hour|$mins)==0).plus($hour,'hour',$mins==0).plus($mins,'minute',true);
 }
+function read_disk($device, $item) {
+  global $var;
+  $smart = "/var/local/emhttp/smart/$device";
+  if (!file_exists($smart) || (time()-filemtime($smart)>=$var['poll_attributes'])) exec("smartctl -A /dev/$device > $smart");
+  $temp = exec("awk '/Temperature/{print \$10}' $smart");
+  switch ($item) {
+    case 'color': return $temp ? 'blue-on' : 'blue-blink';
+    case 'temp' : return $temp ? $temp : '*';
+  }
+}
 function show_totals($text) {
   global $var, $display, $temps, $counts, $fsSize, $fsUsed, $fsFree, $reads, $writes, $errors;
   echo "<tr class='tr_last'>";
@@ -440,8 +450,8 @@ case 'open':
   $status = isset($confirm['preclear']) ? '' : '_NP';
   foreach ($devs as $dev) {
     $dev['name'] = 'preclear';
-    $dev['color'] = exec("hdparm -C /dev/{$dev['device']}|grep 'standby'") ? 'blue-blink' : 'blue-on';
-    $dev['temp'] = $dev['color']=='blue-on' ? exec("smartctl -A /dev/{$dev['device']}|awk '/Temperature_Celsius/{print \$10}'") : '*';
+    $dev['color'] = read_disk($dev['device'], 'color');
+    $dev['temp'] = read_disk($dev['device'], 'temp');
     $dev['status'] = $status;
     echo "<tr>";
     echo "<td>".device_info($dev)."</td>";
