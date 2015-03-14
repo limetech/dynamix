@@ -85,9 +85,7 @@
 
 		echo("Starting apcupsd...$newline");
 		exec_log("/etc/rc.d/rc.apcupsd start");
-		sleep(5);
 		echo("Completed...$newline");
-		sleep(1);
 	}
 
 	function stopapcupsd() {
