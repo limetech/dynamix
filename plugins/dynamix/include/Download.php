@@ -30,10 +30,6 @@ case 'save':
   echo "/$zip";
   break;
 case 'delete':
-  if (isset($_POST['root'])) {
-    @unlink("{$_POST['root']}/$file");
-  } else {
-    @unlink($file);
-  }
+  @unlink($file);
   break;}
 ?>

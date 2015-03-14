@@ -38,7 +38,7 @@ $next = $i<$end ? $refs[$i+1] : $refs[0];
 function cleanUp() {
   if (document.hasFocus()) {
     $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?="$path/$file"?>'});
-    $.post('/webGui/include/Download.php',{cmd:'delete',root:'<?=$docroot?>',file:'<?="$file.zip"?>'});
+    $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?="$docroot/$file.zip"?>'});
   } else {
     setTimeout(cleanUp,4000);
   }
