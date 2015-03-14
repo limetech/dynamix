@@ -17,10 +17,17 @@ Title="System Log"
 echo "<pre class='up'>".shell_exec('cat /var/log/syslog')."</pre>";
 ?>
 <script>
+function cleanUp() {
+  if (document.hasFocus()) {
+    $.post('/webGui/include/Download.php',{cmd:'delete',root:'<?=$docroot?>',file:'syslog.zip'});
+  } else {
+    setTimeout(cleanUp,4000);
+  }
+}  
 function syslog() {
   $.post('/webGui/include/Download.php',{cmd:'save',root:'<?=$docroot?>',file:'/var/log/syslog'},function(data) {
-    window.location.href = data;
-//$.post('/webGui/include/Download.php',{cmd:'del',root:'<?=$docroot?>',zip:'syslog.zip'});
+    location = data;
+    setTimeout(cleanUp,4000);
   });
 }
 </script>

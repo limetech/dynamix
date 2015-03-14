@@ -11,22 +11,29 @@
  */
 ?>
 <?
-$root = $_POST['root'];
+$file = $_POST['file'];
+
 switch ($_POST['cmd']) {
 case 'save':
-  $log = $_POST['file'];
-  $zip = basename($log).'.zip';
-  if (isset($_POST['unix'])) {
-    exec("zip -qj $root/$zip $log");
-  } else {
-    $tmp = '/var/tmp/'.basename($log).'.txt';
-    exec("todos <$log >$tmp");
+  $root = $_POST['root'];
+  $zip = basename($file).'.zip';
+  if (empty($_POST['unix'])) {
+  // Save in windows format (default)
+    $tmp = '/var/tmp/'.basename($file).'.tmp';
+    exec("todos <$file >$tmp");
     exec("zip -qj $root/$zip $tmp");
     unlink($tmp);
+  } else {
+  // Save in unix format
+    exec("zip -qj $root/$zip $file");
   }
   echo "/$zip";
   break;
-case 'del':
-  @unlink("$root/{$_POST['zip']}");
+case 'delete':
+  if (isset($_POST['root'])) {
+    @unlink("{$_POST['root']}/$file");
+  } else {
+    @unlink($file);
+  }
   break;}
 ?>
