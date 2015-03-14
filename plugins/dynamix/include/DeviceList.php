@@ -42,34 +42,34 @@ function device_info($disk) {
   }
   $action = strpos($disk['color'],'blink')===false ? "down" : "up";
   $a = "<a href='#' class='info nohand' onclick='return false'>";
-  $spin_disk = "";
   $title = "";
+  $arrow = "";
   if ($display['spin'] && $disk['rotational']==1 && $var['fsState']=='Started') {
     $a = "<a href='update.htm?cmdSpin{$action}={$href}' class='info' target='progressFrame'>";
     $title = "Spin $action";
-    $spin_disk = "<img src='/webGui/images/$action.png' class='iconwide'>Spin $action disk<br>";
+    $arrow = "<i class='fa fa-sort-$action spacing'></i>";
   }
   $ball = "/webGui/images/{$disk['color']}.png";
-  $left = ($width>1590 && $display['spin']) ? " class='left'" : "";
+  $left = $width>1590 ? " class='left'" : "";
 
   if ($type=='Parity' || $type=='Data' || $type=='Preclear') {
-    $status = "{$a}
+    $status = "$arrow{$a}
     <img src='$ball' title='$title' class='icon' onclick=\"$.removeCookie('one',{path:'/'});\"><span{$left}>
     <img src='/webGui/images/green-on.png' class='icon'>Normal operation<br>
     <img src='/webGui/images/yellow-on.png' class='icon'>Invalid data content<br>
-    <img src='/webGui/images/red-on.png' class='icon'>Device disabled<br>
+    <img src='/webGui/images/red-off.png' class='icon'>Device disabled<br>
     <img src='/webGui/images/blue-on.png' class='icon'>New device not in array<br>
     <img src='/webGui/images/green-blink.png' class='icon'>Device spun-down<br>
     <img src='/webGui/images/grey-off.png' class='icon'>No device present<br>
-    {$spin_disk}</span></a>";
+    </span></a>";
   } else if ($type=='Cache') {
-    $status = "{$a}
+    $status = "$arrow{$a}
     <img src='$ball' title='$title' class='icon' onclick=\"$.removeCookie('one',{path:'/'});\"><span{$left}>
     <img src='/webGui/images/green-on.png' class='icon'>Normal operation<br>
     <img src='/webGui/images/blue-on.png' class='icon'>New device, not in pool<br>
     <img src='/webGui/images/green-blink.png' class='icon'>Device spun-down<br>
     <img src='/webGui/images/grey-off.png' class='icon'>No device present<br>
-    {$spin_disk}</span></a>";
+    </span></a>";
   } else {
     $status = "<img src='$ball' class='icon'>";
   }
@@ -331,6 +331,16 @@ function my_clock($time) {
   $mins = $time%60;
   return plus($days,'day',($hour|$mins)==0).plus($hour,'hour',$mins==0).plus($mins,'minute',true);
 }
+function read_disk($device, $item) {
+  global $var;
+  $smart = "/var/local/emhttp/smart/$device";
+  if (!file_exists($smart) || (time()-filemtime($smart)>=$var['poll_attributes'])) exec("smartctl -A /dev/$device > $smart");
+  $temp = exec("awk '/Temperature/{print \$10}' $smart");
+  switch ($item) {
+    case 'color': return $temp ? 'blue-on' : 'blue-blink';
+    case 'temp' : return $temp ? $temp : '*';
+  }
+}
 function show_totals($text) {
   global $var, $display, $temps, $counts, $fsSize, $fsUsed, $fsFree, $reads, $writes, $errors;
   echo "<tr class='tr_last'>";
@@ -440,8 +450,8 @@ case 'open':
   $status = isset($confirm['preclear']) ? '' : '_NP';
   foreach ($devs as $dev) {
     $dev['name'] = 'preclear';
-    $dev['color'] = exec("hdparm -C /dev/{$dev['device']}|grep 'standby'") ? 'blue-blink' : 'blue-on';
-    $dev['temp'] = $dev['color']=='blue-on' ? exec("smartctl -A /dev/{$dev['device']}|awk '/Temperature_Celsius/{print \$10}'") : '*';
+    $dev['color'] = read_disk($dev['device'], 'color');
+    $dev['temp'] = read_disk($dev['device'], 'temp');
     $dev['status'] = $status;
     echo "<tr>";
     echo "<td>".device_info($dev)."</td>";
