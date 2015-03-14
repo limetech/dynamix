@@ -1,8 +1,8 @@
 #!/usr/bin/php
 <?PHP
 /* Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
- * Copyright 2014, Bergware International.
- * Copyright 2014, Lime Technology
+ * Copyright 2015, Bergware International.
+ * Copyright 2015, Lime Technology
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -89,13 +89,13 @@ $archive = "{$notify['path']}/archive";
 
 switch ($argv[1][0]=='-' ? 'add' : $argv[1]) {
 case 'init':
-  @mkdir($unread,0755,true);
-  @mkdir($archive,0755,true);
   $files = glob("$unread/*.notify", GLOB_NOSORT);
   foreach ($files as $file) if (!is_readable($file)) chmod($file,0666);
   break;
 
 case 'smtp-init':
+  @mkdir($unread,0755,true);
+  @mkdir($archive,0755,true);
   $conf   = $array;
   $conf[] = "# Generated";
   $conf[] = "Root={$ssmtp['root']}";
@@ -116,6 +116,8 @@ case 'smtp-init':
   break;
 
 case 'cron-init':
+  @mkdir($unread,0755,true);
+  @mkdir($archive,0755,true);
   $text = empty($notify['status']) ? "" : "# Generated array status check schedule:\n{$notify['status']} /usr/local/sbin/statuscheck &> /dev/null\n\n";
   parse_cron_cfg("dynamix", "status-check", $text);
   $text = empty($notify['version']) ? "" : "# Generated plugins version check schedule:\n{$notify['version']} /usr/local/sbin/plugincheck &> /dev/null\n\n";
@@ -166,9 +168,9 @@ case 'add':
   $archive = "{$archive}/{$event}-{$ticket}.notify";
   if (file_exists($archive)) break;
   $entity = $overrule===false ? $notify[$importance] : $overrule;
-  if (($entity & 1)==1 && !$mailtest) file_put_contents($unread,"timestamp = $timestamp\nevent = $event\nsubject = $subject\ndescription = $description\nimportance = $importance\n");
-  if (($entity & 2)==2 || $mailtest) if (!generate_email($event, $subject, $description, $importance, $message)) exit(1);
   if (!$mailtest) file_put_contents($archive,"timestamp = $timestamp\nevent = $event\nsubject = $subject\ndescription = $description\nimportance = $importance\n");
+  if (($entity & 1)==1 && !$mailtest) file_put_contents($unread,"timestamp = $timestamp\nevent = $event\nsubject = $subject\ndescription = $description\nimportance = $importance\n");
+  if (($entity & 2)==2 || $mailtest) { if (!generate_email($event, $subject, $description, $importance, $message)) exit(1); }
   break;
 
 case 'get':
@@ -196,8 +198,7 @@ case 'get':
 
 case 'archive':
   if ($argc != 3) exit(usage());
-  $file = "$unread/{$argv[2]}";
-  if (file_exists($file)) unlink($file);
+  @unlink("$unread/{$argv[2]}");
   break;
 }
 
