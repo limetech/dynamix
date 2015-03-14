@@ -19,7 +19,7 @@ case 'save':
   $zip = basename($file).'.zip';
   if (empty($_POST['unix'])) {
   // Save in windows format (default)
-    $tmp = '/var/tmp/'.basename($file).'.tmp';
+    $tmp = '/var/tmp/'.basename($file).'.txt';
     exec("todos <$file >$tmp");
     exec("zip -qj $root/$zip $tmp");
     unlink($tmp);
