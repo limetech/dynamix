@@ -19,6 +19,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="robots" content="noindex">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/default-fonts.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.min.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/default-<?=$display['theme']?>.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/dynamix-<?=$display['theme']?>.css">
 <link type="image/png" rel="shortcut icon" href="/webGui/images/<?=$var['mdColor']?>.png">
