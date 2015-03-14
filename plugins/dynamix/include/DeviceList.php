@@ -247,7 +247,7 @@ function array_offline($disk) {
     echo "<td>".device_info($disk)."</td>";
     echo "<td>".assignment($disk)."</td>";
     echo "<td>".my_temp($disk['temp'])."</td>";
-    echo "<td>".my_scale($disk['sizeSb']*1024, $unit)." $unit</td>";
+    echo "<td>-</td>";
     echo "<td>-</td>";
     echo "<td>-</td>";
     echo "<td>-</td>";
