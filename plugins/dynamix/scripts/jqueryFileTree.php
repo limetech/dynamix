@@ -28,7 +28,7 @@ if( !$root ) exit("ERROR: Root filesystem directory not set in jqueryFileTree.ph
 
 $postDir = rawurldecode($root.(isset($_POST['dir']) ? $_POST['dir'] : null ));
 
-$filter = (isset($_POST['filter']) ? $_POST['filter'] : null);
+$filters = (array)(isset($_POST['filter']) ? $_POST['filter'] : '');
 
 // set checkbox if multiSelect set to true
 $checkbox = ( isset($_POST['multiSelect']) && $_POST['multiSelect'] == 'true' ) ? "<input type='checkbox' />" : null;
@@ -45,11 +45,12 @@ if( file_exists($postDir) ) {
 		echo "<ul class='jqueryFileTree'>";
 
 		// All dirs
+		if ($_POST['show_parent'] == "true" ) echo "<li class='directory collapsed'>{$checkbox}<a href='#' rel='" .dirname($returnDir). "/'>..</a></li>";
 		foreach( $files as $file ) {
 			if( file_exists($postDir . $file) && $file != '.' && $file != '..' ) {
 				if( is_dir($postDir . $file) ) {
 					$htmlRel	= htmlentities($returnDir . $file);
-					$htmlName	= htmlentities($file);
+					$htmlName	= htmlentities((strlen($file) > 33) ? substr($file,0,33).'...' : $file);
 
 					echo "<li class='directory collapsed'>{$checkbox}<a href='#' rel='" .$htmlRel. "/'>" . $htmlName . "</a></li>";
 				}
@@ -62,10 +63,12 @@ if( file_exists($postDir) ) {
 				if( !is_dir($postDir . $file) ) {
 					$htmlRel	= htmlentities($returnDir . $file);
 					$htmlName	= htmlentities($file);
-					$ext		= preg_replace('/^.*\./', '', $file);
+					$ext		= strtolower(preg_replace('/^.*\./', '', $file));
 
-					if (!$filter|$ext==$filter) {
-						echo "<li class='file ext_{$ext}'>{$checkbox}<a href='#' rel='" . $htmlRel . "'>" . $htmlName . "</a></li>";
+    				foreach ($filters as $filter) {
+						if (empty($filter) | $ext==$filter) {
+							echo "<li class='file ext_{$ext}'>{$checkbox}<a href='#' rel='" . $htmlRel . "'>" . $htmlName . "</a></li>";
+						}
 					}
 				}
 			}

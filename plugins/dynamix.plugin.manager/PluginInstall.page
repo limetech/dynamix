@@ -31,4 +31,4 @@ function installPlugin(name) {
 > the local file name of an extension.
 
 **Select local plugin file**
-<div id="plugin_tree"></div>
+<div id="plugin_tree" class="textarea"></div>

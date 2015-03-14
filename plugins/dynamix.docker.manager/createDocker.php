@@ -433,7 +433,7 @@ if($_GET['xmlTemplate']){
       </td>
       <td>
         <input type="text" id="hostPath%s" name="hostPath[]" value="%s" class="textPath" onclick="toggleBrowser(%s);" %s title="The directory in your array the app have access to. Ex: /mnt/user/Movies"/>
-        <div id="fileTree%s" class="fileTree"></div>
+        <div id="fileTree%s" class="textarea fileTree"></div>
       </td>
       <td>
         <select name="hostWritable[]">
@@ -490,15 +490,12 @@ $showAdditionalInfo = true;
 <style type="text/css">
   body { -webkit-overflow-scrolling: touch;}
   .fileTree {
-    width: 242px;
+    width: 240px;
     height: 150px;
-    border: solid 1px #BBB;
-    background: #FFF;
     overflow: scroll;
-    padding: 5px;
-    position:absolute;
-    z-index:100;
-    display:none;
+    position: absolute;
+    z-index: 100;
+    display: none;
   }
   #TemplateSelect {
     width: 255px;
@@ -693,7 +690,7 @@ $showAdditionalInfo = true;
           </td>
           <td>
             <input type="text" id="hostPath1" name="hostPath[]" class="textPath" autocomplete="off" onclick="toggleBrowser(1);" title="The directory in your array the app have access to. Ex: /mnt/user/Movies">
-            <div id="fileTree1" class="fileTree"></div>
+            <div id="fileTree1" class="textarea fileTree"></div>
           </td>
           <td><select id="hostWritable1" name="hostWritable[]">
               <option value="rw" selected="selected">Read/Write</option>

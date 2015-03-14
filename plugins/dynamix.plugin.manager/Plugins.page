@@ -17,11 +17,7 @@ Tabs="true"
 ?>
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css">
 <style type="text/css">
-<?if ($display['theme']=='white'):?>
-  #plugin_tree{width:33%;border:1px solid #E0E0E0;padding:10px 6px;}
-<?else:?>
-  #plugin_tree{width:33%;border:1px solid #303030;padding:10px 6px;}
-<?endif;?>
+  #plugin_tree{width:33%;height:200px;overflow:scroll;}
 </style>
 <script type="text/javascript" src="/webGui/scripts/jqueryFileTree.js"></script>
 <script>
