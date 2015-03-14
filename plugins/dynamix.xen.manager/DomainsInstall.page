@@ -34,4 +34,4 @@ function installDomain(name) {
 > the local file name of an extension.
 
 **Select local domain image**
-<div id="plugin_tree"></div>
+<div id="plugin_tree" class="textarea"></div>
