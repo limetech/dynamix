@@ -47,7 +47,7 @@ function prepareShare(form) {
   item.selected = true;
 }
 function presetShare(form) {
-  var disabled = form.shareUser.value!="e";
+  var disabled = form.shareUser.value!="e" || <?=$var['fsState']!='Stopped' ? 'true' : 'false'?>;
   var onOff = disabled ? 'disable' : 'enable';
   form.shareUserInclude.disabled = disabled;
   form.shareUserExclude.disabled = disabled;
