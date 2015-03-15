@@ -119,8 +119,11 @@ Display position:
   <?=mk_option($notify['position'], "center", "center")?>
   </select>
 
-Storage path:
-: <input type="text" name="path" value="<?=$notify['path']?>"><?=(exec("echo {$notify['path']}|grep '^/mnt'") ? 'Permanent storage' : 'Temporary storage')?>
+Store notifications to flash:
+: <select name="path" size="1">
+  <?=mk_option($notify['path'], "/tmp/notifications", "No")?>
+  <?=mk_option($notify['path'], "/boot/config/plugins/dynamix/notifications", "Yes")?>
+  </select>
 
 System notifications:
 : <select name="system" size="1" onchange="prepareCheckbox(this.selectedIndex)">
