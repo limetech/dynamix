@@ -42,7 +42,7 @@ if(jQuery) (function($){
 			if( options.multiFolder		=== undefined ) options.multiFolder		= false;
 			if( options.loadMessage		=== undefined ) options.loadMessage		= 'Loading...';
 			if( options.multiSelect		=== undefined ) options.multiSelect		= false;
-			if( options.allowBrowsing === undefined ) options.allowBrowsing = false;
+			if( options.allowBrowsing	=== undefined ) options.allowBrowsing	= false;
 
 			$(this).each( function() {
 
@@ -73,7 +73,8 @@ if(jQuery) (function($){
 				}
 
 				function bindTree(element) {
-					$(element).find('LI A').on(options.folderEvent, function() {
+					$(element).find('LI A').on(options.folderEvent, function(event) {
+						event.preventDefault();
 						// set up data object to send back via trigger
 						var data = {};
 						data.li = $(this).closest('li');
@@ -86,7 +87,6 @@ if(jQuery) (function($){
 							root = $(this).closest('ul.jqueryFileTree');
 							root.html('<ul class="jqueryFileTree start"><li class="wait">' + options.loadMessage + '<li></ul>');
 							showTree( $(root), escape(options.root), options.allowBrowsing );
-              
 						} else if( $(this).parent().hasClass('directory') ) {
 							if( $(this).parent().hasClass('collapsed') ) {
 								// Expand
@@ -123,7 +123,7 @@ if(jQuery) (function($){
 						return false;
 					});
 					// Prevent A from triggering the # on non-click events
-					if( options.folderEvent.toLowerCase != 'click' ) $(element).find('LI A').on('click', function() { return false; });
+					if( options.folderEvent.toLowerCase != 'click' ) $(element).find('LI A').on('click', function(event) { event.preventDefault(); return false; });
 				}
 
 				// Loading message
