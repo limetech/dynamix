@@ -406,7 +406,6 @@ case 'array':
   if ($var['fsState']=='Stopped') {
     foreach ($disks as $disk) {if ($disk['type']=='Parity' || $disk['type']=='Data') array_offline($disk);}
     echo "<tr class='tr_last'><td><img src='/webGui/images/sum.png' class='icon'>Slots:</td><td colspan='10'>".array_slots()."</td></tr>";
-    echo "<tr><td colspan='11'></td></tr>";
   } else {
     foreach ($disks as $disk) {if ($disk['type']=='Parity' || $disk['type']=='Data') array_online($disk);}
     if ($display['total'] && $var['mdNumProtected']>1) show_totals("Array of ".my_word($var['mdNumProtected'])." disks".($disks['parity'][status]=='DISK_OK' ? " (including parity disk)" : ""));

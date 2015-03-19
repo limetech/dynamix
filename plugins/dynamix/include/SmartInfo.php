@@ -104,6 +104,9 @@ case "SELFTEST":
   echo $spin ? "<td><input type='button' value='$start' id='long'></td>" : "<td>Disk must be spun up before running test</td>";
   echo "</tr>";
   break;
+case "save":
+  exec("smartctl -A /dev/$port > {$_GET['file']}");
+  break;
 endswitch;
 
 echo "</table>";
