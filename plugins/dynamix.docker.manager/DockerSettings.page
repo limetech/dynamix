@@ -82,7 +82,7 @@ Docker image:
 > to run at all, set this field blank and click **Start**.
 
 &nbsp;
-: <input id="applyBtn" type="button" value="Apply" />
+: <input id="applyBtn" type="button" value="Apply"/><button type="button" onclick="done()">Done</button>
 </form>
 
 <?else:
@@ -111,7 +111,7 @@ Docker image:
 > This is the docker volume.
 
 &nbsp;
-: <input id="applyBtn" type="button" value="Apply" />
+: <input id="applyBtn" type="button" value="Apply"/><button type="button" onclick="done()">Done</button>
 </form>
 
 Docker volume info:
