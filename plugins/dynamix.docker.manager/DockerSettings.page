@@ -3,6 +3,11 @@ Title="Docker"
 Icon="dynamix.docker.manager.png"
 ---
 <?PHP
+if ($var['fsState'] != "Started") {
+  echo "<p class='notice'>Array must be Started to manage Docker.</p>";
+  return;
+}
+
 // Add the Docker JSON client
 require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerClient.php");
 $docker          = new DockerClient();
