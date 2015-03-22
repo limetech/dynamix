@@ -1,6 +1,6 @@
-Menu="Docker"
-Title="Docker Settings"
-Cond="($var['fsState'] == 'Started')"
+Menu="OtherSettings"
+Title="Docker"
+Icon="dynamix.docker.manager.png"
 ---
 <?PHP
 // Add the Docker JSON client
