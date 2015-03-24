@@ -28,6 +28,7 @@ function resetNotify(form) {
   form.path.value = "/tmp/notifications";
   form.system.selectedIndex = 0;
   form.version.selectedIndex = 0;
+  form.docker_update.selectedIndex = 0;
   form.status.selectedIndex = 0;
   form.normal1.checked = true;
   form.normal2.checked = false;
@@ -53,6 +54,7 @@ function prepareNotify(form) {
   form.warning.value = form.warning1.checked*1 + form.warning2.checked*2;
   form.alert.value = form.alert1.checked*1 + form.alert2.checked*2;
   form.plugin.value = form.plugin1.checked*1 + form.plugin2.checked*2;
+  form.docker_notify.value = form.docker_notify1.checked*1 + form.docker_notify2.checked*2;
   form.report.value = form.report1.checked*1 + form.report2.checked*2;
   form.normal1.disabled = true;
   form.normal2.disabled = true;
@@ -77,11 +79,15 @@ function prepareCheckbox(index) {
 function preparePlugin(value) {
   if (value=='') $('.plugin').hide(); else $('.plugin').show();
 }
+function prepareDocker(value) {
+  if (value=='') $('.docker').hide(); else $('.docker').show();
+}
 function prepareReport(value) {
   if (value=='') $('.report').hide(); else $('.report').show();
 }
 $(function(){
   preparePlugin(document.notify_settings.version.value);
+  prepareDocker(document.notify_settings.docker_update.value);
   prepareReport(document.notify_settings.status.value);
 });
 </script>
@@ -94,6 +100,7 @@ $(function(){
 <input type="hidden" name="warning">
 <input type="hidden" name="alert">
 <input type="hidden" name="plugin">
+<input type="hidden" name="docker_notify">
 <input type="hidden" name="report">
 <input type="hidden" name="events">
 
@@ -141,6 +148,16 @@ Plugins version notification:
   <?=mk_option($notify['version'], "10 0 1 * *", "Check once a month")?>
   </select>
 
+Docker update notification:
+: <select name="docker_update" size="1" onchange="prepareDocker(this.value)">
+  <?=mk_option($notify['docker_update'], "", "Never check")?>
+  <?=mk_option($notify['docker_update'], "10 */6 * * *", "Check four times a day")?>
+  <?=mk_option($notify['docker_update'], "10 0,12 * * *", "Check twice a day")?>
+  <?=mk_option($notify['docker_update'], "10 0 * * *", "Check once a day")?>
+  <?=mk_option($notify['docker_update'], "10 0 * * 1", "Check once a week")?>
+  <?=mk_option($notify['docker_update'], "10 0 1 * *", "Check once a month")?>
+  </select>
+
 Array status notification:
 : <select name="status" size="1" onchange="prepareReport(this.value)">
   <?=mk_option($notify['status'], "", "Never send")?>
@@ -157,6 +174,10 @@ Array status notification:
 <span class="plugin" style="display:none">&nbsp;</span>
 : <span class="plugin" style="display:none"><span style="display:inline-block;width:90px;font-style:italic">Plugins version</span><input type="checkbox" name="plugin1"<?=($notify['plugin'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
   <input type="checkbox" name="plugin2"<?=($notify['plugin'] & 2)==2 ? ' checked' : ''?>>Email &nbsp;</span>
+
+<span class="docker" style="display:none">&nbsp;</span>
+: <span class="docker" style="display:none"><span style="display:inline-block;width:90px;font-style:italic">Docker update</span><input type="checkbox" name="docker_notify1"<?=($notify['docker_notify'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
+  <input type="checkbox" name="docker_notify2"<?=($notify['docker_notify'] & 2)==2 ? ' checked' : ''?>>Email &nbsp;</span>
 
 <span class="report" style="display:none">&nbsp;</span>
 : <span class="report" style="display:none"><span style="display:inline-block;width:90px;font-style:italic">Array status</span><input type="checkbox" name="report1"<?=($notify['report'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
