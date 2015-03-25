@@ -3,22 +3,24 @@
 require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerClient.php");
 $DockerTemplates = new DockerTemplates();
 
-switch ($argv[1]) {
-  case '-v':
-    $DockerTemplates->verbose = TRUE;
-    break;
-  case 'check':
-    $check = TRUE;
-    break;
+foreach ($argv as $arg) {
+  switch ($arg) {
+    case '-v':
+      $DockerTemplates->verbose = TRUE;
+      break;
+    case 'check':
+      $check = TRUE;
+      break;
+  }
+}
+if (!isset($check)) {
+  echo " Updating templates... ";
+  $DockerTemplates->downloadTemplates();
 }
 
-echo isset($check) ? "": " Updating templates... ";
-$DockerTemplates->downloadTemplates();
-
-echo isset($check) ? "": " Updating info... ";
+if (!isset($check)) echo " Updating info... ";
 $DockerTemplates->getAllInfo(TRUE);
-
-echo isset($check) ? "": " Done. ";
+if (!isset($check)) echo " Done. ";
 
 if (isset($check)) { 
   require_once("/usr/local/emhttp/webGui/include/Wrappers.php");
@@ -34,7 +36,7 @@ if (isset($check)) {
     $name           = $ct["Name"];
     $hasUpdate   = ($info[$name]['updated'] == "false") ? TRUE : FALSE;
     if ($hasUpdate) {
-      exec("$notify -e 'Docker Manager' -s 'Notice [$server] - $name: new version available' -d 'A new version of $name is available.' -i 'normal $output' -x");
+      exec("$notify -e 'Docker Manager - $name update available' -s 'Notice [$server] - $name: new version available' -d 'A new version of $name is available.' -i 'normal $output' -x");
     }
   }
 }
