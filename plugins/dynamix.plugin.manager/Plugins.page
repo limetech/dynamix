@@ -29,7 +29,7 @@ if ($tmp_stale) foreach (glob("/tmp/plugins/*.{plg,txt}", GLOB_NOSORT+GLOB_BRACE
 
 <script>
 $(function() {
-  $.get('/plugins/dynamix.plugin.manager/include/ShowPlugins.php',function(data) {
+  $.get('/plugins/dynamix.plugin.manager/include/ShowPlugins.php',{stale:'<?=$tmp_stale?>'},function(data) {
     if (data) $('#plugin_list').html(data);
     $('#plugin_table').tablesorter({headers:{0:{sorter:false},5:{sorter:false}}});
   });

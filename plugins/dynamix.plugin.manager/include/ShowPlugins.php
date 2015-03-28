@@ -90,7 +90,7 @@ foreach (glob("/var/log/plugins/*.plg", GLOB_NOSORT) as $plugin_link) {
         $status_info = "up-to-date";
       }
     } else {
-      if ($tmp_stale) $status_info = "unknown";
+      if ($_GET['stale']) $status_info = "unknown";
     }
   }
   $changes = plugin("changes", $changes_file);
