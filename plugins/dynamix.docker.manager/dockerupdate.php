@@ -30,7 +30,7 @@ if (!isset($check)) {
   foreach ($list as $ct) {
     $name = $ct['Name'];
     $image = $ct['Image'];
-    if ($info[$name]['updated'] != "false") {
+    if ($info[$name]['updated'] == "false") {
       $new = $update->getRemoteVersion($docker->getTemplateValue($image, "Registry"), $image);
       exec("$notify -e 'Docker - $name [$new]' -s 'Notice [$server] - Docker update $new' -d 'A new version of $name is available' -i 'normal $output' -x");
     }
