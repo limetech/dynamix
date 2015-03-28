@@ -22,6 +22,7 @@ $files = count(glob($path, GLOB_NOSORT));
 function archiveList() {
   $.post('/webGui/include/NotificationsArchive.php',{log:'<?=$path?>',date:'<?=$notify['date']?>',time:'<?=$notify['time']?>'},function(data) {
     if (data) $('#archive_list').html(data);
+    $('#archive_table').tablesorter({headers:{5:{sorter:false}}});
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
     setTimeout(archiveList,<?=max(abs($display['refresh']),15000)?>);
 <?endif;?>
@@ -30,10 +31,7 @@ function archiveList() {
 function askConfirmation() {
   return confirm('This will delete all notification files!\n\nAre you sure?');
 }
-$(function() {
-  $('#archive_table').tablesorter({headers:{5:{sorter:false}}});
-  archiveList();
-});
+$(archiveList);
 </script>
 
 <table class="tablesorter shift<?=$tabbed?'2':''?>" id="archive_table">
