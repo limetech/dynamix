@@ -31,10 +31,8 @@ foreach (glob("/tmp/plugins/*.plg", GLOB_NOSORT) as $file) {
   $new = exec("$plugin version '$file'");
   if ($new && strcmp($new, $old) > 0) {
     $name = basename($file, '.plg');
-    exec("$notify -e 'Plugin: $name' -s 'Notice [$server] - Version $new available' -d 'A new version of $name is available.' -i 'normal $output' -x");
+    exec("$notify -e 'Plugin - $name [$new]' -s 'Notice [$server] - Version update $new' -d 'A new version of $name is available' -i 'normal $output' -x");
   }
-  unlink($file);
 }
-
 exit(0);
 ?>
