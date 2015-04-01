@@ -30,5 +30,6 @@ function syslog() {
     setTimeout(cleanUp,4000);
   });
 }
+$('.tabs').append("<span class='status vhshift'><input type='button' value='Download' onclick='syslog()'></span>");
 </script>
 <button type="button" onclick="syslog()">Download</button><button type="button" onclick="done()">Done</button>
