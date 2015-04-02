@@ -194,8 +194,8 @@ if ($var['mdResync']>0) {
     exec("awk '/sync completion/ {gsub(\"(time=|sec)\",\"\",x);print x;print \$NF};{x=\$NF}' /var/log/syslog|tail -2", $time);
     if (!count($time)) $time = array_fill(0,2,0);
     $info = $time[1]==0 ? "Duration: ".my_check($time[0]) : "Error code: ".my_error($time[1]);
-    $level = $time[1]==0 ? "normal" : "warning";
-    exec("$notify -e \"unRAID $last\" -s \"Notice [$server] - $last finished\" -d \"$info\" -i \"$level\"");
+    $level = ($time[1]==0 && $var['sbSyncErrs']==0) ? "normal" : "warning";
+    exec("$notify -e \"unRAID $last\" -s \"Notice [$server] - $last finished ({$var['sbSyncErrs']} errors)\" -d \"$info\" -i \"$level\"");
     unset($saved[$item][$name]);
   }
 }
