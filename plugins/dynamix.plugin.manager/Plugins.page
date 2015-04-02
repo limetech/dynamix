@@ -4,8 +4,8 @@ Title="Installed Plugins"
 Tabs="true"
 ---
 <?PHP
-/* Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -15,137 +15,35 @@ Tabs="true"
  * all copies or substantial portions of the Software.
  */
 ?>
+<?
+// Remove stale /tmp/plugin/*.plg entries
+$tmp_stale = ($path != $prev);
+if ($tmp_stale) foreach (glob("/tmp/plugins/*.{plg,txt}", GLOB_NOSORT+GLOB_BRACE) as $entry) if (!file_exists("/var/log/plugins/".basename($entry))) @unlink($entry);
+?>
+
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css">
 <style type="text/css">
   #plugin_tree{width:33%;height:200px;overflow:scroll;}
 </style>
 <script type="text/javascript" src="/webGui/scripts/jqueryFileTree.js"></script>
+
 <script>
 $(function() {
-  $('#plugin_table').tablesorter({headers:{0:{sorter:false},5:{sorter:false}}});
-  $('#plugin_tree').fileTree({root:'/boot/',filter:'plg'}, function(file) {$('#plugin_file').val(file);});
+  $.get('/plugins/dynamix.plugin.manager/include/ShowPlugins.php',{stale:'<?=$tmp_stale?>'},function(data) {
+    if (data) $('#plugin_list').html(data);
+    $('#plugin_table').tablesorter({headers:{0:{sorter:false},5:{sorter:false}}});
+  });
   $('.desc_readmore').readmore({maxHeight: 100});
+  $('#plugin_tree').fileTree({root:'/boot/',filter:'plg'}, function(file) {$('#plugin_file').val(file);});
+  $('.tabs').append("<span class='status vhshift'><input type='button' value='Check for Updates' onclick='openBox(\"/usr/local/sbin/plugin checkall\",\"Plugin Update Check\",490,430,true)'></span>");
 });
-$('.tabs').append("<span class='status vhshift'><input type='button' value='Check for Updates' onclick='openBox(\"/usr/local/sbin/plugin checkall\",\"Plugin Update Check\",490,430,true)'></span>");
 </script>
 
 <blockquote class="inline_help ontop">
 Click <strong><big>check for updates</big></strong> to check all plugins. This page might take some time to load depending on your internet connection and how many plugins need to be checked.
 </blockquote>
-<?
-// Invoke the plugin command with indicated method
-function plugin($method, $arg) {
-  exec("/usr/local/sbin/plugin $method $arg", $output, $retval);
-  if ($retval != 0) return false;
-  return implode("\n", $output);
-}
 
-function make_link($method, $arg) {
-  $id = basename($arg, ".plg").$method;
-  $check = $method=='update' ? "" : "<input type='checkbox' onClick='document.getElementById(\"$id\").disabled=!this.checked'>";
-  $disabled = $check ? " disabled" : "";
-  $cmd = $method == "delete" ? "rm $arg" : "/usr/local/sbin/plugin $method $arg";
-  return "{$check}<input type='button' id='$id' value='{$method}' onclick='openBox(\"{$cmd}\",\"{$method} Plugin\",600,900,true)'{$disabled}>";
-}
-
-// trying our best to find an icon
-function icon($name) {
-// this should be the default location and name
-  $icon = "plugins/{$name}/images/{$name}.png";
-  if (file_exists($icon)) return $icon;
-// try alternatives if default is not present
-  $plugin = strtok($name, '.');
-  $icon = "plugins/{$plugin}/images/{$plugin}.png";
-  if (file_exists($icon)) return $icon;
-  $icon = "plugins/{$plugin}/images/{$name}.png";
-  if (file_exists($icon)) return $icon;
-  $icon = "plugins/{$plugin}/{$plugin}.png";
-  if (file_exists($icon)) return $icon;
-  $icon = "plugins/{$plugin}/{$name}.png";
-  if (file_exists($icon)) return $icon;
-// last resort - plugin manager icon
-  return "plugins/dynamix.plugin.manager/images/dynamix.plugin.manager.png";
-}
-
-// Remove stale /tmp/plugin/*.plg entries
-$tmp_stale = ($path != $prev);
-if ($tmp_stale) foreach (glob("/tmp/plugins/*.{plg,txt}", GLOB_NOSORT+GLOB_BRACE) as $entry) unlink($entry);
-
-echo "<table class='tablesorter plugins".($display['tabs']==1?" shift'":"'")." id='plugin_table'><thead>";
-echo "<tr><th></th><th>Plugin</th><th>Author</th><th>Version</th><th>Status</th><th></th></tr>";
-echo "</thead><tbody>";
-
-foreach (glob("/var/log/plugins/*.plg", GLOB_NOSORT) as $plugin_link) {
-  // only consider symlinks
-  $plugin_file = @readlink($plugin_link);
-  if ($plugin_file === false) continue;
-  // plugin name
-  $name = plugin("name", $plugin_file);
-  if ($name === false) $name = basename($plugin_file, ".plg");
-
-  // link/icon
-  $icon = icon($name);
-  if ($launch = plugin("launch", $plugin_file))
-    $link = "<a href='/$launch'><img src='/$icon' width='48px'/></a>";
-  else
-    $link = "<img src='/{$icon}' width='48px'/>";
-
-  // desc
-  $readme = "plugins/{$name}/README.md";
-  if (file_exists($readme))
-    $desc = Markdown(file_get_contents($readme));
-  else
-    $desc = Markdown("**{$name}**");
-
-  // author
-  $author = plugin("author", $plugin_file);
-  if ($author === false) $author = "anonymous";
-
-  // version
-  $version = plugin("version", $plugin_file);
-  if ($version === false) $version = "unknown";
-
-  // version info
-  $version_info = $version;
-
-  // status info
-  $status_info = "no update";
-  $changes_file = $plugin_file;
-  $URL = plugin("pluginURL", $plugin_file);
-  if ($URL !== false) {
-    $filename = "/tmp/plugins/".basename($URL);
-    if (file_exists($filename)) {
-      $latest = plugin("version", $filename);
-      if ($latest && strcmp($latest, $version) > 0) {
-        $version_info .= "<br><span class='red-text'>{$latest}</span>";
-        $status_info = make_link("update", basename($plugin_file));
-        $changes_file = $filename;
-      } else {
-        $status_info = "up-to-date";
-      }
-    } else {
-      if ($tmp_stale) $status_info = "unknown";
-    }
-  }
-  $changes = plugin("changes", $changes_file);
-  if ($changes !== false) {
-    file_put_contents("/tmp/plugins/".basename($plugin_file, '.plg').".txt", $changes);
-    $version_info .= "&nbsp;<a href='#' title='View Release Notes' onclick=\"openBox('/plugins/dynamix.plugin.manager/include/ShowChanges.php?file=/tmp/plugins/".urlencode(basename($plugin_file,'.plg')).".txt','Release Notes',600,900); return false\"><img src='/webGui/images/information.png' class='icon'></a>";
-  }
-
-  // action
-  $action = strpos($plugin_file, "/usr/local/emhttp/plugins") !== 0 ? make_link("remove", basename($plugin_file)) : "built-in";
-
-  // echo our plugin information
-  echo "<tr>";
-  echo "<td style=\"vertical-align: top\"><p>{$link}</p></td>";
-  echo "<td><span class='desc_readmore' style='display:block'>{$desc}</span></td>";
-  echo "<td>{$author}</td>";
-  echo "<td>{$version_info}</td>";
-  echo "<td>{$status_info}</td>";
-  echo "<td>{$action}</td>";
-  echo "</tr>";
-}
-
-echo "</tbody></table>";
-?>
+<table class='tablesorter plugins <?=$display['tabs']==1?"shift":""?>' id='plugin_table'>
+<thead><tr><th></th><th>Plugin</th><th>Author</th><th>Version</th><th>Status</th><th></th></tr></thead>
+<tbody id='plugin_list'><tr><td colspan='6'><br><i>Please wait, retrieving plugin information ...</i></td><tr></tbody>
+</table>
