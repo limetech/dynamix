@@ -31,7 +31,6 @@ function resetConfirm(form) {
 <form markdown="1" name="confirm_settings" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#file" value="dynamix/dynamix.cfg"/>
 <input type="hidden" name="#section" value="confirm"/>
-
 Confirm reboot & powerdown commands:
 : <select name="down" size="1">
   <?=mk_option($confirm['down'], "0", "No")?>

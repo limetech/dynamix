@@ -14,6 +14,7 @@ Cond="($disks['parity']['status']!='DISK_DSBL_NP')"
  * all copies or substantial portions of the Software.
  */
 ?>
+
 <?
 $mode = array('Disabled','Daily','Weekly','Monthly','Yearly','Every');
 $days = array('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday');
@@ -89,7 +90,6 @@ function resetParity(form) {
 <input type="hidden" name="#file" value="dynamix/dynamix.cfg"/>
 <input type="hidden" name="#section" value="parity"/>
 <input type="hidden" name="#include" value="update.parity.php"/>
-
 Scheduled parity check:
 : <select name="mode" size="1" onchange="submit()">
   <?for ($m=0; $m<count($mode); $m++):?>

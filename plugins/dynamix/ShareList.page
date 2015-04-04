@@ -13,6 +13,7 @@ Title="User Shares"
  * all copies or substantial portions of the Software.
  */
 ?>
+
 <?
 // User share data exists only if array is Started
 if ($var['fsState']!="Started") {

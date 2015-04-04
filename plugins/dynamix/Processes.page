@@ -13,7 +13,8 @@ Title="Processes"
  * all copies or substantial portions of the Software.
  */
 ?>
-<?PHP
+
+<?
 echo "<pre class='up'>".shell_exec('ps -ef')."</pre>";
 ?>
 <button type="button" onclick="done()">Done</button>

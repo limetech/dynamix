@@ -13,6 +13,7 @@ Title="Vars"
  * all copies or substantial portions of the Software.
  */
 ?>
+
 <?
 foreach ($site as &$page) $page['text'] = '...';
 $myPage['text'] = '...';

@@ -54,7 +54,6 @@ if (file_exists($realfile)) {
 <form id="settingsForm" markdown="1" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#file" value="<?=$cfgfile;?>" />
 <input type="hidden" id="command" name="#command" value="/etc/rc.d/rc.docker stop" />
-
 Enable Docker:
 : <select id="DOCKER_ENABLED" name="DOCKER_ENABLED" size="1">
 <?= mk_option($dockercfg['DOCKER_ENABLED'], 'no', 'No'); ?>

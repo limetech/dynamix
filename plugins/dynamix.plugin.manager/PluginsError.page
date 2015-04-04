@@ -14,7 +14,8 @@ Cond="glob('/boot/config/plugins-error/*.plg')"
  * all copies or substantial portions of the Software.
  */
 ?>
-<?PHP
+
+<?
 echo "<table class='tablesorter' id='plugin_table'><thead>";
 echo "<tr><th>Plugin File</th><th>Status</th></tr>";
 echo "</thead><tbody>";
