@@ -13,6 +13,7 @@ Title="Page Map"
  * all copies or substantial portions of the Software.
  */
 ?>
+
 <?
 function show_map($menu, $level) {
   $pages = find_pages( $menu);

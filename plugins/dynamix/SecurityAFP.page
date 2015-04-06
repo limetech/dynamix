@@ -27,7 +27,6 @@ $(checkShareSettingsAFP);
 
 <form markdown="1" name="afp_security_form" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="shareName" value="<?=$name;?>">
-
 Name:
 : <?=preg_match('/^(disk[0-9]|cache[0-9]?)/',$name) ? my_disk($name) : $name?>
 
@@ -100,12 +99,8 @@ Security:
 <?if ($sec_afp[$name]['security'] == 'secure'):?>
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="shareName" value="<?=$name;?>">
-
-&nbsp;
-
-User Access:
-: Guests have **read-only** access.
-  <?input_secure_users($sec_afp);?>
+<div id="title"><dt>User Access</dt><em>Guests have <b>read-only</b> access.</em></div>
+<?input_secure_users($sec_afp);?>
 
 &nbsp;
 : <input type='submit' name='changeShareAccessAFP' value='Apply'><button type='button' onclick='done()'>Done</button>
@@ -114,12 +109,8 @@ User Access:
 <?elseif ($sec_afp[$name]['security'] == 'private'):?>
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="shareName" value="<?=$name;?>">
-
-&nbsp;
-
-User Access:
-: Guests have **no access**.
-  <?input_private_users($sec_afp);?>
+<div id="title"><dt>User Access</dt><em>Guests have <b>no</b> access.</em></div>
+<?input_private_users($sec_afp);?>
 
 &nbsp;
 : <input type='submit' name='changeShareAccessAFP' value='Apply'><button type='button' onclick='done()'>Done</button>

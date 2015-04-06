@@ -15,12 +15,12 @@ Tabs="true"
  * all copies or substantial portions of the Software.
  */
 ?>
+
 <?
 // Remove stale /tmp/plugin/*.plg entries
 $tmp_stale = ($path != $prev);
 if ($tmp_stale) foreach (glob("/tmp/plugins/*.{plg,txt}", GLOB_NOSORT+GLOB_BRACE) as $entry) if (!file_exists("/var/log/plugins/".basename($entry))) @unlink($entry);
 ?>
-
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css">
 <style type="text/css">
   #plugin_tree{width:33%;height:200px;overflow:scroll;}
@@ -43,7 +43,7 @@ $(function() {
 Click <strong><big>check for updates</big></strong> to check all plugins. This page might take some time to load depending on your internet connection and how many plugins need to be checked.
 </blockquote>
 
-<table class='tablesorter plugins <?=$display['tabs']==1?"shift":""?>' id='plugin_table'>
+<table class='tablesorter plugins' id='plugin_table'>
 <thead><tr><th></th><th>Plugin</th><th>Author</th><th>Version</th><th>Status</th><th></th></tr></thead>
 <tbody id='plugin_list'><tr><td colspan='6'><br><i>Please wait, retrieving plugin information ...</i></td><tr></tbody>
 </table>

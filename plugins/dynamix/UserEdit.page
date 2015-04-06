@@ -13,6 +13,7 @@ Title="Edit User"
  * all copies or substantial portions of the Software.
  */
 ?>
+
 <?if (!array_key_exists($name, $users)):?>
   <p class="notice">User <?=$name?> has been deleted.</p><br>
   <button type="button" onClick="done()">OK</button>
@@ -23,7 +24,6 @@ Title="Edit User"
 
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="userName" value="<?=$user['name'];?>">
-
 User name:
 : <?=$user['name']?>
 
@@ -42,7 +42,6 @@ Delete<input type="checkbox" name="confirmDelete" onChange="chkDelete(this.form,
 
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="userName" value="<?=$user['name'];?>">
-
 Password:
 : <input type="password" name="userPassword" maxlength="40" onKeyUp="this.form.cmdUserEdit.disabled = (this.form.userPassword.value != this.form.userPasswordConf.value);">
 

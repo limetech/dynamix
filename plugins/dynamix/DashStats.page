@@ -13,6 +13,7 @@ Title="Statistics"
  * all copies or substantial portions of the Software.
 */
 ?>
+
 <?
 $cores = exec('nproc');
 $fans  = exec("sensors -uA|grep -c 'fan[0-9]_input'");

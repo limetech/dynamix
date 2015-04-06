@@ -12,6 +12,7 @@ Title="Domain '$name' Settings"
  * all copies or substantial portions of the Software.
  */
 ?>
+
 <?
 function domid($domname) {
   $domid = exec("xl domid $domname 2>&1", $output, $retval);
@@ -81,7 +82,6 @@ Domain path:
 <? if ($domid): ?>
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#command" value="/usr/local/sbin/xenman shutdown <?=$domname;?>" />
-
 Status:
 : Started
 
@@ -94,7 +94,6 @@ Status:
 <? else: ?>
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#command" value="/usr/local/sbin/xenman start <?=$domname;?>" />
-
 Status:
 : Shut down
 
@@ -107,7 +106,6 @@ Status:
 
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#command" value="/usr/local/sbin/xenman delete <?=$domname;?>" />
-
 &nbsp;
 : <input type="submit" value="Delete" />
 
@@ -120,7 +118,6 @@ Status:
 
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#file" value="<?=$domcfgfile;?>" />
-
 Domain config file:
 : <?=$domcfgfile;?>
 
@@ -149,7 +146,6 @@ function set_default_configfile_text(form) {
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#include" value="update.file.php" />
 <input type="hidden" name="#file" value="<?=$configfile;?>" />
-
 Xen config file:
 : <?=$configfile;?>
 
@@ -180,7 +176,6 @@ function set_default_readmefile_text(form) {
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#include" value="update.file.php" />
 <input type="hidden" name="#file" value="<?=$readmefile;?>" />
-
 README.md:
 : <?=$readmefile;?>
 

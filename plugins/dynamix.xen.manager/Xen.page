@@ -14,7 +14,8 @@ Tabs="true"
  * all copies or substantial portions of the Software.
  */
 ?>
-<?PHP
+
+<?
 // array must be started since that's where we store the domains
 
 if ($var['fsState'] != "Started") {

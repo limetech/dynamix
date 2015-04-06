@@ -16,6 +16,7 @@ Icon="notifications.png"
  * all copies or substantial portions of the Software.
  */
 ?>
+
 <?
 $events = explode('|', $notify['events']);
 $disabled = $notify['system'] ? '' : 'disabled';
@@ -103,7 +104,6 @@ $(function(){
 <input type="hidden" name="docker_notify">
 <input type="hidden" name="report">
 <input type="hidden" name="events">
-
 Date format:
 : <select name="date" size="1">
   <?=mk_option($notify['date'], "d-m-Y", "DD-MM-YYYY")?>

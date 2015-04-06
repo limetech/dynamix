@@ -183,7 +183,7 @@ $(function() {
   Shadowbox.setup('a.sb-enable', {modal:true});
 <?if ($confirm['warn']):?>
   $('input[value="Apply"]').attr('disabled','disabled');
-  $('form').find('select,input[type=text],input[type=password],input[type=checkbox]').each(function(){$(this).change(function(){$(this).parentsUntil('form').parent().find('input[value="Apply"]').removeAttr('disabled');});});
+  $('form').find('select,input[type=text],input[type=password],input[type=checkbox],textarea').each(function(){$(this).change(function(){$(this).parentsUntil('form').parent().find('input[value="Apply"]').removeAttr('disabled');});});
 <?endif;?>
   timers.watchdog = setTimeout(watchdog,50);
 });

@@ -16,7 +16,6 @@ Cond="(($var['shareSMBEnabled']=='yes') && (isset($name)?array_key_exists($name,
 ?>
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="shareName" value="<?=$name?>">
-
 Name:
 : <?=preg_match('/^(disk[0-9]|cache[0-9]?|flash)/',$name) ? my_disk($name) : $name?>
 
@@ -54,12 +53,8 @@ Security:
 <?if ($sec[$name]['security'] == 'secure'):?>
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="shareName" value="<?=$name?>">
-
-&nbsp;
-
-User Access:
-: Guests have **read-only** access.
-  <?input_secure_users($sec);?>
+<div id="title"><dt>User Access</dt><em>Guests have <b>read-only</b> access.</em></div>
+<?input_secure_users($sec);?>
 
 &nbsp;
 : <input type='submit' name='changeShareAccess' value='Apply'><button type='button' onclick='done()'>Done</button>
@@ -68,12 +63,8 @@ User Access:
 <?elseif ($sec[$name]['security'] == 'private'):?>
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="shareName" value="<?=$name?>">
-
-&nbsp;
-
-User Access:
-: Guests have **no** access.
-  <?input_private_users($sec);?>
+<div id="title"><dt>User Access</dt><em>Guests have <b>no</b> access.</em></div>
+<?input_private_users($sec);?>
 
 &nbsp;
 : <input type='submit' name='changeShareAccess' value='Apply'><button type='button' onclick='done()'>Done</button>

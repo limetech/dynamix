@@ -33,15 +33,6 @@ For readonly files:
 Clicking Start will open another window and start the background process. Closing the window before
 completion will terminate the background process - so don't do that. This process can take a long time if you have many files.
 
-<?PHP
-/* Copyright 2014, Lime Technology LLC.
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
- */
-/* Program updates made by Bergware International (October 2014) */
-?>
 <?$cmd = '/usr/local/sbin/newperms';?>
 
 <form method="POST" action="/update.htm" target="progressFrame">

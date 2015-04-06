@@ -13,6 +13,7 @@ Title="SMTP Settings"
  * all copies or substantial portions of the Software.
  */
 ?>
+
 <?
 $incomplete = strlen($ssmtp['root'])==0 || strlen($ssmtp['server'])==0 || strlen($ssmtp['port'])==0 || ((strlen($ssmtp['AuthUser'])==0 || strlen($ssmtp['AuthPass'])==0) && $ssmtp['AuthMethod']!='none');
 ?>
@@ -71,7 +72,6 @@ function settings(form, data) {
 <input type="hidden" name="#file"  value="dynamix/dynamix.cfg">
 <input type="hidden" name="#section" value="ssmtp">
 <input type="hidden" name="#command" value="/usr/local/sbin/notify smtp-init">
-
 Preset service:
 : <select name="service" size="1" onchange="settings(this.form,this.value)">
 <?=mk_option($ssmtp['service'], "smtp.gmail.com:465:YES:NO:login", "Gmail")?>

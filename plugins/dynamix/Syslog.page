@@ -13,7 +13,8 @@ Title="System Log"
  * all copies or substantial portions of the Software.
  */
 ?>
-<?PHP
+
+<?
 echo "<pre class='up'>".shell_exec('cat /var/log/syslog')."</pre>";
 ?>
 <script>
