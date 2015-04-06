@@ -14,6 +14,7 @@ Cond="glob('/boot/config/plugins-stale/*.plg')"
  * all copies or substantial portions of the Software.
  */
 ?>
+
 <?
 echo "<table class='tablesorter plugins shift' id='plugin_table'><thead>";
 echo "<tr><th></th><th>Plugin</th><th>Author</th><th>Version</th><th>Status</th><th></th></tr>";

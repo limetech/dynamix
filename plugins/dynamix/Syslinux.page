@@ -16,7 +16,7 @@ Title="Syslinux Configuration"
 > Use this page to make changes to your `syslinux.cfg` file.  You will
 > need to reboot your server for these changes to take effect.
 
-<?PHP
+<?
 $file = "/boot/syslinux/syslinux.cfg";
 $text = file_get_contents($file);
 $default_text = @file_get_contents("$file-");
@@ -30,7 +30,6 @@ function setDefault(form) {
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#include" value="update.file.php">
 <input type="hidden" name="#file" value="<?=$file;?>">
-
 Syslinux configuration:
 
 : <textarea spellcheck="false" cols="80" rows="22" maxlength="2048" name="text" style="font-family:bitstream;width:66%"><?=$text;?></textarea>

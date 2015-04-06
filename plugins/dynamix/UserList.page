@@ -13,6 +13,7 @@ Title="Users"
  * all copies or substantial portions of the Software.
  */
 ?>
+
 <?foreach ($users as $user):?>
   <div class="user-list"><center><a href="<?=$path?>/UserEdit?name=<?=$user['name'];?>"><img src="/webGui/images/user.png" border="0"><br><?=$user['name']?></a><br><span style="font-size: 10px"><?=$user['desc']?></span></center></div>
 <?endforeach;?>

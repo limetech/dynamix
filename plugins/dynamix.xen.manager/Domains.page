@@ -24,8 +24,7 @@ $(function() {
   $('#plugin_tree').fileTree({root:'/boot/'}, function(file) {$('#domain_file').val(file);});
 });
 </script>
-
-<?PHP
+<?
 function domid($domname) {
   $domid = exec("xl domid $domname 2>&1", $output, $retval);
   if ($retval != 0) $domid = false;
@@ -38,7 +37,7 @@ function dominfo($domid) {
 function parse_configfile($configfile) {
   return json_decode(shell_exec("xl -N create $configfile | tail -n +2"), true);
 }
-echo "<table class='tablesorter xenman".($display['tabs']==1?" shift'":"'")." id='domain_table'><thead>";
+echo "<table class='tablesorter xenman' id='domain_table'><thead>";
 echo "<tr><th></th><th>Name</th><th>ID</th><th>Mem(MB)</th><th>VCPUs</th><th>State</th><th>Time(s)</th><th>Autostart</th></tr>";
 echo "</thead><tbody>";
 

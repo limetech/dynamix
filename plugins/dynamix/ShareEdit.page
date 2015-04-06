@@ -13,6 +13,7 @@ Title="Share Settings"
  * all copies or substantial portions of the Software.
  */
 ?>
+
 <?
 if ($name == "") {
   /* default values when adding new share */
@@ -127,7 +128,6 @@ function prepareEdit(form) {
 
 <form markdown="1" name="share_edit" method="POST" action="/update.htm" target="progressFrame" onsubmit="return prepareEdit(this)">
 <input type="hidden" name="shareNameOrig" value="<?=$share['nameOrig']?>">
-
 Name:
 : <input type="text" name="shareName" maxlength="40" value="<?=$share['name']?>">
 

@@ -92,7 +92,6 @@ function resetDisplay(form) {
 <form markdown="1" name="display_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="return prepareDisplay(this)">
 <input type="hidden" name="#file" value="dynamix/dynamix.cfg"/>
 <input type="hidden" name="#section" value="display"/>
-
 Date format:
 : <select name="date" size="1" onchange="presetTime(this.form)">
   <?=mk_option($display['date'], "%c", "System Setting")?>

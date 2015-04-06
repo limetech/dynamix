@@ -148,7 +148,7 @@ function pgrep($process_name) {
 }
 function input_secure_users($sec) {
   global $name, $users;
-  echo "<table class='settings shifted'>";
+  echo "<table class='settings'>";
   $write_list = explode(",", $sec[$name]['writeList']);
   foreach ($users as $user) {
     $idx = $user['idx'];
@@ -170,7 +170,7 @@ function input_secure_users($sec) {
 }
 function input_private_users($sec) {
   global $name, $users;
-  echo "<table class='settings shifted'>";
+  echo "<table class='settings'>";
   $read_list = explode(",", $sec[$name]['readList']);
   $write_list = explode(",", $sec[$name]['writeList']);
   foreach ($users as $user) {
