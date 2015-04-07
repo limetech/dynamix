@@ -13,6 +13,10 @@ function getLibvirtSchema() {
 		"!value": ""
 	};
 
+	root.domain.description = {
+		"!value": ""
+	};
+
 	root.domain.memory = {
 		"!attrs": {
 			unit: ["MiB", "KiB", "GiB"]
@@ -102,16 +106,20 @@ function getLibvirtSchema() {
 			retries: null
 		}
 	};
+	root.domain.features.pae = {
+		"!novalue": 1
+	};
 
 	root.domain.clock = {
 		"!attrs": {
-			offset: ["localtime"]
+			offset: ["localtime", "utc"]
 		}
 	};
 	root.domain.clock.timer = {
 		"!attrs": {
-			name: ["hypervclock", "hpet"],
-			present: ["no"]
+			name: ["hypervclock", "hpet", "rtc", "pit"],
+			tickpolicy: ["catchup", "delay"],
+			present: ["no", "yes"]
 		}
 	};
 
