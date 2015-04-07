@@ -1,11 +1,4 @@
 Menu="Tasks:60"
 Type="xmenu"
+Cond="(pgrep('docker')!==false)"
 ---
-<?PHP
-// array must be started since that's where we store the docker volume
-//
-if ($var['fsState'] != "Started") {
-  echo "<p class='notice'>Array must be Started to manage Docker.</p>";
-  return;
-}
-?>
