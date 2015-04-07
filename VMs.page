@@ -1,13 +1,17 @@
 Menu="Tasks:70"
 Type="xmenu"
 Tabs="true"
+Cond="(pgrep('libvirtd')!==false)"
 ---
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.kvm.manager/styles/dynamix.kvm.manager.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.min.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
 <style type="text/css">
+  body { -webkit-overflow-scrolling: touch;}
   .fileTree {
     width: 305px;
-    height: 150px;
+    max-height: 150px;
     overflow: scroll;
     position: absolute;
     z-index: 100;
@@ -15,6 +19,7 @@ Tabs="true"
   }
 </style>
 <script type="text/javascript" src="/webGui/scripts/jqueryFileTree.js"></script>
+<script type="text/javascript" src="/webGui/scripts/jquery.switchButton.js"></script>
 <script type="text/javascript" src="/plugins/dynamix.kvm.manager/scripts/dynamix.kvm.manager.js"></script>
 
 <?php

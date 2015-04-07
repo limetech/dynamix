@@ -18,9 +18,7 @@ if ($_GET['refresh']) {
 	}
 }
 if ($action) {
-	if ($action == 'domain-edit') {
-		include('/usr/local/emhttp/plugins/dynamix.kvm.manager/editxml.php');
-	}
+
 }else{
    if ($subaction) {
      	$domName = $lv->domain_get_name_by_uuid($uuid);
@@ -95,7 +93,7 @@ if ($action) {
 				$domName.' disk dev has been changed from '.$_GET['olddev'].' to '.$_POST['diskdev']:
 				'Error: '.$lv->get_last_error();
 		}
-		elseif ($subaction == 'domain-diskresize') {
+		elseif ($subaction == 'disk-resize') {
 			$capacity = $_POST['cap'];
 			if (substr($_GET['oldcap'],0,-1) < substr($capacity,0,-1)){
 				shell_exec("qemu-img resize -q {$_GET['disk']} $capacity");
@@ -289,11 +287,13 @@ if ($action) {
           		 onClick=\"return confirm('Remove $name definition?')\" title='remove $name definition'><i class='glyphicon glyphicon-minus'></i></a>
 					 | <a class='btn btn-sm btn-danger' href='?subaction=domain-delete&amp;uuid=$uuid'
           		 onClick=\"return confirm('Completely remove $name xml and image?')\" title='remove $name xml and image'><i class=' glyphicon glyphicon-remove'></i></a>
-          		  | <button class='btn btn-sm btn-info' onClick=\"javascript:location.href='?action=domain-edit&amp;uuid=$uuid'\"
-		  		title='edit domain XML'><i class='glyphicon glyphicon-pencil'></i></button>";
+          		  | <button class='btn btn-sm btn-info' onClick=\"javascript:location.href='VMs/UpdateVM?uuid=$uuid'\"
+          title='edit domain'><i class='glyphicon glyphicon-pencil'></i></button>
+          | <button class='btn btn-sm btn-info' onClick=\"javascript:location.href='VMs/UpdateVM?template=XML_Expert&amp;uuid=$uuid'\"
+          title='edit domain XML'><i class='fa fa-code'></i></button>";
 		else
-			echo " | <button class='btn btn-sm btn-info' onClick=\"javascript:location.href='?action=domain-edit&amp;uuid=$uuid&amp;readonly=true'\"
-		  		title='view domain XML'><i class=\"glyphicon glyphicon-share-alt\"></i></button>";
+			echo " | <button class='btn btn-sm btn-info' onClick=\"javascript:location.href='VMs/UpdateVM?template=XML_Expert&amp;uuid=$uuid'\"
+          title='view domain XML'><i class=\"fa fa-code\"></i></button>";
 			echo "</td>
 			</tr>
 			<tr id='name$i' style='display: none'>";
@@ -339,7 +339,7 @@ if ($action) {
 								</span></form>
 							</td>
                      <td title='Click to increase Disk Size'>
-                     	<form method='post' action='?subaction=domain-diskresize&amp;uuid=$uuid&amp;disk=$disk&amp;oldcap=$capacity' /><span class='diskresize' style='width:30px'>
+                     	<form method='post' action='?subaction=disk-resize&amp;uuid=$uuid&amp;disk=$disk&amp;oldcap=$capacity' /><span class='diskresize' style='width:30px'>
 								<span class='text' ><a href='#'> $capacity </a></span>
   									<input class='input' type='text' style='width:46px' name='cap' value='$capacity' val='diskresize' hidden />
 								</span></form>
@@ -530,3 +530,45 @@ if($msg){
 	echo "<script type='text/javascript'>$(function() { $('#countdown').html('<font class=\"".$color."\">".$msg."</font>');}); </script>";
 	}
 ?>
+
+<input type="button" id="btnAddVM" value="Add VM"/>
+
+<script type="text/javascript">
+function vncOpen() {
+  $.post('/plugins/dynamix.kvm.manager/classes/vnc.php',{cmd:'open',root:'<?=$docroot?>',file:'/usr/local/emhttp/plugins/dynamix.kvm.manager/vncconnect.vnc'},function(data) {
+    window.location.href = data;
+  });
+}
+
+function toggle_id(itemID){
+   if ((document.getElementById(itemID).style.display == 'none')) {
+      document.getElementById(itemID).style.display = 'table-row';
+      event.preventDefault();
+   } else {
+      document.getElementById(itemID).style.display = 'none';
+      event.preventDefault();
+   }
+}
+
+function showInput(){
+    $(this).off('click');
+    $(this).siblings('input').each(function(){$(this).show();});
+    $(this).siblings('input').focus();
+    $(this).hide();
+}
+
+function hideInput(){
+    $(this).hide();
+    $(this).siblings('span').show();
+    $(this).siblings('span').click(showInput);
+}
+
+$(function() {
+  $('.text').click(showInput);
+  $('.input').blur(hideInput);
+  $('#btnAddVM').click(function AddVMEvent() {
+    window.location = '/VMs/AddVM';
+  });
+});
+</script>
+
