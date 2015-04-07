@@ -32,7 +32,7 @@ Enable NFS:
 > Select 'Yes' to enable the NFS protocol.
 
 Tunable (fuse_remember):
-: <input type="text" name="fuse_remember" maxlength="10" value="<?=$var['fuse_remember']?>"><?=$var['fuse_remember_status']?>
+: <input type="text" name="fuse_remember" maxlength="10" value="<?=$var['fuse_remember']?>" class="narrow"><?=$var['fuse_remember_status']?>
 
 > When NFS is enabled, this Tunable may be used to alleviate or solve instances of "NFS Stale File Handles"
 > you might encounter with your NFS client.

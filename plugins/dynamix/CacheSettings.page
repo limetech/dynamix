@@ -37,7 +37,7 @@ Use cache disk:
 > use of the Cache Disk on individual user shares.
 
 Min. free space:
-: <input type="text" name="shareCacheFloor" maxlength="16" value="<?=$var['shareCacheFloor']?>" <?=$disabled?>>
+: <input type="text" name="shareCacheFloor" maxlength="16" value="<?=$var['shareCacheFloor']?>" class="narrow" <?=$disabled?>>
 
 > This represents a "floor" of the amount of free space remaining on the cache disk.  If the free
 > space becomes less than this value, then new files written to user shares with cache enabled will go to

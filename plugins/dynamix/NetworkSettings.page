@@ -84,7 +84,7 @@ Setup bridge:
 > typically will restore your network).
 
 Bridge name:
-: <input type="text" name="BRNAME" maxlength="80" value="<?=$var['BRNAME']?>">
+: <input type="text" name="BRNAME" maxlength="80" value="<?=$var['BRNAME']?>" class="narrow">
 
 > This is the name of the bridge interface.  If left blank, the name of the bridge will be **br0**.
 > If running as a Xen dom0 we recommend setting this to **xenbr0**.
@@ -108,17 +108,17 @@ Obtain IP Address Automatically:
 > If set to 'Yes' the server will attempt to obtain its IP address from the local DHCP server.
 
 IP Address:
-: <input type="text" name="IPADDR" maxlength="40" value="<?=$var['IPADDR']?>">
+: <input type="text" name="IPADDR" maxlength="40" value="<?=$var['IPADDR']?>" class="narrow">
 
 > Greyed out when using DHCP server.
 
 Netmask:
-: <input type="text" name="NETMASK" maxlength="40" value="<?=$var['NETMASK']?>">
+: <input type="text" name="NETMASK" maxlength="40" value="<?=$var['NETMASK']?>" class="narrow">
 
 > Greyed out when using DHCP server.
 
 Gateway:
-: <input type="text" name="GATEWAY" maxlength="40" value="<?=$var['GATEWAY']?>">
+: <input type="text" name="GATEWAY" maxlength="40" value="<?=$var['GATEWAY']?>" class="narrow">
 
 > Greyed out when using DHCP server.
 
@@ -133,19 +133,19 @@ Obtain DNS Server Address Automatically:
 > you need to set the first DNS Server entry to the IP address of your AD Domain server.
 
 DNS Server 1:
-: <input type="text" name="DNS_SERVER1" maxlength="80" value="<?=$var['DNS_SERVER1'];?>">
+: <input type="text" name="DNS_SERVER1" maxlength="80" value="<?=$var['DNS_SERVER1'];?>" class="narrow">
 
 > This is the primary DNS server to use.  Enter a FQDN or an IP address.
 > Note: for *Active Directory* you **must** ensure this is set to the IP address of your
 > AD Domain server.
 
 DNS Server 2:
-: <input type="text" name="DNS_SERVER2" maxlength="80" value="<?=$var['DNS_SERVER2'];?>">
+: <input type="text" name="DNS_SERVER2" maxlength="80" value="<?=$var['DNS_SERVER2'];?>" class="narrow">
 
 > This is the DNS server to use if DNS Server 1 is down.
 
 DNS Server 3:
-: <input type="text" name="DNS_SERVER3" maxlength="80" value="<?=$var['DNS_SERVER3'];?>">
+: <input type="text" name="DNS_SERVER3" maxlength="80" value="<?=$var['DNS_SERVER3'];?>" class="narrow">
 
 > This is the DNS server to use if DNS Servers 1 and 2 are both down.
 
