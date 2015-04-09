@@ -23,13 +23,13 @@ input:focus[type=text],input:focus[type=password],input:focus[type=number],input
 input:hover[type=submit],input:hover[type=reset],input:hover[type=button],button:hover[type=button],a.button:hover{border-color:#6AB034;color:#FFFFFF;background:-webkit-radial-gradient(#5E9E2E,#8FD956);background:linear-gradient(#5E9E2E,#8FD956);}
 input:active[type=submit],input:active[type=reset],input:active[type=button],button:active[type=button]{border-color:#6AB034;box-shadow:inset 0 0 8px 4px #548C29,0 1px 0 0 #101010;}
 input[disabled],input:hover[type=reset][disabled],input:hover[type=button][disabled],input:hover[type=submit][disabled],button[disabled],button:hover[disabled],input:active[disabled],input:active[type=submit][disabled],input:active[type=reset][disabled],input:active[type=button][disabled],button:hover[type=button][disabled],button[type=button][disabled],button:active[type=button][disabled],button:active[disabled],button:active[disabled],textarea[disabled]{color:#505050;border-color:#181818;background:linear-gradient(#202020,#101010);background:-webkit-radial-gradient(#202020,#101010);cursor:default;}
-select{font-family:arimo;font-size:11px;color:#A0A0A0;background:-webkit-radial-gradient(#505050,#303030);background:linear-gradient(#505050,#303030);padding:3px 6px;margin:0 10px 0 0;border:none;box-shadow:0 2px 0 #404040;border-radius:4px;outline:none;display:inline-block;cursor:pointer;}
+select{min-width:150px;max-width:320px;font-family:arimo;font-size:11px;color:#A0A0A0;background:-webkit-radial-gradient(#505050,#303030);background:linear-gradient(#505050,#303030);padding:3px 6px;margin:0 10px 0 0;border:none;box-shadow:0 2px 0 #404040;border-radius:4px;outline:none;display:inline-block;cursor:pointer;}
 select[disabled]{color:#505050;background:-webkit-radial-gradient(#303030,#101010);background:linear-gradient(#303030,#101010);box-shadow:0 2px 0 #202020;cursor:default;}
 select[name=enter_view]{padding:0;float:right;}
 select[name=enter_share]{padding:0;float:right;}
 select option{background-color:#000000;}
-select.large{width:100px;}
-select.narrow,input.narrow{width:50px;}
+select.narrow{min-width:69px;}
+input.narrow{width:136px;}
 #header{height:90px;}
 #header.image{background:url(../images/banner.png) no-repeat #000000;border-radius:5px;color:#D0D0D0;}
 #header .logo{float:left;margin-top:20px;margin-left:20px;}

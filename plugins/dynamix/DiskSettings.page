@@ -98,15 +98,15 @@ Force NCQ disabled:
 > NCQ turned off.
 
 Tunable (poll_attributes):
-: <input type="text" name="poll_attributes" maxlength="10" value="<?=$var['poll_attributes']?>"><?=$var['poll_attributes_status']?></td>
+: <input type="text" name="poll_attributes" maxlength="10" value="<?=$var['poll_attributes']?>" class="narrow"><?=$var['poll_attributes_status']?></td>
 
 > This "tunable" defines the disk SMART polling interval, in seconds.  A value of 0 disables SMART polling (not recommended).
 
 Tunable (md_num_stripes):
-: <input type="text" name="md_num_stripes" maxlength="10" value="<?=$var['md_num_stripes']?>"><?=$var['md_num_stripes_status']?></td>
+: <input type="text" name="md_num_stripes" maxlength="10" value="<?=$var['md_num_stripes']?>" class="narrow"><?=$var['md_num_stripes_status']?></td>
 
 Tunable (md_sync_window):
-: <input type="text" name="md_sync_window" maxlength="10" value="<?=$var['md_sync_window']?>"><?=$var['md_sync_window_status']?></td>
+: <input type="text" name="md_sync_window" maxlength="10" value="<?=$var['md_sync_window']?>" class="narrow"><?=$var['md_sync_window_status']?></td>
 
 > These tunables let you control [certain properties](/Help) of the unRAID driver.
 >
