@@ -22,5 +22,5 @@ $text = '...';
 ksort($site);
 ksort($GLOBALS);
 ?>
-<pre class='up'><?=print_r($GLOBALS);?></pre>
+<pre class='up'><?print_r($GLOBALS);?></pre>
 <button type="button" onclick="done()">Done</button>
