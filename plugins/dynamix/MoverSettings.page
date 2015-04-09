@@ -63,7 +63,7 @@ function resetMover(form) {
 </script>
 <form markdown="1" name="mover_schedule" method="POST" action="/update.htm" target="progressFrame" onsubmit="prepareMover(this)">
 Mover schedule:
-: <select name="shareMoverSchedule" size="1" class="large" onchange="presetMover(this.form)">
+: <select name="shareMoverSchedule" size="1" onchange="presetMover(this.form)">
   <?for ($m=0; $m<count($mode); $m++):?>
   <?=mk_option($move, strval($m), $mode[$m])?>
   <?endfor;?>
@@ -74,7 +74,7 @@ Mover schedule:
 > The interval determines how fast the mover will activated, it runs in the background.
 
 Day of the week:
-: <select name="day" size="1" class="large">
+: <select name="day" size="1">
   <?for ($d=0; $d<count($days); $d++):?>
   <?=mk_option($cron[4], strval($d), $days[$d])?>
   <?endfor;?>
@@ -84,7 +84,7 @@ Day of the week:
 > Choose a day when the weekly schedule is selected. Otherwise disabled.
 
 Day of the month:
-: <select name="dotm" size="1" class="large">
+: <select name="dotm" size="1">
   <?for ($d=1; $d<=31; $d++):?>
   <?=mk_option($cron[2], strval($d), sprintf("%02d", $d))?>
   <?endfor;?>
@@ -118,7 +118,7 @@ Time of the day:
 > For the other schedules choose here the time of the day the mover should start.
 
 Mover logging:
-: <select name="shareMoverLogging" size="1" class="large">
+: <select name="shareMoverLogging" size="1">
   <?=mk_option($var['shareMoverLogging'], "yes", "Enabled")?>
   <?=mk_option($var['shareMoverLogging'], "no", "Disabled")?>
   </select>

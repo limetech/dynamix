@@ -16,7 +16,7 @@ Cond="($var['shareSMBEnabled']=='yes')"
 ?>
 <form markdown="1" name="WorkGroup" method="POST" action="/update.htm" target="progressFrame">
 Workgroup:
-: <input type="text" name="WORKGROUP" maxlength="40" value="<?=$var['WORKGROUP'];?>">
+: <input type="text" name="WORKGROUP" maxlength="40" value="<?=$var['WORKGROUP'];?>" class="narrow">
 
 > Enter your local network Workgroup name. Usually this is "WORKGROUP".
 
