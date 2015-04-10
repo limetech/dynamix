@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#copy old image to new
+if [ -f /boot/config/plugins/virtMan/virtMan.img ]; then
+    if [ "$(mount | grep virtMan.img)" ]; then
+      umount /etc/libvirt
+    fi
+    if [ ! -f /boot/config/plugins/dynamix.kvm.manager/domain.img ]; then
+      cp /boot/config/plugins/virtMan/virtMan.img /boot/config/plugins/dynamix.kvm.manager/domain.img
+    fi
+fi
+
+cp -nr /usr/local/emhttp/plugins/dynamix.kvm.manager/dynamix.kvm.manager /boot/config/plugins
