@@ -210,7 +210,7 @@ Critical disk utilization level (%):
 Warning disk utilization level (%):
 : <input type="number" min="0" max="99" name="warning" class="narrow" maxlength="2" value="<?=$display['warning']?>">
 
-> *Warning disk utilization* sets the warning threshold for a hard disk utilization. Exceeding this threshold will result in an warning notification.
+> *Warning disk utilization* sets the warning threshold for a hard disk utilization. Exceeding this threshold will result in a warning notification.
 >
 > When the warning level is set equal or greater than the critical level, there will be only critical notifications (warnings are not existing).
 
@@ -223,7 +223,7 @@ Temperature unit:
 <span id="hot">Warning disk temperature threshold (&deg;<?=$display['unit']?>):</span>
 : <input type="number" min="0" max="300" name="hot" class="narrow" maxlength="3" value="<?=$display['unit']=='C'?$display['hot']:round(9/5*$display['hot']+32)?>" onchange="checkTemp(this.form,true)">
 
-> *Warning disk temperature* sets the warning threshold for a hard disk temperature. Exceeding this threshold will result in an warning notification.
+> *Warning disk temperature* sets the warning threshold for a hard disk temperature. Exceeding this threshold will result in a warning notification.
 
 <span id="max">Critical disk temperature threshold (&deg;<?=$display['unit']?>):</span>
 : <input type="number" min="0" max="300" name="max" class="narrow" maxlength="3" value="<?=$display['unit']=='C'?$display['max']:round(9/5*$display['max']+32)?>" onchange="checkTemp(this.form,false)">
@@ -240,8 +240,8 @@ Page update frequency:
 
 > *Page update* determines how often the browser will query the unRAID server to obtain the latest information.
 >
-> By default 'real-time' is selected. In case one experiences issues in the operation of the unRAID server then the frequency can be lowered or disabled all together.
-> In the later case a 'refresh' button appears on the top of the screen to do manual refreshing.
+> By default 'real-time' is selected. In case issues are experienced in the operation of the unRAID server, then the update frequency can be lowered or disabled altogether.
+> In the latter case a 'refresh' button appears on the top of the screen to do manual page refreshing.
 >
 > A special option exists to disable screen updates while a parity operation is in progress. Use this option when degradation of the parity operation is observed.
 
