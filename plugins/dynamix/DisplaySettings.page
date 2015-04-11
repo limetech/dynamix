@@ -220,6 +220,10 @@ Temperature unit:
   <?=mk_option($display['unit'], "F", "Fahrenheit")?>
   </select>
 
+> Selects the temperature unit for the disk temperature thresholds. Changing the unit will adjust the existing value in the disk temperature thresholds as appropriate.
+>
+> Make sure any newly entered values represent the selected temperature unit.
+
 <span id="hot">Warning disk temperature threshold (&deg;<?=$display['unit']?>):</span>
 : <input type="number" min="0" max="300" name="hot" class="narrow" maxlength="3" value="<?=$display['unit']=='C'?$display['hot']:round(9/5*$display['hot']+32)?>" onchange="checkTemp(this.form,true)">
 
