@@ -202,17 +202,17 @@ Used / Free columns:
   <?=mk_option($display['text'], "2", "Bar (color)")?>
   </select>
 
-Critical disk utilization level (%):
-: <input type="number" min="0" max="100" name="critical" class="narrow" maxlength="3" value="<?=$display['critical']?>">
-
-> *Critical disk utilization* sets the critical threshold for a hard disk utilization. Exceeding this threshold will result in an alert notification.
-
 Warning disk utilization level (%):
 : <input type="number" min="0" max="99" name="warning" class="narrow" maxlength="2" value="<?=$display['warning']?>">
 
 > *Warning disk utilization* sets the warning threshold for a hard disk utilization. Exceeding this threshold will result in a warning notification.
 >
 > When the warning level is set equal or greater than the critical level, there will be only critical notifications (warnings are not existing).
+
+Critical disk utilization level (%):
+: <input type="number" min="0" max="100" name="critical" class="narrow" maxlength="3" value="<?=$display['critical']?>">
+
+> *Critical disk utilization* sets the critical threshold for a hard disk utilization. Exceeding this threshold will result in an alert notification.
 
 Temperature unit:
 : <select name="unit" size="1" onchange="presetTemp(this.form)">
@@ -241,7 +241,7 @@ Page update frequency:
 > *Page update* determines how often the browser will query the unRAID server to obtain the latest information.
 >
 > By default 'real-time' is selected. In case issues are experienced in the operation of the unRAID server, then the update frequency can be lowered or disabled altogether.
-> In the latter case a 'refresh' button appears on the top of the screen to do manual page refreshing.
+> In the latter case a 'refresh' button appears in the top of the screen to do manual page refreshing.
 >
 > A special option exists to disable screen updates while a parity operation is in progress. Use this option when degradation of the parity operation is observed.
 
