@@ -16,7 +16,7 @@ Cond="($disks['parity']['status']!='DISK_DSBL_NP')"
 ?>
 
 <?
-$mode = array('Disabled','Daily','Weekly','Monthly','Yearly','Every');
+$mode = array('Disabled','Daily','Weekly','Monthly','Yearly','Custom');
 $days = array('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday');
 $months = array('January','February','March','April','May','June','July','August','September','October','November','December');
 $memory = '/tmp/memory.tmp';
@@ -32,8 +32,8 @@ if (file_exists($memory)) {
 <script>
 <?if ($parity['mode']==5):?>
 $(function() {
-  $("#s1").dropdownchecklist({emptyText:'Every day', width:300, firstItemChecksAll: true, explicitClose:'...close'});
-  $("#s2").dropdownchecklist({emptyText:'Every month', width:300, firstItemChecksAll: true, explicitClose:'...close'});
+  $("#s1").dropdownchecklist({emptyText:'Every day', width:131, explicitClose:'...close'});
+  $("#s2").dropdownchecklist({emptyText:'Every month', width:131, explicitClose:'...close'});
 });
 // Simulate a single input field
 function prepareParity(form) {
@@ -97,6 +97,8 @@ Scheduled parity check:
   <?endfor;?>
   </select>
 
+> By default no parity check is scheduled. Select here the desired schedule. This can be one of the preset schedules for daily, weekly, monthly, yearly or a custom schedule.
+
 Day of the week:
 <?if ($parity['mode']==2):?>
 : <select name="day" size="1">
@@ -105,7 +107,6 @@ Day of the week:
   <?endfor;?>
 <?elseif ($parity['mode']==5):?>
 : <select id="s1" name="day" size="1" multiple="multiple" style="display:none">
-  <option value=''>(All)</option>
   <?for ($d=0; $d<count($days); $d++):?>
   <?=mk_option_check($parity['day'], strval($d), $days[$d])?>
   <?endfor;?>
@@ -114,6 +115,8 @@ Day of the week:
   <?=mk_option($parity['day'], "*", "--------")?>
 <?endif;?>
   </select>
+
+> When a weekly or custom schedule is selected then choose here the preferred day of the week, otherwise this setting is unavailable.
 
 <?if ($parity['mode']<5):?>
 Day of the month:
@@ -141,6 +144,8 @@ Week of the month:
 <?endif;?>
   </select>
 
+> When a monthly, yearly or custom schedule is selected then choose here the preferred day of the month, otherwise this setting is unavailable.
+
 Time of the day:
 : <select name="hour" size="1">
 <?if ($parity['mode']>0):?>
@@ -153,11 +158,12 @@ Time of the day:
 <?endif;?>
   </select>
 
+> Choose the desired time to start the schedule. Granularity is given in half hour periods.
+
 Month of the year:
 <?if ($parity['mode']>=4):?>
 <?if ($parity['mode']==5):?>
 : <select id="s2" name="month" size="1" multiple="multiple" style="display:none">
-  <option value=''>(All)</option>
   <?for ($m=0; $m<count($months); $m++):?>
   <?=mk_option_check($parity['month'], strval($m+1), $months[$m])?>
   <?endfor;?>
@@ -173,11 +179,15 @@ Month of the year:
 <?endif;?>
   </select>
 
+> When a yearly or custom schedule is selected then choose here the preferred month of the year, otherwise this setting is unavailable.
+
 Write corrections to parity disk:
 : <select name="write" size="1">
   <?=mk_option($parity['write'], "", "Yes")?>
   <?=mk_option($parity['write'], "NOCORRECT", "No")?>
   </select>
+
+> Choose here whether any parity errors found during the check, need to be corrected on the parity disk or not.
 
 <button type="button" onclick="resetParity(this.form);">Default</button>
 : <input type="submit" name="#apply" value="Apply"><button type="button" onclick="done()">Done</button></td>
