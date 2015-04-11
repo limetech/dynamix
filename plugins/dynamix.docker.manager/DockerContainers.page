@@ -1,4 +1,4 @@
-Menu="Docker"
+Menu="Docker:1"
 Title="Docker Containers"
 Cond="(pgrep('docker')!==false)"
 Markdown="false"

@@ -89,6 +89,11 @@ function resetDisplay(form) {
   $('#passive').show();
 }
 </script>
+
+> The display settings below determine how items are displayed on screen. Use these settings to tweak the visual effects to your likings.
+>
+> You can experiment with these settings as desired, they only affect visual properties.
+
 <form markdown="1" name="display_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="return prepareDisplay(this)">
 <input type="hidden" name="#file" value="dynamix/dynamix.cfg"/>
 <input type="hidden" name="#section" value="display"/>
@@ -197,11 +202,17 @@ Used / Free columns:
   <?=mk_option($display['text'], "2", "Bar (color)")?>
   </select>
 
+Warning disk utilization level (%):
+: <input type="number" min="0" max="99" name="warning" class="narrow" maxlength="2" value="<?=$display['warning']?>">
+
+> *Warning disk utilization* sets the warning threshold for a hard disk utilization. Exceeding this threshold will result in a warning notification.
+>
+> When the warning level is set equal or greater than the critical level, there will be only critical notifications (warnings are not existing).
+
 Critical disk utilization level (%):
 : <input type="number" min="0" max="100" name="critical" class="narrow" maxlength="3" value="<?=$display['critical']?>">
 
-Warning disk utilization level (%):
-: <input type="number" min="0" max="99" name="warning" class="narrow" maxlength="2" value="<?=$display['warning']?>">
+> *Critical disk utilization* sets the critical threshold for a hard disk utilization. Exceeding this threshold will result in an alert notification.
 
 Temperature unit:
 : <select name="unit" size="1" onchange="presetTemp(this.form)">
@@ -209,11 +220,19 @@ Temperature unit:
   <?=mk_option($display['unit'], "F", "Fahrenheit")?>
   </select>
 
+> Selects the temperature unit for the disk temperature thresholds. Changing the unit will adjust the existing value in the disk temperature thresholds as appropriate.
+>
+> Make sure any newly entered values represent the selected temperature unit.
+
 <span id="hot">Warning disk temperature threshold (&deg;<?=$display['unit']?>):</span>
 : <input type="number" min="0" max="300" name="hot" class="narrow" maxlength="3" value="<?=$display['unit']=='C'?$display['hot']:round(9/5*$display['hot']+32)?>" onchange="checkTemp(this.form,true)">
 
+> *Warning disk temperature* sets the warning threshold for a hard disk temperature. Exceeding this threshold will result in a warning notification.
+
 <span id="max">Critical disk temperature threshold (&deg;<?=$display['unit']?>):</span>
 : <input type="number" min="0" max="300" name="max" class="narrow" maxlength="3" value="<?=$display['unit']=='C'?$display['max']:round(9/5*$display['max']+32)?>" onchange="checkTemp(this.form,false)">
+
+> *Critical disk temperature* sets the critical threshold for a hard disk temperature. Exceeding this threshold will result in an alert notification.
 
 Page update frequency:
 : <select name="refresh" size="1" onchange="presetPassive(this.selectedIndex)">
@@ -222,6 +241,13 @@ Page update frequency:
   <?=mk_option($display['refresh'], $display['refresh']<0?"-10000":"10000", "Regular")?>
   <?=mk_option($display['refresh'], $display['refresh']<0?"-60000":"60000", "Slow")?>
   </select><span id="passive"<?=$display['refresh']==0?" style='display:none'":""?>>&nbsp;<input type="checkbox" name="#passive"<?=$display['refresh']<0?' checked':''?> onchange="presetRefresh(this.form)">disable page updates while parity operation is running.</span>
+
+> *Page update* determines how often the browser will query the unRAID server to obtain the latest information.
+>
+> By default 'real-time' is selected. In case issues are experienced in the operation of the unRAID server, then the update frequency can be lowered or disabled altogether.
+> In the latter case a 'refresh' button appears in the top of the screen to do manual page refreshing.
+>
+> A special option exists to disable screen updates while a parity operation is in progress. Use this option when degradation of the parity operation is observed.
 
 <button type="button" onclick="resetDisplay(this.form);">Default</button>
 : <input type="submit" name="#apply" value="Apply"><button type="button" onclick="done()">Done</button>
