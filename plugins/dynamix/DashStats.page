@@ -97,7 +97,7 @@ function changeView(item) {
 function update3() {
   var tag = $('.smb').is(':visible') ? 'smb' : $('.afp').is(':visible') ? 'afp' : $('.nfs').is(':visible') ? 'nfs' : '';
 <?if ($var['fsState']=='Started'):?>
-  $.post('<?=$url?>',{cmd:'shares',com:tag,names:'<?=$names?>'},function(data) {
+  $.post('<?=$url?>',{cmd:'shares',com:tag,names:'<?=addslashes($names)?>'},function(data) {
     if (data) $.each(data.split('#'),function(k,v) {$('#share'+(k+1)).html(v);});
   });
 <?endif;?>

@@ -27,6 +27,9 @@ $root = '/';
 if( !$root ) exit("ERROR: Root filesystem directory not set in jqueryFileTree.php");
 
 $postDir = rawurldecode($root.(isset($_POST['dir']) ? $_POST['dir'] : null ));
+if (substr($postDir, -1) != '/') {
+	$postDir .= '/';
+}
 
 $filters = (array)(isset($_POST['filter']) ? $_POST['filter'] : '');
 
