@@ -59,6 +59,7 @@ function resetMover(form) {
   form.shareMoverLogging.selectedIndex = 1;
   $('#H1').show();
   $('#H2').hide();
+  $('input[name="changeMover"]').removeAttr('disabled');
 }
 </script>
 <form markdown="1" name="mover_schedule" method="POST" action="/update.htm" target="progressFrame" onsubmit="prepareMover(this)">

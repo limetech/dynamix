@@ -87,6 +87,7 @@ function resetDisplay(form) {
   form.refresh.selectedIndex = 1;
   document.getElementsByName('#passive')[0].checked = false;
   $('#passive').show();
+  $('input[name="#apply"]').removeAttr('disabled');
 }
 </script>
 
