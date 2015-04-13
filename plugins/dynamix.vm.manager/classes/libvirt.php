@@ -70,7 +70,7 @@
 
 			$loader = '';
 			if (!empty($domain['ovmf'])) {
-				$loader = "<loader readonly='yes' type='pflash'>/usr/share/qemu/ovmf-x64/OVMF-pure-efi.fd</loader>";
+				$loader = "<loader type='pflash'>/usr/share/qemu/ovmf-x64/OVMF-pure-efi.fd</loader>";
 			}
 
 			$vcpus = 1;
@@ -428,7 +428,7 @@
 
 			$loader = '';
 			if (!empty($domain['ovmf'])) {
-				$loader = "<loader readonly='yes' type='pflash'>/usr/share/qemu/ovmf-x64/OVMF-pure-efi.fd</loader>";
+				$loader = "<loader type='pflash'>/usr/share/qemu/ovmf-x64/OVMF-pure-efi.fd</loader>";
 			}
 
 			$vcpus = 1;
