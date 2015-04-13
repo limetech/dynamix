@@ -263,7 +263,6 @@
 			$pcidevs='';
 			$gpuargs='';
 			$gpuincr=0;
-			$gpuaudio=[];
 			$vnc='';
 			if (!empty($gpus)) {
 				foreach ($gpus as $i => $gpu) {
@@ -292,16 +291,6 @@
 							//if ($this->vfio_bind($gpu['id'])) {
 								$gpuargs .= "<qemu:arg value='-device'/>
 											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=pcie.0,multifunction=on,x-vga=on'/>";
-
-								// GPU Audio function
-								if (file_exists("/sys/bus/pci/devices/0000:{$gpu_bus}:{$gpu_slot}.1/iommu_group/")) {
-									//if ($this->vfio_bind("0000:{$gpu_bus}:{$gpu_slot}.1")) {
-										$gpuargs .= "<qemu:arg value='-device'/>
-													<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.1,bus=pcie.0'/>";
-
-										$gpuaudio[] = "{$gpu_bus}:{$gpu_slot}.1";
-									//}
-								}
 							//}
 							break;
 
@@ -309,16 +298,6 @@
 							//if ($this->vfio_bind($gpu['id'])) {
 								$gpuargs .= "<qemu:arg value='-device'/>
 											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=root.1,addr=0{$gpuincr}.0,multifunction=on,x-vga=on'/>";
-
-								// GPU Audio function
-								if (file_exists("/sys/bus/pci/devices/0000:{$gpu_bus}:{$gpu_slot}.1/iommu_group/")) {
-									//if ($this->vfio_bind("0000:{$gpu_bus}:{$gpu_slot}.1")) {
-										$gpuargs .= "<qemu:arg value='-device'/>
-													<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.1,bus=root.1,addr=0{$gpuincr}.1'/>";
-
-										$gpuaudio[] = "{$gpu_bus}:{$gpu_slot}.1";
-									//}
-								}
 							//}
 							break;
 
@@ -331,18 +310,6 @@
 											<address domain='0x0000' bus='0x" . $gpu_bus . "' slot='0x" . $gpu_slot . "' function='0x" . $gpu_function . "'/>
 										</source>
 									</hostdev>";
-
-						// GPU Audio function
-						if (file_exists("/sys/bus/pci/devices/0000:{$gpu_bus}:{$gpu_slot}.1/iommu_group/")) {
-							$pcidevs .= "<hostdev mode='subsystem' type='pci' managed='yes'>
-											<driver name='vfio'/>
-											<source>
-												<address domain='0x0000' bus='0x" . $gpu_bus . "' slot='0x" . $gpu_slot . "' function='0x1'/>
-											</source>
-										</hostdev>";
-
-							$gpuaudio[] = "{$gpu_bus}:{$gpu_slot}.1";
-						}
 						*/
 					}
 
@@ -356,17 +323,14 @@
 						continue;
 					}
 
-					// Since we pass through the gpu audio, dont pass this audio device if it's already passed through
-					if (!in_array($audio['id'], $gpuaudio)) {
-						list($audio_bus, $audio_slot, $audio_function) = explode(":", str_replace('.', ':', $audio['id']));
+					list($audio_bus, $audio_slot, $audio_function) = explode(":", str_replace('.', ':', $audio['id']));
 
-						$pcidevs .= "<hostdev mode='subsystem' type='pci' managed='yes'>
-										<driver name='vfio'/>
-										<source>
-											<address domain='0x0000' bus='0x" . $audio_bus . "' slot='0x" . $audio_slot . "' function='0x" . $audio_function . "'/>
-										</source>
-									</hostdev>";
-					}
+					$pcidevs .= "<hostdev mode='subsystem' type='pci' managed='yes'>
+									<driver name='vfio'/>
+									<source>
+										<address domain='0x0000' bus='0x" . $audio_bus . "' slot='0x" . $audio_slot . "' function='0x" . $audio_function . "'/>
+									</source>
+								</hostdev>";
 				}
 			}
 
@@ -657,7 +621,6 @@
 			$pcidevs='';
 			$gpuargs='';
 			$gpuincr=0;
-			$gpuaudio=[];
 			$vnc='';
 			if (!empty($gpus)) {
 				foreach ($gpus as $i => $gpu) {
@@ -686,16 +649,6 @@
 							if ($this->vfio_bind($gpu['id'])) {
 								$gpuargs .= "<qemu:arg value='-device'/>
 											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=pcie.0,multifunction=on,x-vga=on'/>";
-
-								// GPU Audio function
-								if (file_exists("/sys/bus/pci/devices/0000:{$gpu_bus}:{$gpu_slot}.1/iommu_group/")) {
-									if ($this->vfio_bind("0000:{$gpu_bus}:{$gpu_slot}.1")) {
-										$gpuargs .= "<qemu:arg value='-device'/>
-													<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.1,bus=pcie.0'/>";
-
-										$gpuaudio[] = "{$gpu_bus}:{$gpu_slot}.1";
-									}
-								}
 							}
 							break;
 
@@ -703,16 +656,6 @@
 							if ($this->vfio_bind($gpu['id'])) {
 								$gpuargs .= "<qemu:arg value='-device'/>
 											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=root.1,addr=0{$gpuincr}.0,multifunction=on,x-vga=on'/>";
-
-								// GPU Audio function
-								if (file_exists("/sys/bus/pci/devices/0000:{$gpu_bus}:{$gpu_slot}.1/iommu_group/")) {
-									if ($this->vfio_bind("0000:{$gpu_bus}:{$gpu_slot}.1")) {
-										$gpuargs .= "<qemu:arg value='-device'/>
-													<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.1,bus=root.1,addr=0{$gpuincr}.1'/>";
-
-										$gpuaudio[] = "{$gpu_bus}:{$gpu_slot}.1";
-									}
-								}
 							}
 							break;
 
@@ -725,18 +668,6 @@
 											<address domain='0x0000' bus='0x" . $gpu_bus . "' slot='0x" . $gpu_slot . "' function='0x" . $gpu_function . "'/>
 										</source>
 									</hostdev>";
-
-						// GPU Audio function
-						if (file_exists("/sys/bus/pci/devices/0000:{$gpu_bus}:{$gpu_slot}.1/iommu_group/")) {
-							$pcidevs .= "<hostdev mode='subsystem' type='pci' managed='yes'>
-											<driver name='vfio'/>
-											<source>
-												<address domain='0x0000' bus='0x" . $gpu_bus . "' slot='0x" . $gpu_slot . "' function='0x1'/>
-											</source>
-										</hostdev>";
-
-							$gpuaudio[] = "{$gpu_bus}:{$gpu_slot}.1";
-						}
 						*/
 					}
 
@@ -750,17 +681,14 @@
 						continue;
 					}
 
-					// Since we pass through the gpu audio, dont pass this audio device if it's already passed through
-					if (!in_array($audio['id'], $gpuaudio)) {
-						list($audio_bus, $audio_slot, $audio_function) = explode(":", str_replace('.', ':', $audio['id']));
+					list($audio_bus, $audio_slot, $audio_function) = explode(":", str_replace('.', ':', $audio['id']));
 
-						$pcidevs .= "<hostdev mode='subsystem' type='pci' managed='yes'>
-										<driver name='vfio'/>
-										<source>
-											<address domain='0x0000' bus='0x" . $audio_bus . "' slot='0x" . $audio_slot . "' function='0x" . $audio_function . "'/>
-										</source>
-									</hostdev>";
-					}
+					$pcidevs .= "<hostdev mode='subsystem' type='pci' managed='yes'>
+									<driver name='vfio'/>
+									<source>
+										<address domain='0x0000' bus='0x" . $audio_bus . "' slot='0x" . $audio_slot . "' function='0x" . $audio_function . "'/>
+									</source>
+								</hostdev>";
 				}
 			}
 
