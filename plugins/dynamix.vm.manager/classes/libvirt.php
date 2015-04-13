@@ -288,17 +288,13 @@
 					switch ($machine) {
 
 						case 'q35':
-							//if ($this->vfio_bind($gpu['id'])) {
-								$gpuargs .= "<qemu:arg value='-device'/>
-											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=pcie.0,multifunction=on,x-vga=on'/>";
-							//}
+							$gpuargs .= "<qemu:arg value='-device'/>
+										<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=pcie.0,multifunction=on,x-vga=on'/>";
 							break;
 
 						case 'pc':
-							//if ($this->vfio_bind($gpu['id'])) {
-								$gpuargs .= "<qemu:arg value='-device'/>
+							$gpuargs .= "<qemu:arg value='-device'/>
 											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=root.1,addr=0{$gpuincr}.0,multifunction=on,x-vga=on'/>";
-							//}
 							break;
 
 						//TODO - OVMF
@@ -646,17 +642,13 @@
 					switch ($machine) {
 
 						case 'q35':
-							if ($this->vfio_bind($gpu['id'])) {
-								$gpuargs .= "<qemu:arg value='-device'/>
-											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=pcie.0,multifunction=on,x-vga=on'/>";
-							}
+							$gpuargs .= "<qemu:arg value='-device'/>
+										<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=pcie.0,multifunction=on,x-vga=on'/>";
 							break;
 
 						case 'pc':
-							if ($this->vfio_bind($gpu['id'])) {
-								$gpuargs .= "<qemu:arg value='-device'/>
-											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=root.1,addr=0{$gpuincr}.0,multifunction=on,x-vga=on'/>";
-							}
+							$gpuargs .= "<qemu:arg value='-device'/>
+										<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=root.1,addr=0{$gpuincr}.0,multifunction=on,x-vga=on'/>";
 							break;
 
 						//TODO - OVMF
