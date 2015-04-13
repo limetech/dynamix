@@ -1,0 +1,186 @@
+<?xml version='1.0' standalone='yes'?>
+
+<!DOCTYPE PLUGIN [
+<!ENTITY name      "dynamix.kvm.manager">
+<!ENTITY author    "dmacias72">
+<!ENTITY version   "2015.04.07">
+<!ENTITY pluginURL "https://github.com/eschultz/&name;/raw/master/&name;.plg">
+<!ENTITY plugin	   "/boot/config/plugins/&name;">
+<!ENTITY emhttp	   "/usr/local/emhttp/plugins/&name;">
+]>
+
+<PLUGIN  name="&name;"
+         author="&author;"
+         version="&version;"
+         pluginURL="&pluginURL;"
+	 plugin="&plugin;"
+	 emhttp="&emhttp;">
+
+<CHANGES>
+###2015.04.07
+-updated template options: Custom and XML Expert
+-VMs can be edited now
+###2015.03.10
+-added vga and audio passthrough support
+-new template options: Localized Windows Desktop and Other
+###2015.02.24
+-fix css formating on some pages
+###2015.02.14-15
+-Eric: Updated XML editors to use CodeMirror library
+-Bug fixes
+###2015.02.08
+-Add delete xml and image completely
+-Fix usb bug on create vm page
+-Fix spaces in name on create page
+-Fix password
+-Combine virtMan and dynamix.kvm.manager plugins
+###2015.01.29
+-Add VNC password
+-reformat javascript
+###2015.01.24
+-Add boot device change
+-Add auto add name space for qemu:commandline
+-Misc fixes
+###2014.12.28
+-Bug fixes and windows vm clock
+-Remove spellcheck from textarea
+-Add hyperv support for windows machines
+-Fix cdrom change sata bus
+-remove excess java code and cfg file
+-Fix q35 machine type
+-Add ability to increase disk capacity
+###2014.12.24
+-Fix domain.cfg missing error
+-Fix no disks domain auto start
+###2014.12.23
+-Change VNC to ip based for our OSX friends
+-Add settings tab with default media and image settings
+-Add debug option
+###2014.12.21-21a
+-expanded usb devices to include bus and device
+-Reformat Create VM page
+###2014.12.20-20a
+-Add temp driver cdrom for windows installs.  It will disapear after vm has shut down
+-Add Machine type selection.
+-Add usbtab selection under usb devices
+-Fix no domains sort error
+-Remove Storage Pool tab and all storage pool functions.
+-Add web based file trees to Create VM tab to access cdrom, existing images and to create images.
+-New vm images will be created based on name of vm in a sub-folder of the same name similar to xenman plugin
+-Add file tree for cdrom change for existing vm ie. for switching to driver image for windows virtio drivers
+-Remove Device tab
+-condense action messages
+###2014.12.03
+-Change table spacing
+###2014.12.01
+-Update the plugin to a dynamix compatible version for beta 12 and above
+###2014.11.29a
+-add snapshot descriptions
+-add disk dev name change
+-change method of saving xml so will save with snapshots
+-remove dominfo and hostinfo page
+-change to KVM tab since webvirtmgr is dead
+###2014.11.08
+-add memory and vcpu change to domain info page
+-add actions to domain info page
+-add ability to change cdrom media for domain (running or shutdown)
+-change template cdrom to ide from sata
+###2014.11.02-02a
+-fix xml save function
+-added date and time to snapshots
+###2014.11.01
+-add domain snapshots create, delete and revert
+-add managedsave.  Similar to hibernation.
+###2014.10.31-31b
+-change "on crash" and "on reboot" to restart in create template.
+-add refresh after stop
+-rearrange navbar
+-combine drives and cdroms
+-defaults to vnc mouse/usb tablet
+-reformat create template for easier use
+-add cdrom sectionin dominfo page
+###2014.10.30-30a
+-fix a couple create bugs
+-add USB tablet selection
+-add 9p sharing to passthrough unRAID shares to vm's (won't work with windows till someone creates a pci driver)
+-add domain info network information
+###2014.10.27-28
+-add full featured VNC novnc
+-add create functions: driver cd, usb passthrough
+###2014.10.23
+-create vm template now functional
+###2014.10.20
+-add xml view while domain is running
+-disable create button till finished
+###2014.10.19-19a
+-remove edit from running domains
+-add storage pool functions
+###2014.10.18
+-removed include, added autostart
+###2014.10.17
+-custom css, confirm delete, various bugs and enabled del vol, view xml
+###2014.10.16
+-removed all modals and fixed css
+###2014.10.13
+-initial commit
+</CHANGES>
+
+
+<!--
+This plugin installs an a virtual machine management interface
+-->
+
+
+
+<!--
+get from github as tarball
+-->
+<FILE Name="&plugin;/&name;-&version;.tar.gz">
+<URL>"https://github.com/eschultz/&name;/archive/&version;.tar.gz"</URL>
+</FILE>
+
+<!--
+The 'install' script.
+-->
+<FILE Run="/bin/bash" Method="install">
+<INLINE>
+if [ ! -d &emhttp; ]; then
+ 	mkdir -p &emhttp;
+fi
+
+#copy old image to new
+if [ -f /boot/config/plugins/virtMan/virtMan.img ]; then
+    if [ "$(mount | grep virtMan.img)" ]; then
+      umount /etc/libvirt
+    fi
+    if [ ! -f &plugin;/domain.img ]; then
+      cp /boot/config/plugins/virtMan/virtMan.img &plugin;/domain.img
+    fi
+fi
+
+tar -zxf &plugin;/&name;-&version;.tar.gz --strip=1 -C &emhttp;/
+find &plugin; -type f -iname "*.tar.gz" ! -iname "&name;-&version;.tar.gz" -delete
+cp -nr /usr/local/emhttp/plugins/&name;/&name; /boot/config/plugins
+
+# mount xml/conf image if not already mounted
+if [ ! "$(mount | grep domain.img)" ]; then
+  mount -t ext4 &plugin;/domain.img /etc/libvirt
+fi
+</INLINE>
+</FILE>
+
+<!--
+The 'remove' script.
+-->
+<FILE Run="/bin/bash" Method="remove">
+<INLINE>
+rm -rf &emhttp;
+rm -f &plugin;/&name;-&version;.tar.gz
+if [ "$(mount | grep domain.img)" ]; then
+  umount /etc/libvirt
+fi
+</INLINE>
+</FILE>
+
+</PLUGIN>
+
