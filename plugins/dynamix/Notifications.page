@@ -47,6 +47,7 @@ function resetNotify(form) {
   preparePlugin('');
   prepareReport('');
   for (var i=1; i<=5; i++) form.elements['a'+i].checked = true;
+  $('input[name="#apply"]').removeAttr('disabled');
 }
 function prepareNotify(form) {
   var events = [];

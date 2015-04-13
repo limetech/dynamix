@@ -67,7 +67,7 @@ function prepareParity(form) {
 <?endif;?>
 $(function() {
 <?if (file_exists($memory)):?>
-  $('form[name="parity_settings"]').find('input[value="Apply"]').removeAttr('disabled');
+  $('input[name="#apply"]').removeAttr('disabled');
 <?unlink($memory);?>
 <?endif;?>
   presetParity(document.parity_settings);
@@ -84,6 +84,7 @@ function resetParity(form) {
   form.mode.selectedIndex = 0;
   form.write.selectedIndex = 0;
   form.submit();
+  $('input[name="#apply"]').removeAttr('disabled');
 }
 </script>
 <form markdown="1" name="parity_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareParity(this)">

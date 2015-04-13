@@ -19,6 +19,7 @@ function resetConfirm(form) {
   form.down.selectedIndex = 1;
   form.stop.selectedIndex = 1;
   form.warn.selectedIndex = 1;
+  $('input[name="#apply"]').removeAttr('disabled');
 <?if (isset($confirm['sleep'])):?>
   form.sleep.selectedIndex = 1;
 <?endif;?>
