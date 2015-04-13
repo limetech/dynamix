@@ -1,0 +1,44 @@
+Menu="Tasks:70"
+Type="xmenu"
+Tabs="true"
+Cond="(pgrep('libvirtd')!==false)"
+---
+<link type="text/css" rel="stylesheet" href="/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.min.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
+<style type="text/css">
+  body { -webkit-overflow-scrolling: touch;}
+  .fileTree {
+    width: 305px;
+    max-height: 150px;
+    overflow: scroll;
+    position: absolute;
+    z-index: 100;
+    display: none;
+  }
+</style>
+<script type="text/javascript" src="/webGui/scripts/jqueryFileTree.js"></script>
+<script type="text/javascript" src="/webGui/scripts/jquery.switchButton.js"></script>
+<script type="text/javascript" src="/plugins/dynamix.vm.manager/scripts/dynamix.vm.manager.js"></script>
+
+<?php
+if ($var['fsState'] != "Started") {
+  echo "<p class='notice'>Array must be Started to manage Virtual Machines.</p>";
+  return;
+}
+
+require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt.php');
+require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt_helpers.php');
+
+// Check if domain.img exists
+$libvirt_filecheck = (file_exists( "/boot/config/plugins/dynamix.kvm.manager/domain.img" )) ? true : false;
+
+// if domain.img exists check if it's not mounted then mount
+if ($libvirt_filecheck) {
+	if (!shell_exec("mount | grep domain.img" )) {
+		shell_exec("mount -t ext4 /boot/config/plugins/dynamix.kvm.manager/domain.img /etc/libvirt" );
+	}
+}
+
+?>
