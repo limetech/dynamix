@@ -9,6 +9,8 @@ if [ "$SERVICE" = "enable" ]; then
 	# mount xml/conf image if not already mounted
 	if [ ! "$(mount | grep domain.img)" ]; then
 	  mount -t ext4 /boot/config/plugins/dynamix.kvm.manager/domain.img /etc/libvirt
+	  mkdir -p /etc/libvirt/hooks
+	  cp /boot/config/plugins/dynamix.kvm.manager/qemu /etc/libvirt/hooks/
 	fi
 
 	# Start libvirt
