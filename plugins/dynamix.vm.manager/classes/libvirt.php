@@ -68,6 +68,11 @@
 				$pae = '<pae/>';
 			}
 
+			$loader = '';
+			if (!empty($domain['ovmf'])) {
+				$loader = "<loader readonly='yes' type='pflash'>/usr/share/qemu/ovmf-x64/OVMF-pure-efi.fd</loader>";
+			}
+
 			$vcpus = 1;
 			$vcpupinstr = '';
 
@@ -285,28 +290,32 @@
 
 					list($gpu_bus, $gpu_slot, $gpu_function) = explode(":", str_replace('.', ':', $gpu['id']));
 
-					switch ($machine) {
+					if (!empty($domain['ovmf'])) {
 
-						case 'q35':
-							$gpuargs .= "<qemu:arg value='-device'/>
-										<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=pcie.0,multifunction=on,x-vga=on'/>";
-							break;
-
-						case 'pc':
-							$gpuargs .= "<qemu:arg value='-device'/>
-											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=root.1,addr=0{$gpuincr}.0,multifunction=on,x-vga=on'/>";
-							break;
-
-						//TODO - OVMF
-						/*
-
+						// OVMF passthrough uses the normal hostdev and libvirt can fully manage the device
 						$pcidevs .= "<hostdev mode='subsystem' type='pci' managed='yes'>
 										<driver name='vfio'/>
 										<source>
 											<address domain='0x0000' bus='0x" . $gpu_bus . "' slot='0x" . $gpu_slot . "' function='0x" . $gpu_function . "'/>
 										</source>
 									</hostdev>";
-						*/
+
+					} else {
+
+						// VGA BIOS passthrough uses qemu args and we have to manage the device (libvirt wont attach/detach the device driver to vfio-pci)
+						switch ($machine) {
+
+							case 'q35':
+								$gpuargs .= "<qemu:arg value='-device'/>
+											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=pcie.0,multifunction=on,x-vga=on'/>";
+								break;
+
+							case 'pc':
+								$gpuargs .= "<qemu:arg value='-device'/>
+											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=root.1,addr=0{$gpuincr}.0,multifunction=on,x-vga=on'/>";
+								break;
+						}
+
 					}
 
 					$gpuincr++;
@@ -366,6 +375,7 @@
 						</memoryBacking>
 						$cpustr
 						<os>
+							$loader
 							<type arch='$arch' machine='$machine'>hvm</type>
 						</os>
 						<features>
@@ -414,6 +424,11 @@
 			$pae = '';
 			if ($arch == 'i686'){
 				$pae = '<pae/>';
+			}
+
+			$loader = '';
+			if (!empty($domain['ovmf'])) {
+				$loader = "<loader readonly='yes' type='pflash'>/usr/share/qemu/ovmf-x64/OVMF-pure-efi.fd</loader>";
 			}
 
 			$vcpus = 1;
@@ -639,28 +654,32 @@
 
 					list($gpu_bus, $gpu_slot, $gpu_function) = explode(":", str_replace('.', ':', $gpu['id']));
 
-					switch ($machine) {
+					if (!empty($domain['ovmf'])) {
 
-						case 'q35':
-							$gpuargs .= "<qemu:arg value='-device'/>
-										<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=pcie.0,multifunction=on,x-vga=on'/>";
-							break;
-
-						case 'pc':
-							$gpuargs .= "<qemu:arg value='-device'/>
-										<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=root.1,addr=0{$gpuincr}.0,multifunction=on,x-vga=on'/>";
-							break;
-
-						//TODO - OVMF
-						/*
-
+						// OVMF passthrough uses the normal hostdev and libvirt can fully manage the device
 						$pcidevs .= "<hostdev mode='subsystem' type='pci' managed='yes'>
 										<driver name='vfio'/>
 										<source>
 											<address domain='0x0000' bus='0x" . $gpu_bus . "' slot='0x" . $gpu_slot . "' function='0x" . $gpu_function . "'/>
 										</source>
 									</hostdev>";
-						*/
+
+					} else {
+
+						// VGA BIOS passthrough uses qemu args and we have to manage the device (libvirt wont attach/detach the device driver to vfio-pci)
+						switch ($machine) {
+
+							case 'q35':
+								$gpuargs .= "<qemu:arg value='-device'/>
+											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=pcie.0,multifunction=on,x-vga=on'/>";
+								break;
+
+							case 'pc':
+								$gpuargs .= "<qemu:arg value='-device'/>
+											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=root.1,addr=0{$gpuincr}.0,multifunction=on,x-vga=on'/>";
+								break;
+						}
+
 					}
 
 					$gpuincr++;
@@ -721,6 +740,7 @@
 							</memoryBacking>
 							$cpustr
 							<os>
+								$loader
 								<type arch='$arch' machine='$machine'>hvm</type>
 							</os>
 							<features>
@@ -770,6 +790,7 @@
 							</memoryBacking>
 							$cpustr
 							<os>
+								$loader
 								<type arch='$arch' machine='$machine'>hvm</type>
 							</os>
 							<features>
