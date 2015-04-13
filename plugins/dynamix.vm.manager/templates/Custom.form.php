@@ -539,17 +539,6 @@
 
 <table>
 	<tr>
-		<td class="debug_button">Debug:</td>
-		<td>
-			<pre class="debug" style="display: none;">
-$arrConfig: <?=json_encode($arrConfig, JSON_PRETTY_PRINT)?>
-			</pre>
-		</td>
-	</tr>
-</table>
-
-<table>
-	<tr>
 		<td></td>
 		<td>
 		<? if (!$boolRunning) { ?>
@@ -571,13 +560,6 @@ $arrConfig: <?=json_encode($arrConfig, JSON_PRETTY_PRINT)?>
 
 <script type="text/javascript">
 $(function() {
-	//DEBUG DEBUG DEBUG DEBUG DEBUG
-	$("#form_content .debug_button").click(function() {
-		$("#form_content .debug").slideToggle();
-	});
-	//DEBUG DEBUG DEBUG DEBUG DEBUG
-
-
 	$("#form_content #domain_mem").change(function changeMemEvent() {
 		$("#domain_maxmem").val($(this).val());
 	});
