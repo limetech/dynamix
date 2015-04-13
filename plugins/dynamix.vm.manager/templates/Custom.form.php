@@ -248,7 +248,7 @@
 	<tr class="advanced">
 		<td>Machine:</td>
 		<td>
-			<select name="domain[machine]" title="Select the machine model.  i440fx will work for most.  Q35 for a newer machine model with PCIE">
+			<select name="domain[machine]" id="domain_machine" title="Select the machine model.  i440fx will work for most.  Q35 for a newer machine model with PCIE">
 			<?php mk_dropdown_options($arrValidMachineTypes, $arrConfig['domain']['machine']); ?>
 			</select>
 		</td>
@@ -710,8 +710,10 @@ $(function() {
 
 		if ($(this).val() == 'windows') {
 			$('#domain_clock').val('localtime');
+			$('#domain_machine').val('pc');
 		} else {
 			$('#domain_clock').val('utc');
+			$('#domain_machine').val('q35');
 		}
 	}).change(); // Fire call now too
 
