@@ -1,5 +1,6 @@
 Menu="Parity Data Cache"
 Title="Health"
+Cond="(strstr($disks[$name]['status'],'_NP')===false)"
 ---
 <?PHP
 /* Copyright 2014, Lime Technology
