@@ -1,6 +1,6 @@
 Menu="Parity Data Cache"
 Title="Device Settings"
-Cond="($disks[$name]['status']!='DISK_NP')&&($disks[$name]['status']!='DISK_NP_OK')"
+Cond="($disks[$name]['status']!='DISK_NP')"
 ---
 <?PHP
 /* Copyright 2014, Lime Technology
@@ -95,6 +95,7 @@ Pool info:
 
 > This is the output of *btrfs filesystem show /mnt/cache*.
 
+<?if ($var['cacheSbNumDisks']>1):?>
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
 <?if ($disk['fsStatus']=="Mounted"):?>
 <?exec("/sbin/btrfs balance status /mnt/{$disk['name']}", $balance_status, $retval);?>
@@ -135,9 +136,11 @@ Balance status:
 <?endif;?>
 </form>
 <?endif;?>
+<?endif;?>
 <?if ($disk['fsType']=="btrfs"):?>
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
 <?if ($disk['fsStatus']=="Mounted"):?>
+<?$scrub_cmd = "/sbin/btrfs scrub start -B";?>
 <?exec("/sbin/btrfs scrub status /mnt/{$disk['name']}", $scrub_status, $retval);?>
 
 Scrub status:
@@ -145,8 +148,8 @@ Scrub status:
 
 > This is the output of *btrfs scrub status /mnt/cache*.
 
-<?if (strstr(implode($scrub_status), "running")===FALSE):?>
-<input type="hidden" name="#command" value="/sbin/btrfs scrub start -B">
+<?if (exec("/usr/local/sbin/background status $scrub_cmd")==""):?>
+<input type="hidden" name="#command" value="<?=$scrub_cmd?>">
 <input type="hidden" name="#arg[2]" value="/mnt/<?=$disk['name']?>">
 <input type="hidden" name="#arg[3]" value="&>/dev/null &"> 
 
@@ -190,8 +193,8 @@ Check Filesystem status:
 
 > This is the latest *file system check* status.
 
-<?if (exec("webGui/scripts/background status $check_cmd")==""):?>
-<input type="hidden" name="#command" value="webGui/scripts/background start <?=$status_file?> <?=$check_cmd?>">
+<?if (exec("/usr/local/sbin/background status $check_cmd")==""):?>
+<input type="hidden" name="#command" value="/usr/local/sbin/background start <?=$status_file?> <?=$check_cmd?>">
 
 &nbsp;
 : <input type="submit" value="Check"><input type="text" name="#arg[1]" maxlength="256" value=""> Options (see Help)
@@ -208,7 +211,7 @@ Check Filesystem status:
 > increasing for the device on the Main page.
 
 <?else:?>
-<input type="hidden" name="#command" value="webGui/scripts/background cancel <?=$check_cmd?>">
+<input type="hidden" name="#command" value="/usr/local/sbin/background cancel <?=$check_cmd?>">
 
 &nbsp;
 : <input type="submit" value="Cancel"> *Running*
@@ -239,8 +242,8 @@ Check Filesystem status:
 
 > This is the latest *file system check* status.
 
-<?if (exec("webGui/scripts/background status $check_cmd")==""):?>
-<input type="hidden" name="#command" value="webGui/scripts/background start <?=$status_file?> <?=$check_cmd?>">
+<?if (exec("/usr/local/sbin/background status $check_cmd")==""):?>
+<input type="hidden" name="#command" value="/usr/local/sbin/background start <?=$status_file?> <?=$check_cmd?>">
 
 &nbsp;
 : <input type="submit" value="Check"><input type="text" name="#arg[1]" maxlength="256" value="-n"> Options (see Help)
@@ -256,7 +259,7 @@ Check Filesystem status:
 > increasing for the device on the Main page.
 
 <?else:?>
-<input type="hidden" name="#command" value="webGui/scripts/background cancel <?=$check_cmd?>">
+<input type="hidden" name="#command" value="/usr/local/sbin/background cancel <?=$check_cmd?>">
 
 &nbsp;
 : <input type="submit" value="Cancel"> *Running*
