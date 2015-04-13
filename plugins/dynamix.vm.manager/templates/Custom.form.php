@@ -248,7 +248,7 @@
 	<tr class="advanced">
 		<td>Machine:</td>
 		<td>
-			<select name="domain[machine]" title="Select the machine model.  i440fx will work for most.  Q35 for a newer machine model with PCIE">
+			<select name="domain[machine]" id="domain_machine" title="Select the machine model.  i440fx will work for most.  Q35 for a newer machine model with PCIE">
 			<?php mk_dropdown_options($arrValidMachineTypes, $arrConfig['domain']['machine']); ?>
 			</select>
 		</td>
@@ -539,17 +539,6 @@
 
 <table>
 	<tr>
-		<td class="debug_button">Debug:</td>
-		<td>
-			<pre class="debug" style="display: none;">
-$arrConfig: <?=json_encode($arrConfig, JSON_PRETTY_PRINT)?>
-			</pre>
-		</td>
-	</tr>
-</table>
-
-<table>
-	<tr>
 		<td></td>
 		<td>
 		<? if (!$boolRunning) { ?>
@@ -571,13 +560,6 @@ $arrConfig: <?=json_encode($arrConfig, JSON_PRETTY_PRINT)?>
 
 <script type="text/javascript">
 $(function() {
-	//DEBUG DEBUG DEBUG DEBUG DEBUG
-	$("#form_content .debug_button").click(function() {
-		$("#form_content .debug").slideToggle();
-	});
-	//DEBUG DEBUG DEBUG DEBUG DEBUG
-
-
 	$("#form_content #domain_mem").change(function changeMemEvent() {
 		$("#domain_maxmem").val($(this).val());
 	});
@@ -710,8 +692,10 @@ $(function() {
 
 		if ($(this).val() == 'windows') {
 			$('#domain_clock').val('localtime');
+			$('#domain_machine').val('pc');
 		} else {
 			$('#domain_clock').val('utc');
+			$('#domain_machine').val('q35');
 		}
 	}).change(); // Fire call now too
 
