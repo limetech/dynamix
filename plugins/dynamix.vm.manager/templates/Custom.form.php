@@ -1,7 +1,7 @@
 <?php
 	require_once('/usr/local/emhttp/plugins/dynamix/include/Helpers.php');
-	require_once('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php');
-	require_once('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt_helpers.php');
+	require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt.php');
+	require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt_helpers.php');
 
 	$arrValidMachineTypes = getValidMachineTypes();
 	$arrValidPCIDevices = getValidPCIDevices();
@@ -95,7 +95,7 @@
 			$wsport = $lv->domain_get_ws_port($res);
 
 			if ($vncport >= 0) {
-				$vnc = '/plugins/dynamix.kvm.manager/vnc.html?autoconnect=true&host='.$var['IPADDR'].'&port='.$wsport;
+				$vnc = '/plugins/dynamix.vm.manager/vnc.html?autoconnect=true&host='.$var['IPADDR'].'&port='.$wsport;
 				$arrResponse['vncurl'] = $vnc;
 			}
 		}

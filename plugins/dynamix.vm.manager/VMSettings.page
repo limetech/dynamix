@@ -1,6 +1,6 @@
 Menu="OtherSettings"
 Title="VM Manager"
-Icon="dynamix.kvm.manager.png"
+Icon="dynamix.vm.manager.png"
 ---
 <?PHP
 if ($var['fsState'] != "Started") {
@@ -8,8 +8,8 @@ if ($var['fsState'] != "Started") {
   return;
 }
 
-require_once('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php');
-require_once('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt_helpers.php');
+require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt.php');
+require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt_helpers.php');
 
 // Check if domain.img exists
 $libvirt_filecheck = (file_exists( "/boot/config/plugins/dynamix.kvm.manager/domain.img" )) ? true : false;
@@ -49,7 +49,7 @@ if ($boolACSEnabled != $boolACSInSyslinux) {
 	?><p class="notice">You must reboot in to <b><?=$strCurrentLabel?></b> mode for changes to take effect</p><?php
 }
 ?>
-<link type="text/css" rel="stylesheet" href="/plugins/dynamix.kvm.manager/styles/dynamix.kvm.manager.css">
+<link type="text/css" rel="stylesheet" href="/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.min.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
@@ -107,18 +107,18 @@ PCIe ACS Override:
 
 <script type="text/javascript" src="/webGui/scripts/jqueryFileTree.js"></script>
 <script type="text/javascript" src="/webGui/scripts/jquery.switchButton.js"></script>
-<script type="text/javascript" src="/plugins/dynamix.kvm.manager/scripts/dynamix.kvm.manager.js"></script>
+<script type="text/javascript" src="/plugins/dynamix.vm.manager/scripts/dynamix.vm.manager.js"></script>
 <script>
 $(function(){
 	$("#applyBtn").click(function(){
 		$("#command").val("/etc/rc.d/rc.libvirt " + ($("#SERVICE").val()=="enable" ? "start" : "stop"));
 
 		if ($('#pcie_acs_override').val() == '1') {
-			$.get("/plugins/dynamix.kvm.manager/VMajax.php?action=acs-override-enable", function( data ) {
+			$.get("/plugins/dynamix.vm.manager/VMajax.php?action=acs-override-enable", function( data ) {
 				$("#settingsForm").submit();
 			}, "json");
 		} else {
-			$.get("/plugins/dynamix.kvm.manager/VMajax.php?action=acs-override-disable", function( data ) {
+			$.get("/plugins/dynamix.vm.manager/VMajax.php?action=acs-override-disable", function( data ) {
 				$("#settingsForm").submit();
 			}, "json");
 		}

@@ -208,7 +208,7 @@ if ($action) {
         	$wsport = '-';
         	$vncport = "auto";
       }else
-         $vnc = '/plugins/dynamix.kvm.manager/vnc.html?autoconnect=true&host='.$var['IPADDR'].'&port='.$wsport;
+         $vnc = '/plugins/dynamix.vm.manager/vnc.html?autoconnect=true&host='.$var['IPADDR'].'&port='.$wsport;
 		$bootdev = $lv->domain_get_boot_devices($name)[0];
 
       unset($tmp);
@@ -218,7 +218,7 @@ if ($action) {
 		//Domain information
       echo "<tr style='background-color:".bcolor($i,$theme)."'>
       			<td>
-						<img src='/plugins/dynamix.kvm.manager/images/".$color."-on.png' title='$state'>
+						<img src='/plugins/dynamix.vm.manager/images/".$color."-on.png' title='$state'>
       			</td>
         	      <td>
 						<a href='#' onclick=\"toggle_id('name$i')\" title='click for more domain info'>$name</a>
@@ -535,7 +535,7 @@ if($msg){
 
 <script type="text/javascript">
 function vncOpen() {
-  $.post('/plugins/dynamix.kvm.manager/classes/vnc.php',{cmd:'open',root:'<?=$docroot?>',file:'/usr/local/emhttp/plugins/dynamix.kvm.manager/vncconnect.vnc'},function(data) {
+  $.post('/plugins/dynamix.vm.manager/classes/vnc.php',{cmd:'open',root:'<?=$docroot?>',file:'/usr/local/emhttp/plugins/dynamix.vm.manager/vncconnect.vnc'},function(data) {
     window.location.href = data;
   });
 }

@@ -3,14 +3,14 @@ Cond="(pgrep('libvirtd')!==false)"
 Markdown="false"
 ---
 <?php
-require_once('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php');
-require_once('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt_helpers.php');
+require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt.php');
+require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt_helpers.php');
 
 $arrTemplates = array();
 $strSelectedTemplate = '';
 
 // Read files from the templates folder
-foreach (glob('plugins/dynamix.kvm.manager/templates/*.form.php') as $template) {
+foreach (glob('plugins/dynamix.vm.manager/templates/*.form.php') as $template) {
 	$arrTemplates[] = basename($template, '.form.php');
 }
 
@@ -21,7 +21,7 @@ if (!empty($arrTemplates) && !in_array($strSelectedTemplate, $arrTemplates)) {
 $arrLoad = [];
 
 ?>
-<link type="text/css" rel="stylesheet" href="/plugins/dynamix.kvm.manager/styles/dynamix.kvm.manager.css">
+<link type="text/css" rel="stylesheet" href="/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.min.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
@@ -153,7 +153,7 @@ $arrLoad = [];
 
 <script type="text/javascript" src="/webGui/scripts/jqueryFileTree.js"></script>
 <script type="text/javascript" src="/webGui/scripts/jquery.switchButton.js"></script>
-<script type="text/javascript" src="/plugins/dynamix.kvm.manager/scripts/dynamix.kvm.manager.js"></script>
+<script type="text/javascript" src="/plugins/dynamix.vm.manager/scripts/dynamix.vm.manager.js"></script>
 <script type="text/javascript">
 function isVMAdvancedMode() {
 	return ($.cookie('vmmanager_listview_mode') == 'advanced');
@@ -213,7 +213,7 @@ $(function() {
 			$el.html('<div style="padding-left: 80px; padding-top: 20px; font-size: 1.3em"><img src="/webGui/images/spinner.gif"> Loading...</div>').fadeIn('fast');
 		});
 
-		$.get('/plugins/dynamix.kvm.manager/templates/' + templateName + '.form.php', function(data) {
+		$.get('/plugins/dynamix.vm.manager/templates/' + templateName + '.form.php', function(data) {
 			$el.stop(true, false).fadeOut(100, function() {
 				$el.html(data);
 

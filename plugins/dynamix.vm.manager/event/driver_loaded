@@ -10,4 +10,4 @@ if [ -f /boot/config/plugins/virtMan/virtMan.img ]; then
     fi
 fi
 
-cp -nr /usr/local/emhttp/plugins/dynamix.kvm.manager/dynamix.kvm.manager /boot/config/plugins
+cp -nr /usr/local/emhttp/plugins/dynamix.vm.manager/dynamix.kvm.manager /boot/config/plugins

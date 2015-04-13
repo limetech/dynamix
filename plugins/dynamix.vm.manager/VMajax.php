@@ -1,8 +1,8 @@
 <?php
 
 require_once('/usr/local/emhttp/plugins/dynamix/include/Helpers.php');
-require_once('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt.php');
-require_once('/usr/local/emhttp/plugins/dynamix.kvm.manager/classes/libvirt_helpers.php');
+require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt.php');
+require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt_helpers.php');
 
 $_REQUEST = array_merge($_GET, $_POST);
 
