@@ -73,7 +73,7 @@ function device_info($disk) {
   } else {
     $status = "<img src='$ball' class='icon'>";
   }
-  $link = strpos($disk['status'], '_NP')===false ? "<a href='$path/$type?name=$href'>$name</a>" : $name;
+  $link = strpos($disk['status'], 'DISK_NP')===false ? "<a href='$path/$type?name=$href'>$name</a>" : $name;
   return $status.$link;
 }
 function device_browse($disk) {
@@ -147,7 +147,7 @@ function array_offline($disk) {
     echo "<td>{$disk['fsType']}</td>";
     echo "<td></td>";
   break;
-  case "DISK_NP_OK":
+  case "DISK_OK_NP":
     echo "<td>".device_info($disk)."</td>";
     echo "<td>".assignment($disk)."</td>";
     echo "<td></td>";
@@ -186,7 +186,7 @@ function array_offline($disk) {
     echo "<td>{$disk['fsType']}</td>";
     echo "<td></td>";
   break;
-  case "DISK_DSBL_NP":
+  case "DISK_NP_DSBL":
   if ($disk['name']=="parity") {
     echo "<td>".device_info($disk)."</td>";
     echo "<td colspan='9'>".assignment($disk)."</td>";
@@ -281,7 +281,7 @@ function array_online($disk) {
 //    echo "<td>".device_info($disk)."</td>";
 //    echo "<td colspan='10'>Not installed</td>";
   break;
-  case "DISK_NP_OK":
+  case "DISK_OK_NP":
     echo "<td>".device_info($disk)."</td>";
     echo "<td>Not Installed</td>";
     echo "<td></td>";
@@ -293,7 +293,7 @@ function array_online($disk) {
     echo "<td>{$disk['fsType']}</td>";
     echo "<td>".device_browse($disk)."</td>";
   break;
-  case "DISK_DSBL_NP":
+  case "DISK_NP_DSBL":
     echo "<td>".device_info($disk)."</td>";
   if ($disk['name']=="parity") {
     echo "<td colspan='10'>Not installed</td>";
@@ -408,7 +408,7 @@ case 'array':
     echo "<tr class='tr_last'><td><img src='/webGui/images/sum.png' class='icon'>Slots:</td><td colspan='10'>".array_slots()."</td></tr>";
   } else {
     foreach ($disks as $disk) {if ($disk['type']=='Parity' || $disk['type']=='Data') array_online($disk);}
-    if ($display['total'] && $var['mdNumProtected']>1) show_totals("Array of ".my_word($var['mdNumProtected'])." disks".($disks['parity'][status]=='DISK_OK' ? " (including parity disk)" : ""));
+    if ($display['total'] && $var['mdNumProtected']>1) show_totals("Array of ".my_word($var['mdNumDisks'])." devices");
   }
 break;
 case 'flash':
@@ -442,7 +442,7 @@ case 'cache':
     echo "<tr><td colspan='11'></td></tr>";
   } else {
     foreach ($disks as $disk) {if ($disk['type']=='Cache') array_online($disk);}
-    if ($display['total'] && $var['cacheSbNumDisks']>1) show_totals("Pool of ".my_word($var['cacheSbNumDisks'])." disks");
+    if ($display['total'] && $var['cacheSbNumDisks']>1) show_totals("Pool of ".my_word($var['cacheNumDevices'])." devices");
   }
 break;
 case 'open':
