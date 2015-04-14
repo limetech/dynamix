@@ -122,17 +122,17 @@ class DockerTemplates {
 	}
 
 
-	public function downloadTemplates($Dest = ""){
+	public function downloadTemplates($Dest=NULL, $Urls=NULL){
 		global $dockerManPaths;
 		$Dest = ($Dest) ? $Dest : $dockerManPaths['templates-storage'];
+		$Urls = ($Urls) ? $Urls : $dockerManPaths['template-repos'];
 		$repotemplates = array();
 		$output = "";
 		$tmp_dir = "/tmp/tmp-".mt_rand();
 		
-		$urls = @file($dockerManPaths['template-repos'], FILE_IGNORE_NEW_LINES);
+		$urls = @file($Urls, FILE_IGNORE_NEW_LINES);
 		if ( ! is_array($urls)) return false;
 		$this->debug("\nURLs:\n   " . implode("\n   ", $urls));
-		
 		foreach ($urls as $url) {
 			$api_regexes = array(
 				0 => '%/.*github.com/([^/]*)/([^/]*)/tree/([^/]*)/(.*)$%i',
@@ -140,7 +140,6 @@ class DockerTemplates {
 				2 => '%/.*github.com/([^/]*)/(.*).git%i',
 				3 => '%/.*github.com/([^/]*)/(.*)%i',
 				);
-
 			for ($i=0; $i < count($api_regexes); $i++) {
 				if ( preg_match($api_regexes[$i], $url, $matches) ){
 					$github_api['user']   = ( isset( $matches[1] )) ? $matches[1] : "";
@@ -151,7 +150,6 @@ class DockerTemplates {
 					break;
 				}
 			}
-
 			if ( $this->download_url($github_api['url'], "$tmp_dir.tar.gz") === FALSE) {
 				$this->debug("\n Download ". $github_api['url'] ." has failed.");
 				return NULL;
@@ -160,7 +158,6 @@ class DockerTemplates {
 				shell_exec("tar -zxf $tmp_dir.tar.gz --strip=1 -C $tmp_dir/ 2>&1");
 				unlink("$tmp_dir.tar.gz");
 			}
-
 			$tmplsStor = array();
 			$templates = $this->getTemplates($tmp_dir);
 			$this->debug("\n Templates found in ". $github_api['url']);
@@ -190,7 +187,6 @@ class DockerTemplates {
 			if (!in_array($arrLocalTemplate['path'], $repotemplates)) {
 				unlink($arrLocalTemplate['path']);
 				$this->debug("   Removed: ".$arrLocalTemplate['prefix'].'/'.$arrLocalTemplate['name']."\n");
-
 				// Any other files left in this template folder? if not delete the folder too
 				$files = array_diff(scandir(dirname($arrLocalTemplate['path'])), array('.', '..'));
 				if (empty($files)) {
