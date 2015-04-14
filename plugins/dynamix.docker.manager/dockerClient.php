@@ -165,7 +165,8 @@ class DockerTemplates {
 			$templates = $this->getTemplates($tmp_dir);
 			$tmplsStor = array();
 			foreach ($templates as $template) {
-				$tmplsStor[] = sprintf("%s/%s", $dockerManPaths['templates-storage'], str_replace($tmp_dir."/", "", $template['path']) );
+				$storPath = sprintf("%s/%s", $dockerManPaths['templates-storage'], str_replace($tmp_dir."/", "", $template['path']) );
+				$tmplsStor[] = $storPath;
 				if (! is_dir( dirname( $storPath ))) @mkdir( dirname( $storPath ), 0777, true);
 				if ( is_file($storPath) ){
 					if ( sha1_file( $template['path'] )  ===  sha1_file( $storPath )) {
