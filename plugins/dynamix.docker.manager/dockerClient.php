@@ -122,8 +122,9 @@ class DockerTemplates {
 	}
 
 
-	public function downloadTemplates(){
+	public function downloadTemplates($Dest = ""){
 		global $dockerManPaths;
+		$Dest = ($Dest) ? $Dest : $dockerManPaths['templates-storage'];
 		$repotemplates = array();
 		$output = "";
 		$tmp_dir = "/tmp/tmp-".mt_rand();
@@ -160,12 +161,11 @@ class DockerTemplates {
 				unlink("$tmp_dir.tar.gz");
 			}
 
-			$this->debug("\n Templates found in ". $github_api['url']);
-
-			$templates = $this->getTemplates($tmp_dir);
 			$tmplsStor = array();
+			$templates = $this->getTemplates($tmp_dir);
+			$this->debug("\n Templates found in ". $github_api['url']);
 			foreach ($templates as $template) {
-				$storPath = sprintf("%s/%s", $dockerManPaths['templates-storage'], str_replace($tmp_dir."/", "", $template['path']) );
+				$storPath = sprintf("%s/%s", $Dest, str_replace($tmp_dir."/", "", $template['path']) );
 				$tmplsStor[] = $storPath;
 				if (! is_dir( dirname( $storPath ))) @mkdir( dirname( $storPath ), 0777, true);
 				if ( is_file($storPath) ){
@@ -186,7 +186,7 @@ class DockerTemplates {
 			$this->removeDir($tmp_dir);
 		}
 		// Delete any templates not in the repos
-		foreach ($this->listDir($dockerManPaths['templates-storage'], "xml") as $arrLocalTemplate) {
+		foreach ($this->listDir($Dest, "xml") as $arrLocalTemplate) {
 			if (!in_array($arrLocalTemplate['path'], $repotemplates)) {
 				unlink($arrLocalTemplate['path']);
 				$this->debug("   Removed: ".$arrLocalTemplate['prefix'].'/'.$arrLocalTemplate['name']."\n");
