@@ -124,7 +124,11 @@ $DockerTemplates = new DockerTemplates();
 				?>
 			</td>
 			<td>
+				<?if($info[$ct['Name']]['template']):?>
 				<a class="exec" onclick="editContainer('<?=addslashes($ct['Name']);?>','<?=addslashes($info[$ct['Name']]['template']);?>');"><?=htmlspecialchars($ct['Name']);?></a>
+				<?else:?>
+				<?=htmlspecialchars($ct['Name']);?>
+				<?endif;?>
 				<div class="advanced" style="color:#888; width: 160px;">Container ID: <?=htmlspecialchars($ct['Id']);?></div>
 			</td>
 			<td>
