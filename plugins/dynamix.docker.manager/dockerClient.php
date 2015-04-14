@@ -125,6 +125,7 @@ class DockerTemplates {
 	public function downloadTemplates(){
 		global $dockerManPaths;
 		$repotemplates = array();
+		$output = "";
 		$tmp_dir = "/tmp/tmp-".mt_rand();
 		
 		$urls = @file($dockerManPaths['template-repos'], FILE_IGNORE_NEW_LINES);
@@ -162,9 +163,9 @@ class DockerTemplates {
 			$this->debug("\n Templates found in ". $github_api['url']);
 
 			$templates = $this->getTemplates($tmp_dir);
+			$tmplsStor = array();
 			foreach ($templates as $template) {
-				$storPath = sprintf("%s/%s", $dockerManPaths['templates-storage'], str_replace($tmp_dir."/", "", $template['path']) );
-				$repotemplates[] = $storPath;
+				$tmplsStor[] = sprintf("%s/%s", $dockerManPaths['templates-storage'], str_replace($tmp_dir."/", "", $template['path']) );
 				if (! is_dir( dirname( $storPath ))) @mkdir( dirname( $storPath ), 0777, true);
 				if ( is_file($storPath) ){
 					if ( sha1_file( $template['path'] )  ===  sha1_file( $storPath )) {
@@ -179,6 +180,8 @@ class DockerTemplates {
 					$this->debug("   Added: ".$template['prefix'].'/'.$template['name']);
 				}
 			}
+			$repotemplates = array_merge($repotemplates, $tmplsStor);
+			$output[$url] = $tmplsStor;
 			$this->removeDir($tmp_dir);
 		}
 		// Delete any templates not in the repos
@@ -195,7 +198,7 @@ class DockerTemplates {
 				}
 			}
 		}
-		return $repotemplates;
+		return $output;
 	}
 
 
