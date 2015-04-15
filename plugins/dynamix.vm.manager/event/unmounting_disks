@@ -3,7 +3,7 @@
 # Shutdown libvirt
 if [ -x /etc/rc.d/rc.libvirt ]; then
   logger "Stopping libvirt"
-  /etc/rc.d/rc.libvirt stop | logger
+  /etc/rc.d/rc.libvirt stop |& logger
 fi
 
 if [ "$(mount | grep domain.img)" ]; then
