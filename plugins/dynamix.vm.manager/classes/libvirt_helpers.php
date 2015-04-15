@@ -295,10 +295,10 @@
 			'domain' => [
 				'name' => $lv->domain_get_name($res),
 				'desc' => $lv->domain_get_description($res),
-				'persistent' => 1, //TODO?
+				'persistent' => 1,
 				'uuid' => $lv->domain_get_uuid($res),
 				'clock' => $lv->domain_get_clock_offset($res),
-				'os' => 'windows', //TODO?
+				'os' => ($lv->domain_get_clock_offset($res) == 'localtime' ? 'windows' : 'other'),
 				'arch' => $lv->domain_get_arch($res),
 				'machine' => (strpos($lv->domain_get_machine($res), 'i440fx') !== false ? 'pc' : 'q35'),
 				'mem' => $lv->domain_get_current_memory($res),
