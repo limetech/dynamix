@@ -60,27 +60,19 @@ class DockerTemplates {
     return ($exit_code === 0 ) ? implode("\n", $out) : FALSE;
   }
 
-	public function listDir($dir, $ext = FALSE) {
-		$result = array();
-		if (! $dir) return $result;
-		$Files = array_diff(scandir($dir), array('.', '..'));
-		if (! $Files) return $result;
-		natcasesort($Files);
-		foreach ($Files as $f) {
-			$dirname = realpath($dir).'/'.$f;
-			if (is_dir($dirname)) {
-				$result = array_merge($result, $this->listDir($dirname, $ext));
-			} else {
-				$info = new SplFileInfo($dirname);
-				$fext = $info->getExtension();
-				if ($ext && ( $ext != $fext )) continue;
-				$result[] = array('path'   => $dirname,
-				                  'prefix' => basename(dirname($dirname)),
-				                  'name'   => $info->getBasename(".$fext"),
-				                  );
-			}
+	public function listDir($root, $ext=NULL) {
+		$iter = new RecursiveIteratorIterator(
+						new RecursiveDirectoryIterator($root, 
+						RecursiveDirectoryIterator::SKIP_DOTS),
+						RecursiveIteratorIterator::SELF_FIRST,
+						RecursiveIteratorIterator::CATCH_GET_CHILD);
+		$paths = array();
+		foreach ($iter as $path => $fileinfo) {
+			$fext = $fileinfo->getExtension();
+			if ($ext && ( $ext != $fext )) continue;
+			if ( $fileinfo->isFile()) $paths[] = array('path' => $path, 'prefix' => basename(dirname($path)), 'name' => $fileinfo->getBasename(".$fext"));
 		}
-		return $result;
+	return $paths;
 	}
 
 
