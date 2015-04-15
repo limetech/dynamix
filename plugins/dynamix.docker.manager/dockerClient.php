@@ -56,7 +56,7 @@ class DockerTemplates {
 	}
 
   public function download_url($url, $path = "", $bg = FALSE){
-    exec("curl --max-time 30 -s -k -L ".($path ? " -o '$path' " : "")." $url ".($bg ? ">/dev/null 2>&1 &" : "2>/dev/null"), $out, $exit_code );
+    exec("curl --max-time 60 --silent --insecure --location --fail ".($path ? " -o '$path' " : "")." $url ".($bg ? ">/dev/null 2>&1 &" : "2>/dev/null"), $out, $exit_code );
     return ($exit_code === 0 ) ? implode("\n", $out) : FALSE;
   }
 
@@ -398,10 +398,10 @@ class DockerTemplates {
 ######################################
 class DockerUpdate{
 
-	public function download_url($url, $path = ""){
-		exec("curl --max-time 30 -s -k -L ". ($path ? " -o '$path' " : "") ." $url 2>/dev/null", $out, $exit_code );
-		return ($exit_code === 0 ) ? implode("\n", $out) : FALSE;
-	}
+  public function download_url($url, $path = "", $bg = FALSE){
+    exec("curl --max-time 30 --silent --insecure --location --fail ".($path ? " -o '$path' " : "")." $url ".($bg ? ">/dev/null 2>&1 &" : "2>/dev/null"), $out, $exit_code );
+    return ($exit_code === 0 ) ? implode("\n", $out) : FALSE;
+  }
 
 
 	public function getRemoteVersion($RegistryUrl, $image){
