@@ -28,7 +28,8 @@
 			'cpumode' => 'host-passthrough',
 			'vcpus' => 1,
 			'vcpu' => [0],
-			'hyperv' => 1
+			'hyperv' => 1,
+			'ovmf' => 0
 		],
 		'media' => [
 			'cdrom' => '',
@@ -250,6 +251,23 @@
 		<td>
 			<select name="domain[machine]" id="domain_machine" title="Select the machine model.  i440fx will work for most.  Q35 for a newer machine model with PCIE">
 			<?php mk_dropdown_options($arrValidMachineTypes, $arrConfig['domain']['machine']); ?>
+			</select>
+		</td>
+	</tr>
+
+	<tr class="advanced">
+		<td>BIOS:</td>
+		<td>
+			<select name="domain[ovmf]" title="Select the BIOS.  SeaBIOS will work for most.  OVMF requires a UEFI-compatable OS (e.g. Windows 8/2012, newer Linux distros) and if using graphics device passthrough it too needs UEFI" <? if (!empty($arrConfig['domain']['state'])) echo 'disabled="disabled"'; ?>>
+			<?php
+				echo mk_option($arrConfig['domain']['ovmf'], '0', 'SeaBIOS');
+
+				if (file_exists('/usr/share/qemu/ovmf-x64/OVMF-pure-efi.fd')) {
+					echo mk_option($arrConfig['domain']['ovmf'], '1', 'OVMF');
+				} else {
+					echo mk_option('', '0', 'OVMF (Not Available)', 'disabled="disabled"');
+				}
+			?>
 			</select>
 		</td>
 	</tr>

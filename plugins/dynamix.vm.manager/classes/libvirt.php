@@ -644,10 +644,19 @@
 								<input type='keyboard' bus='ps2'/>
 								<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0' $passwdstr>
 									<listen type='address' address='0.0.0.0'/>
-								</graphics>
-								<video>
-									<model type='vmvga'/>
-								</video>";
+								</graphics>";
+
+						if (!empty($domain['ovmf'])) {
+							// OVMF doesn't work with vmvga
+							$vnc .= "<video>
+										<model type='cirrus'/>
+									</video>";
+						} else {
+							// SeaBIOS is cool with vmvga
+							$vnc .= "<video>
+										<model type='vmvga'/>
+									</video>";
+						}
 						continue;
 					}
 
@@ -1792,6 +1801,12 @@
 				return false;
 
 			return $tmp[0];
+		}
+
+		function domain_get_ovmf($domain) {
+			$domain = $this->get_domain_object($domain);
+
+			return $this->_get_single_xpath_result($domain, '//domain/os/loader');
 		}
 
 		function domain_get_multimedia_device($domain, $type, $display=false) {
