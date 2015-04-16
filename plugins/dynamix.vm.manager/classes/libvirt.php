@@ -734,101 +734,57 @@
 				}
 			}
 
+			$xml = "<domain type='$type' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
+						<uuid>$uuid</uuid>
+						<name>$name</name>
+						<description>{$domain['desc']}</description>
+						<currentMemory>$mem</currentMemory>
+						<memory>$maxmem</memory>
+						<memoryBacking>
+							<nosharepages/>
+							<locked/>
+						</memoryBacking>
+						$cpustr
+						<os>
+							$loader
+							<type arch='$arch' machine='$machine'>hvm</type>
+						</os>
+						<features>
+							<acpi/>
+							<apic/>
+							$hyperv
+							$pae
+						</features>
+						$clock
+						<on_poweroff>destroy</on_poweroff>
+						<on_reboot>restart</on_reboot>
+						<on_crash>restart</on_crash>
+						<devices>
+							<emulator>$emulator</emulator>
+							$diskstr
+							$mediastr
+							$driverstr
+							$ctrl
+							$sharestr
+							$netstr
+							$vnc
+							<console type='pty'/>
+							$pcidevs
+							$usbstr
+							<memballoon model='virtio'>
+								<alias name='balloon0'/>
+							</memballoon>
+						</devices>
+						$cmdargs
+					</domain>";
 
 			if (!empty($diskstr) | !empty($mediastr)) {
-				$xml = "<domain type='$type' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
-							<uuid>$uuid</uuid>
-							<name>$name</name>
-							<description>{$domain['desc']}</description>
-							<currentMemory>$mem</currentMemory>
-							<memory>$maxmem</memory>
-							<memoryBacking>
-								<nosharepages/>
-								<locked/>
-							</memoryBacking>
-							$cpustr
-							<os>
-								$loader
-								<type arch='$arch' machine='$machine'>hvm</type>
-							</os>
-							<features>
-								<acpi/>
-								<apic/>
-								$hyperv
-								$pae
-							</features>
-							$clock
-							<on_poweroff>destroy</on_poweroff>
-							<on_reboot>restart</on_reboot>
-							<on_crash>restart</on_crash>
-							<devices>
-								<emulator>$emulator</emulator>
-								$diskstr
-								$mediastr
-								$driverstr
-								$ctrl
-								$sharestr
-								$netstr
-								$vnc
-								<console type='pty'/>
-								$pcidevs
-								$usbstr
-								<memballoon model='virtio'>
-									<alias name='balloon0'/>
-								</memballoon>
-							</devices>
-							$cmdargs
-						</domain>";
-
 				$tmp = libvirt_domain_create_xml($this->conn, $xml);
 				if (!$tmp)
 					return $this->_set_last_error();
 			}
 
 			if ($domain['persistent']) {
-				$xml = "<domain type='$type' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
-							<uuid>$uuid</uuid>
-							<name>$name</name>
-							<description>{$domain['desc']}</description>
-							<currentMemory>$mem</currentMemory>
-							<memory>$maxmem</memory>
-							<memoryBacking>
-								<nosharepages/>
-								<locked/>
-							</memoryBacking>
-							$cpustr
-							<os>
-								$loader
-								<type arch='$arch' machine='$machine'>hvm</type>
-							</os>
-							<features>
-								<acpi/>
-								<apic/>
-								$hyperv
-								$pae
-							</features>
-							$clock
-							<on_poweroff>destroy</on_poweroff>
-							<on_reboot>restart</on_reboot>
-							<on_crash>restart</on_crash>
-							<devices>
-								<emulator>$emulator</emulator>
-								$diskstr
-								$mediastr
-								$ctrl
-								$sharestr
-								$netstr
-								$vnc
-								<console type='pty'/>
-								$pcidevs
-								$usbstr
-								<memballoon model='virtio'>
-									<alias name='balloon0'/>
-								</memballoon>
-							</devices>
-							$cmdargs
-						</domain>";
-
 				$tmp = libvirt_domain_define_xml($this->conn, $xml);
 				if ($tmp) {
 					$this->domain_set_autostart($tmp, $domain['autostart'] == 1);
