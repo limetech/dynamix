@@ -108,6 +108,12 @@
 				$ctrl = "<controller type='usb' index='0' model='ich9-ehci1'/>
 					<controller type='usb' index='0' model='ich9-uhci1'/>";
 			}
+
+			// OVMF needs the bus set to virtio for cdroms
+			if (!empty($domain['ovmf'])) {
+				$bus = "virtio";
+			}
+
 			$clock = "<clock offset='" . $domain['clock'] . "'>
 						<timer name='rtc' tickpolicy='catchup'/>
 						<timer name='pit' tickpolicy='delay'/>
@@ -474,6 +480,12 @@
 				$ctrl = "<controller type='usb' index='0' model='ich9-ehci1'/>
 						<controller type='usb' index='0' model='ich9-uhci1'/>";
 			}
+
+			// OVMF needs the bus set to virtio for cdroms
+			if (!empty($domain['ovmf'])) {
+				$bus = "virtio";
+			}
+
 			$clock =	"<clock offset='" . $domain['clock'] . "'>
 							<timer name='rtc' tickpolicy='catchup'/>
 							<timer name='pit' tickpolicy='delay'/>
