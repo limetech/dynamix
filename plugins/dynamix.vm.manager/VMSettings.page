@@ -22,6 +22,15 @@ if ($libvirt_filecheck) {
 }
 
 
+// Check for Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support
+$strCPUInfo = file_get_contents('/proc/cpuinfo');
+
+if (strpos($strCPUInfo, 'vmx') === false && strpos($strCPUInfo, 'svm') === false) {
+	?><p class="notice">Your hardware does not have Intel VT-x or AMD-V capability.  This is required to create VMs in KVM. <a href="http://lime-technology.com/wiki/index.php/UnRAID_Manual_6#Hardware-Assisted_Virtualization_.28HVM.29" target="_blank">Click here to see the unRAID Wiki for more information</a></p><?php
+	exit;
+}
+
+
 // Check for PCIE ACS capabilities
 $boolACSEnabled = (strpos(file_get_contents('/proc/cmdline'), 'pcie_acs_override=') !== false);
 
@@ -46,7 +55,7 @@ foreach ($arrSyslinuxCfg as &$strSyslinuxCfg) {
 }
 
 if ($boolACSEnabled != $boolACSInSyslinux) {
-	?><p class="notice">You must reboot in to <b><?=$strCurrentLabel?></b> mode for changes to take effect</p><?php
+	?><p class="notice">You must reboot for changes to take effect</p><?php
 }
 ?>
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css">

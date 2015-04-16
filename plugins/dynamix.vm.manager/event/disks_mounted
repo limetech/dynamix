@@ -16,6 +16,6 @@ if [ "$SERVICE" = "enable" ]; then
 	# Start libvirt
 	if [ -x /etc/rc.d/rc.libvirt ]; then
 	  logger "Starting libvirt"
-	  /etc/rc.d/rc.libvirt start | logger
+	  /etc/rc.d/rc.libvirt start |& logger
 	fi
 fi

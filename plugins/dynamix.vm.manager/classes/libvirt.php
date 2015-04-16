@@ -115,14 +115,13 @@
 					</clock>";
 
 			$hyperv = '';
-			if (!empty($domain['os']) && $domain['os'] == "windows") {
-				if ($domain['hyperv']){
-					$hyperv = "<hyperv>
-								<relaxed state='on'/>
-								<vapic state='on'/>
-								<spinlocks state='on' retries='8191'/>
-							</hyperv>";
-				}
+			if (!empty($domain['os']) && $domain['os'] == "windows" && $domain['hyperv']) {
+				$hyperv = "<hyperv>
+							<relaxed state='on'/>
+							<vapic state='on'/>
+							<spinlocks state='on' retries='8191'/>
+						</hyperv>";
+
 				$clock = "<clock offset='" . $domain['clock'] . "'>
 							<timer name='hypervclock' present='yes'/>
 							<timer name='hpet' present='no'/>

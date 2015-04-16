@@ -11,7 +11,7 @@
 	// Create domain config if needed
 	$domain_cfgfile = "/boot/config/domain.cfg";
 	if (!file_exists($domain_cfgfile)) {
-		file_put_contents($domain_cfgfile, 'ENABLED="no"'."\n".'DEBUG="no"'."\n".'MEDIADIR="/mnt/"'."\n".'DISKDIR="/mnt/"'."\n");
+		file_put_contents($domain_cfgfile, 'SERVICE="disable"'."\n".'DEBUG="no"'."\n".'MEDIADIR="/mnt/"'."\n".'DISKDIR="/mnt/"'."\n".'BRNAME=""'."\n");
 	} else {
 		// This will clean any ^M characters (\r) caused by windows from the config file
 		shell_exec("sed -i 's!\r!!g' '$domain_cfgfile'");
@@ -26,7 +26,7 @@
 
 	$domain_bridge = (!($domain_cfg['BRNAME'])) ? $var['BRNAME'] : $domain_cfg['BRNAME'];
 	$msg = (empty($domain_bridge)) ? "Error: Setup Bridge in Settings/Network Settings" : false;
-	$libvirt_service = isset($domain_cfg['SERVICE']) ?	$domain_cfg['SERVICE'] : "enable";
+	$libvirt_service = isset($domain_cfg['SERVICE']) ?	$domain_cfg['SERVICE'] : "disable";
 
 	if ($libvirt_running == "yes"){
 		$uri = is_dir('/proc/xen') ? 'xen:///system' : 'qemu:///system';
@@ -295,10 +295,10 @@
 			'domain' => [
 				'name' => $lv->domain_get_name($res),
 				'desc' => $lv->domain_get_description($res),
-				'persistent' => 1, //TODO?
+				'persistent' => 1,
 				'uuid' => $lv->domain_get_uuid($res),
 				'clock' => $lv->domain_get_clock_offset($res),
-				'os' => 'windows', //TODO?
+				'os' => ($lv->domain_get_clock_offset($res) == 'localtime' ? 'windows' : 'other'),
 				'arch' => $lv->domain_get_arch($res),
 				'machine' => (strpos($lv->domain_get_machine($res), 'i440fx') !== false ? 'pc' : 'q35'),
 				'mem' => $lv->domain_get_current_memory($res),
