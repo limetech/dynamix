@@ -697,7 +697,11 @@ $(function() {
 			$('#domain_clock').val('utc');
 			$('#domain_machine').val('q35');
 		}
-	}).change(); // Fire call now too
+	});
+
+	// Toggle OS-dependent fields now (we could fire the change event but we don't want to change the clock and machine)
+	slideUpRows($('.domain_os').not($('.' + $("#form_content #domain_os").val())));
+	slideDownRows($('.domain_os.' + $("#form_content #domain_os").val()).not(isVMAdvancedMode() ? '.basic' : '.advanced'));
 
 	if ($(".gpu option[value='vnc']:selected").length) {
 		$('.vncpassword').show();
