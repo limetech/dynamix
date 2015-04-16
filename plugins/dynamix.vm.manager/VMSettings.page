@@ -92,7 +92,7 @@ vDisk Share <span style="font-weight: normal">(optional)</span>:
 : <input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/" name="DISKDIR" maxlength="60" value="<?=$domain_cfg['DISKDIR']?>" placeholder="Double Click to Select (ie. /mnt/cache/images)" title="Double Click to Select (ie. /mnt/cache/images)">
 
 Alternate Network Bridge:
-: <input type="text" id="bridge" name="BRNAME" maxlength="60" value="<?=$domain_cfg['BRNAME']?>" placeholder="Leave Blank for Default unRAID Network Bridge" title="Leave Blank for Default unRAID Network Bridge">
+: <input type="text" id="bridge" name="BRNAME" maxlength="60" value="<?=$domain_cfg['BRNAME']?>" placeholder="Leave blank to use the default libVirt managed network bridge" title="Leave blank to use the default libVirt managed network bridge">
 
 PCIe ACS Override:
 : <select id="pcie_acs_override" size="1">

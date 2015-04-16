@@ -24,7 +24,7 @@
 		error_reporting(0);
 	}
 
-	$domain_bridge = (!($domain_cfg['BRNAME'])) ? $var['BRNAME'] : $domain_cfg['BRNAME'];
+	$domain_bridge = (!($domain_cfg['BRNAME'])) ? 'virbr0' : $domain_cfg['BRNAME'];
 	$msg = (empty($domain_bridge)) ? "Error: Setup Bridge in Settings/Network Settings" : false;
 	$libvirt_service = isset($domain_cfg['SERVICE']) ?	$domain_cfg['SERVICE'] : "disable";
 
@@ -308,8 +308,9 @@
 				'vcpus' => $dom['nrVirtCpu'],
 				'vcpu' => $lv->domain_get_vcpu_pins($res),
 				'hyperv' => ($lv->domain_get_feature($res, 'hyperv') ? 1 : 0),
-				'autostart' => $lv->domain_get_autostart($res) ? 1 : 0,
-				'state' => $lv->domain_state_translate($dom['state'])
+				'autostart' => ($lv->domain_get_autostart($res) ? 1 : 0),
+				'state' => $lv->domain_state_translate($dom['state']),
+				'ovmf' => ($lv->domain_get_ovmf($res) ? 1 : 0)
 			],
 			'media' => [
 				'cdrom' => (!empty($medias) && !empty($medias[0]) && array_key_exists('file', $medias[0])) ? $medias[0]['file'] : '',

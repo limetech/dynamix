@@ -644,10 +644,19 @@
 								<input type='keyboard' bus='ps2'/>
 								<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0' $passwdstr>
 									<listen type='address' address='0.0.0.0'/>
-								</graphics>
-								<video>
-									<model type='vmvga'/>
-								</video>";
+								</graphics>";
+
+						if (!empty($domain['ovmf'])) {
+							// OVMF doesn't work with vmvga
+							$vnc .= "<video>
+										<model type='cirrus'/>
+									</video>";
+						} else {
+							// SeaBIOS is cool with vmvga
+							$vnc .= "<video>
+										<model type='vmvga'/>
+									</video>";
+						}
 						continue;
 					}
 
@@ -725,101 +734,57 @@
 				}
 			}
 
+			$xml = "<domain type='$type' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
+						<uuid>$uuid</uuid>
+						<name>$name</name>
+						<description>{$domain['desc']}</description>
+						<currentMemory>$mem</currentMemory>
+						<memory>$maxmem</memory>
+						<memoryBacking>
+							<nosharepages/>
+							<locked/>
+						</memoryBacking>
+						$cpustr
+						<os>
+							$loader
+							<type arch='$arch' machine='$machine'>hvm</type>
+						</os>
+						<features>
+							<acpi/>
+							<apic/>
+							$hyperv
+							$pae
+						</features>
+						$clock
+						<on_poweroff>destroy</on_poweroff>
+						<on_reboot>restart</on_reboot>
+						<on_crash>restart</on_crash>
+						<devices>
+							<emulator>$emulator</emulator>
+							$diskstr
+							$mediastr
+							$driverstr
+							$ctrl
+							$sharestr
+							$netstr
+							$vnc
+							<console type='pty'/>
+							$pcidevs
+							$usbstr
+							<memballoon model='virtio'>
+								<alias name='balloon0'/>
+							</memballoon>
+						</devices>
+						$cmdargs
+					</domain>";
 
 			if (!empty($diskstr) | !empty($mediastr)) {
-				$xml = "<domain type='$type' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
-							<uuid>$uuid</uuid>
-							<name>$name</name>
-							<description>{$domain['desc']}</description>
-							<currentMemory>$mem</currentMemory>
-							<memory>$maxmem</memory>
-							<memoryBacking>
-								<nosharepages/>
-								<locked/>
-							</memoryBacking>
-							$cpustr
-							<os>
-								$loader
-								<type arch='$arch' machine='$machine'>hvm</type>
-							</os>
-							<features>
-								<acpi/>
-								<apic/>
-								$hyperv
-								$pae
-							</features>
-							$clock
-							<on_poweroff>destroy</on_poweroff>
-							<on_reboot>restart</on_reboot>
-							<on_crash>restart</on_crash>
-							<devices>
-								<emulator>$emulator</emulator>
-								$diskstr
-								$mediastr
-								$driverstr
-								$ctrl
-								$sharestr
-								$netstr
-								$vnc
-								<console type='pty'/>
-								$pcidevs
-								$usbstr
-								<memballoon model='virtio'>
-									<alias name='balloon0'/>
-								</memballoon>
-							</devices>
-							$cmdargs
-						</domain>";
-
 				$tmp = libvirt_domain_create_xml($this->conn, $xml);
 				if (!$tmp)
 					return $this->_set_last_error();
 			}
 
 			if ($domain['persistent']) {
-				$xml = "<domain type='$type' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
-							<uuid>$uuid</uuid>
-							<name>$name</name>
-							<description>{$domain['desc']}</description>
-							<currentMemory>$mem</currentMemory>
-							<memory>$maxmem</memory>
-							<memoryBacking>
-								<nosharepages/>
-								<locked/>
-							</memoryBacking>
-							$cpustr
-							<os>
-								$loader
-								<type arch='$arch' machine='$machine'>hvm</type>
-							</os>
-							<features>
-								<acpi/>
-								<apic/>
-								$hyperv
-								$pae
-							</features>
-							$clock
-							<on_poweroff>destroy</on_poweroff>
-							<on_reboot>restart</on_reboot>
-							<on_crash>restart</on_crash>
-							<devices>
-								<emulator>$emulator</emulator>
-								$diskstr
-								$mediastr
-								$ctrl
-								$sharestr
-								$netstr
-								$vnc
-								<console type='pty'/>
-								$pcidevs
-								$usbstr
-								<memballoon model='virtio'>
-									<alias name='balloon0'/>
-								</memballoon>
-							</devices>
-							$cmdargs
-						</domain>";
-
 				$tmp = libvirt_domain_define_xml($this->conn, $xml);
 				if ($tmp) {
 					$this->domain_set_autostart($tmp, $domain['autostart'] == 1);
@@ -1792,6 +1757,12 @@
 				return false;
 
 			return $tmp[0];
+		}
+
+		function domain_get_ovmf($domain) {
+			$domain = $this->get_domain_object($domain);
+
+			return $this->_get_single_xpath_result($domain, '//domain/os/loader');
 		}
 
 		function domain_get_multimedia_device($domain, $type, $display=false) {
