@@ -13,24 +13,29 @@ Title="System Log"
  * all copies or substantial portions of the Software.
  */
 ?>
-
 <?
 echo "<pre class='up'>".shell_exec('cat /var/log/syslog')."</pre>";
 ?>
 <script>
-function cleanUp() {
-  if (document.hasFocus()) {
-    $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?=$docroot?>/syslog.zip'});
-  } else {
-    setTimeout(cleanUp,4000);
+  function uploadLog(button, title, type, text){
+    old = $(button).html();
+    $(button).html("<i class='fa fa-circle-o-notch fa-spin'></i> Uploading...");
+    $.post("/webGui/include/UploadLog.php",{pastebin:'true',title:title,type:type,text:text},function(data){alert('Your URL: \n\n'+data);$(button).html(old);});
   }
-}  
-function syslog() {
-  $.post('/webGui/include/Download.php',{cmd:'save',root:'<?=$docroot?>',file:'/var/log/syslog'},function(data) {
-    location = data;
-    setTimeout(cleanUp,4000);
-  });
-}
-$('.tabs').append("<span class='status vhshift'><input type='button' value='Download' onclick='syslog()'></span>");
+  function cleanUp() {
+    if (document.hasFocus()) {
+      $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?=$docroot?>/syslog.zip'});
+    } else {
+      setTimeout(cleanUp,4000);
+    }
+  }  
+  function syslog() {
+    $.post('/webGui/include/Download.php',{cmd:'save',root:'<?=$docroot?>',file:'/var/log/syslog'},function(data) {
+      location = data;
+      setTimeout(cleanUp,4000);
+    });
+  }
+  $('.tabs').append("<span class='status vhshift'><input type='button' value='Download' onclick='syslog()'></span>");
+  $('.tabs').append("<span class='status vhshift' style='padding-right:15px;'><button type='button' onclick='uploadLog(this, \"Syslog\", \"file\", \"/var/log/syslog\");'><i class='fa fa-upload'></i> Upload Syslog</button></span>");
 </script>
 <button type="button" onclick="syslog()">Download</button><button type="button" onclick="done()">Done</button>
