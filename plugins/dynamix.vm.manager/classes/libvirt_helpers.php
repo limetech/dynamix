@@ -24,7 +24,7 @@
 		error_reporting(0);
 	}
 
-	$domain_bridge = (!($domain_cfg['BRNAME'])) ? $var['BRNAME'] : $domain_cfg['BRNAME'];
+	$domain_bridge = (!($domain_cfg['BRNAME'])) ? 'virbr0' : $domain_cfg['BRNAME'];
 	$msg = (empty($domain_bridge)) ? "Error: Setup Bridge in Settings/Network Settings" : false;
 	$libvirt_service = isset($domain_cfg['SERVICE']) ?	$domain_cfg['SERVICE'] : "disable";
 
