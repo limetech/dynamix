@@ -130,14 +130,7 @@ PCIe ACS Override:
 : <input id="applyBtn" type="button" value="Apply"/><button type="button" onclick="done()">Done</button>
 </form>
 
-
-<div id="title">
-	<span class="left">Logfiles</span>
-</div>
-
-<p style="margin-top:-5px;margin-left:15px;margin-bottom:0px">
-	<a id="openlog" title="/var/log/libvirt/libvirtd.log" href="#" onclick="openWindow('/usr/bin/tail -n 42 -f /var/log/libvirt/libvirtd.log','Log Information',600,900);">/var/log/libvirt/libvirtd.log</a>
-</p>
+> View the log for libvirt: <a id="openlog" title="/var/log/libvirt/libvirtd.log" href="#" onclick="openWindow('/usr/bin/tail -n 42 -f /var/log/libvirt/libvirtd.log','Log Information',600,900);">/var/log/libvirt/libvirtd.log</a>
 
 
 <script type="text/javascript" src="/webGui/scripts/jqueryFileTree.js"></script>
