@@ -67,33 +67,24 @@ class DockerTemplates {
 		if($this->verbose) echo $m."\n";
 	}
 
-	public function download_url($url, $path = ""){
-		exec("curl --max-time 60 -s -k -L ". ($path ? " -o '$path' " : "") ." $url 2>/dev/null", $out, $exit_code );
-		return ($exit_code === 0 ) ? implode("\n", $out) : FALSE;
-	}
+  public function download_url($url, $path = "", $bg = FALSE){
+    exec("curl --max-time 60 --silent --insecure --location --fail ".($path ? " -o '$path' " : "")." $url ".($bg ? ">/dev/null 2>&1 &" : "2>/dev/null"), $out, $exit_code );
+    return ($exit_code === 0 ) ? implode("\n", $out) : FALSE;
+  }
 
-
-	public function listDir($dir, $ext = FALSE) {
-		$result = array();
-		if (! $dir) return $result;
-		$Files = array_diff(scandir($dir), array('.', '..'));
-		if (! $Files) return $result;
-		natcasesort($Files);
-		foreach ($Files as $f) {
-			$dirname = realpath($dir).'/'.$f;
-			if (is_dir($dirname)) {
-				$result = array_merge($result, $this->listDir($dirname, $ext));
-			} else {
-				$info = new SplFileInfo($dirname);
-				$fext = $info->getExtension();
-				if ($ext && ( $ext != $fext )) continue;
-				$result[] = array('path'   => $dirname,
-				                  'prefix' => basename(dirname($dirname)),
-				                  'name'   => $info->getBasename(".$fext"),
-				                  );
-			}
+	public function listDir($root, $ext=NULL) {
+		$iter = new RecursiveIteratorIterator(
+						new RecursiveDirectoryIterator($root, 
+						RecursiveDirectoryIterator::SKIP_DOTS),
+						RecursiveIteratorIterator::SELF_FIRST,
+						RecursiveIteratorIterator::CATCH_GET_CHILD);
+		$paths = array();
+		foreach ($iter as $path => $fileinfo) {
+			$fext = $fileinfo->getExtension();
+			if ($ext && ( $ext != $fext )) continue;
+			if ( $fileinfo->isFile()) $paths[] = array('path' => $path, 'prefix' => basename(dirname($path)), 'name' => $fileinfo->getBasename(".$fext"));
 		}
-		return $result;
+	return $paths;
 	}
 
 
@@ -135,15 +126,17 @@ class DockerTemplates {
 	}
 
 
-	public function downloadTemplates(){
+	public function downloadTemplates($Dest=NULL, $Urls=NULL){
 		global $dockerManPaths;
+		$Dest = ($Dest) ? $Dest : $dockerManPaths['templates-storage'];
+		$Urls = ($Urls) ? $Urls : $dockerManPaths['template-repos'];
 		$repotemplates = array();
+		$output = "";
 		$tmp_dir = "/tmp/tmp-".mt_rand();
-
-		$urls = @file($dockerManPaths['template-repos'], FILE_IGNORE_NEW_LINES);
+		
+		$urls = @file($Urls, FILE_IGNORE_NEW_LINES);
 		if ( ! is_array($urls)) return false;
 		$this->debug("\nURLs:\n   " . implode("\n   ", $urls));
-
 		foreach ($urls as $url) {
 			$api_regexes = array(
 				0 => '%/.*github.com/([^/]*)/([^/]*)/tree/([^/]*)/(.*)$%i',
@@ -151,7 +144,6 @@ class DockerTemplates {
 				2 => '%/.*github.com/([^/]*)/(.*).git%i',
 				3 => '%/.*github.com/([^/]*)/(.*)%i',
 				);
-
 			for ($i=0; $i < count($api_regexes); $i++) {
 				if ( preg_match($api_regexes[$i], $url, $matches) ){
 					$github_api['user']   = ( isset( $matches[1] )) ? $matches[1] : "";
@@ -162,7 +154,6 @@ class DockerTemplates {
 					break;
 				}
 			}
-
 			if ( $this->download_url($github_api['url'], "$tmp_dir.tar.gz") === FALSE) {
 				$this->debug("\n Download ". $github_api['url'] ." has failed.");
 				return NULL;
@@ -171,13 +162,12 @@ class DockerTemplates {
 				shell_exec("tar -zxf $tmp_dir.tar.gz --strip=1 -C $tmp_dir/ 2>&1");
 				unlink("$tmp_dir.tar.gz");
 			}
-
-			$this->debug("\n Templates found in ". $github_api['url']);
-
+			$tmplsStor = array();
 			$templates = $this->getTemplates($tmp_dir);
+			$this->debug("\n Templates found in ". $github_api['url']);
 			foreach ($templates as $template) {
-				$storPath = sprintf("%s/%s", $dockerManPaths['templates-storage'], str_replace($tmp_dir."/", "", $template['path']) );
-				$repotemplates[] = $storPath;
+				$storPath = sprintf("%s/%s", $Dest, str_replace($tmp_dir."/", "", $template['path']) );
+				$tmplsStor[] = $storPath;
 				if (! is_dir( dirname( $storPath ))) @mkdir( dirname( $storPath ), 0777, true);
 				if ( is_file($storPath) ){
 					if ( sha1_file( $template['path'] )  ===  sha1_file( $storPath )) {
@@ -192,14 +182,15 @@ class DockerTemplates {
 					$this->debug("   Added: ".$template['prefix'].'/'.$template['name']);
 				}
 			}
+			$repotemplates = array_merge($repotemplates, $tmplsStor);
+			$output[$url] = $tmplsStor;
 			$this->removeDir($tmp_dir);
 		}
 		// Delete any templates not in the repos
-		foreach ($this->listDir($dockerManPaths['templates-storage'], "xml") as $arrLocalTemplate) {
+		foreach ($this->listDir($Dest, "xml") as $arrLocalTemplate) {
 			if (!in_array($arrLocalTemplate['path'], $repotemplates)) {
 				unlink($arrLocalTemplate['path']);
 				$this->debug("   Removed: ".$arrLocalTemplate['prefix'].'/'.$arrLocalTemplate['name']."\n");
-
 				// Any other files left in this template folder? if not delete the folder too
 				$files = array_diff(scandir(dirname($arrLocalTemplate['path'])), array('.', '..'));
 				if (empty($files)) {
@@ -208,6 +199,7 @@ class DockerTemplates {
 				}
 			}
 		}
+		return $output;
 	}
 
 
@@ -410,10 +402,10 @@ class DockerTemplates {
 ######################################
 class DockerUpdate{
 
-	public function download_url($url, $path = ""){
-		exec("curl --max-time 30 -s -k -L ". ($path ? " -o '$path' " : "") ." $url 2>/dev/null", $out, $exit_code );
-		return ($exit_code === 0 ) ? implode("\n", $out) : FALSE;
-	}
+  public function download_url($url, $path = "", $bg = FALSE){
+    exec("curl --max-time 30 --silent --insecure --location --fail ".($path ? " -o '$path' " : "")." $url ".($bg ? ">/dev/null 2>&1 &" : "2>/dev/null"), $out, $exit_code );
+    return ($exit_code === 0 ) ? implode("\n", $out) : FALSE;
+  }
 
 
 	public function getRemoteVersion($RegistryUrl, $image){
@@ -583,7 +575,7 @@ class DockerClient {
 
 			$c["Image"]       = $obj['Image'];
 			$c["ImageId"]     = substr($details[0]["Image"],0,12);
-			$c["Name"]        = substr($obj['Names'][0], 1);
+			$c["Name"]        = substr($details[0]['Name'], 1);
 			$c["Status"]      = $status;
 			$c["Running"]     = $running;
 			$c["Cmd"]         = $obj['Command'];

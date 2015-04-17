@@ -134,7 +134,7 @@ PCIe ACS Override:
 <?= mk_option(($boolACSInSyslinux ? '1' : '0'), '1', 'Yes'); ?>
 </select>
 
-> To enable the assignment of different PCI devices to different concurrently running VMs, you may need to enable this setting.
+> Warning:  Use of this setting could cause possible data corruption with certain hardware configurations.  Please visit the Lime Technology forums for more information.
 >
 > A reboot will be required for changes to this setting to take affect.
 
