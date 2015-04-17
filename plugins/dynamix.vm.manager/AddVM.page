@@ -2,7 +2,19 @@ Title="Add VM"
 Cond="(pgrep('libvirtd')!==false)"
 Markdown="false"
 ---
-<?php
+<?PHP
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Derek Macias, Eric Schultz, Jon Panozzo.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
 require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt.php');
 require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt_helpers.php');
 
@@ -127,19 +139,48 @@ $arrLoad = [];
 				</select><img src="/webGui/images/spinner.gif" style="display: none">
 			</td>
 		</tr>
+	</table>
+	<div>
+		<blockquote class="inline_help">
+			<p>Choose a preconfigured template or select Custom to create your own from scratch.</p>
+		</blockquote>
+	</div>
+
+	<table>
 		<tr class="non_expert_xml">
 			<td>Name:</td>
 			<td><input type="text" name="domain[name]" class="textTemplate" title="Name of virtual machine" placeholder="e.g. My Workstation" /></td>
 		</tr>
+	</table>
+	<div class="non_expert_xml">
+		<blockquote class="inline_help">
+			<p>Give the VM a name (e.g. Work, Gaming, Media Player, Firewall, Bitcoin Miner)</p>
+		</blockquote>
+	</div>
+
+	<table>
 		<tr class="non_expert_xml">
 			<td>Description:</td>
 			<td><input type="text" name="domain[desc]" title="Description of virtual machine" placeholder="description of virtual machine (optional)" /></td>
 		</tr>
+	</table>
+	<div class="non_expert_xml">
+		<blockquote class="inline_help">
+			<p>Give the VM a brief description (optional field).</p>
+		</blockquote>
+	</div>
+
+	<table>
 		<tr style="line-height: 15px; vertical-align: middle;">
 			<td>Autostart:</td>
 			<td><div style="margin-left: -10px"><input type="checkbox" id="domain_autostart" name="domain[autostart]" style="display: none" class="autostart" value="1"></div></td>
 		</tr>
 	</table>
+	<div>
+		<blockquote class="inline_help">
+			<p>If you want this VM to start with the array, set this to yes.</p>
+		</blockquote>
+	</div>
 
 	<div id="title">
 		<span class="left"><img src="/plugins/dynamix.docker.manager/icons/preferences.png" class="icon">Template Settings</span>
@@ -218,6 +259,10 @@ $(function() {
 				$el.html(data);
 
 				checkForAdvancedMode();
+
+				if ($.cookie('help')=='help') {
+					$('.inline_help').show();
+				}
 
 				$el.fadeIn('fast');
 			});

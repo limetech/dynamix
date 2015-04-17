@@ -1,4 +1,16 @@
-<?php
+<?PHP
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Guilherme Jardim, Eric Schultz, Jon Panozzo.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
 
 ## BETA 11
 $dockerManPaths      = array(
@@ -127,11 +139,11 @@ class DockerTemplates {
 		global $dockerManPaths;
 		$repotemplates = array();
 		$tmp_dir = "/tmp/tmp-".mt_rand();
-		
+
 		$urls = @file($dockerManPaths['template-repos'], FILE_IGNORE_NEW_LINES);
 		if ( ! is_array($urls)) return false;
 		$this->debug("\nURLs:\n   " . implode("\n   ", $urls));
-		
+
 		foreach ($urls as $url) {
 			$api_regexes = array(
 				0 => '%/.*github.com/([^/]*)/([^/]*)/tree/([^/]*)/(.*)$%i',

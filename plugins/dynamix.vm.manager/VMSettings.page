@@ -3,6 +3,18 @@ Title="VM Manager"
 Icon="dynamix.vm.manager.png"
 ---
 <?PHP
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Derek Macias, Eric Schultz, Jon Panozzo.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
 if ($var['fsState'] != "Started") {
   echo "<p class='notice'>Array must be Started to manage Virtual Machines.</p>";
   return;
@@ -85,14 +97,36 @@ Enable VMs:
 <?= mk_option($libvirt_service, 'enable', 'Yes'); ?>
 </select>
 
-ISO Library Share <span style="font-weight: normal">(optional)</span>:
-: <input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/" name="MEDIADIR" maxlength="60" value="<?=$domain_cfg['MEDIADIR']?>" placeholder="Double Click to Select (ie. /mnt/disk1/media)" title="Double Click to Select (ie. /mnt/disk1/media)">
+> Stopping the VM Manager will first attempt to shutdown all running VMs.  After 40 seconds, any remaining VM instances will be terminated.
 
+<? if ($libvirt_service == 'enable') {
+	$libvirt_info = libvirt_version('libvirt');
+	$qemu_info = $lv->get_connect_information(); ?>
+Libvirt Version:
+: <?= $libvirt_info['libvirt.major'] . '.' .  $libvirt_info['libvirt.minor'] . '.' .  $libvirt_info['libvirt.release']; ?>
+
+QEMU Version:
+: <?= $qemu_info['hypervisor_major'] . '.' .  $qemu_info['hypervisor_minor'] . '.' .  $qemu_info['hypervisor_release']; ?>
+<? } ?>
+
+ISO Library Share <span style="font-weight: normal">(optional)</span>:
+: <input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/user/" name="MEDIADIR" maxlength="60" value="<?=$domain_cfg['MEDIADIR']?>" placeholder="Click to Select">
+
+> Specify a user share that contains all your installation media for operating systems
+
+<!--
 vDisk Share <span style="font-weight: normal">(optional)</span>:
-: <input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/" name="DISKDIR" maxlength="60" value="<?=$domain_cfg['DISKDIR']?>" placeholder="Double Click to Select (ie. /mnt/cache/images)" title="Double Click to Select (ie. /mnt/cache/images)">
+: <input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/" name="DISKDIR" maxlength="60" value="<?=$domain_cfg['DISKDIR']?>" placeholder="Click to Select (ie. /mnt/cache/images)" title="Click to Select (ie. /mnt/cache/images)">
+-->
 
 Alternate Network Bridge:
 : <input type="text" id="bridge" name="BRNAME" maxlength="60" value="<?=$domain_cfg['BRNAME']?>" placeholder="Leave blank to use the default libVirt managed network bridge" title="Leave blank to use the default libVirt managed network bridge">
+
+> Enter the name of the alternate network bridge you wish to use for your VMs here, otherwise leave the field blank and
+> libvirt will create a bridge that will utilize NAT (network address translation) and act as a DHCP server to hand out
+> IP addresses to virtual machines directly.
+>
+> NOTE:  You can also specify an alternate network bridge on a per-VM basis.
 
 PCIe ACS Override:
 : <select id="pcie_acs_override" size="1">
@@ -100,18 +134,15 @@ PCIe ACS Override:
 <?= mk_option(($boolACSInSyslinux ? '1' : '0'), '1', 'Yes'); ?>
 </select>
 
+> To enable the assignment of different PCI devices to different concurrently running VMs, you may need to enable this setting.
+>
+> A reboot will be required for changes to this setting to take affect.
+
 &nbsp;
 : <input id="applyBtn" type="button" value="Apply"/><button type="button" onclick="done()">Done</button>
 </form>
 
-
-<div id="title">
-	<span class="left">Logfiles</span>
-</div>
-
-<p style="margin-top:-5px;margin-left:15px;margin-bottom:0px">
-	<a id="openlog" title="/var/log/libvirt/libvirtd.log" href="#" onclick="openWindow('/usr/bin/tail -n 42 -f /var/log/libvirt/libvirtd.log','Log Information',600,900);">/var/log/libvirt/libvirtd.log</a>
-</p>
+> View the log for libvirt: <a id="openlog" title="/var/log/libvirt/libvirtd.log" href="#" onclick="openWindow('/usr/bin/tail -n 42 -f /var/log/libvirt/libvirtd.log','Log Information',600,900);">/var/log/libvirt/libvirtd.log</a>
 
 
 <script type="text/javascript" src="/webGui/scripts/jqueryFileTree.js"></script>
@@ -134,7 +165,5 @@ $(function(){
 	});
 
 	$("input[data-pickroot]").click(universalTreePicker);
-
-	showStatus('libvirtd');
 });
 </script>
