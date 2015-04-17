@@ -15,6 +15,7 @@ Cond="(pgrep('libvirtd')!==false)"
  * all copies or substantial portions of the Software.
  */
 ?>
+
 <?
 $action = array_key_exists('action', $_GET) ? $_GET['action'] : '';
 $subaction = array_key_exists('subaction', $_GET) ? $_GET['subaction'] : '';
@@ -238,7 +239,7 @@ if ($action) {
                <td>";
      		/* display and change vcpus */
 	     	if ($state == 'shutoff'){
-				echo	'<select name="vcpu_count" onchange="location = this.options[this.selectedIndex].value;" title="define number of vpus for domain">';
+				echo	'<select name="vcpu_count" class="narrow" onchange="location = this.options[this.selectedIndex].value;" title="define number of vpus for domain">';
 	  			for ($ii = 1; $ii <= $maxcpu; $ii++) {
         			echo "<option value='?subaction=vcpu-change&amp;vcpu=$ii&amp;uuid=$uuid'";
         			if ($ii == $vcpu)
@@ -253,7 +254,7 @@ if ($action) {
                <td>";
 			/* display memory*/
      		if ($state == 'shutoff') {
-     			echo '<select name="memory" onchange="location = this.options[this.selectedIndex].value;" title="define the amount memory">';
+     			echo '<select name="memory" class="narrow" onchange="location = this.options[this.selectedIndex].value;" title="define the amount memory">';
 				echo "<option value=''>*****</option>";
         		for ($ii = 1; $ii <= ($maxmem*2); $ii++) {
         			$mem2 = ($ii*512);
@@ -314,7 +315,7 @@ if ($action) {
          			<tr>
          				<thead>
                   	<th class='header'><i class='glyphicon glyphicon-hdd '></i><b> Disk devices &nbsp;</b>
-                  	<select name='boot_dev' onchange='location = this.options[this.selectedIndex].value;' title='change boot device'>
+                  	<select name='boot_dev' class='narrow' onchange='location = this.options[this.selectedIndex].value;' title='change boot device'>
                   	<option ";
                //boot device select
 							if($bootdev == 'hd')
