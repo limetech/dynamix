@@ -191,9 +191,8 @@ Array status notification:
   </select>
 
 > Start a periodic array health check (preventive maintenance) and notify the user the result of this check.
-> Use the checkboxes below to select how notifications need to be given, browser, email or both.
-> <br><b>Tip:</b> you can use custom notification agents; just add them to "/boot/config/plugins/dynamix/notification/agents" directory and check 'Custom'.
 
+Available Notifications:
 <span class="plugin" style="display:none">&nbsp;</span>
 : <span class="plugin" style="display:none"><span style="display:inline-block;width:90px;font-style:italic">Plugins version</span>
   <input type="checkbox" name="plugin1"<?=($notify['plugin'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
@@ -211,6 +210,10 @@ Array status notification:
   <input type="checkbox" name="report1"<?=($notify['report'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
   <input type="checkbox" name="report2"<?=($notify['report'] & 2)==2 ? ' checked' : ''?>>Email &nbsp;
   <input type="checkbox" name="report3"<?=($notify['report'] & 4)==4 ? ' checked' : ''?>>Custom &nbsp;</span>
+
+> Use the checkboxes above to select what and how notifications need to be given, browser, email or both.
+> <br><b>Tip:</b> you can use custom notification agents; just add them to "/boot/config/plugins/dynamix/notification/agents" directory and check 'Custom'.
+
 
 Notification entity:
 : <span style="display:inline-block;width:90px;font-style:italic">Notices</span>
