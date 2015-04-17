@@ -97,7 +97,7 @@ if (!empty($_GET['uuid'])) {
 		transition-duration: 0.1s;
 		transition-timing-function: linear;
 	}
-	#createform .sectionbutton.remove { top: 0; }
+	#createform .sectionbutton.remove { top: 0; opacity: 0.3; }
 	#createform .sectionbutton.add { bottom: 0; }
 	#createform .sectionbutton:hover { opacity: 1.0; }
 	#createform .sectiontab {
@@ -115,6 +115,9 @@ if (!empty($_GET['uuid'])) {
 	#createform .multiple:hover .sectionbutton {
 		opacity: 0.7;
 		left: 4px;
+	}
+	#createform .multiple:hover .sectionbutton.remove {
+		opacity: 0.6;
 	}
 	#createform .multiple:hover .sectiontab {
 		background-color: #CCCCCC;
