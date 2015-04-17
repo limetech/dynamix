@@ -192,7 +192,7 @@ function bindSectionEvents(category) {
 		// delete section
 		if (!config.hasOwnProperty('minimum') || parseInt(config.minimum) < (index+1)) {
 			if ($first_td.children('.sectionbutton.remove').length === 0) {
-				var $el_remove = $('<div class="sectionbutton remove" title="Remove ' + config.prefix + ' ' + category.replace('_', ' ') + '"><i class="fa fa-trash-o red"></i></div>').one('click', clickRemoveSection);
+				var $el_remove = $('<div class="sectionbutton remove" title="Remove ' + config.prefix + ' ' + category.replace('_', ' ') + '"><i class="fa fa-times red"></i></div>').one('click', clickRemoveSection);
 				$first_td.append($el_remove);
 			}
 			boolDelete = true;
