@@ -144,7 +144,7 @@ if (!empty($_GET['uuid'])) {
 		<tr <? if (!empty($arrLoad['name'])) echo 'style="display: none"'; ?>>
 			<td>Template:</td>
 			<td>
-				<select id="domain_template" name="domain[template]" title="Select domain operating system type. Windows or Other for Linux, OSX and others">
+				<select id="domain_template" name="domain[template]" class="narrow" title="Select domain operating system type. Windows or Other for Linux, OSX and others">
 					<?php
 						foreach ($arrTemplates as $strTemplate) {
 							echo mk_option($strSelectedTemplate, $strTemplate, str_replace('_', ' ', $strTemplate));

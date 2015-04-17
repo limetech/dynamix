@@ -179,7 +179,7 @@
 	<tr>
 		<td>Operating System:</td>
 		<td>
-			<select name="domain[os]" id="domain_os" title="define the base OS">
+			<select name="domain[os]" id="domain_os" class="narrow" title="define the base OS">
 			<?php mk_dropdown_options(['windows' => 'Windows', 'other' => 'Other'], $arrConfig['domain']['os']); ?>
 			</select>
 		</td>
@@ -244,7 +244,7 @@
 	<tr class="basic">
 		<td>CPUs:</td>
 		<td>
-			<select name="domain[vcpus]" id="domain_vcpus" title="define number of cpu cores used by this vm">
+			<select name="domain[vcpus]" id="domain_vcpus" class="narrow" title="define number of cpu cores used by this vm">
 			<?php mk_dropdown_options(array_combine(range(1, $maxcpu), range(1, $maxcpu)), $arrConfig['domain']['vcpus']); ?>
 			</select>
 		</td>
@@ -260,7 +260,7 @@
 	<tr>
 		<td>Initial Memory:</td>
 		<td>
-			<select name="domain[mem]" id="domain_mem" title="define the amount memory">
+			<select name="domain[mem]" id="domain_mem" class="narrow" title="define the amount memory">
 			<?php
 				for ($i = 1; $i <= ($maxmem*2); $i++) {
 					$label = ($i * 512) . ' MB';
@@ -273,7 +273,7 @@
 
 		<td class="advanced">Max Memory:</td>
 		<td class="advanced">
-			<select name="domain[maxmem]" id="domain_maxmem" title="define the maximum amount of memory">
+			<select name="domain[maxmem]" id="domain_maxmem" class="narrow" title="define the maximum amount of memory">
 			<?php
 				for ($i = 1; $i <= ($maxmem*2); $i++) {
 					$label = ($i * 512) . ' MB';
@@ -301,7 +301,7 @@
 	<tr class="advanced">
 		<td>Machine:</td>
 		<td>
-			<select name="domain[machine]" id="domain_machine" title="Select the machine model.  i440fx will work for most.  Q35 for a newer machine model with PCIE">
+			<select name="domain[machine]" class="narrow" id="domain_machine" title="Select the machine model.  i440fx will work for most.  Q35 for a newer machine model with PCIE">
 			<?php mk_dropdown_options($arrValidMachineTypes, $arrConfig['domain']['machine']); ?>
 			</select>
 		</td>
@@ -320,7 +320,7 @@
 	<tr class="advanced">
 		<td>BIOS:</td>
 		<td>
-			<select name="domain[ovmf]" title="Select the BIOS.  SeaBIOS will work for most.  OVMF requires a UEFI-compatable OS (e.g. Windows 8/2012, newer Linux distros) and if using graphics device passthrough it too needs UEFI" <? if (!empty($arrConfig['domain']['state'])) echo 'disabled="disabled"'; ?>>
+			<select name="domain[ovmf]" class="narrow" title="Select the BIOS.  SeaBIOS will work for most.  OVMF requires a UEFI-compatable OS (e.g. Windows 8/2012, newer Linux distros) and if using graphics device passthrough it too needs UEFI" <? if (!empty($arrConfig['domain']['state'])) echo 'disabled="disabled"'; ?>>
 			<?php
 				echo mk_option($arrConfig['domain']['ovmf'], '0', 'SeaBIOS');
 
@@ -357,7 +357,7 @@
 	<tr class="advanced">
 		<td>Hyper-V:</td>
 		<td>
-			<select name="domain[hyperv]" id="hyperv" title="Hyperv tweaks for Windows.  Don't select if trying to passthrough Nvidia card">
+			<select name="domain[hyperv]" id="hyperv" class="narrow" title="Hyperv tweaks for Windows.  Don't select if trying to passthrough Nvidia card">
 			<?php mk_dropdown_options(['No', 'Yes'], $arrConfig['domain']['hyperv']); ?>
 			</select>
 		</td>
@@ -421,7 +421,7 @@
 		<tr class="advanced disk_file_options">
 			<td>vDisk Type:</td>
 			<td>
-				<select name="disk[<?=$i?>][driver]" title="type of storage image">
+				<select name="disk[<?=$i?>][driver]" class="narrow" title="type of storage image">
 				<?php mk_dropdown_options($arrValidDiskDrivers, $arrDisk['driver']); ?>
 				</select>
 			</td>
@@ -469,7 +469,7 @@
 		<tr class="advanced disk_file_options">
 			<td>vDisk Type:</td>
 			<td>
-				<select name="disk[{{INDEX}}][driver]" title="type of storage image">
+				<select name="disk[{{INDEX}}][driver]" class="narrow" title="type of storage image">
 				<?php mk_dropdown_options($arrValidDiskDrivers, ''); ?>
 				</select>
 			</td>
@@ -546,7 +546,7 @@
 		<tr>
 			<td>Graphics Card:</td>
 			<td>
-				<select name="gpu[<?=$i?>][id]" class="gpu">
+				<select name="gpu[<?=$i?>][id]" class="gpu narrow">
 				<?php
 					if ($i == 0) {
 						// Only the first video card can be VNC
@@ -591,7 +591,7 @@
 		<tr>
 			<td>Graphics Card:</td>
 			<td>
-				<select name="gpu[{{INDEX}}][id]" class="gpu">
+				<select name="gpu[{{INDEX}}][id]" class="gpu narrow">
 				<?php
 					echo mk_option('', '', 'None');
 
@@ -614,7 +614,7 @@
 		<tr>
 			<td>Sound Card:</td>
 			<td>
-				<select name="audio[<?=$i?>][id]" class="audio">
+				<select name="audio[<?=$i?>][id]" class="audio narrow">
 				<?php
 					echo mk_option($arrAudio['id'], '', 'None');
 
@@ -638,7 +638,7 @@
 		<tr>
 			<td>Sound Card:</td>
 			<td>
-				<select name="audio[{{INDEX}}][id]" class="audio">
+				<select name="audio[{{INDEX}}][id]" class="audio narrow">
 				<?php
 					foreach($arrValidAudioDevices as $arrDev) {
 						echo mk_option('', $arrDev['id'], trim($arrDev['name'] . ' | ' . $arrDev['id'], ' |'));
