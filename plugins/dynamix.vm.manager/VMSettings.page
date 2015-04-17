@@ -97,6 +97,16 @@ Enable VMs:
 <?= mk_option($libvirt_service, 'enable', 'Yes'); ?>
 </select>
 
+<? if ($libvirt_service == 'enable') {
+	$libvirt_info = libvirt_version('libvirt');
+	$qemu_info = $lv->get_connect_information(); ?>
+Libvirt Version:
+: <?= $libvirt_info['libvirt.major'] . '.' .  $libvirt_info['libvirt.minor'] . '.' .  $libvirt_info['libvirt.release']; ?>
+
+QEMU Version:
+: <?= $qemu_info['hypervisor_major'] . '.' .  $qemu_info['hypervisor_minor'] . '.' .  $qemu_info['hypervisor_release']; ?>
+<? } ?>
+
 ISO Library Share <span style="font-weight: normal">(optional)</span>:
 : <input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/user/" name="MEDIADIR" maxlength="60" value="<?=$domain_cfg['MEDIADIR']?>" placeholder="Click to Select">
 
