@@ -91,7 +91,7 @@ Spinup group(s):
 <?if ($name=="cache" && $var['SYS_CACHE_SLOTS']>1):?>
 
 Pool info:
-: <?echo "<pre>".shell_exec('/sbin/btrfs filesystem show /mnt/cache')."</pre>";?>
+: <?echo "<pre>".shell_exec("/sbin/btrfs filesystem show {$disk['uuid']}")."</pre>";?>
 
 > This is the output of *btrfs filesystem show /mnt/cache*.
 
