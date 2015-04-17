@@ -547,6 +547,9 @@ $showAdditionalInfo = true;
     vertical-align: bottom;
     text-align: left;
   }
+  .inline_help {
+    font-size: 12px;
+  }
   .desc {
     padding: 6px;
     line-height: 15px;
@@ -616,6 +619,24 @@ $showAdditionalInfo = true;
           <? if (!empty($rmadd)) {
             echo "<a onclick=\"rmTemplate('" . addslashes($rmadd) . "');\" style=\"cursor:pointer;\"><img src=\"/plugins/dynamix.docker.manager/assets/images/remove.png\" title=\"" . htmlspecialchars($rmadd) . "\" width=\"30px\"></a>";
           }?>
+
+        </td>
+      </tr>
+      <tr class="inline_help" style="display: none">
+        <td colspan="2">
+          <blockquote class="inline_help">
+            <p>Templates are a quicker way to setting up Docker Containers on your unRAID server.  There are two types of templates:</p>
+
+            <p>
+              <b>Default templates</b><br>
+              When valid repositories are added to your Docker Repositories page, they will appear in a section on this drop down for you to choose (master categorized by author, then by application template).  After selecting a default template, the page will populate with new information about the application in the Description field, and will typically provide instructions for how to setup the container.  Select a default template when it is the first time you are configuring this application.
+            </p>
+
+            <p>
+              <b>User-defined templates</b><br>
+              Once you've added an application to your system through a Default template, the settings you specified are saved to your USB flash device to make it easy to rebuild your applications in the event an upgrade were to fail or if another issue occurred.  To rebuild, simply select the previously loaded application from the User-defined list and all the settings for the container will appear populated from your previous setup.  Clicking create will redownload the necessary files for the application and should restore you to a working state.  To delete a User-defined template, select it from the list above and click the red X to the right of it.
+            </p>
+          </blockquote>
         </td>
       </tr>
       <?}?>
@@ -639,11 +660,25 @@ $showAdditionalInfo = true;
 
         <td><input type="text" name="containerName" class="textPath" value="<? if(isset($templateName)){ echo htmlspecialchars(trim($templateName));} ?>"></td>
       </tr>
+      <tr class="inline_help" style="display: none">
+        <td colspan="2">
+          <blockquote class="inline_help">
+            <p>Give the container a name or leave it as default.</p>
+          </blockquote>
+        </td>
+      </tr>
 
       <tr class="additionalFields" style="display:none">
         <td>Repository:</td>
 
         <td><input type="text" name="Repository" class="textPath" value="<? if(isset($templateRepository)){ echo htmlspecialchars(trim($templateRepository));} ?>"></td>
+      </tr>
+      <tr class="additionalFields" style="display:none">
+        <td colspan="2" class="inline_help" style="display:none">
+          <blockquote class="inline_help">
+            <p>The repository for the application on the Docker Registry.  Format of authorname/appname.  Optionally you can add a : after appname and request a specific version for the container image.</p>
+          </blockquote>
+        </td>
       </tr>
 
       <tr>
@@ -656,17 +691,39 @@ $showAdditionalInfo = true;
           }?>
         </select></td>
       </tr>
+      <tr class="inline_help" style="display:none">
+        <td colspan="2">
+          <blockquote class="inline_help">
+            <p>If the Bridge type is selected, the application’s network access will be restricted to only communicating on the ports specified in the port mappings section.  If the Host type is selected, the application will be given access to communicate using any port on the host that isn’t already mapped to another in-use application/service.  Generally speaking, it is recommended to leave this setting to its default value as specified per application template.</p>
+            <p>IMPORTANT NOTE:  If adjusting port mappings, do not modify the settings for the Container port as only the Host port can be adjusted.</p>
+          </blockquote>
+        </td>
+      </tr>
 
       <tr class="additionalFields" style="display:none">
         <td>Privileged:</td>
 
         <td><input type="checkbox" name="Privileged" <?if(isset($templatePrivileged)) {echo $templatePrivileged;}?>></td>
       </tr>
+      <tr class="additionalFields" style="display:none">
+        <td colspan="2" class="inline_help" style="display:none">
+          <blockquote class="inline_help">
+            <p>For containers that require the use of host-device access directly or need full exposure to host capabilities, this option will need to be selected.  For more information, see this link:  <a href="https://docs.docker.com/reference/run/#runtime-privilege-linux-capabilities-and-lxc-configuration" target="_blank">https://docs.docker.com/reference/run/#runtime-privilege-linux-capabilities-and-lxc-configuration</a></p>
+          </blockquote>
+        </td>
+      </tr>
 
       <tr class="additionalFields" style="display:none">
         <td>Bind time:</td>
 
         <td><input type="checkbox" name="BindTime" checked></td>
+      </tr>
+      <tr class="additionalFields" style="display:none">
+        <td colspan="2" class="inline_help" style="display:none">
+          <blockquote class="inline_help">
+            <p>There's two ways of bind time: one is to mount /etc/localtime to the container (chosen method); the other is to set a variable TZ with the time zone.</p>
+          </blockquote>
+        </td>
       </tr>
     </table>
 
@@ -705,6 +762,10 @@ $showAdditionalInfo = true;
       </tbody>
     </table>
 
+    <blockquote class="inline_help">
+      <p>Applications can be given read and write access to your data by mapping a directory path from the container to a directory path on the host.  When looking at the volume mappings section, the Container volume represents the path from the container that will be mapped.  The Host path represents the path the Container volume will map to on your unRAID system.  All applications should require at least one volume mapping to store application metadata (e.g., media libraries, application settings, user profile data, etc.).  Clicking inside these fields provides a "picker" that will let you navigate to where the mapping should point.  Additional mappings can be manually created by clicking the Add Path button.  Most applications will need you to specify additional mappings in order for the application to interact with other data on the system (e.g., with Plex Media Server, you should specify an additional mapping to give it access to your media files).  It is important that when naming Container volumes that you specify a path that won’t conflict with already existing folders present in the container.  If unfamiliar with Linux, using a prefix such as "unraid_" for the volume name is a safe bet (e.g., "/unraid_media" is a valid Container volume name).</p>
+    </blockquote>
+
     <div id="titlePort">
       <div id="title">
         <span class="left"><img src="/plugins/dynamix.docker.manager/icons/network.png" class="icon">Port Mappings</span>
@@ -738,6 +799,10 @@ $showAdditionalInfo = true;
           <?if(isset($templatePorts)){echo $templatePorts;}?>
         </tbody>
       </table>
+
+      <blockquote class="inline_help">
+        <p>When the network type is set to Bridge, you will be given the option of customizing what ports the container will use.  While applications may be configured to talk to a specific port by default, we can remap those to different ports on our host with Docker.  This means that while three different apps may all want to use port 8000, we can map each app to a unique port on the host (e.g., 8000, 8001, and 8002).  When the network type is set to Host, the container will be allowed to use any available port on your system.  Additional port mappings can be created, similar to Volumes, although this is not typically necessary when working with templates as port mappings should already be specified.</p>
+      </blockquote>
     </div>
 
     <div class="additionalFields" style="display:none">
@@ -766,6 +831,10 @@ $showAdditionalInfo = true;
           <?if(isset($templateVariables)){echo $templateVariables;}?>
         </tbody>
       </table>
+
+      <blockquote class="inline_help">
+        <p>For details, see this link: <a href="https://docs.docker.com/reference/run/#env-environment-variables" target="_blank">https://docs.docker.com/reference/run/#env-environment-variables</a></p>
+      </blockquote>
     </div>
 
     <div <?= empty($templateExtraParams) ? 'class="additionalFields" style="display:none"' : '' ?>>
@@ -774,6 +843,10 @@ $showAdditionalInfo = true;
       </div>
 
       <input type="text" name="ExtraParams" class="textTemplate" value="<? if(isset($templateExtraParams)){ echo htmlspecialchars(trim($templateExtraParams));} ?>"/>
+
+      <blockquote class="inline_help">
+        <p>If you wish to append additional commands to your Docker container at run-time, you can specify them here.  For example, if you wish to pin an application to live on a specific CPU core, you can enter "--cpuset=0" in this field.  Change 0 to the core # on your system (starting with 0).  You can pin multiple cores by separation with a comma or a range of cores by separation with a dash.  For all possible Docker run-time commands, see here: <a href="https://docs.docker.com/reference/run/" target="_blank">https://docs.docker.com/reference/run/</a></p>
+      </blockquote>
     </div>
 
     <div <?= $showAdditionalInfo ? 'class="additionalFields"' : '' ?> style="display:none">
@@ -787,10 +860,24 @@ $showAdditionalInfo = true;
             <input type="url" name="Registry" class="textTemplate" placeholder="e.g. https://registry.hub.docker.com/u/username/image" value="<? if(isset($templateRegistry)){ echo htmlspecialchars(trim($templateRegistry));} ?>"/>
           </td>
         </tr>
+        <tr class="inline_help" style="display: none">
+          <td colspan="2">
+            <blockquote class="inline_help">
+              <p>The path to the container's repository location on the Docker Hub.</p>
+            </blockquote>
+          </td>
+        </tr>
         <tr>
           <td style="width: 150px;">WebUI:</td>
           <td>
             <input type="text" name="WebUI" class="textTemplate" placeholder="e.g. http://[IP]:[PORT:8080]/" value="<? if(isset($templateWebUI)){ echo htmlspecialchars(trim($templateWebUI));} ?>"/>
+          </td>
+        </tr>
+        <tr class="inline_help" style="display: none">
+          <td colspan="2">
+            <blockquote class="inline_help">
+              <p>When you click on an application icon from the Docker Containers page, the WebUI option will link to the path in this field.  Use [IP} to identify the IP of your host and [PORT:####] replacing the #'s for your port.</p>
+            </blockquote>
           </td>
         </tr>
         <tr>
@@ -799,16 +886,37 @@ $showAdditionalInfo = true;
             <input type="url" name="Banner" class="textTemplate" placeholder="e.g. http://address.to/banner.png" value="<? if(isset($templateBanner)){ echo htmlspecialchars(trim($templateBanner));} ?>"/>
           </td>
         </tr>
+        <tr class="inline_help" style="display: none">
+          <td colspan="2">
+            <blockquote class="inline_help">
+              <p>Link to the banner image for your application (only displayed on dashboard if Show Dashboard apps under Display Settings is set to Banners).</p>
+            </blockquote>
+          </td>
+        </tr>
         <tr>
           <td style="width: 150px;">Icon:</td>
           <td>
             <input type="url" name="Icon" class="textTemplate" placeholder="e.g. http://address.to/icon.png" value="<? if(isset($templateIcon)){ echo htmlspecialchars(trim($templateIcon));} ?>"/>
           </td>
         </tr>
+        <tr class="inline_help" style="display: none">
+          <td colspan="2">
+            <blockquote class="inline_help">
+              <p>Link to the icon image for your application (only displayed on dashboard if Show Dashboard apps under Display Settings is set to Icons).</p>
+            </blockquote>
+          </td>
+        </tr>
         <tr>
           <td style="width: 150px; vertical-align: top;">Description:</td>
           <td>
             <textarea name="Description" rows="10" cols="71" class="textTemplate"><? if(isset($templateDescription)){ echo htmlspecialchars(trimLine($templateDescription));} ?></textarea>
+          </td>
+        </tr>
+        <tr class="inline_help" style="display: none">
+          <td colspan="2">
+            <blockquote class="inline_help">
+              <p>A description for the application container.  Supports basic HTML mark-up.</p>
+            </blockquote>
           </td>
         </tr>
       </table>
