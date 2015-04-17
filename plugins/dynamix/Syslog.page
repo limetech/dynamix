@@ -20,7 +20,7 @@ echo "<pre class='up'>".shell_exec('cat /var/log/syslog')."</pre>";
   function uploadLog(button, title, type, text){
     old = $(button).html();
     $(button).html("<i class='fa fa-circle-o-notch fa-spin'></i> Uploading...");
-    $.post("/webGui/include/UploadLog.php",{pastebin:'true',title:title,type:type,text:text},function(data){alert('Your URL: \n\n'+data);$(button).html(old);});
+    $.post("/webGui/include/UploadLog.php",{pastebin:'true',title:title,type:type,text:text},function(data){if(data){clearTimeout(timers.notifier);notifier();$(button).html(old);}});
   }
   function cleanUp() {
     if (document.hasFocus()) {

@@ -1,8 +1,13 @@
 <?
 $url = "http://gui.us.to:8088";
 
+if (! isset($var)){
+  if (! is_file("/usr/local/emhttp/state/var.ini")) shell_exec("wget -qO /dev/null localhost:$(ss -napt|grep emhttp|grep -Po ':\K\d+')");
+  $var = @parse_ini_file("/usr/local/emhttp/state/var.ini");
+}
+
 function sendPaste($text, $title) {
-  global $url;
+  global $url, $var;
   $data = array('data'     => $text,
                 'language' => 'text',
                 'title'    => '[unRAID] '.$title,
@@ -15,13 +20,13 @@ function sendPaste($text, $title) {
   $out = json_decode($out, TRUE);
   if (isset($out['result'])){
     $resp = "${url}/".$out['result']['id']."/".$out['result']['hash'];
-    echo $resp;
-    require_once("/usr/local/emhttp/webGui/include/Wrappers.php");
     $notify = "/usr/local/sbin/notify";
     $server = strtoupper($var['NAME']);
-    exec("$notify -e '$title uploaded - [".$out['result']['id']."]' -s 'Notice [$server] - $title uploaded.' -d 'A new copy of $title has been uploaded: $resp' -i 'normal 3' -x");
+    exec("$notify -e '$title uploaded - [".$out['result']['id']."]' -s 'Notice [$server] - $title uploaded.' -d 'A new copy of $title has been uploaded: $resp' -i 'normal 1' -x");
+    echo $resp;
   }
 }
+
 if ($_POST['pastebin']){
   $title = $_POST['title'];
   $text  = $_POST['text'];
