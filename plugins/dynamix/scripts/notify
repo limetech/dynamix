@@ -86,6 +86,15 @@ if ($argc == 1) exit(usage());
 extract(parse_plugin_cfg("dynamix",true));
 $unread  = "{$notify['path']}/unread";
 $archive = "{$notify['path']}/archive";
+$plugins_dir = "/boot/config/plugins/dynamix/notifications/plugins";
+if (is_dir($plugins_dir)) {
+  $plugins = array();
+  foreach (array_diff(scandir($plugins_dir), array('.','..')) as $p) {
+    if (is_executable("${plugins_dir}/${p}")) $plugins[] = "${plugins_dir}/${p}";
+  }
+} else {
+  $plugins = NULL;
+}
 
 switch ($argv[1][0]=='-' ? 'add' : $argv[1]) {
 case 'init':
@@ -171,7 +180,10 @@ case 'add':
   if (file_exists($archive)) break;
   $entity = $overrule===false ? $notify[$importance] : $overrule;
   if (!$mailtest) file_put_contents($archive,"timestamp = $timestamp\nevent = $event\nsubject = $subject\ndescription = $description\nimportance = $importance\n");
-  if (($entity & 1)==1 && !$mailtest) file_put_contents($unread,"timestamp = $timestamp\nevent = $event\nsubject = $subject\ndescription = $description\nimportance = $importance\n");
+  if (($entity & 1)==1 && !$mailtest) {
+    file_put_contents($unread,"timestamp = $timestamp\nevent = $event\nsubject = $subject\ndescription = $description\nimportance = $importance\n");
+    if (is_array($plugins) && count($plugins)) foreach ($plugins as $plugin) exec("TIMESTAMP='$timestamp' EVENT='$event' SUBJECT='$subject' DESCRIPTION='$description' IMPORTANCE='$importance' ".$plugin);
+  }
   if (($entity & 2)==2 || $mailtest) { if (!generate_email($event, $subject, str_replace('<br>','. ',$description), $importance, $message)) exit(1); }
   break;
 
