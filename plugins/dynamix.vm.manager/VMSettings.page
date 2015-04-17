@@ -160,7 +160,5 @@ $(function(){
 	});
 
 	$("input[data-pickroot]").click(universalTreePicker);
-
-	showStatus('libvirtd');
 });
 </script>
