@@ -97,7 +97,7 @@ if (!empty($_GET['uuid'])) {
 		transition-duration: 0.1s;
 		transition-timing-function: linear;
 	}
-	#createform .sectionbutton.remove { top: 0; }
+	#createform .sectionbutton.remove { top: 0; opacity: 0.3; }
 	#createform .sectionbutton.add { bottom: 0; }
 	#createform .sectionbutton:hover { opacity: 1.0; }
 	#createform .sectiontab {
@@ -115,6 +115,9 @@ if (!empty($_GET['uuid'])) {
 	#createform .multiple:hover .sectionbutton {
 		opacity: 0.7;
 		left: 4px;
+	}
+	#createform .multiple:hover .sectionbutton.remove {
+		opacity: 0.6;
 	}
 	#createform .multiple:hover .sectiontab {
 		background-color: #CCCCCC;
@@ -144,7 +147,7 @@ if (!empty($_GET['uuid'])) {
 		<tr <? if (!empty($arrLoad['name'])) echo 'style="display: none"'; ?>>
 			<td>Template:</td>
 			<td>
-				<select id="domain_template" name="domain[template]" title="Select domain operating system type. Windows or Other for Linux, OSX and others">
+				<select id="domain_template" name="domain[template]" class="narrow" title="Select domain operating system type. Windows or Other for Linux, OSX and others">
 					<?php
 						foreach ($arrTemplates as $strTemplate) {
 							echo mk_option($strSelectedTemplate, $strTemplate, str_replace('_', ' ', $strTemplate));
@@ -154,7 +157,7 @@ if (!empty($_GET['uuid'])) {
 			</td>
 		</tr>
 	</table>
-	<div>
+	<div <? if (!empty($arrLoad['name'])) echo 'style="display: none"'; ?>>
 		<blockquote class="inline_help">
 			<p>Choose a preconfigured template or select Custom to create your own from scratch.</p>
 		</blockquote>
@@ -190,11 +193,9 @@ if (!empty($_GET['uuid'])) {
 			<td><div style="margin-left: -10px"><input type="checkbox" id="domain_autostart" name="domain[autostart]" style="display: none" class="autostart" value="1" <? if ($arrLoad['autostart']) echo 'checked'; ?>></div></td>
 		</tr>
 	</table>
-	<div>
-		<blockquote class="inline_help">
-			<p>If you want this VM to start with the array, set this to yes.</p>
-		</blockquote>
-	</div>
+	<blockquote class="inline_help">
+		<p>If you want this VM to start with the array, set this to yes.</p>
+	</blockquote>
 
 	<div id="title">
 		<span class="left"><img src="/plugins/dynamix.docker.manager/icons/preferences.png" class="icon">Template Settings</span>

@@ -179,7 +179,7 @@
 	<tr>
 		<td>Operating System:</td>
 		<td>
-			<select name="domain[os]" id="domain_os" title="define the base OS">
+			<select name="domain[os]" id="domain_os" class="narrow" title="define the base OS">
 			<?php mk_dropdown_options(['windows' => 'Windows', 'other' => 'Other'], $arrConfig['domain']['os']); ?>
 			</select>
 		</td>
@@ -233,36 +233,34 @@
 			</div>
 		</td>
 	</tr>
-	<tr class="advanced">
-		<td colspan="2">
-			<blockquote class="inline_help">
-				<p>By default, VMs created will be pinned to physical CPU cores to improve performance.  From this view, you can adjust which actual CPU cores a VM will be pinned (minimum 1).</p>
-			</blockquote>
-		</td>
-	</tr>
+</table>
+<div class="advanced">
+	<blockquote class="inline_help">
+		<p>By default, VMs created will be pinned to physical CPU cores to improve performance.  From this view, you can adjust which actual CPU cores a VM will be pinned (minimum 1).</p>
+	</blockquote>
+</div>
 
+<table>
 	<tr class="basic">
 		<td>CPUs:</td>
 		<td>
-			<select name="domain[vcpus]" id="domain_vcpus" title="define number of cpu cores used by this vm">
+			<select name="domain[vcpus]" id="domain_vcpus" class="narrow" title="define number of cpu cores used by this vm">
 			<?php mk_dropdown_options(array_combine(range(1, $maxcpu), range(1, $maxcpu)), $arrConfig['domain']['vcpus']); ?>
 			</select>
 		</td>
 	</tr>
-	<tr class="basic">
-		<td colspan="2">
-			<blockquote class="inline_help">
-				<p>Select which CPU cores you wish to run this VM upon (minimum 1).</p>
-			</blockquote>
-		</td>
-	</tr>
 </table>
+<div class="basic">
+	<blockquote class="inline_help">
+		<p>Select which CPU cores you wish to run this VM upon (minimum 1).</p>
+	</blockquote>
+</div>
 
 <table>
 	<tr>
 		<td>Initial Memory:</td>
 		<td>
-			<select name="domain[mem]" id="domain_mem" title="define the amount memory">
+			<select name="domain[mem]" id="domain_mem" class="narrow" title="define the amount memory">
 			<?php
 				for ($i = 1; $i <= ($maxmem*2); $i++) {
 					$label = ($i * 512) . ' MB';
@@ -275,7 +273,7 @@
 
 		<td class="advanced">Max Memory:</td>
 		<td class="advanced">
-			<select name="domain[maxmem]" id="domain_maxmem" title="define the maximum amount of memory">
+			<select name="domain[maxmem]" id="domain_maxmem" class="narrow" title="define the maximum amount of memory">
 			<?php
 				for ($i = 1; $i <= ($maxmem*2); $i++) {
 					$label = ($i * 512) . ' MB';
@@ -287,46 +285,42 @@
 		</td>
 		<td></td>
 	</tr>
-	<tr class="basic">
-		<td colspan="3">
-			<blockquote class="inline_help">
-				<p>Select how much memory to allocate to the VM at boot.</p>
-			</blockquote>
-		</td>
-	</tr>
-	<tr class="advanced">
-		<td colspan="5">
-			<blockquote class="inline_help">
-				<p>Select how much memory to allocate to the VM at boot (cannot be more than Max. Mem).</p>
-			</blockquote>
-		</td>
-	</tr>
 </table>
+<div class="basic">
+	<blockquote class="inline_help">
+		<p>Select how much memory to allocate to the VM at boot.</p>
+	</blockquote>
+</div>
+<div class="advanced">
+	<blockquote class="inline_help">
+		<p>Select how much memory to allocate to the VM at boot (cannot be more than Max. Mem).</p>
+	</blockquote>
+</div>
 
 <table>
 	<tr class="advanced">
 		<td>Machine:</td>
 		<td>
-			<select name="domain[machine]" id="domain_machine" title="Select the machine model.  i440fx will work for most.  Q35 for a newer machine model with PCIE">
+			<select name="domain[machine]" class="narrow" id="domain_machine" title="Select the machine model.  i440fx will work for most.  Q35 for a newer machine model with PCIE">
 			<?php mk_dropdown_options($arrValidMachineTypes, $arrConfig['domain']['machine']); ?>
 			</select>
 		</td>
 	</tr>
-	<tr class="advanced">
-		<td colspan="2">
-			<blockquote class="inline_help">
-				<p>The machine type option primarily affects the success some users may have with various hardware and GPU pass through.  For more information on the various QEMU machine types, see these links:</p>
-				<a href="http://wiki.qemu.org/Documentation/Platforms/PC" target="_blank">http://wiki.qemu.org/Documentation/Platforms/PC</a><br>
-				<a href="http://wiki.qemu.org/Features/Q35" target="_blank">http://wiki.qemu.org/Features/Q35</a><br>
-				<p>As a rule of thumb, try to get your configuration working with i440fx first and if that fails, try adjusting to Q35 to see if that changes anything.</p>
-			</blockquote>
-		</td>
-	</tr>
+</table>
+<div class="advanced">
+	<blockquote class="inline_help">
+		<p>The machine type option primarily affects the success some users may have with various hardware and GPU pass through.  For more information on the various QEMU machine types, see these links:</p>
+		<a href="http://wiki.qemu.org/Documentation/Platforms/PC" target="_blank">http://wiki.qemu.org/Documentation/Platforms/PC</a><br>
+		<a href="http://wiki.qemu.org/Features/Q35" target="_blank">http://wiki.qemu.org/Features/Q35</a><br>
+		<p>As a rule of thumb, try to get your configuration working with i440fx first and if that fails, try adjusting to Q35 to see if that changes anything.</p>
+	</blockquote>
+</div>
 
+<table>
 	<tr class="advanced">
 		<td>BIOS:</td>
 		<td>
-			<select name="domain[ovmf]" title="Select the BIOS.  SeaBIOS will work for most.  OVMF requires a UEFI-compatable OS (e.g. Windows 8/2012, newer Linux distros) and if using graphics device passthrough it too needs UEFI" <? if (!empty($arrConfig['domain']['state'])) echo 'disabled="disabled"'; ?>>
+			<select name="domain[ovmf]" class="narrow" title="Select the BIOS.  SeaBIOS will work for most.  OVMF requires a UEFI-compatable OS (e.g. Windows 8/2012, newer Linux distros) and if using graphics device passthrough it too needs UEFI" <? if (!empty($arrConfig['domain']['state'])) echo 'disabled="disabled"'; ?>>
 			<?php
 				echo mk_option($arrConfig['domain']['ovmf'], '0', 'SeaBIOS');
 
@@ -342,42 +336,40 @@
 			<?php } ?>
 		</td>
 	</tr>
-	<tr class="advanced">
-		<td colspan="2">
-			<blockquote class="inline_help">
-				<p>
-					<b>SeaBIOS</b><br>
-					is the default virtual BIOS used to create virtual machines and is compatible with all guest operating systems (Windows, Linux, etc.).
-				</p>
-				<p>
-					<b>OVMF</b><br>
-					(Open Virtual Machine Firmware) adds support for booting VMs using UEFI, but virtual machine guests must also support UEFI.  Assigning graphics devices to a OVMF-based virtual machine requires that the graphics device also support UEFI.
-				</p>
-				<p>
-					Once a VM is created this setting cannot be adjusted.
-				</p>
-			</blockquote>
-		</td>
-	</tr>
 </table>
+<div class="advanced">
+	<blockquote class="inline_help">
+		<p>
+			<b>SeaBIOS</b><br>
+			is the default virtual BIOS used to create virtual machines and is compatible with all guest operating systems (Windows, Linux, etc.).
+		</p>
+		<p>
+			<b>OVMF</b><br>
+			(Open Virtual Machine Firmware) adds support for booting VMs using UEFI, but virtual machine guests must also support UEFI.  Assigning graphics devices to a OVMF-based virtual machine requires that the graphics device also support UEFI.
+		</p>
+		<p>
+			Once a VM is created this setting cannot be adjusted.
+		</p>
+	</blockquote>
+</div>
 
 <table class="domain_os windows">
 	<tr class="advanced">
 		<td>Hyper-V:</td>
 		<td>
-			<select name="domain[hyperv]" id="hyperv" title="Hyperv tweaks for Windows.  Don't select if trying to passthrough Nvidia card">
+			<select name="domain[hyperv]" id="hyperv" class="narrow" title="Hyperv tweaks for Windows.  Don't select if trying to passthrough Nvidia card">
 			<?php mk_dropdown_options(['No', 'Yes'], $arrConfig['domain']['hyperv']); ?>
 			</select>
 		</td>
 	</tr>
-	<tr class="advanced">
-		<td colspan="2">
-			<blockquote class="inline_help">
-				<p>Exposes the guest to hyper-v extensions for Microsoft operating systems.  Set to "Yes" by default, but set to "No" automatically if an NVIDIA-based GPU is assigned to the guest (but can be user-toggled back to "Yes").</p>
-			</blockquote>
-		</td>
-	</tr>
 </table>
+<div class="domain_os windows">
+	<div class="advanced">
+		<blockquote class="inline_help">
+			<p>Exposes the guest to hyper-v extensions for Microsoft operating systems.  Set to "Yes" by default, but set to "No" automatically if an NVIDIA-based GPU is assigned to the guest (but can be user-toggled back to "Yes").</p>
+		</blockquote>
+	</div>
+</div>
 
 <table>
 	<tr>
@@ -386,14 +378,10 @@
 			<input type="text" data-pickcloseonfile="true" data-pickfilter="iso" data-pickroot="<?=$domain_cfg['MEDIADIR']?>" name="media[cdrom]" value="<?=$arrConfig['media']['cdrom']?>" placeholder="Click and Select cdrom image to install operating system">
 		</td>
 	</tr>
-	<tr>
-		<td colspan="2">
-			<blockquote class="inline_help">
-				<p>Select the virtual CD-ROM (ISO) that contains the installation media for your operating system.  Clicking this field displays a list of ISOs found in the directory specified on the Settings page.</p>
-			</blockquote>
-		</td>
-	</tr>
 </table>
+<blockquote class="inline_help">
+	<p>Select the virtual CD-ROM (ISO) that contains the installation media for your operating system.  Clicking this field displays a list of ISOs found in the directory specified on the Settings page.</p>
+</blockquote>
 
 <table class="domain_os windows">
 	<tr>
@@ -402,15 +390,13 @@
 			<input type="text" data-pickcloseonfile="true" data-pickfilter="iso" data-pickroot="<?=$domain_cfg['MEDIADIR']?>" name="media[drivers]" value="<?=$arrConfig['media']['drivers']?>" placeholder="Download, Click and Select virtio drivers image">
 		</td>
 	</tr>
-	<tr>
-		<td colspan="2">
-			<blockquote class="inline_help">
-				<p>Specify the virtual CD-ROM (ISO) that contains the VirtIO Windows drivers as provided by the Fedora Project.  Download the latest ISO from here: <a href="http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/" target="_blank">http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/</a></p>
-				<p>When installing Windows, you will reach a step where no disk devices will be found.  There is an option to browse for drivers on that screen.  Click browse and locate the additional CD-ROM in the menu.  Inside there will be various folders for the different versions of Windows.  Open the folder for the version of Windows you are installing and then select the AMD64 subfolder inside (even if you are on an Intel system, select AMD64).  Three drivers will be found.  Select them all, click next, and the vDisks you have assigned will appear.</p>
-			</blockquote>
-		</td>
-	</tr>
 </table>
+<div class="domain_os windows">
+	<blockquote class="inline_help">
+		<p>Specify the virtual CD-ROM (ISO) that contains the VirtIO Windows drivers as provided by the Fedora Project.  Download the latest ISO from here: <a href="http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/" target="_blank">http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/</a></p>
+		<p>When installing Windows, you will reach a step where no disk devices will be found.  There is an option to browse for drivers on that screen.  Click browse and locate the additional CD-ROM in the menu.  Inside there will be various folders for the different versions of Windows.  Open the folder for the version of Windows you are installing and then select the AMD64 subfolder inside (even if you are on an Intel system, select AMD64).  Three drivers will be found.  Select them all, click next, and the vDisks you have assigned will appear.</p>
+	</blockquote>
+</div>
 
 
 <? foreach ($arrConfig['disk'] as $i => $arrDisk) {
@@ -435,7 +421,7 @@
 		<tr class="advanced disk_file_options">
 			<td>vDisk Type:</td>
 			<td>
-				<select name="disk[<?=$i?>][driver]" title="type of storage image">
+				<select name="disk[<?=$i?>][driver]" class="narrow" title="type of storage image">
 				<?php mk_dropdown_options($arrValidDiskDrivers, $arrDisk['driver']); ?>
 				</select>
 			</td>
@@ -483,7 +469,7 @@
 		<tr class="advanced disk_file_options">
 			<td>vDisk Type:</td>
 			<td>
-				<select name="disk[{{INDEX}}][driver]" title="type of storage image">
+				<select name="disk[{{INDEX}}][driver]" class="narrow" title="type of storage image">
 				<?php mk_dropdown_options($arrValidDiskDrivers, ''); ?>
 				</select>
 			</td>
@@ -560,7 +546,7 @@
 		<tr>
 			<td>Graphics Card:</td>
 			<td>
-				<select name="gpu[<?=$i?>][id]" class="gpu">
+				<select name="gpu[<?=$i?>][id]" class="gpu narrow">
 				<?php
 					if ($i == 0) {
 						// Only the first video card can be VNC
@@ -605,7 +591,7 @@
 		<tr>
 			<td>Graphics Card:</td>
 			<td>
-				<select name="gpu[{{INDEX}}][id]" class="gpu">
+				<select name="gpu[{{INDEX}}][id]" class="gpu narrow">
 				<?php
 					echo mk_option('', '', 'None');
 
@@ -628,7 +614,7 @@
 		<tr>
 			<td>Sound Card:</td>
 			<td>
-				<select name="audio[<?=$i?>][id]" class="audio">
+				<select name="audio[<?=$i?>][id]" class="audio narrow">
 				<?php
 					echo mk_option($arrAudio['id'], '', 'None');
 
@@ -652,7 +638,7 @@
 		<tr>
 			<td>Sound Card:</td>
 			<td>
-				<select name="audio[{{INDEX}}][id]" class="audio">
+				<select name="audio[{{INDEX}}][id]" class="audio narrow">
 				<?php
 					foreach($arrValidAudioDevices as $arrDev) {
 						echo mk_option('', $arrDev['id'], trim($arrDev['name'] . ' | ' . $arrDev['id'], ' |'));
@@ -740,15 +726,11 @@
 			</div>
 		</td>
 	</tr>
-	<tr>
-		<td colspan="2">
-			<blockquote class="inline_help">
-				<p>If you wish to assign any USB devices to your guest, you can select them from this list.<br>
-				NOTE:  USB hotplug support is not yet implemented, so devices must be attached before the VM is started to use them.</p>
-			</blockquote>
-		</td>
-	</tr>
 </table>
+<blockquote class="inline_help">
+	<p>If you wish to assign any USB devices to your guest, you can select them from this list.<br>
+	NOTE:  USB hotplug support is not yet implemented, so devices must be attached before the VM is started to use them.</p>
+</blockquote>
 
 <table>
 	<tr>
@@ -768,14 +750,10 @@
 		<? } ?>
 		</td>
 	</tr>
-	<tr>
-		<td colspan="2">
-			<blockquote class="inline_help">
-				<p>Click Create to generate the vDisks and return to the Virtual Machines page where your new VM will be created.</p>
-			</blockquote>
-		</td>
-	</tr>
 </table>
+<blockquote class="inline_help">
+	<p>Click Create to generate the vDisks and return to the Virtual Machines page where your new VM will be created.</p>
+</blockquote>
 
 
 <script type="text/javascript">
