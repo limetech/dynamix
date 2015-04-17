@@ -1,4 +1,16 @@
-<?php
+<?PHP
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Derek Macias, Eric Schultz, Jon Panozzo.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
 	class Libvirt {
 		private $conn;
 		private $last_error;
@@ -108,6 +120,12 @@
 				$ctrl = "<controller type='usb' index='0' model='ich9-ehci1'/>
 					<controller type='usb' index='0' model='ich9-uhci1'/>";
 			}
+
+			// OVMF needs the bus set to virtio for cdroms
+			if (!empty($domain['ovmf'])) {
+				$bus = "virtio";
+			}
+
 			$clock = "<clock offset='" . $domain['clock'] . "'>
 						<timer name='rtc' tickpolicy='catchup'/>
 						<timer name='pit' tickpolicy='delay'/>
@@ -280,10 +298,19 @@
 								<input type='keyboard' bus='ps2'/>
 								<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0' $passwdstr>
 									<listen type='address' address='0.0.0.0'/>
-								</graphics>
-								<video>
-									<model type='vmvga'/>
-								</video>";
+								</graphics>";
+
+						if (!empty($domain['ovmf'])) {
+							// OVMF doesn't work with vmvga
+							$vnc .= "<video>
+										<model type='cirrus'/>
+									</video>";
+						} else {
+							// SeaBIOS is cool with vmvga
+							$vnc .= "<video>
+										<model type='vmvga'/>
+									</video>";
+						}
 						continue;
 					}
 
@@ -465,6 +492,12 @@
 				$ctrl = "<controller type='usb' index='0' model='ich9-ehci1'/>
 						<controller type='usb' index='0' model='ich9-uhci1'/>";
 			}
+
+			// OVMF needs the bus set to virtio for cdroms
+			if (!empty($domain['ovmf'])) {
+				$bus = "virtio";
+			}
+
 			$clock =	"<clock offset='" . $domain['clock'] . "'>
 							<timer name='rtc' tickpolicy='catchup'/>
 							<timer name='pit' tickpolicy='delay'/>
