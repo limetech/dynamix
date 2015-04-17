@@ -97,6 +97,8 @@ Enable VMs:
 <?= mk_option($libvirt_service, 'enable', 'Yes'); ?>
 </select>
 
+> Stopping the VM Manager will first attempt to shutdown all running VMs.  After 40 seconds, any remaining VM instances will be terminated.
+
 <? if ($libvirt_service == 'enable') {
 	$libvirt_info = libvirt_version('libvirt');
 	$qemu_info = $lv->get_connect_information(); ?>
