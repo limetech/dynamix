@@ -575,7 +575,7 @@ class DockerClient {
 
 			$c["Image"]       = $obj['Image'];
 			$c["ImageId"]     = substr($details[0]["Image"],0,12);
-			$c["Name"]        = substr($obj['Names'][0], 1);
+			$c["Name"]        = substr($details[0]['Name'], 1);
 			$c["Status"]      = $status;
 			$c["Running"]     = $running;
 			$c["Cmd"]         = $obj['Command'];
