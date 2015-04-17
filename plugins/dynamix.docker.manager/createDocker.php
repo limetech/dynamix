@@ -263,6 +263,13 @@ if ($_POST){
     include($dockerManPaths['plugin'] . "/exec.php");
   }
 
+  // Remove old container if renamed
+  $existing = isset($_POST['existingContainer']) ? $_POST['existingContainer'] : FALSE;
+  if ($existing && ContainerExist($existing)){
+    $_GET['cmd'] = "/usr/bin/docker rm -f $existing";
+    include($dockerManPaths['plugin'] . "/exec.php"); 
+  }
+
   // Injecting the command in $_GET variable and executing.
   $_GET['cmd'] = $cmd;
   include($dockerManPaths['plugin'] . "/exec.php");
@@ -594,7 +601,9 @@ $showAdditionalInfo = true;
 <div id="canvas" style="z-index:1;">
   <form method="post" id="createContainer">
     <table class="Preferences">
-      <? if($xmlType != "edit") {?>
+      <? if($xmlType == "edit"):
+        if (ContainerExist($templateName)): echo "<input type='hidden' name='existingContainer' value='${templateName}'>\n"; endif;
+      else:?>
       <tr>
         <td style="width: 150px;">Template:</td>
         <td >
@@ -651,7 +660,7 @@ $showAdditionalInfo = true;
           </blockquote>
         </td>
       </tr>
-      <?}?>
+      <?endif;?>
       <?if(!empty($templateDescBox)){?>
       <tr>
         <td style="vertical-align: top;">Description:</td>
