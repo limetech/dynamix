@@ -70,6 +70,7 @@ if ($file) {
   }
 }
 if ($command) {
+  if($_POST['env']) foreach (explode("|",$_POST['env']) as $env) putenv($env);
   write_log($command);
   $proc = popen($command, 'r');
   while (!feof($proc)) {

@@ -197,41 +197,41 @@ Available Notifications:
 : <span class="plugin" style="display:none"><span style="display:inline-block;width:90px;font-style:italic">Plugins version</span>
   <input type="checkbox" name="plugin1"<?=($notify['plugin'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
   <input type="checkbox" name="plugin2"<?=($notify['plugin'] & 2)==2 ? ' checked' : ''?>>Email &nbsp;
-  <input type="checkbox" name="plugin3"<?=($notify['plugin'] & 4)==4 ? ' checked' : ''?>>Custom &nbsp;</span>
+  <input type="checkbox" name="plugin3"<?=($notify['plugin'] & 4)==4 ? ' checked' : ''?>>Agents &nbsp;</span>
 
 <span class="docker" style="display:none">&nbsp;</span>
 : <span class="docker" style="display:none"><span style="display:inline-block;width:90px;font-style:italic">Docker update</span>
   <input type="checkbox" name="docker_notify1"<?=($notify['docker_notify'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
   <input type="checkbox" name="docker_notify2"<?=($notify['docker_notify'] & 2)==2 ? ' checked' : ''?>>Email &nbsp;
-  <input type="checkbox" name="docker_notify3"<?=($notify['docker_notify'] & 4)==4 ? ' checked' : ''?>>Custom &nbsp;</span>
+  <input type="checkbox" name="docker_notify3"<?=($notify['docker_notify'] & 4)==4 ? ' checked' : ''?>>Agents &nbsp;</span>
 
 <span class="report" style="display:none">&nbsp;</span>
 : <span class="report" style="display:none"><span style="display:inline-block;width:90px;font-style:italic">Array status</span>
   <input type="checkbox" name="report1"<?=($notify['report'] & 1)==1 ? ' checked' : ''?>>Browser &nbsp;
   <input type="checkbox" name="report2"<?=($notify['report'] & 2)==2 ? ' checked' : ''?>>Email &nbsp;
-  <input type="checkbox" name="report3"<?=($notify['report'] & 4)==4 ? ' checked' : ''?>>Custom &nbsp;</span>
+  <input type="checkbox" name="report3"<?=($notify['report'] & 4)==4 ? ' checked' : ''?>>Agents &nbsp;</span>
 
 > Use the checkboxes above to select what and how notifications need to be given, browser, email or both.
-> <br><b>Tip:</b> you can use custom notification agents; just add them to "/boot/config/plugins/dynamix/notification/agents" directory and check 'Custom'.
+> <br><b>Tip:</b> you can use custom notification agents; just add them to "/boot/config/plugins/dynamix/notification/agents" directory and check 'Agents'.
 
 
 Notification entity:
 : <span style="display:inline-block;width:90px;font-style:italic">Notices</span>
   <input type="checkbox" class="checkbox" name="normal1"<?=($notify['normal'] & 1)==1 ? " checked $disabled" : $disabled?>>Browser &nbsp;
   <input type="checkbox" class="checkbox" name="normal2"<?=($notify['normal'] & 2)==2 ? " checked $disabled" : $disabled?>>Email &nbsp;
-  <input type="checkbox" class="checkbox" name="normal3"<?=($notify['normal'] & 4)==4 ? " checked $disabled" : $disabled?>>Custom &nbsp;
+  <input type="checkbox" class="checkbox" name="normal3"<?=($notify['normal'] & 4)==4 ? " checked $disabled" : $disabled?>>Agents &nbsp;
 
 &nbsp;
 : <span style="display:inline-block;width:90px;font-style:italic">Warnings</span>
   <input type="checkbox" class="checkbox" name="warning1"<?=($notify['warning'] & 1)==1 ? " checked $disabled" : $disabled?>>Browser &nbsp;
   <input type="checkbox" class="checkbox" name="warning2"<?=($notify['warning'] & 2)==2 ? " checked $disabled" : $disabled?>>Email &nbsp;
-  <input type="checkbox" class="checkbox" name="warning3"<?=($notify['warning'] & 4)==4 ? " checked $disabled" : $disabled?>>Custom &nbsp;
+  <input type="checkbox" class="checkbox" name="warning3"<?=($notify['warning'] & 4)==4 ? " checked $disabled" : $disabled?>>Agents &nbsp;
 
 &nbsp;
 : <span style="display:inline-block;width:90px;font-style:italic">Alerts</span>
   <input type="checkbox" class="checkbox" name="alert1"<?=($notify['alert'] & 1)==1 ? " checked $disabled" : $disabled?>>Browser &nbsp;
   <input type="checkbox" class="checkbox" name="alert2"<?=($notify['alert'] & 2)==2 ? " checked $disabled" : $disabled?>>Email &nbsp;
-  <input type="checkbox" class="checkbox" name="alert3"<?=($notify['alert'] & 4)==4 ? " checked $disabled" : $disabled?>>Custom &nbsp;
+  <input type="checkbox" class="checkbox" name="alert3"<?=($notify['alert'] & 4)==4 ? " checked $disabled" : $disabled?>>Agents &nbsp;
 
 > Notifications are classified as:
 >
