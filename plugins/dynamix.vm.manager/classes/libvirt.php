@@ -1377,7 +1377,8 @@
 				return $this->domain_get_info_call($name, $name_override);
 
 			$domname = $name_override ? $name_override : $name;
-			$domkey  = $name_override ? $name_override : $this->domain_get_name($name);
+			$dom = $this->get_domain_object($domname);
+			$domkey  = $name_override ? $name_override : $this->domain_get_name($dom);
 			if (!array_key_exists($domkey, $this->dominfos)) {
 				$tmp = $this->domain_get_info_call($name, $name_override);
 				$this->dominfos[$domkey] = $tmp[$domname];
