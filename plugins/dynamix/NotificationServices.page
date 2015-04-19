@@ -1,8 +1,8 @@
 Menu="Notifications:3"
-Title="Notification Agents"
+Title="Notification Services"
 ---
 <?
-$xml_file = "/usr/local/emhttp/plugins/dynamix/include/NotificationAgents.xml";
+$xml_file = "/usr/local/emhttp/plugins/dynamix/include/NotificationServices.xml";
 $agents_dir = "/boot/config/plugins/dynamix/notifications/agents";
 $agents_disabled = "/boot/config/plugins/dynamix/notifications/agents-disabled";
 if(!is_dir($agents_dir)) @mkdir($agents_dir,0755,TRUE);
@@ -25,8 +25,14 @@ if(!is_dir($agents_disabled)) @mkdir($agents_disabled,0755,TRUE);
     form.find(".variable").each(function(){
       vars += $(this).attr('name')+'="'+$(this).val()+"\"\n";
     });
+    FileEnabled = form.find("input[name=FileEnabled]").val();
+    FileDisabled = form.find("input[name=FileDisabled]").val();
+    if (form.find("select[name=Enabled]").val() == "yes") {
+      form.find("input[name=#command]").val("/usr/bin/mv -f '"+FileDisabled+"' '"+FileEnabled+"'");
+    } else {
+      form.find("input[name=#command]").val("/usr/bin/mv -f '"+FileEnabled+"' '"+FileDisabled+"'");
+    }
     form.find('input[name=text]').val(script.format(vars,"\n"));
-    form.submit();
   }
   function execCmd(command) {
     form = $("#formExec");
@@ -45,7 +51,7 @@ if(!is_dir($agents_disabled)) @mkdir($agents_disabled,0755,TRUE);
 <input type='hidden' name='#command' value=''>
 </form>
 <?
-$xml = simplexml_load_file($xml_file);
+$xml = @simplexml_load_file($xml_file) or die("Fail opening $xml_file");
 foreach ($xml->Agent as $agent) {
   $Name = $agent->Name;
   $FileEnabled = "${agents_dir}/${Name}.sh";
@@ -64,28 +70,31 @@ foreach ($xml->Agent as $agent) {
   foreach (explode(PHP_EOL,(String) $agent->Script) as $line) {
     if(trim($line)) $Script .= trim($line)."{1}";
   }
-  echo "<div id='title'><img src='/plugins/dynamix/icons/".strtolower($Name).".png' class='icon' style='height:16px;width:16px;'>${Name}<span class='status'>".(is_file($FileEnabled) ? "<span class='green'>Enabled</span>": "<span class='red'>Disabled</span>")."</span></div>
+  echo "<div id='title' style='position:relative;margin:0px;top:-21px;'><img src='/plugins/dynamix/icons/".strtolower($Name).".png' class='icon' style='height:16px;width:16px;'>${Name}<span class='status'>".(is_file($FileEnabled) ? "<span class='green'>Enabled</span>": "<span class='red'>Disabled</span>")."</span></div>
         <form method='POST' action='/update.php' target='progressFrame'>
         <input type='hidden' name='#include' value='update.file.php'>
         <input type='hidden' name='#file' value='${File}'>
+        <input type='hidden' name='#command' value=''>
+        <input type='hidden' name='FileEnabled' value='$FileEnabled'>
+        <input type='hidden' name='FileDisabled' value='$FileDisabled'>
         <input type='hidden' name='text' value=''>
-        <script>Scripts['${Name}']=".json_encode($Script)."</script>
-        ";
+        <dl><dt>Enabled</dt><dd><select name='Enabled' size='1'>";
+        echo mk_option(is_file($FileDisabled), 'no', 'No');
+        echo mk_option(is_file($FileEnabled), 'yes', 'Yes');
+        echo "</select></dd></dl><script>Scripts['${Name}']=".json_encode($Script)."</script>";
   foreach ($agent->Variables->children() as $Var) {
     $vName = preg_replace('#\[([^\]]*)\]#', '<$1>', (string) $Var);
     $vDesc = preg_replace('#\[([^\]]*)\]#', '<$1>', (String) $Var->attributes()->Desc);
     $vDefault = preg_replace('#\[([^\]]*)\]#', '<$1>', (String) $Var->attributes()->Default);
     $vHelp = preg_replace('#\[([^\]]*)\]#', '<$1>', (String) $Var->attributes()->Help);
-    echo "<dl><dt>${vDesc}</dt><dd><input name='${vName}' size='40' maxlength='80' class='variable' value='".( isset($Values[$vName]) ? $Values[$vName] : $vDefault )."'></dd></dl>";
+    echo "<dl><dt>${vDesc}</dt><dd><input name='${vName}' size='40' maxlength='80' class='variable' required value='".( isset($Values[$vName]) ? $Values[$vName] : $vDefault )."'></dd></dl>";
     if ($vHelp) echo "<blockquote class='inline_help'>$vHelp</blockquote>";
   }
-  echo "<dl><dt>&nbsp;</dt><dd><button type='button' onclick='prepareService(this, \"${Name}\")'>Save</button>";
-  if (is_file($FileEnabled)) {
-    echo "<button type='button' onclick='execCmd(\"/usr/bin/mv -f ${FileEnabled} ${FileDisabled}\")'>Disable</button>";
-  } else {
-    echo "<button type='button' onclick='execCmd(\"/usr/bin/mv -f ${FileDisabled} ${FileEnabled}\")'>Enable</button>";
+  echo "<dl><dt>&nbsp;</dt><dd><input type='submit' onclick='prepareService(this, \"${Name}\")' value='Save'>";
+  if (is_file($File)) {
+    echo "<button type='button' onclick='execCmd(\"/usr/bin/rm $File\")'>Remove</button>";
+    echo "<button type='button' onclick='testService(\"$Name\",\"$File\")'>Test</button>";
   }
-  if (is_file($File)) echo "<button type='button' onclick='testService(\"$Name\",\"$File\")'>Test</button>";
-  echo "<button type='button' onclick='done()'>Done</button></dd></dl></form>";
+  echo "<button type='button' onclick='done()'>Done</button></dd></dl></form><div style='min-height:50px;'></div>";
 }
 ?>

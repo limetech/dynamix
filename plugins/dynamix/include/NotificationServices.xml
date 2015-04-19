@@ -5,7 +5,7 @@
     <Variables>
       <Variable Help="The Access Token can be found [a href='https://www.pushbullet.com/account'] [u]here[/u].[/a]" Desc="Access Token" Default="">TOKEN</Variable>
       <Variable Help="" Desc="Notification Title" Default="$SUBJECT">TITLE</Variable>
-      <Variable Help="" Desc="Notification Body" Default="$DESCRIPTION">BODY</Variable>
+      <Variable Help="" Desc="Notification Message" Default="$DESCRIPTION">MESSAGE</Variable>
     </Variables>
     <Script>
       <![CDATA[
@@ -15,7 +15,7 @@
       ##########
       curl -s -k -X POST --header "Authorization: Bearer $TOKEN" \
       --header  'Content-Type: application/json' \
-      -d "{\"type\": \"note\", \"title\": \"$TITLE\", \"body\": \"$BODY\"}" \
+      -d "{\"type\": \"note\", \"title\": \"$TITLE\", \"body\": \"$MESSAGE\"}" \
       https://api.pushbullet.com/v2/pushes 2>&1
       ]]>
     </Script>
@@ -54,6 +54,42 @@
       --form-string "priority=$PRIORITY" \
       --form-string "html=1" \
       https://api.pushover.net/1/messages.json 2>&1
+      ]]>
+    </Script>
+  </Agent>
+  <Agent>
+    <Name>Boxcar</Name>
+    <Variables>
+      <Variable Help="The User Key can be found [a href='https://pushover.net/'][u]here[/u].[/a]" Desc="Access Token" Default="">ACCESS_TOKEN</Variable>
+      <Variable Help="" Desc="Notification Title" Default="$SUBJECT">TITLE</Variable>
+      <Variable Help="" Desc="Notification Message" Default="$SUBJECT \n$DESCRIPTION">MESSAGE</Variable>
+    </Variables>
+    <Script>
+      <![CDATA[
+      #!/bin/bash
+      ############
+      {0}
+      ############
+      MESSAGE=$(echo -e "$MESSAGE")
+      case "$IMPORTANCE" in
+      'normal' )
+      PRIORITY="-1"
+      ;;
+      'warning' )
+      PRIORITY="0"
+      ;;
+      'alert' )
+      PRIORITY="1"
+      ;;
+      esac
+
+      curl -s -k -d "user_credentials=$ACCESS_TOKEN" \
+      -d "notification[title]=$TITLE" \
+      -d "notification[long_message]=$MESSAGE" \
+      -d "notification[source_name]=unRAID" \
+      -d "notification[sound]=bird-1" \
+      -d "notification[icon_url]=http://i.imgur.com/sSmPVCB.png" \
+      https://new.boxcar.io/api/notifications 2>&1
       ]]>
     </Script>
   </Agent>
