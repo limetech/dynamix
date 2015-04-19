@@ -1,5 +1,5 @@
 <?
-$url = "http://gui.us.to:8088";
+$url = "http://162.243.138.66";
 
 if (! isset($var)){
   if (! is_file("/usr/local/emhttp/state/var.ini")) shell_exec("wget -qO /dev/null localhost:$(ss -napt|grep emhttp|grep -Po ':\K\d+')");
