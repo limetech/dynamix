@@ -42,8 +42,10 @@ if(!is_dir($agents_disabled)) @mkdir($agents_disabled,0755,TRUE);
   function testService(name, file) {
     form = $("#formExec");
     form.find("input[name=#command]").val(file);
-    $('<input type="hidden" name="env" value="EVENT='+name+' test.|SUBJECT='+name+' test.|DESCRIPTION='+name+' test.|IMPORTANCE=normal">"').appendTo(form);
-    form.submit();
+    form.append('<input type="hidden" name="#env[]" value="EVENT='+name+' test.">');
+    form.append('<input type="hidden" name="#env[]" value="SUBJECT='+name+' test.">');
+    form.append('<input type="hidden" name="#env[]" value="DESCRIPTION='+name+' test.">');
+    form.append('<input type="hidden" name="#env[]" value="IMPORTANCE=normal">');
     execCmd(file);
   }
 </script>

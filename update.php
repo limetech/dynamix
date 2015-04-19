@@ -71,6 +71,12 @@ if ($file) {
   }
 }
 if ($command) {
+  if (isset($_POST['#env'])) {
+    $envs = $_POST['#env'];
+    foreach ($envs as $env) {
+      putenv($env);
+    }
+  }
   if($_POST['env']) foreach (explode("|",$_POST['env']) as $env) putenv($env);
   if (substr($command,0,1) != "/") $command = "{$_SERVER['DOCUMENT_ROOT']}/$command";
   if (isset($_POST['#arg'])) {
