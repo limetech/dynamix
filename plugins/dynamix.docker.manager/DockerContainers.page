@@ -154,7 +154,10 @@ $DockerTemplates = new DockerTemplates();
 			<td style="word-break:break-all;"><?= implode("<br>", $ports); ?></td>
 			<td style="word-break:break-all;"><?= implode("<br>", $paths); ?></td>
 			<td data-sort-value="<?=$is_autostart?>"><input type="checkbox" class="autostart" container="<?=htmlspecialchars($ct['Name']);?>" <?=$info[$ct['Name']]['autostart'] ? "checked" : ""?>></td>
-			<td><a class="log" onclick="containerLogs('<?=addslashes($ct['Name']);?>','Log for <?=addslashes($ct['Name']);?>', false, false)"><img class="basic" src="/plugins/dynamix/icons/log.png"/><div class="advanced" style="width: 124px;"><?=htmlspecialchars($ct['Status'])?></div><div class="advanced" style="color:#888;">Created <?=htmlspecialchars($ct['Created'])?></div></a><div class='advanced exec' onclick='uploadLog(this, "<?=$ct['Name'];?> log", "command", "/usr/bin/docker logs --tail=2000 <?=$ct['Name'];?>");'><i class='fa fa-upload'></i> upload log</div></div></td>
+			<td>
+				<a class="log" onclick="containerLogs('<?=addslashes($ct['Name']);?>','Log for <?=addslashes($ct['Name']);?>', false, false)"><img class="basic" src="/plugins/dynamix/icons/log.png"/><div class="advanced" style="width: 124px;"><?=htmlspecialchars($ct['Status'])?></div><div class="advanced" style="color:#888;">Created <?=htmlspecialchars($ct['Created'])?></div></a>
+				<div class='advanced exec' onclick='uploadLog(this, "<?=$ct['Name'];?> log", "command", "/usr/bin/cat /root/b");'><i class='fa fa-upload'></i> upload log</div></div>
+			</td>
 		</tr>
 		<?}?>
 
@@ -206,7 +209,7 @@ $DockerTemplates = new DockerTemplates();
   function uploadLog(button, title, type, text){
     old = $(button).html();
     $(button).html("<i class='fa fa-circle-o-notch fa-spin'></i> uploading...");
-    $.post("/webGui/include/UploadLog.php",{pastebin:'true',title:title,type:type,text:text},function(data){if(data){console.log(data);clearTimeout(timers.notifier);notifier();$(button).html(old);}});
+    $.post("/webGui/include/UploadLog.php",{pastebin:'true',title:title,type:type,text:text},function(data){if(data.result != "failed"){window.open(data.result, '_blank')};clearTimeout(timers.notifier);notifier();$(button).html(old);},'json');
   }
 $(function() {
 	if ($.cookie('docker_listview_mode') == 'advanced') {
