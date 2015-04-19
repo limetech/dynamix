@@ -30,6 +30,7 @@ function sendPaste($text, $title) {
 if ($_POST['pastebin']){
   $title = $_POST['title'];
   $text  = $_POST['text'];
+  if (!$text) exit(0);
   switch ($_POST['type']) {
     case 'file':
       sendPaste(file_get_contents($text),$title);
