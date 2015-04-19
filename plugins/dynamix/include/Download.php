@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2014, Bergware International.
- * Copyright 2014, Lime Technology
+/* Copyright 2015, Bergware International.
+ * Copyright 2015, Lime Technology
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -10,24 +10,29 @@
  * all copies or substantial portions of the Software.
  */
 ?>
+
 <?
 $file = $_POST['file'];
 
 switch ($_POST['cmd']) {
 case 'save':
+  $raw  = empty($_POST['raw']) ? false : $_POST['raw'];
   $root = $_POST['root'];
-  $zip = basename($file).'.zip';
-  if (empty($_POST['unix'])) {
-  // Save in windows format (default)
-    $tmp = '/var/tmp/'.basename($file).'.txt';
+  $name = basename($file);
+  if ($raw == false) {
+    $tmp = "/var/tmp/$name.txt";
+    $name .= '.zip';
     exec("todos <$file >$tmp");
-    exec("zip -qj $root/$zip $tmp");
+    exec("zip -qj $root/$name $tmp");
     unlink($tmp);
-  } else {
-  // Save in unix format
-    exec("zip -qj $root/$zip $file");
+  } elseif ($raw == 'windows') {
+    $name .= '.rtf';
+    exec("todos <$file >$root/$name");
+  } elseif ($raw == 'unix') {
+    $name .= '.rtf';
+    exec("cp -f $file $root/$name");
   }
-  echo "/$zip";
+  echo "/$name";
   break;
 case 'delete':
   @unlink($file);

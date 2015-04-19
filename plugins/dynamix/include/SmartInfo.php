@@ -105,7 +105,7 @@ case "SELFTEST":
   echo "</tr>";
   break;
 case "save":
-  exec("smartctl -A /dev/$port > {$_GET['file']}");
+  exec("smartctl -a /dev/$port >{$_GET['file']}");
   break;
 endswitch;
 
