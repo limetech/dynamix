@@ -26,6 +26,7 @@
  * #include : specifies name of an include file to read and execute in before saving the file contents
  * #cleanup : if present then parameters with empty strings are omitted from being written to the file
  * #command : a shell command to execute after updating the configuration file
+ * #arg     : an array of arguments for the shell command
  */
 function write_log($string) {
   if (empty($string)) {
@@ -71,11 +72,18 @@ if ($file) {
 }
 if ($command) {
   if($_POST['env']) foreach (explode("|",$_POST['env']) as $env) putenv($env);
+  if (substr($command,0,1) != "/") $command = "{$_SERVER['DOCUMENT_ROOT']}/$command";
+  if (isset($_POST['#arg'])) {
+    $args = $_POST['#arg'];
+    ksort($args);
+    $command = "$command " . implode(" ", $args);
+  }
   write_log($command);
   $proc = popen($command, 'r');
   while (!feof($proc)) {
-    write_log(fread($proc, 4096));
-    @flush();
+    write_log(fgets($proc));
+//    write_log(fread($proc, 4096));
+//    @flush();
   }
 }
 ?>

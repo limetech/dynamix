@@ -1,6 +1,6 @@
 Menu="Scheduler:1"
 Title="Parity Check"
-Cond="($disks['parity']['status']!='DISK_DSBL_NP')"
+Cond="($disks['parity']['status']!='DISK_NP_DSBL')"
 ---
 <?PHP
 /* Copyright 2015, Bergware International.

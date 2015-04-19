@@ -1377,7 +1377,8 @@
 				return $this->domain_get_info_call($name, $name_override);
 
 			$domname = $name_override ? $name_override : $name;
-			$domkey  = $name_override ? $name_override : $this->domain_get_name($name);
+			$dom = $this->get_domain_object($domname);
+			$domkey  = $name_override ? $name_override : $this->domain_get_name($dom);
 			if (!array_key_exists($domkey, $this->dominfos)) {
 				$tmp = $this->domain_get_info_call($name, $name_override);
 				$this->dominfos[$domkey] = $tmp[$domname];
@@ -1573,24 +1574,35 @@
 			$dom = $this->get_domain_object($domain);
 			if (!$dom)
 				return false;
-			$tmp = $this->get_disk_stats($domain);
-			if (array_key_exists('file', $tmp[0])) {
-				$disk = $tmp[0]['file'];
-				$tmp = pathinfo($disk);
-				$pathinfo = $tmp['dirname'];
-				$cfg = $pathinfo.'/'.$tmp['filename'].'.cfg';
-				$xml = $pathinfo.'/'.$tmp['filename'].'.xml';
+			$disks = $this->get_disk_stats($dom);
+			$tmp = libvirt_domain_undefine($dom);
+			if (!$tmp)
+				return $this->_set_last_error();
+
+			// remove the first disk only
+			if (array_key_exists('file', $disks[0])) {
+				$disk = $disks[0]['file'];
+				$pathinfo = pathinfo($disk);
+				$dir = $pathinfo['dirname'];
+
+				// remove the vm config
+				$cfg_vm = $dir.'/'.$domain.'.cfg';
+				if (file_exists($cfg_vm));
+					unlink($cfg_vm);
+
+				$cfg = $dir.'/'.$pathinfo['filename'].'.cfg';
+				$xml = $dir.'/'.$pathinfo['filename'].'.xml';
 					if (file_exists($disk));
 						unlink($disk);
 					if (file_exists($cfg));
 						unlink($cfg);
 					if (file_exists($xml));
 						unlink($xml);
-					if (is_dir($pathinfo) && $this->is_dir_empty($pathinfo))
-						rmdir($pathinfo);
+					if (is_dir($dir) && $this->is_dir_empty($dir))
+						rmdir($dir);
 			}
-			$tmp = libvirt_domain_undefine($dom);
-			return ($tmp) ? $tmp : $this->_set_last_error();
+
+			return true;
 		}
 
 		function is_dir_empty($dir) {

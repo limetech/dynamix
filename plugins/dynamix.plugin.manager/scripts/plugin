@@ -150,18 +150,32 @@ EOF;
 // Returns TRUE if success else FALSE and fills in error.
 //
 function download($URL, $name, &$error) {
-  if ($file = popen("wget --no-check-certificate --progress=dot -O $name $URL 2>&1", 'r')) {
+  if ($file = popen("wget --progress=dot -O $name $URL 2>&1", 'r')) {
+    echo "plugin: downloading: $name ...\r";
     $level = -1;
     while (!feof($file)) {
-      $line = preg_split('/\s+/', fgets($file, 256));
-      if (count($line)>=7 && strpos($line[7],'%') && substr($line[7],0,-1)>$level) { echo "Download progress: {$line[7]}\n"; $level += 10; }
+      if (preg_match("/\d+%/", fgets($file), $matches)) {
+        $percentage = substr($matches[0],0,-1);
+        if ($percentage > $level) {
+          echo "plugin: downloading: $name ... $percentage%\r";
+          $level = $percentage;
+        }
+      }
     }
+    echo "plugin: downloading: $name ... done\n";
     pclose($file);
     return true;
   } else {
     $error = "wget: $URL failed";
     return false;
   }
+}
+
+// Deal with logging message.
+//
+function logger($message) {
+//  echo "$message\n";
+  shell_exec( "logger $message");
 }
 
 // Interpret a plugin file
@@ -225,12 +239,12 @@ function plugin($method, $plugin_file, &$error) {
       // If file already exists, do not overwrite
       //
       if (file_exists($name)) {
-        echo "plugin: skipping: $name already exists\n";
+        logger("plugin: skipping: $name already exists");
       } elseif ($file->LOCAL) {
         // Create the file
         //
         // for local file, just copy it
-        echo "plugin: creating: $name - copying LOCAL file $file->LOCAL\n";
+        logger("plugin: creating: $name - copying LOCAL file $file->LOCAL");
         if (!copy($file->LOCAL, $name)) {
           $error = "unable to copy LOCAL file: $name";
           @unlink($name);
@@ -238,10 +252,10 @@ function plugin($method, $plugin_file, &$error) {
         }
       } elseif ($file->INLINE) {
         // for inline file, create with inline contents
-        echo "plugin: creating: $name - from INLINE content\n";
+        logger("plugin: creating: $name - from INLINE content");
         $contents = trim($file->INLINE).PHP_EOL;
         if ($file->attributes()->Type == 'base64') {
-          echo "plugin: decoding: $name as base64\n";
+          logger("plugin: decoding: $name as base64");
           $contents = base64_decode($contents);
           if ($contents === false) {
             $error = "unable to decode inline base64: $name";
@@ -255,13 +269,13 @@ function plugin($method, $plugin_file, &$error) {
         }
       } elseif ($file->URL) {
         // for download file, download and maybe verify the file MD5
-        echo "plugin: creating: $name - downloading from URL $file->URL\n";
+        logger("plugin: creating: $name - downloading from URL $file->URL");
         if (download($file->URL, $name, $error) === false) {
           @unlink($name);
           return false;
         }
         if ($file->MD5) {
-          echo "plugin: checking: $name - MD5\n";
+          logger("plugin: checking: $name - MD5");
           if (md5_file($name) != $file->MD5) {
             $error = "bad file MD5: $name";
             unlink($name);
@@ -274,7 +288,7 @@ function plugin($method, $plugin_file, &$error) {
       if ($file->attributes()->Mode) {
         // if file has 'Mode' attribute, apply it
         $mode = $file->attributes()->Mode;
-        echo "plugin: setting: $name - mode to $mode\n";
+        logger("plugin: setting: $name - mode to $mode");
         if (!chmod($name, octdec($mode))) {
           $error = "chmod failure: $name";
           return false;
@@ -286,13 +300,13 @@ function plugin($method, $plugin_file, &$error) {
     if ($file->attributes()->Run) {
       $command = $file->attributes()->Run;
       if ($name) {
-        echo "plugin: running: $name\n";
+        logger("plugin: running: $name");
         system("$command $name", $retval);
       } elseif ($file->LOCAL) {
-        echo "plugin: running: $file->LOCAL\n";
+        logger("plugin: running: $file->LOCAL");
         system("$command $file->LOCAL", $retval);
       } elseif ($file->INLINE) {
-        echo "plugin: running: 'anonymous'\n";
+        logger("plugin: running: 'anonymous'");
         $inline = escapeshellarg($file->INLINE);
         passthru("echo $inline | $command", $retval);
       }
@@ -330,7 +344,6 @@ if ($method == "checkall") {
     if ($installed_plugin_file === false) continue;
     if (plugin("pluginURL", $installed_plugin_file, $error) === false) continue;
     $plugin = basename($installed_plugin_file);
-    echo "plugin: checking $plugin ...\n";
     exec("/usr/local/sbin/plugin check $plugin", $output, $retval);
   }
   exit(0);
@@ -390,10 +403,6 @@ if ($method == "install") {
       if (strcmp($plugin_version, $installed_version) == 0) {
         echo "plugin: not reinstalling same version\n";
       }
-   // Bergware change: forget 'older' plugins
-   // if (dirname($plugin_file) == "/boot/config/plugins") {
-   // move($plugin_file, "/boot/config/plugins-stale");
-   // }
       exit(1);
     }
     if (plugin("install", $plugin_file, $error) === false) {
@@ -435,6 +444,7 @@ if ($method == "install") {
 // only .plg files should have a remove method
 //
 if ($method == "remove") {
+  echo "plugin: removing: $argv[2]\n";
   $plugin = $argv[2];
   $installed_plugin_file = @readlink("/var/log/plugins/$plugin");
   if ($installed_plugin_file !== false) {
@@ -458,6 +468,7 @@ if ($method == "remove") {
 // directory.
 //
 if ($method == "check") {
+  echo "plugin: checking: $argv[2]\n";
   $plugin = $argv[2];
   $installed_plugin_file = @readlink("/var/log/plugins/$plugin");
   if ($installed_plugin_file === false) {
@@ -493,6 +504,7 @@ if ($method == "check") {
 // Finally we mark the new.plg "installed".
 //
 if ($method == "update") {
+  echo "plugin: updating: $argv[2]\n";
   $plugin = $argv[2];
   $installed_plugin_file = @readlink("/var/log/plugins/$plugin");
   if ($installed_plugin_file === false) {
@@ -512,8 +524,6 @@ if ($method == "update") {
   }
   // install was successful, save the updated plugin so it installs again next boot
   unlink("/var/log/plugins/$plugin");
-  // Bergware change: forget 'older' plugins
-  // move($installed_plugin_file, "/boot/config/plugins-stale");
   copy($plugin_file, "/boot/config/plugins/$plugin");
   symlink("/boot/config/plugins/$plugin", "/var/log/plugins/$plugin");
   echo "plugin: updated\n";

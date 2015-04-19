@@ -3,7 +3,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name      "dynamix">
 <!ENTITY author    "Bergware">
-<!ENTITY version   "2015.02.25">
+<!ENTITY version   "2015.04.17">
 <!ENTITY pluginURL "https://raw.github.com/limetech/&name;/master/plugins/&name;/&name;.plg">
 ]>
 
@@ -23,19 +23,6 @@ Please refer to
 **&lt;a href="https://github.com/limetech/dynamix/commits/master" target="_blank">commit history&lt;/a>**
 on github.
 </CHANGES>
-
-<!--
-Pre-install checks.
--->
-<FILE Run="/bin/bash">
-<INLINE>
-source /etc/unraid-version
-if [ "${version:0:11}" != "6.0-beta14a" ]; then
-  echo "this plugin is only valid for unRAID OS 6.0-beta14a"
-  exit 1
-fi
-</INLINE>
-</FILE>
 
 <!--
 Get from github as tarball.

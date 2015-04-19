@@ -1,2 +1,2 @@
 #!/bin/bash
-( /usr/bin/php /usr/local/emhttp/plugins/apcupsd/apcupsdctl.php "autostart" ) &
+/usr/bin/php /usr/local/emhttp/plugins/apcupsd/apcupsdctl.php "autostart"

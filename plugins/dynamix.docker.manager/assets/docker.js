@@ -15,7 +15,9 @@ function addDockerContainerContext(container, image, template, started, update, 
   }
   opts.push({divider: true});
   opts.push({text: 'Logs', icon:'fa-navicon', action: function(e){ e.preventDefault(); containerLogs(container); }});
-  opts.push({text: 'Edit', icon:'fa-wrench', action: function(e){ e.preventDefault(); editContainer(container, template); }});
+  if (template) {
+    opts.push({text: 'Edit', icon:'fa-wrench', action: function(e){ e.preventDefault(); editContainer(container, template); }});
+  }
   if (autostart){
     opts.push({text: 'Disable autostart', icon:'fa-check-square-o', action: function(e){ e.preventDefault();  autoStart(container, e); }});
   } else {
