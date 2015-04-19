@@ -40,14 +40,14 @@ $next = $i<$end ? $refs[$i+1] : $refs[0];
 function cleanUp() {
   if (document.hasFocus()) {
     $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?="$path/$file"?>'});
-    $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?="$docroot/$file.zip"?>'});
+    $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?="$docroot/$file.rtf"?>'});
   } else {
     setTimeout(cleanUp,4000);
   }
 }  
 function saveSMART() {
   $.get('/webGui/include/SmartInfo.php',{cmd:'save',port:'<?=$dev?>',file:'<?="$path/$file"?>'}, function() {
-    $.post('/webGui/include/Download.php',{cmd:'save',root:'<?=$docroot?>',file:'<?="$path/$file"?>'},function(data) {
+    $.post('/webGui/include/Download.php',{cmd:'save',raw:'windows',root:'<?=$docroot?>',file:'<?="$path/$file"?>'},function(data) {
       location = data;
       setTimeout(cleanUp,4000);
     });
