@@ -15,7 +15,7 @@ Title="Statistics"
 ?>
 
 <?
-$cores = exec("awk '/^cpu cores/ {print $4}' /proc/cpuinfo|tail -1");
+$cores = exec("awk '/^cpu cores/ {print $4;exit;}' /proc/cpuinfo");
 $fans  = exec("sensors -uA|grep -c 'fan[0-9]_input'");
 $group = $var['shareSMBEnabled']=='yes' | $var['shareAFPEnabled']=='yes' | $var['shareNFSEnabled']=='yes';
 $names = "";

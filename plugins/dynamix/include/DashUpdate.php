@@ -108,11 +108,7 @@ case 'cpu':
   if (file_exists("/proc/xen")) {
     exec("xenpm get-cpufreq-states|awk '/^current frequency/ {print \$4\" \"\$5}'",$speeds);
   } else {
-    exec("awk '/^cpu MHz/ {printf\"%4.0f MHz\\n\", $4}' /proc/cpuinfo",$speeds);
-    # if hyper-threading is enabled, trim the ht threads
-    if (shell_exec("grep -c -o '^flags\b.*: .*\bht\b' /proc/cpuinfo") > 0) {
-      $speeds = array_slice($speeds, 0, (count($speeds)/2));
-    }
+    exec("awk '/^cpu MHz/ {printf \"%4.0f MHz\\n\", $4}' /proc/cpuinfo|head -$(awk '/^cpu cores/ {print $4;exit;}' /proc/cpuinfo)",$speeds);
   }
   echo implode('#',$speeds);
 break;
