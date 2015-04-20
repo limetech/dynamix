@@ -20,12 +20,15 @@ if(!is_dir($agents_disabled)) @mkdir($agents_disabled,0755,TRUE);
       });
     };
   }
+  function addslashes(text) {
+    return text.replace(/\"/g, "\\\"");
+  }
   function prepareService(el, name) {
     var script = Scripts[name];
     var vars = "";
     form = $(el).parents('form:first');
     form.find(".variable").each(function(){
-      vars += $(this).attr('name')+'="'+$(this).val()+"\"\n";
+      vars += $(this).attr('name')+'="'+addslashes($(this).val())+"\"\n";
     });
     FileEnabled = FilesEnabled[name];
     FileDisabled = FilesDisabled[name];
@@ -89,7 +92,7 @@ foreach ($xml->Agent as $agent) {
     $vDesc = preg_replace('#\[([^\]]*)\]#', '<$1>', (String) $Var->attributes()->Desc);
     $vDefault = preg_replace('#\[([^\]]*)\]#', '<$1>', (String) $Var->attributes()->Default);
     $vHelp = preg_replace('#\[([^\]]*)\]#', '<$1>', (String) $Var->attributes()->Help);
-    echo "<dl><dt>${vDesc}</dt><dd><input name='${vName}' size='40' maxlength='80' class='variable' required value='".( isset($Values[$vName]) ? $Values[$vName] : $vDefault )."'></dd></dl>";
+    echo "<dl><dt>${vDesc}</dt><dd><input type=\"text\" name=\"${vName}\" class=\"variable\" required value=\"".( isset($Values[$vName]) ? $Values[$vName] : $vDefault )."\"></dd></dl>";
     if ($vHelp) echo "<blockquote class='inline_help'>$vHelp</blockquote>";
   }
   echo "<dl><dt>&nbsp;</dt><dd><input type='submit' onclick='prepareService(this, \"${Name}\")' value='Save'>";
