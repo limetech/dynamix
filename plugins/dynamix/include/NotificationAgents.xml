@@ -71,24 +71,13 @@
       {0}
       ############
       MESSAGE=$(echo -e "$MESSAGE")
-      case "$IMPORTANCE" in
-      'normal' )
-      PRIORITY="-1"
-      ;;
-      'warning' )
-      PRIORITY="0"
-      ;;
-      'alert' )
-      PRIORITY="1"
-      ;;
-      esac
 
       curl -s -k -d "user_credentials=$ACCESS_TOKEN" \
       -d "notification[title]=$TITLE" \
       -d "notification[long_message]=$MESSAGE" \
       -d "notification[source_name]=unRAID" \
       -d "notification[sound]=bird-1" \
-      -d "notification[icon_url]=http://i.imgur.com/sSmPVCB.png" \
+      -d "notification[icon_url]=http://i.imgur.com/u63iSL1.png" \
       https://new.boxcar.io/api/notifications 2>&1
       ]]>
     </Script>

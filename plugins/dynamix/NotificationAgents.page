@@ -1,8 +1,8 @@
 Menu="Notifications:3"
-Title="Notification Services"
+Title="Notification Agents"
 ---
 <?
-$xml_file = "/usr/local/emhttp/plugins/dynamix/include/NotificationServices.xml";
+$xml_file = "/usr/local/emhttp/plugins/dynamix/include/NotificationAgents.xml";
 $agents_dir = "/boot/config/plugins/dynamix/notifications/agents";
 $agents_disabled = "/boot/config/plugins/dynamix/notifications/agents-disabled";
 if(!is_dir($agents_dir)) @mkdir($agents_dir,0755,TRUE);
@@ -10,6 +10,8 @@ if(!is_dir($agents_disabled)) @mkdir($agents_disabled,0755,TRUE);
 ?>
 <script type="text/javascript">
   Scripts = new Object();
+  FilesEnabled = new Object();
+  FilesDisabled = new Object();
   if (!String.prototype.format) {
     String.prototype.format = function() {
       var args = arguments;
@@ -25,8 +27,8 @@ if(!is_dir($agents_disabled)) @mkdir($agents_disabled,0755,TRUE);
     form.find(".variable").each(function(){
       vars += $(this).attr('name')+'="'+$(this).val()+"\"\n";
     });
-    FileEnabled = form.find("input[name=FileEnabled]").val();
-    FileDisabled = form.find("input[name=FileDisabled]").val();
+    FileEnabled = FilesEnabled[name];
+    FileDisabled = FilesDisabled[name];
     if (form.find("select[name=Enabled]").val() == "yes") {
       form.find("input[name=#command]").val("/usr/bin/mv -f '"+FileDisabled+"' '"+FileEnabled+"'");
     } else {
@@ -77,13 +79,11 @@ foreach ($xml->Agent as $agent) {
         <input type='hidden' name='#include' value='update.file.php'>
         <input type='hidden' name='#file' value='${File}'>
         <input type='hidden' name='#command' value=''>
-        <input type='hidden' name='FileEnabled' value='$FileEnabled'>
-        <input type='hidden' name='FileDisabled' value='$FileDisabled'>
         <input type='hidden' name='text' value=''>
         <dl><dt>Enabled</dt><dd><select name='Enabled' size='1'>";
         echo mk_option(is_file($FileDisabled), 'no', 'No');
         echo mk_option(is_file($FileEnabled), 'yes', 'Yes');
-        echo "</select></dd></dl><script>Scripts['${Name}']=".json_encode($Script)."</script>";
+        echo "</select></dd></dl><script>Scripts['${Name}']=".json_encode($Script).";FilesEnabled['${Name}']='$FileEnabled';FilesDisabled['${Name}']='$FileDisabled';</script>";
   foreach ($agent->Variables->children() as $Var) {
     $vName = preg_replace('#\[([^\]]*)\]#', '<$1>', (string) $Var);
     $vDesc = preg_replace('#\[([^\]]*)\]#', '<$1>', (String) $Var->attributes()->Desc);
