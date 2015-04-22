@@ -44,7 +44,7 @@
 		$uri = is_dir('/proc/xen') ? 'xen:///system' : 'qemu:///system';
 		$lv = new Libvirt($uri, null, null, false);
 		$info = $lv->host_get_node_info();
-		$maxcpu = (int)$info['cores']*(int)$info['threads'];
+		$maxcpu = (int)$info['cpus'];
 		$maxmem = number_format(($info['memory'] / 1048576), 1, '.', ' ');
 	}
 

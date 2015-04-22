@@ -71,6 +71,9 @@ if ($file) {
   }
 }
 if ($command) {
+  if (isset($_POST['#env'])) {
+    foreach ($_POST['#env'] as $env) putenv($env);
+  }
   if (substr($command,0,1) != "/") $command = "{$_SERVER['DOCUMENT_ROOT']}/$command";
   if (isset($_POST['#arg'])) {
     $args = $_POST['#arg'];
