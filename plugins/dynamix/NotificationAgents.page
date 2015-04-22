@@ -70,9 +70,17 @@ foreach ($xml->Agent as $agent) {
     $File = $FileEnabled;
   }
   $Values = array();
+  $Script = "";
   if (is_file($File)){
-    preg_match("/[#]{6,100}(.*?)[#]{6,100}/si", file_get_contents($File), $match);
-    if (isset($match[1])) $Values = parse_ini_string($match[1]);
+    preg_match("/[#]{6,100}([^#]*?)[#]{6,100}/si", file_get_contents($File), $match);
+    if (isset($match[1])) {
+      foreach (explode(PHP_EOL, $match[1]) as $line) {
+        if (strpos($line, "=")){
+          list($k, $v) = explode("=",str_replace(array("\""), "", $line),2);
+          $Values[$k] = $v;
+        }
+      }
+    }
   }
   foreach (explode(PHP_EOL,(String) $agent->Script) as $line) {
     if(trim($line)) $Script .= trim($line)."{1}";
