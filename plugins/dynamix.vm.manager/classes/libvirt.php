@@ -121,9 +121,9 @@
 					<controller type='usb' index='0' model='ich9-uhci1'/>";
 			}
 
-			// OVMF needs the bus set to virtio for cdroms
+			// OVMF needs the bus set to ide for cdroms
 			if (!empty($domain['ovmf'])) {
-				$bus = "virtio";
+				$bus = "ide";
 			}
 
 			$clock = "<clock offset='" . $domain['clock'] . "'>
@@ -493,9 +493,9 @@
 						<controller type='usb' index='0' model='ich9-uhci1'/>";
 			}
 
-			// OVMF needs the bus set to virtio for cdroms
+			// OVMF needs the bus set to ide for cdroms
 			if (!empty($domain['ovmf'])) {
-				$bus = "virtio";
+				$bus = "ide";
 			}
 
 			$clock =	"<clock offset='" . $domain['clock'] . "'>
