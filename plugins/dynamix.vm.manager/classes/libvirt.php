@@ -293,10 +293,15 @@
 					}
 
 					if ($gpu['id'] == 'vnc') {
+						$strKeyMap = '';
+						if (!empty($gpu['keymap'])) {
+							$strKeyMap = "keymap='" . $gpu['keymap'] . "'";
+						}
+
 						$vnc = "<input type='tablet' bus='usb'/>
 								<input type='mouse' bus='ps2'/>
 								<input type='keyboard' bus='ps2'/>
-								<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0' $passwdstr>
+								<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0' $passwdstr $strKeyMap>
 									<listen type='address' address='0.0.0.0'/>
 								</graphics>";
 
@@ -1663,6 +1668,17 @@
 			return $var;
 		}
 
+		function domain_get_vnc_keymap($domain) {
+			$tmp = $this->get_xpath($domain, '//domain/devices/graphics/@keymap', false);
+			if (!$tmp)
+				return 'en-us';
+
+			$var = $tmp[0];
+			unset($tmp);
+
+			return $var;
+		}
+
 		function domain_get_ws_port($domain) {
 			$tmp = $this->get_xpath($domain, '//domain/devices/graphics/@websocket', false);
 			$var = (int)$tmp[0];
@@ -1672,8 +1688,6 @@
 		}
 
 		function domain_get_arch($domain) {
-			$domain = $this->get_domain_object($domain);
-
 			$tmp = $this->get_xpath($domain, '//domain/os/type/@arch', false);
 			$var = $tmp[0];
 			unset($tmp);
@@ -1682,8 +1696,6 @@
 		}
 
 		function domain_get_machine($domain) {
-			$domain = $this->get_domain_object($domain);
-
 			$tmp = $this->get_xpath($domain, '//domain/os/type/@machine', false);
 			$var = $tmp[0];
 			unset($tmp);
@@ -1805,8 +1817,6 @@
 		}
 
 		function domain_get_ovmf($domain) {
-			$domain = $this->get_domain_object($domain);
-
 			return $this->_get_single_xpath_result($domain, '//domain/os/loader');
 		}
 

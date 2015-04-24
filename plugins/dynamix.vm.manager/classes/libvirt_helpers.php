@@ -210,8 +210,6 @@
 			'pc' => 'i440fx'
 		];
 
-		//TODO: add support for OVMF types
-
 		return $arrValidMachineTypes;
 	}
 
@@ -223,6 +221,47 @@
 		];
 
 		return $arrValidDiskDrivers;
+	}
+
+
+	function getValidKeyMaps() {
+		$arrValidKeyMaps = [
+			'ar' => 'Arabic (ar)',
+			'hr' => 'Croatian (hr)',
+			'cz' => 'Czech (cz)',
+			'da' => 'Danish (da)',
+			'nl' => 'Dutch (nl)',
+			'nl-be' => 'Dutch-Belgium (nl-be)',
+			'en-gb' => 'English-United Kingdom (en-gb)',
+			'en-us' => 'English-United States (en-us)',
+			'es' => 'Español (es)',
+			'et' => 'Estonian (et)',
+			'fo' => 'Faroese (fo)',
+			'fi' => 'Finnish (fi)',
+			'fr' => 'French (fr)',
+			'bepo' => 'French-Bépo (bepo)',
+			'fr-be' => 'French-Belgium (fr-be)',
+			'fr-ca' => 'French-Canadian (fr-ca)',
+			'fr-ch' => 'French-Switzerland (fr-ch)',
+			'de-ch' => 'German-Switzerland (de-ch)',
+			'hu' => 'Hungarian (hu)',
+			'is' => 'Icelandic (is)',
+			'it' => 'Italian (it)',
+			'ja' => 'Japanese (ja)',
+			'lv' => 'Latvian (lv)',
+			'lt' => 'Lithuanian (lt)',
+			'mk' => 'Macedonian (mk)',
+			'no' => 'Norwegian (no)',
+			'pl' => 'Polish (pl)',
+			'pt-br' => 'Portuguese-Brazil (pt-br)',
+			'ru' => 'Russian (ru)',
+			'sl' => 'Slovene (sl)',
+			'sv' => 'Swedish (sv)',
+			'th' => 'Thailand (th)',
+			'tr' => 'Turkish (tr)'
+		];
+
+		return $arrValidKeyMaps;
 	}
 
 
@@ -259,7 +298,10 @@
 		// check for vnc; add to arrGPUDevices
 		$intVNCPort = $lv->domain_get_vnc_port($res);
 		if (!empty($intVNCPort)) {
-			$arrGPUDevices[] = ['id' => 'vnc'];
+			$arrGPUDevices[] = [
+				'id' => 'vnc',
+				'keymap' => $lv->domain_get_vnc_keymap($res)
+			];
 		}
 
 		foreach ($arrHostDevs as $arrHostDev) {

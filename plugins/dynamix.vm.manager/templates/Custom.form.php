@@ -19,6 +19,7 @@
 	$arrValidPCIDevices = getValidPCIDevices();
 	$arrValidUSBDevices = getValidUSBDevices();
 	$arrValidDiskDrivers = getValidDiskDrivers();
+	$arrValidKeyMaps = getValidKeyMaps();
 
 	$arrValidGPUDevices = array_filter($arrValidPCIDevices, function($arrDev) { return ($arrDev['class'] == 'vga'); });
 	$arrValidAudioDevices = array_filter($arrValidPCIDevices, function($arrDev) { return ($arrDev['class'] == 'audio'); });
@@ -57,7 +58,8 @@
 		],
 		'gpu' => [
 			[
-				'id' => 'vnc'
+				'id' => 'vnc',
+				'keymap' => 'en-us'
 			]
 		],
 		'audio' => [
@@ -568,6 +570,14 @@
 			<td>VNC Password:</td>
 			<td><input type="password" name="domain[password]" title="password for VNC" placeholder="Password for VNC (optional)" /></td>
 		</tr>
+		<tr class="advanced vnckeymap">
+			<td>VNC Keyboard:</td>
+			<td>
+				<select name="gpu[<?=$i?>][keymap]" title="keyboard for VNC">
+				<?php mk_dropdown_options($arrValidKeyMaps, $arrGPU['keymap']); ?>
+				</select>
+			</td>
+		</tr>
 		<? } ?>
 	</table>
 	<?php if ($i == 0) { ?>
@@ -580,6 +590,11 @@
 		<p class="vncpassword">
 			<b>VNC Password</b><br>
 			If you wish to require a password to connect to the VM over a VNC connection, specify one here.
+		</p>
+
+		<p class="advanced vnckeymap">
+			<b>VNC Keyboard</b><br>
+			If you wish to assign a different keyboard layout to use for a VNC connection, specify one here.
 		</p>
 
 		<p>Additional devices can be added/removed by clicking the symbols to the left.</p>
@@ -828,10 +843,13 @@ $(function() {
 		var myvalue = $(this).val();
 		var mylabel = $(this).children('option:selected').text();
 
+		$vnc_sections = $('.vncpassword,.vnckeymap');
 		if ($(".gpu option[value='vnc']:selected").length) {
-			slideDownRows($('.vncpassword'));
+			$vnc_sections.filter('.wasadvanced').removeClass('wasadvanced').addClass('advanced');
+			slideDownRows($vnc_sections.not(isVMAdvancedMode() ? '.basic' : '.advanced'));
 		} else {
-			slideUpRows($('.vncpassword'));
+			slideUpRows($vnc_sections);
+			$vnc_sections.filter('.advanced').removeClass('advanced').addClass('wasadvanced');
 		}
 
 		if (mylabel.indexOf('NVIDIA ') > -1) {
