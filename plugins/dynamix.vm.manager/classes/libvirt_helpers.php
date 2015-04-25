@@ -124,7 +124,7 @@
 			return $cacheValidPCIDevices;
 		}
 
-		$arrWhitelistGPUNames = array('VGA compatible controller');
+		$arrWhitelistGPUNames = array('VGA compatible controller', 'Video Device');
 		$arrWhitelistAudioNames = array('Audio device');
 
 		$arrValidPCIDevices = array();
