@@ -505,6 +505,7 @@
 			if ($arch == 'i686'){
 				$pae = '<pae/>';
 			}
+			$startnow = $domain['startnow'];
 
 			$loader = '';
 			if (!empty($domain['ovmf'])) {
@@ -865,7 +866,7 @@
 						$cmdargs
 					</domain>";
 
-			if (!empty($diskstr) | !empty($mediastr)) {
+			if (!empty($startnow) && !empty($diskstr) && !empty($mediastr)) {
 				$tmp = libvirt_domain_create_xml($this->conn, $xml);
 				if (!$tmp)
 					return $this->_set_last_error();
