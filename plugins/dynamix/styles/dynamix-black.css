@@ -77,12 +77,6 @@ span.select{font-family:arimo;font-size:11px;color:#A0A0A0;background:-webkit-ra
 span.select[disabled]{color:#505050;background:-webkit-radial-gradient(#303030,#101010);background:linear-gradient(#303030,#101010);cursor:default;box-shadow:0 2px 0 #202020;}
 div.sb-message{font-size:12px;padding:10px;text-align:center;}
 div.sb-message a:link,div.sb-message a:visited{color:#fff;text-decoration:underline;}
-div.split0{background:url('../images/split-info.png') 0 -825px;width:400px;height:217px;}
-div.split1{background:url('../images/split-info.png') 0 -543px;width:400px;height:282px;}
-div.split2{background:url('../images/split-info.png') -400px -460px;width:400px;height:365px;}
-div.split3{background:url('../images/split-info.png') -400px 0;width:400px;height:460px;}
-div.split4{background:url('../images/split-info.png') 0 0;width:400px;height:543px;}
-div.split9{background:url('../images/split-info.png') -400px -825px;width:400px;height:199px;}
 div.icon-file{background:url('../images/file-types.png') -112px -112px;width:16px;height:16px;}
 div.icon-ogg{background:url('../images/file-types.png') 0 0;width:16px;height:16px;}
 div.icon-php{background:url('../images/file-types.png') -16px 0;width:16px;height:16px;}
