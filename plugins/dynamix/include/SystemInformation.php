@@ -43,7 +43,7 @@ echo empty($var['SYS_MODEL']) ? 'N/A' : "{$var['SYS_MODEL']}";
 </div>
 <div><span style="width:90px;display:inline-block"><strong>System:</strong></span>
 <?
-echo exec("dmidecode -q -t 2|awk -F: '{if(/Manufacturer:/) m=$2; else if(/Product Name:/) p=$2} END{print m\" -\"p}'");
+echo exec("dmidecode -q -t 2|awk -F: '{if(/^\tManufacturer:/) m=$2; else if(/^\tProduct Name:/) p=$2} END{print m\" -\"p}'");
 ?>
 </div>
 <div><span style="width:90px;display:inline-block"><strong>Flash GUID:</strong></span>
@@ -57,7 +57,7 @@ function write($number) {
   $words = array('zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty');
   return $number<=count($words) ? $words[$number] : $number;
 }
-$cpu = explode('#',exec("dmidecode -q -t 4|awk -F: '{if(/Version:/) v=$2; else if(/Current Speed:/) s=$2} END{print v\"#\"s}'"));
+$cpu = explode('#',exec("dmidecode -q -t 4|awk -F: '{if(/^\tVersion:/) v=$2; else if(/^\tCurrent Speed:/) s=$2} END{print v\"#\"s}'"));
 $cpumodel = str_replace(array("Processor","(C)","(R)","(TM)"),array("","&#169;","&#174;","&#8482;"),$cpu[0]);
 if (strpos($cpumodel,'@')===false):
   $cpuspeed = explode(' ',$cpu[1]);
@@ -73,7 +73,7 @@ endif;
 </div>
 <div><span style="width:90px; display:inline-block"><strong>Cache:</strong></span>
 <?
-$cache = explode('#',exec("dmidecode -q -t 7|awk -F: '{if(/Socket Designation:/) c=c$2\";\"; else if(/Installed Size:/) s=s$2\";\"} END{print c\"#\"s}'"));
+$cache = explode('#',exec("dmidecode -q -t 7|awk -F: '{if(/^\tSocket Designation:/) c=c$2\";\"; else if(/^\tInstalled Size:/) s=s$2\";\"} END{print c\"#\"s}'"));
 $socket = array_map('trim',explode(';',$cache[0]));
 $volume = array_map('trim',explode(';',$cache[1]));
 $name = array();
@@ -90,7 +90,7 @@ echo $size;
 </div>
 <div><span style="width:90px; display:inline-block"><strong>Memory:</strong></span>
 <?
-echo exec("dmidecode -q -t memory|awk '{if(/Maximum Capacity:/){m=$3;u1=$4} else if(/Size:/){t+=$2;if(length($3)==2){u2=$3}}} END{print t,u2\" (max. installable capacity \"m,u1\")\"}'");
+echo exec("dmidecode -q -t memory|awk '{if(/^\tMaximum Capacity:/){m=$3;u1=$4} else if(/^\tSize:/){t+=$2;if(length($3)==2){u2=$3}}} END{print t,u2\" (max. installable capacity \"m,u1\")\"}'");
 ?>
 </div>
 <div><span style="width:90px; display:inline-block"><strong>Network:</strong></span>
