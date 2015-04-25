@@ -121,9 +121,9 @@
 					<controller type='usb' index='0' model='ich9-uhci1'/>";
 			}
 
-			// OVMF needs the bus set to virtio for cdroms
+			// OVMF needs the bus set to ide for cdroms
 			if (!empty($domain['ovmf'])) {
-				$bus = "virtio";
+				$bus = "ide";
 			}
 
 			$clock = "<clock offset='" . $domain['clock'] . "'>
@@ -284,6 +284,8 @@
 
 			$pcidevs='';
 			$gpuargs='';
+			$gpudevs=[];
+			$gpuargsdevs=[];
 			$gpuincr=0;
 			$vnc='';
 			if (!empty($gpus)) {
@@ -292,11 +294,21 @@
 						continue;
 					}
 
+					// Skip duplicate video devices
+					if (in_array($gpu['id'], $gpudevs)) {
+						continue;
+					}
+
 					if ($gpu['id'] == 'vnc') {
+						$strKeyMap = '';
+						if (!empty($gpu['keymap'])) {
+							$strKeyMap = "keymap='" . $gpu['keymap'] . "'";
+						}
+
 						$vnc = "<input type='tablet' bus='usb'/>
 								<input type='mouse' bus='ps2'/>
 								<input type='keyboard' bus='ps2'/>
-								<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0' $passwdstr>
+								<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0' $passwdstr $strKeyMap>
 									<listen type='address' address='0.0.0.0'/>
 								</graphics>";
 
@@ -333,40 +345,80 @@
 
 							case 'q35':
 								$gpuargs .= "<qemu:arg value='-device'/>
-											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=pcie.0,multifunction=on,x-vga=on'/>";
+											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=pcie.0,multifunction=on" . ((empty($gpuargs) && empty($vnc)) ? ',x-vga=on' : '') . "'/>";
+								$gpuargsdevs[$gpu['id']] = ""; // no address needed
 								break;
 
 							case 'pc':
 								$gpuargs .= "<qemu:arg value='-device'/>
-											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=root.1,addr=0{$gpuincr}.0,multifunction=on,x-vga=on'/>";
+											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=root.1,addr=0{$gpuincr}.0,multifunction=on" . ((empty($gpuargs) && empty($vnc)) ? ',x-vga=on' : '') . "'/>";
+								$gpuargsdevs[$gpu['id']] = "0{$gpuincr}.0";
 								break;
 						}
 
 					}
 
+					$gpudevs[] = $gpu['id'];
 					$gpuincr++;
 				}
 			}
 
+			$audioargs='';
+			$audiodevs=[];
 			if (!empty($audios)) {
 				foreach ($audios as $i => $audio) {
 					if (empty($audio['id'])) {
 						continue;
 					}
 
+					// Skip duplicate audio devices
+					if (in_array($audio['id'], $audiodevs)) {
+						continue;
+					}
+
 					list($audio_bus, $audio_slot, $audio_function) = explode(":", str_replace('.', ':', $audio['id']));
 
-					$pcidevs .= "<hostdev mode='subsystem' type='pci' managed='yes'>
-									<driver name='vfio'/>
-									<source>
-										<address domain='0x0000' bus='0x" . $audio_bus . "' slot='0x" . $audio_slot . "' function='0x" . $audio_function . "'/>
-									</source>
-								</hostdev>";
+					if (!empty($domain['ovmf']) || empty($gpuargsdevs)) {
+
+						$pcidevs .= "<hostdev mode='subsystem' type='pci' managed='yes'>
+										<driver name='vfio'/>
+										<source>
+											<address domain='0x0000' bus='0x" . $audio_bus . "' slot='0x" . $audio_slot . "' function='0x" . $audio_function . "'/>
+										</source>
+									</hostdev>";
+
+					} else {
+
+						// VGA BIOS passthrough uses qemu args and we have to manage the device (libvirt wont attach/detach the device driver to vfio-pci)
+						switch ($machine) {
+
+							case 'q35':
+								$audioargs .= "<qemu:arg value='-device'/>
+												<qemu:arg value='vfio-pci,host={$audio_bus}:{$audio_slot}.{$audio_function},bus=pcie.0'/>";
+								break;
+
+							case 'pc':
+								// Look for video device and see if this sound device is a function of that video card
+								$addr = '';
+								if (isset($gpuargsdevs[$audio_bus . ':' . $audio_slot . '.0'])) {
+									$addr = str_replace('.0', '.' . $audio_function, $gpuargsdevs[$audio_bus . ':' . $audio_slot . '.0']);
+								} else {
+									$addr = "0" . $gpuincr++ . ".0";
+								}
+
+								$audioargs .= "<qemu:arg value='-device'/>
+												<qemu:arg value='vfio-pci,host={$audio_bus}:{$audio_slot}.{$audio_function},bus=root.1,addr=" . $addr . "'/>";
+								break;
+						}
+
+					}
+
+					$audiodevs[] = $audio['id'];
 				}
 			}
 
 			$cmdargs='';
-			if (!empty($gpuargs)) {
+			if (!empty($gpuargs) || !empty($audioargs)) {
 				switch ($machine) {
 
 					case 'q35':
@@ -374,6 +426,7 @@
 										<qemu:arg value='-device'/>
 										<qemu:arg value='ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=2,chassis=1,id=root.1'/>
 										$gpuargs
+										$audioargs
 									</qemu:commandline>";
 						break;
 
@@ -382,6 +435,7 @@
 										<qemu:arg value='-device'/>
 										<qemu:arg value='ioh3420,bus=pci.0,addr=1c.0,multifunction=on,port=2,chassis=1,id=root.1'/>
 										$gpuargs
+										$audioargs
 									</qemu:commandline>";
 						break;
 
@@ -451,6 +505,7 @@
 			if ($arch == 'i686'){
 				$pae = '<pae/>';
 			}
+			$startnow = $domain['startnow'];
 
 			$loader = '';
 			if (!empty($domain['ovmf'])) {
@@ -493,9 +548,9 @@
 						<controller type='usb' index='0' model='ich9-uhci1'/>";
 			}
 
-			// OVMF needs the bus set to virtio for cdroms
+			// OVMF needs the bus set to ide for cdroms
 			if (!empty($domain['ovmf'])) {
-				$bus = "virtio";
+				$bus = "ide";
 			}
 
 			$clock =	"<clock offset='" . $domain['clock'] . "'>
@@ -663,6 +718,8 @@
 
 			$pcidevs='';
 			$gpuargs='';
+			$gpudevs=[];
+			$gpuargsdevs=[];
 			$gpuincr=0;
 			$vnc='';
 			if (!empty($gpus)) {
@@ -671,11 +728,21 @@
 						continue;
 					}
 
+					// Skip duplicate video devices
+					if (in_array($gpu['id'], $gpudevs)) {
+						continue;
+					}
+
 					if ($gpu['id'] == 'vnc') {
+						$strKeyMap = '';
+						if (!empty($gpu['keymap'])) {
+							$strKeyMap = "keymap='" . $gpu['keymap'] . "'";
+						}
+
 						$vnc = "<input type='tablet' bus='usb'/>
 								<input type='mouse' bus='ps2'/>
 								<input type='keyboard' bus='ps2'/>
-								<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0' $passwdstr>
+								<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0' $passwdstr $strKeyMap>
 									<listen type='address' address='0.0.0.0'/>
 								</graphics>";
 
@@ -712,40 +779,80 @@
 
 							case 'q35':
 								$gpuargs .= "<qemu:arg value='-device'/>
-											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=pcie.0,multifunction=on,x-vga=on'/>";
+											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=pcie.0,multifunction=on" . ((empty($gpuargs) && empty($vnc)) ? ',x-vga=on' : '') . "'/>";
+								$gpuargsdevs[$gpu['id']] = ""; // no address needed
 								break;
 
 							case 'pc':
 								$gpuargs .= "<qemu:arg value='-device'/>
-											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=root.1,addr=0{$gpuincr}.0,multifunction=on,x-vga=on'/>";
+											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=root.1,addr=0{$gpuincr}.0,multifunction=on" . ((empty($gpuargs) && empty($vnc)) ? ',x-vga=on' : '') . "'/>";
+								$gpuargsdevs[$gpu['id']] = "0{$gpuincr}.0";
 								break;
 						}
 
 					}
 
+					$gpudevs[] = $gpu['id'];
 					$gpuincr++;
 				}
 			}
 
+			$audioargs='';
+			$audiodevs=[];
 			if (!empty($audios)) {
 				foreach ($audios as $i => $audio) {
 					if (empty($audio['id'])) {
 						continue;
 					}
 
+					// Skip duplicate audio devices
+					if (in_array($audio['id'], $audiodevs)) {
+						continue;
+					}
+
 					list($audio_bus, $audio_slot, $audio_function) = explode(":", str_replace('.', ':', $audio['id']));
 
-					$pcidevs .= "<hostdev mode='subsystem' type='pci' managed='yes'>
-									<driver name='vfio'/>
-									<source>
-										<address domain='0x0000' bus='0x" . $audio_bus . "' slot='0x" . $audio_slot . "' function='0x" . $audio_function . "'/>
-									</source>
-								</hostdev>";
+					if (!empty($domain['ovmf']) || empty($gpuargsdevs)) {
+
+						$pcidevs .= "<hostdev mode='subsystem' type='pci' managed='yes'>
+										<driver name='vfio'/>
+										<source>
+											<address domain='0x0000' bus='0x" . $audio_bus . "' slot='0x" . $audio_slot . "' function='0x" . $audio_function . "'/>
+										</source>
+									</hostdev>";
+
+					} else {
+
+						// VGA BIOS passthrough uses qemu args and we have to manage the device (libvirt wont attach/detach the device driver to vfio-pci)
+						switch ($machine) {
+
+							case 'q35':
+								$audioargs .= "<qemu:arg value='-device'/>
+												<qemu:arg value='vfio-pci,host={$audio_bus}:{$audio_slot}.{$audio_function},bus=pcie.0'/>";
+								break;
+
+							case 'pc':
+								// Look for video device and see if this sound device is a function of that video card
+								$addr = '';
+								if (isset($gpuargsdevs[$audio_bus . ':' . $audio_slot . '.0'])) {
+									$addr = str_replace('.0', '.' . $audio_function, $gpuargsdevs[$audio_bus . ':' . $audio_slot . '.0']);
+								} else {
+									$addr = "0" . $gpuincr++ . ".0";
+								}
+
+								$audioargs .= "<qemu:arg value='-device'/>
+												<qemu:arg value='vfio-pci,host={$audio_bus}:{$audio_slot}.{$audio_function},bus=root.1,addr=" . $addr . "'/>";
+								break;
+						}
+
+					}
+
+					$audiodevs[] = $audio['id'];
 				}
 			}
 
 			$cmdargs='';
-			if (!empty($gpuargs)) {
+			if (!empty($gpuargs) || !empty($audioargs)) {
 				switch ($machine) {
 
 					case 'q35':
@@ -753,6 +860,7 @@
 										<qemu:arg value='-device'/>
 										<qemu:arg value='ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=2,chassis=1,id=root.1'/>
 										$gpuargs
+										$audioargs
 									</qemu:commandline>";
 						break;
 
@@ -761,6 +869,7 @@
 										<qemu:arg value='-device'/>
 										<qemu:arg value='ioh3420,bus=pci.0,addr=1c.0,multifunction=on,port=2,chassis=1,id=root.1'/>
 										$gpuargs
+										$audioargs
 									</qemu:commandline>";
 						break;
 
@@ -811,7 +920,7 @@
 						$cmdargs
 					</domain>";
 
-			if (!empty($diskstr) | !empty($mediastr)) {
+			if (!empty($startnow) && !empty($diskstr) && !empty($mediastr)) {
 				$tmp = libvirt_domain_create_xml($this->conn, $xml);
 				if (!$tmp)
 					return $this->_set_last_error();
@@ -1663,6 +1772,17 @@
 			return $var;
 		}
 
+		function domain_get_vnc_keymap($domain) {
+			$tmp = $this->get_xpath($domain, '//domain/devices/graphics/@keymap', false);
+			if (!$tmp)
+				return 'en-us';
+
+			$var = $tmp[0];
+			unset($tmp);
+
+			return $var;
+		}
+
 		function domain_get_ws_port($domain) {
 			$tmp = $this->get_xpath($domain, '//domain/devices/graphics/@websocket', false);
 			$var = (int)$tmp[0];
@@ -1672,8 +1792,6 @@
 		}
 
 		function domain_get_arch($domain) {
-			$domain = $this->get_domain_object($domain);
-
 			$tmp = $this->get_xpath($domain, '//domain/os/type/@arch', false);
 			$var = $tmp[0];
 			unset($tmp);
@@ -1682,8 +1800,6 @@
 		}
 
 		function domain_get_machine($domain) {
-			$domain = $this->get_domain_object($domain);
-
 			$tmp = $this->get_xpath($domain, '//domain/os/type/@machine', false);
 			$var = $tmp[0];
 			unset($tmp);
@@ -1805,8 +1921,6 @@
 		}
 
 		function domain_get_ovmf($domain) {
-			$domain = $this->get_domain_object($domain);
-
 			return $this->_get_single_xpath_result($domain, '//domain/os/loader');
 		}
 

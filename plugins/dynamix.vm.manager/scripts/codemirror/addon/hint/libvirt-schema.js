@@ -212,7 +212,10 @@ function getLibvirtSchema() {
 			port: ["-1"],
 			autoport: ["yes", "no"],
 			websocket: ["-1"],
-			listen: ["0.0.0.0"]
+			listen: ["0.0.0.0"],
+			keymap: ["en-us", "en-gb", "ar", "hr", "cz", "da", "nl", "nl-be", "es", "et", "fo",
+					"fi", "fr", "bepo", "fr-be", "fr-ca", "fr-ch", "de-ch", "hu", "is", "it",
+					"ja", "lv", "lt", "mk", "no", "pl", "pt-br", "ru", "sl", "sv", "th", "tr"]
 		}
 	};
 
