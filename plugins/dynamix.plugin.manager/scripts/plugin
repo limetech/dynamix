@@ -344,6 +344,7 @@ if ($method == "checkall") {
     if ($installed_plugin_file === false) continue;
     if (plugin("pluginURL", $installed_plugin_file, $error) === false) continue;
     $plugin = basename($installed_plugin_file);
+    echo "plugin: checking $plugin ...\n";
     exec("/usr/local/sbin/plugin check $plugin", $output, $retval);
   }
   exit(0);
@@ -444,7 +445,7 @@ if ($method == "install") {
 // only .plg files should have a remove method
 //
 if ($method == "remove") {
-  echo "plugin: removing: $argv[2]\n";
+  echo "plugin: removing: {$argv[2]}\n";
   $plugin = $argv[2];
   $installed_plugin_file = @readlink("/var/log/plugins/$plugin");
   if ($installed_plugin_file !== false) {
@@ -468,7 +469,7 @@ if ($method == "remove") {
 // directory.
 //
 if ($method == "check") {
-  echo "plugin: checking: $argv[2]\n";
+  echo "plugin: checking: {$argv[2]}\n";
   $plugin = $argv[2];
   $installed_plugin_file = @readlink("/var/log/plugins/$plugin");
   if ($installed_plugin_file === false) {
@@ -504,7 +505,7 @@ if ($method == "check") {
 // Finally we mark the new.plg "installed".
 //
 if ($method == "update") {
-  echo "plugin: updating: $argv[2]\n";
+  echo "plugin: updating: {$argv[2]}\n";
   $plugin = $argv[2];
   $installed_plugin_file = @readlink("/var/log/plugins/$plugin");
   if ($installed_plugin_file === false) {

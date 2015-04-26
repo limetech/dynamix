@@ -113,7 +113,7 @@ case 'cpu':
   echo implode('#',$speeds);
 break;
 case 'fan':
-  exec("sensors -uA|awk '/fan[0-9]_input/{print $2+0\" RPM\"}'",$rpms);
+  exec("sensors -uA 2>/dev/null|awk '/fan[0-9]_input/{print $2+0\" RPM\"}'",$rpms);
   echo implode('#',$rpms);
 break;
 case 'port':
