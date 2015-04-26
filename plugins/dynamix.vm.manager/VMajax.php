@@ -16,6 +16,15 @@ require_once('/usr/local/emhttp/plugins/dynamix/include/Helpers.php');
 require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt.php');
 require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt_helpers.php');
 
+$arrSizePrefix = [
+	0 => '',
+	1 => 'K',
+	2 => 'M',
+	3 => 'G',
+	4 => 'T',
+	5 => 'P'
+];
+
 $_REQUEST = array_merge($_GET, $_POST);
 
 $action = array_key_exists('action', $_REQUEST) ? $_REQUEST['action'] : '';
@@ -222,6 +231,18 @@ switch ($action) {
 		if (is_file($file)) {
 			$json_info = json_decode(shell_exec("qemu-img info --output json " . escapeshellarg($file)), true);
 			if (!empty($json_info)) {
+				$intDisplaySize = (int)$json_info['virtual-size'];
+				$intShifts = 0;
+				while (!empty($intDisplaySize) &&
+						(floor($intDisplaySize) == $intDisplaySize) &&
+						isset($arrSizePrefix[$intShifts])) {
+
+					$arrResponse['display-size'] = $intDisplaySize . $arrSizePrefix[$intShifts];
+
+					$intDisplaySize /= 1024;
+					$intShifts++;
+				}
+
 				$arrResponse['virtual-size'] = $json_info['virtual-size'];
 				$arrResponse['actual-size'] = $json_info['actual-size'];
 				$arrResponse['format'] = $json_info['format'];

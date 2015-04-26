@@ -53,7 +53,7 @@
 				'new' => '',
 				'size' => '',
 				'driver' => 'raw',
-				'dev' => 'hdc'
+				'dev' => 'hda'
 			]
 		],
 		'gpu' => [
@@ -98,7 +98,7 @@
 		file_put_contents('/tmp/debug_libvirt_postparams.txt', print_r($_POST, true));
 		file_put_contents('/tmp/debug_libvirt_newxml.xml', $lv->config_to_xml($_POST));
 
-		$tmp = $lv->domain_new($_POST['domain'], $_POST['media'], $_POST['nic'], $_POST['disk'], $_POST['usb'], $_POST['shares'], $_POST['gpu'], $_POST['audio']);
+		$tmp = $lv->domain_new($_POST);
 		if (!$tmp){
 			$arrResponse = ['error' => $lv->get_last_error()];
 		} else {
@@ -140,7 +140,7 @@
 		$lv->domain_undefine($res);
 
 		// Save new domain
-		$tmp = $lv->domain_define($lv->config_to_xml($_POST));
+		$tmp = $lv->domain_new($_POST);
 		if (!$tmp){
 			$strLastError = $lv->get_last_error();
 
@@ -808,36 +808,28 @@ $(function() {
 		}
 	});
 
-	$("#form_content").on("change", ".disk", function changeDiskEvent() {
+	$("#form_content").on("change keyup", ".disk", function changeDiskEvent() {
 		var $input = $(this);
 		var config = $input.data();
 
 		if (config.hasOwnProperty('pickfilter')) {
-			var isFile = false;
-
-			//TODO - check server-side if file really exists or not
-			$.each(config.pickfilter.split(","), function(index, item) {
-				if ($input.val().substr((item.length+1) * -1) == "."+item) {
-					isFile = true;
-					return true;
-				}
-			});
-
 			var $other_sections = $input.closest('table').find('.disk_file_options');
 
-			if (isFile) {
-				slideUpRows($other_sections);
+			$.get("/plugins/dynamix.vm.manager/VMajax.php?action=file-info&file=" + encodeURIComponent($input.val()), function( info ) {
+				if (info.isfile) {
+					slideUpRows($other_sections);
 
-				$other_sections.filter('.advanced').removeClass('advanced').addClass('wasadvanced');
+					$other_sections.filter('.advanced').removeClass('advanced').addClass('wasadvanced');
 
-				$input.attr('name', $input.attr('name').replace('new', 'image'));
-			} else {
-				$other_sections.filter('.wasadvanced').removeClass('wasadvanced').addClass('advanced');
+					$input.attr('name', $input.attr('name').replace('new', 'image'));
+				} else {
+					$other_sections.filter('.wasadvanced').removeClass('wasadvanced').addClass('advanced');
 
-				slideDownRows($other_sections.not(isVMAdvancedMode() ? '.basic' : '.advanced'));
+					slideDownRows($other_sections.not(isVMAdvancedMode() ? '.basic' : '.advanced'));
 
-				$input.attr('name', $input.attr('name').replace('image', 'new'));
-			}
+					$input.attr('name', $input.attr('name').replace('image', 'new'));
+				}
+			}, "json");
 		}
 	});
 
