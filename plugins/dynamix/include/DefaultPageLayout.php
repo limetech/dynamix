@@ -102,6 +102,7 @@ function done() {
 }
 function chkDelete(form, button) {
   button.value = form.confirmDelete.checked ? 'Delete' : 'Apply';
+  button.disabled = false;
 }
 function openBox(cmd,title,height,width,load) {
   // open shadowbox window (run in foreground)
