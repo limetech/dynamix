@@ -53,6 +53,147 @@
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
+		function set_folder_nodatacow($folder) {
+			if (!is_dir($folder)) {
+				return false;
+			}
+
+			// determine the actual disk if user share is being used
+			if (strpos($folder, '/mnt/user/') === 0) {
+				$tmp = parse_ini_string(shell_exec("getfattr -n user.LOCATION " . escapeshellarg($folder) . " | grep user.LOCATION"));
+				$folder = str_replace('/mnt/user', '/mnt/' . $tmp['user.LOCATION'], $folder);  // replace 'user' with say 'cache' or 'disk1' etc
+			}
+
+			@shell_exec("chattr +C -R " . escapeshellarg($folder) . " >/dev/null");
+
+			return true;
+		}
+
+		function create_disk_image($disk, $vmname = '', $diskid = 1) {
+			$arrReturn = [];
+
+			if (!empty($disk['size'])) {
+				$disk['size'] = str_replace(array("KB","MB","GB","TB","PB"), array("K","M","G","T","P"), strtoupper($disk['size']));
+			}
+			if (empty($disk['driver'])) {
+				$disk['driver'] = 'raw';
+			}
+
+			// if new is a folder then
+			//   if existing then
+			//     create folder 'new/vmname'
+			//     create image file as new/vmname/vdisk[1-x].xxx
+			//   if doesn't exist then
+			//     create folder 'new'
+			//     create image file as new/vdisk[1-x].xxx
+
+			// if new is a file then
+			//   if existing then
+			//     nothing to do
+			//   if doesn't exist then
+			//     create folder dirname('new') if needed
+			//     create image file as new --> if size is specified
+
+			if (!empty($disk['new']) && is_file($disk['new'])) {
+				$disk['image'] = $disk['new'];
+			}
+
+			if (!empty($disk['image'])) {
+				// Use existing disk image
+				if (is_file($disk['image'])) {
+					$json_info = json_decode(shell_exec("qemu-img info --output json " . escapeshellarg($disk['image'])), true);
+					$disk['driver'] = $json_info['format'];
+
+					if (!empty($disk['size'])) {
+						//TODO: expand disk image if size param is larger
+					}
+
+					return $disk;
+				}
+
+				$disk['new'] = $disk['image'];
+			}
+
+			if (!empty($disk['new']) && !empty($disk['size'])) {
+				// Create new disk image
+				$strImgFolder = $disk['new'];
+				$strImgPath = '';
+
+				$path_parts = pathinfo($strImgFolder);
+				if (empty($path_parts['extension'])) {
+					// 'new' is a folder
+
+					if (substr($strImgFolder, -1) != '/') {
+						$strImgFolder .= '/';
+					}
+
+					if (is_dir($strImgFolder)) {
+						// 'new' is a folder and already exists, append vmname folder
+						$strImgFolder .= preg_replace('((^\.)|\/|(\.$))', '_', $vmname) . '/';
+					}
+
+					// create folder if needed
+					if (!is_dir($strImgFolder)) {
+						mkdir($strImgFolder);
+					}
+
+					$this->set_folder_nodatacow($strImgFolder);
+
+					$strExt = ($disk['driver'] == 'raw') ? 'img' : $disk['driver'];
+
+					$strImgPath = $strImgFolder . 'vdisk' . $diskid . '.' . $strExt;
+
+				} else {
+					// 'new' is a file
+
+					// create parent folder if needed
+					if (!is_dir($path_parts['dirname'])) {
+						mkdir($path_parts['dirname']);
+					}
+
+					$this->set_folder_nodatacow($path_parts['dirname']);
+
+					$strImgPath = $strImgFolder;
+				}
+
+
+				if (is_file($strImgPath)) {
+					$json_info = json_decode(shell_exec("qemu-img info --output json " . escapeshellarg($strImgPath)), true);
+					$disk['driver'] = $json_info['format'];
+					$return_value = 0;
+				} else {
+					$strLastLine = exec("qemu-img create -q -f " . escapeshellarg($disk['driver']) . " " . escapeshellarg($strImgPath) . " " . escapeshellarg($disk['size']), $output, $return_value);
+				}
+
+				if ($return_value != 0) {
+
+					// ERROR during image creation, return message to user
+					$arrReturn = [
+						'error' => "Error creating disk image '" . $strImgPath . "': " . $strLastLine,
+						'error_output' => $output
+					];
+
+				} else {
+
+					// Success!
+					$arrReturn = [
+						'image' => $strImgPath,
+						'driver' => $disk['driver']
+					];
+					if (!empty($disk['dev'])) {
+						$arrReturn['dev'] = $disk['dev'];
+					}
+					if (!empty($disk['bus'])) {
+						$arrReturn['bus'] = $disk['bus'];
+					}
+
+				}
+			}
+
+			return $arrReturn;
+		}
+
+
 		function config_to_xml($config) {
 			$domain = $config['domain'];
 			$media = $config['media'];
@@ -118,7 +259,7 @@
 			if ($machine == 'q35'){
 				$bus = "sata";
 				$ctrl = "<controller type='usb' index='0' model='ich9-ehci1'/>
-					<controller type='usb' index='0' model='ich9-uhci1'/>";
+						<controller type='usb' index='0' model='ich9-uhci1'/>";
 			}
 
 			// OVMF needs the bus set to ide for cdroms
@@ -199,31 +340,70 @@
 						//TODO: check if image/new is a block device
 						$diskcount++;
 
-						if (!empty($disk['image'])) {
-							$img = $disk['image'];
-							$json_info = json_decode(shell_exec("qemu-img info --output json " . escapeshellarg($img)), true);
-							$driver = $json_info['format'];
-						} else {
-							$img = $disk['new'].$name."/";
-							//if (!is_dir($img))
-							//	mkdir($img);
-
-							//@shell_exec("chattr +C -R ".escapeshellarg($img));
-
-							//$cfg = $img.$name.".cfg";
-							//if (!file_exists($cfg)){
-							//	file_put_contents($cfg, 'AUTOSTART="no"' . "\n");
-							//}
-							$driver = $disk['driver'];
-							$ext = ($driver == 'raw') ? 'img' : $driver;
-							$img .= 'vdisk'.$diskcount.'.'.$ext;
-							//$size = str_replace(array("KB","MB","GB","TB","PB"), array("K","M","G","T","P"), strtoupper($disk['size']));
-							//shell_exec("qemu-img create -q -f $driver " . escapeshellarg($img) . " $size");
+						if (!empty($disk['new']) && is_file($disk['new'])) {
+							$disk['image'] = $disk['new'];
 						}
 
-						$diskbus = 'virtio';
-						if (!empty($disk['bus'])) {
-							$diskbus = $disk['bus'];
+						if (!empty($disk['image'])) {
+							if (empty($disk['driver'])) {
+								$disk['driver'] = 'raw';
+
+								if (is_file($disk['image'])) {
+									$json_info = json_decode(shell_exec("qemu-img info --output json " . escapeshellarg($disk['image'])), true);
+									$disk['driver'] = $json_info['format'];
+								}
+							}
+						} else {
+							if (empty($disk['driver'])) {
+								$disk['driver'] = 'raw';
+							}
+
+							$strImgFolder = $disk['new'];
+							$strImgPath = '';
+
+							$path_parts = pathinfo($strImgFolder);
+							if (empty($path_parts['extension'])) {
+								// 'new' is a folder
+
+								if (substr($strImgFolder, -1) != '/') {
+									$strImgFolder .= '/';
+								}
+
+								if (is_dir($strImgFolder)) {
+									// 'new' is a folder and already exists, append domain name as child folder
+									$strImgFolder .= preg_replace('((^\.)|\/|(\.$))', '_', $domain['name']) . '/';
+								}
+
+								$strExt = ($disk['driver'] == 'raw') ? 'img' : $disk['driver'];
+
+								$strImgPath = $strImgFolder . 'vdisk' . $diskcount . '.' . $strExt;
+
+							} else {
+								// 'new' is a file
+								$strImgPath = $strImgFolder;
+							}
+
+							if (is_file($strImgPath)) {
+								$json_info = json_decode(shell_exec("qemu-img info --output json " . escapeshellarg($strImgPath)), true);
+								$disk['driver'] = $json_info['format'];
+							}
+
+							$arrReturn = [
+								'image' => $strImgPath,
+								'driver' => $disk['driver']
+							];
+							if (!empty($disk['dev'])) {
+								$arrReturn['dev'] = $disk['dev'];
+							}
+							if (!empty($disk['bus'])) {
+								$arrReturn['bus'] = $disk['bus'];
+							}
+
+							$disk = $arrReturn;
+						}
+
+						if (empty($disk['bus'])) {
+							$disk['bus'] = 'virtio';
 						}
 
 						if (empty($disk['dev'])) {
@@ -239,9 +419,9 @@
 						}
 
 						$diskstr .= "<disk type='file' device='disk'>
-										<driver name='qemu' type='$driver' cache='none' io='native'/>
-										<source file='$img'/>
-										<target bus='$diskbus' dev='{$disk['dev']}' />
+										<driver name='qemu' type='{$disk['driver']}' cache='none' io='native'/>
+										<source file='{$disk['image']}'/>
+										<target bus='{$disk['bus']}' dev='{$disk['dev']}'/>
 										$bootorder
 									</disk>";
 					}
@@ -489,454 +669,50 @@
 
 		}
 
-		function domain_new($domain, $media, $nics, $disks, $usb, $shares, $gpus, $audios) {
-			$type = $domain['type'];
-			$name = $domain['name'];
-			$mem = $domain['mem'];
-			$maxmem = $mem;
-			if (!empty($domain['maxmem'])) {
-				$maxmem = $domain['maxmem'];
-			}
-			$uuid = $this->domain_generate_uuid();
-			$machine = $domain['machine'];
-			$emulator = $this->get_default_emulator();
-			$arch = $domain['arch'];
-			$pae = '';
-			if ($arch == 'i686'){
-				$pae = '<pae/>';
-			}
-			$startnow = $domain['startnow'];
+		function domain_new($config) {
 
-			$loader = '';
-			if (!empty($domain['ovmf'])) {
-				$loader = "<loader type='pflash'>/usr/share/qemu/ovmf-x64/OVMF-pure-efi.fd</loader>";
-			}
-
-			$vcpus = 1;
-			$vcpupinstr = '';
-
-			if (!empty($domain['vcpu']) && is_array($domain['vcpu'])) {
-				$vcpus = count($domain['vcpu']);
-				foreach($domain['vcpu'] as $i => $vcpu) {
-					$vcpupinstr .= "<vcpupin vcpu='$i' cpuset='$vcpu'/>";
-				}
-			} else if (!empty($domain['vcpus'])) {
-				$vcpus = $domain['vcpus'];
-				for ($i=0; $i < $vcpus; $i++) {
-					$vcpupinstr .= "<vcpupin vcpu='$i' cpuset='$i'/>";
-				}
-			}
-
-			$cpumode = '';
-			if (!empty($domain['cpumode']) && $domain['cpumode'] == 'host-passthrough') {
-				$cpumode .= "mode='host-passthrough'";
-			}
-
-			$cpustr = "<cpu $cpumode>
-							<topology sockets='1' cores='{$vcpus}' threads='1'/>
-						</cpu>
-						<vcpu placement='static'>{$vcpus}</vcpu>
-						<cputune>
-							$vcpupinstr
-						</cputune>";
-
-			$bus = "ide";
-			$ctrl = '';
-			if ($machine == 'q35'){
-				$bus = "sata";
-				$ctrl = "<controller type='usb' index='0' model='ich9-ehci1'/>
-						<controller type='usb' index='0' model='ich9-uhci1'/>";
-			}
-
-			// OVMF needs the bus set to ide for cdroms
-			if (!empty($domain['ovmf'])) {
-				$bus = "ide";
-			}
-
-			$clock =	"<clock offset='" . $domain['clock'] . "'>
-							<timer name='rtc' tickpolicy='catchup'/>
-							<timer name='pit' tickpolicy='delay'/>
-							<timer name='hpet' present='no'/>
-						</clock>";
-
-			$hyperv = '';
-			if (!empty($domain['os']) && $domain['os'] == "windows") {
-				if ($domain['hyperv']){
-					$hyperv = "<hyperv>
-									<relaxed state='on'/>
-									<vapic state='on'/>
-									<spinlocks state='on' retries='8191'/>
-								</hyperv>";
-				}
-				$clock = "<clock offset='" . $domain['clock'] . "'>
-							<timer name='hypervclock' present='yes'/>
-							<timer name='hpet' present='no'/>
-						</clock>";
-			}
-
-			$usbstr = '';
-			if (!empty($usb)) {
-				foreach($usb as $i => $v){
-					$usbx = explode(':', $v);
-					$usbstr .= "<hostdev mode='subsystem' type='usb' managed='yes'>
-									<source>
-										<vendor id='0x".$usbx[0]."'/>
-										<product id='0x".$usbx[1]."'/>
-									</source>
-								</hostdev>";
-				}
-			}
-
-			$arrAvailableDevs = [];
-			foreach (range('a', 'z') as $letter) {
-				$arrAvailableDevs['hd' . $letter] = 'hd' . $letter;
-			}
-			$arrUsedBootOrders = [];
-
-			//media settings
-			$mediastr = '';
-			if (!empty($media['cdrom'])) {
-				unset($arrAvailableDevs['hda']);
-				$arrUsedBootOrders[] = 2;
-				$mediastr = "<disk type='file' device='cdrom'>
-								<driver name='qemu'/>
-								<source file='{$media['cdrom']}'/>
-								<target dev='hda' bus='$bus'/>
-								<readonly/>
-								<boot order='2'/>
-							</disk>";
-			}
-
-			$driverstr = '';
-			if (!empty($media['drivers']) && $domain['os'] == "windows") {
-				unset($arrAvailableDevs['hdb']);
-				$driverstr = "<disk type='file' device='cdrom'>
-								<driver name='qemu'/>
-								<source file='{$media['drivers']}'/>
-								<target dev='hdb' bus='$bus'/>
-								<readonly/>
-							</disk>";
-			}
-
-			//disk settings
-			$diskstr = '';
+			// attempt to create all disk images if needed
 			$diskcount = 0;
-			if (!empty($disks)) {
-				foreach ($disks as $i => $disk) {
+			if (!empty($config['disk'])) {
+				foreach ($config['disk'] as $i => $disk) {
 					if (!empty($disk['image']) | !empty($disk['new']) ) {
-						//TODO: check if image/new is a block device
 						$diskcount++;
 
-						if (!empty($disk['image'])) {
-							$img = $disk['image'];
-							$json_info = json_decode(shell_exec("qemu-img info --output json " . escapeshellarg($img)), true);
-							$driver = $json_info['format'];
-						} else {
-							$img = $disk['new'].$name."/";
-							if (!is_dir($img))
-								mkdir($img);
+						$disk = $this->create_disk_image($disk, $config['domain']['name'], $diskcount);
 
-							// determine the actual disk if user share is being used
-							if (strpos($img, '/mnt/user/') === 0) {
-								$tmp = parse_ini_string(shell_exec("getfattr -n user.LOCATION " . escapeshellarg($img) . " | grep user.LOCATION"));
-								$img = str_replace('/mnt/user', '/mnt/' . $tmp['user.LOCATION'], $img);  // replace 'user' with say 'cache' or 'disk1' etc
-							}
-
-							@shell_exec("chattr +C -R " . escapeshellarg($img) . " >/dev/null");
-
-							$cfg = $img.$name.".cfg";
-							if (!file_exists($cfg)){
-								file_put_contents($cfg, 'AUTOSTART="no"' . "\n");
-							}
-							$driver = $disk['driver'];
-							$ext = ($driver == 'raw') ? 'img' : $driver;
-							$img .= 'vdisk'.$diskcount.'.'.$ext;
-							$size = str_replace(array("KB","MB","GB","TB","PB"), array("K","M","G","T","P"), strtoupper($disk['size']));
-							shell_exec("qemu-img create -q -f " . escapeshellarg($driver) . " " . escapeshellarg($img) . " " . escapeshellarg($size));
+						if (!empty($disk['error'])) {
+							$this->last_error = $disk['error'];
+							return false;
 						}
 
-						$diskbus = 'virtio';
-						if (!empty($disk['bus'])) {
-							$diskbus = $disk['bus'];
-						}
-
-						if (empty($disk['dev'])) {
-							$disk['dev'] = array_shift($arrAvailableDevs);
-						} else if (in_array($disk['dev'], $arrAvailableDevs)) {
-							unset($arrAvailableDevs[$disk['dev']]);
-						}
-
-						$bootorder = '';
-						if (!in_array(1, $arrUsedBootOrders)) {
-							$bootorder = "<boot order='1'/>";
-							$arrUsedBootOrders[] = 1;
-						}
-
-						$diskstr .= "<disk type='file' device='disk'>
-										<driver name='qemu' type='$driver' cache='none' io='native'/>
-										<source file='$img'/>
-										<target bus='$diskbus' dev='{$disk['dev']}' />
-										$bootorder
-									</disk>";
+						$config['disk'][$i] = $disk;
 					}
 				}
 			}
 
-			$netstr = '';
-			if (!empty($nics)) {
-				foreach ($nics as $i => $nic) {
-					if (empty($nic['mac']) || empty($nic['network'])) {
-						continue;
-					}
+			// generate xml for this domain
+			$strXML = $this->config_to_xml($config);
 
-					$netstr .= "<interface type='bridge'>
-									<mac address='{$nic['mac']}'/>
-									<source bridge='{$nic['network']}'/>
-									<model type='virtio'/>
-								</interface>";
-				}
-			}
 
-			$sharestr = '';
-			if (!empty($shares) && $domain['os'] != "windows") {
-				foreach ($shares as $i => $share) {
-					if (empty($share['source']) || empty($share['target'])) {
-						continue;
-					}
-
-					$sharestr .= "<filesystem type='mount' accessmode='passthrough'>
-									<source dir='".$share['source']."'/>
-									<target dir='".$share['target']."'/>
-								</filesystem>";
-				}
-			}
-
-			$passwdstr = '';
-			if (!empty($domain['password'])){
-				$passwdstr = "passwd='" . $domain['password'] . "'";
-			}
-
-			$pcidevs='';
-			$gpuargs='';
-			$gpudevs=[];
-			$gpuargsdevs=[];
-			$gpuincr=0;
-			$vnc='';
-			if (!empty($gpus)) {
-				foreach ($gpus as $i => $gpu) {
-					if (empty($gpu['id'])) {
-						continue;
-					}
-
-					// Skip duplicate video devices
-					if (in_array($gpu['id'], $gpudevs)) {
-						continue;
-					}
-
-					if ($gpu['id'] == 'vnc') {
-						$strKeyMap = '';
-						if (!empty($gpu['keymap'])) {
-							$strKeyMap = "keymap='" . $gpu['keymap'] . "'";
-						}
-
-						$vnc = "<input type='tablet' bus='usb'/>
-								<input type='mouse' bus='ps2'/>
-								<input type='keyboard' bus='ps2'/>
-								<graphics type='vnc' port='-1' autoport='yes' websocket='-1' listen='0.0.0.0' $passwdstr $strKeyMap>
-									<listen type='address' address='0.0.0.0'/>
-								</graphics>";
-
-						if (!empty($domain['ovmf'])) {
-							// OVMF doesn't work with vmvga
-							$vnc .= "<video>
-										<model type='cirrus'/>
-									</video>";
-						} else {
-							// SeaBIOS is cool with vmvga
-							$vnc .= "<video>
-										<model type='vmvga'/>
-									</video>";
-						}
-						continue;
-					}
-
-					list($gpu_bus, $gpu_slot, $gpu_function) = explode(":", str_replace('.', ':', $gpu['id']));
-
-					if (!empty($domain['ovmf'])) {
-
-						// OVMF passthrough uses the normal hostdev and libvirt can fully manage the device
-						$pcidevs .= "<hostdev mode='subsystem' type='pci' managed='yes'>
-										<driver name='vfio'/>
-										<source>
-											<address domain='0x0000' bus='0x" . $gpu_bus . "' slot='0x" . $gpu_slot . "' function='0x" . $gpu_function . "'/>
-										</source>
-									</hostdev>";
-
-					} else {
-
-						// VGA BIOS passthrough uses qemu args and we have to manage the device (libvirt wont attach/detach the device driver to vfio-pci)
-						switch ($machine) {
-
-							case 'q35':
-								$gpuargs .= "<qemu:arg value='-device'/>
-											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=pcie.0,multifunction=on" . ((empty($gpuargs) && empty($vnc)) ? ',x-vga=on' : '') . "'/>";
-								$gpuargsdevs[$gpu['id']] = ""; // no address needed
-								break;
-
-							case 'pc':
-								$gpuargs .= "<qemu:arg value='-device'/>
-											<qemu:arg value='vfio-pci,host={$gpu_bus}:{$gpu_slot}.{$gpu_function},bus=root.1,addr=0{$gpuincr}.0,multifunction=on" . ((empty($gpuargs) && empty($vnc)) ? ',x-vga=on' : '') . "'/>";
-								$gpuargsdevs[$gpu['id']] = "0{$gpuincr}.0";
-								break;
-						}
-
-					}
-
-					$gpudevs[] = $gpu['id'];
-					$gpuincr++;
-				}
-			}
-
-			$audioargs='';
-			$audiodevs=[];
-			if (!empty($audios)) {
-				foreach ($audios as $i => $audio) {
-					if (empty($audio['id'])) {
-						continue;
-					}
-
-					// Skip duplicate audio devices
-					if (in_array($audio['id'], $audiodevs)) {
-						continue;
-					}
-
-					list($audio_bus, $audio_slot, $audio_function) = explode(":", str_replace('.', ':', $audio['id']));
-
-					if (!empty($domain['ovmf']) || empty($gpuargsdevs)) {
-
-						$pcidevs .= "<hostdev mode='subsystem' type='pci' managed='yes'>
-										<driver name='vfio'/>
-										<source>
-											<address domain='0x0000' bus='0x" . $audio_bus . "' slot='0x" . $audio_slot . "' function='0x" . $audio_function . "'/>
-										</source>
-									</hostdev>";
-
-					} else {
-
-						// VGA BIOS passthrough uses qemu args and we have to manage the device (libvirt wont attach/detach the device driver to vfio-pci)
-						switch ($machine) {
-
-							case 'q35':
-								$audioargs .= "<qemu:arg value='-device'/>
-												<qemu:arg value='vfio-pci,host={$audio_bus}:{$audio_slot}.{$audio_function},bus=pcie.0'/>";
-								break;
-
-							case 'pc':
-								// Look for video device and see if this sound device is a function of that video card
-								$addr = '';
-								if (isset($gpuargsdevs[$audio_bus . ':' . $audio_slot . '.0'])) {
-									$addr = str_replace('.0', '.' . $audio_function, $gpuargsdevs[$audio_bus . ':' . $audio_slot . '.0']);
-								} else {
-									$addr = "0" . $gpuincr++ . ".0";
-								}
-
-								$audioargs .= "<qemu:arg value='-device'/>
-												<qemu:arg value='vfio-pci,host={$audio_bus}:{$audio_slot}.{$audio_function},bus=root.1,addr=" . $addr . "'/>";
-								break;
-						}
-
-					}
-
-					$audiodevs[] = $audio['id'];
-				}
-			}
-
-			$cmdargs='';
-			if (!empty($gpuargs) || !empty($audioargs)) {
-				switch ($machine) {
-
-					case 'q35':
-						$cmdargs .= "<qemu:commandline>
-										<qemu:arg value='-device'/>
-										<qemu:arg value='ioh3420,bus=pcie.0,addr=1c.0,multifunction=on,port=2,chassis=1,id=root.1'/>
-										$gpuargs
-										$audioargs
-									</qemu:commandline>";
-						break;
-
-					case 'pc':
-						$cmdargs .= "<qemu:commandline>
-										<qemu:arg value='-device'/>
-										<qemu:arg value='ioh3420,bus=pci.0,addr=1c.0,multifunction=on,port=2,chassis=1,id=root.1'/>
-										$gpuargs
-										$audioargs
-									</qemu:commandline>";
-						break;
-
-				}
-			}
-
-			$xml = "<domain type='$type' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
-						<uuid>$uuid</uuid>
-						<name>$name</name>
-						<description>{$domain['desc']}</description>
-						<currentMemory>$mem</currentMemory>
-						<memory>$maxmem</memory>
-						<memoryBacking>
-							<nosharepages/>
-							<locked/>
-						</memoryBacking>
-						$cpustr
-						<os>
-							$loader
-							<type arch='$arch' machine='$machine'>hvm</type>
-						</os>
-						<features>
-							<acpi/>
-							<apic/>
-							$hyperv
-							$pae
-						</features>
-						$clock
-						<on_poweroff>destroy</on_poweroff>
-						<on_reboot>restart</on_reboot>
-						<on_crash>restart</on_crash>
-						<devices>
-							<emulator>$emulator</emulator>
-							$diskstr
-							$mediastr
-							$driverstr
-							$ctrl
-							$sharestr
-							$netstr
-							$vnc
-							<console type='pty'/>
-							$pcidevs
-							$usbstr
-							<memballoon model='virtio'>
-								<alias name='balloon0'/>
-							</memballoon>
-						</devices>
-						$cmdargs
-					</domain>";
-
-			if (!empty($startnow) && !empty($diskstr) && !empty($mediastr)) {
-				$tmp = libvirt_domain_create_xml($this->conn, $xml);
+			// Start the VM now if requested
+			if (!empty($config['domain']['startnow'])) {
+				$tmp = libvirt_domain_create_xml($this->conn, $strXML);
 				if (!$tmp)
 					return $this->_set_last_error();
 			}
 
-			if ($domain['persistent']) {
-				$tmp = libvirt_domain_define_xml($this->conn, $xml);
-				if ($tmp) {
-					$this->domain_set_autostart($tmp, $domain['autostart'] == 1);
-					return $tmp;
-				} else {
+			// Define the VM to persist
+			if ($config['domain']['persistent']) {
+				$tmp = libvirt_domain_define_xml($this->conn, $strXML);
+				if (!$tmp)
 					return $this->_set_last_error();
-				}
+
+				$this->domain_set_autostart($tmp, $config['domain']['autostart'] == 1);
+				return $tmp;
 			}
 			else
 				return $tmp;
+
 		}
 
 		function vfio_bind($strPassthruDevice) {
