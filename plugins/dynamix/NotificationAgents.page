@@ -5,54 +5,77 @@ Title="Notification Agents"
 $xml_file = "/usr/local/emhttp/plugins/dynamix/include/NotificationAgents.xml";
 $agents_dir = "/boot/config/plugins/dynamix/notifications/agents";
 $agents_disabled = "/boot/config/plugins/dynamix/notifications/agents-disabled";
+$fields = array('Event','Subject','Timestamp','Description','Importance','Content');
+
 if(!is_dir($agents_dir)) @mkdir($agents_dir,0755,TRUE);
 if(!is_dir($agents_disabled)) @mkdir($agents_disabled,0755,TRUE);
 ?>
-<script type="text/javascript">
-  Scripts = new Object();
-  FilesEnabled = new Object();
-  FilesDisabled = new Object();
-  if (!String.prototype.format) {
-    String.prototype.format = function() {
-      var args = arguments;
-      return this.replace(/{(\d+)}/g, function(match, number) {
-        return typeof args[number] != 'undefined' ? args[number] : match;
-      });
-    };
-  }
-  function addslashes(text) {
-    return text.replace(/\"/g, "\\\"");
-  }
-  function prepareService(el, name) {
-    var script = Scripts[name];
-    var vars = "";
-    form = $(el).parents('form:first');
-    form.find(".variable").each(function(){
-      vars += $(this).attr('name')+'="'+addslashes($(this).val())+"\"\n";
+<script>
+var openPage = true;
+<?if ($tabbed):?>
+$('#tab3').bind({click:function(){initDropdown();}});
+$(function(){if ($('#tab3').is(':checked')) initDropdown();});
+<?else:?>
+$(function(){initDropdown();});
+<?endif;?>
+Scripts = new Object();
+FilesEnabled = new Object();
+FilesDisabled = new Object();
+if (!String.prototype.format) {
+  String.prototype.format = function() {
+    var args = arguments;
+    return this.replace(/{(\d+)}/g, function(match, number) {
+      return typeof args[number] != 'undefined' ? args[number] : match;
     });
-    FileEnabled = FilesEnabled[name];
-    FileDisabled = FilesDisabled[name];
-    if (form.find("select[name=Enabled]").val() == "yes") {
-      form.find("input[name=#command]").val("/usr/bin/mv -f '"+FileDisabled+"' '"+FileEnabled+"'");
-    } else {
-      form.find("input[name=#command]").val("/usr/bin/mv -f '"+FileEnabled+"' '"+FileDisabled+"'");
-    }
-    form.find('input[name=text]').val(script.format(vars,"\n"));
+  };
+}
+function addslashes(text) {
+  return text.replace(/\"/g, "\\\"");
+}
+function prepareService(el, name) {
+  var script = Scripts[name];
+  var vars = "";
+  var form = $(el).parents('form:first');
+  form.find(".variable").each(function() {
+    vars += $(this).attr('name')+'="'+addslashes($(this).val())+"\"\n";
+  });
+  $('[name="'+name+'"] [id^="slot_"]').each(function() {
+    var include = '';
+    $(this).find('option').each(function() {
+      if ($(this).is(':selected')) {
+        if (include.length) include += ',';
+        include += $(this).val();
+        $(this).removeAttr('selected');
+      }
+    });
+    vars += $(this).attr('name')+'="'+include+"\"\n";
+  }); 
+  FileEnabled = FilesEnabled[name];
+  FileDisabled = FilesDisabled[name];
+  if (form.find("select[name=Enabled]").val() == "yes") {
+    form.find("input[name=#command]").val("/usr/bin/mv -f '"+FileDisabled+"' '"+FileEnabled+"'");
+  } else {
+    form.find("input[name=#command]").val("/usr/bin/mv -f '"+FileEnabled+"' '"+FileDisabled+"'");
   }
-  function execCmd(command) {
-    form = $("#formExec");
-    form.find("input[name=#command]").val(command);
-    form.submit();
-  }
-  function testService(name, file) {
-    form = $("#formExec");
-    form.find("input[name=#command]").val(file);
-    form.append('<input type="hidden" name="#env[]" value="EVENT='+name+' test.">');
-    form.append('<input type="hidden" name="#env[]" value="SUBJECT='+name+' test.">');
-    form.append('<input type="hidden" name="#env[]" value="DESCRIPTION='+name+' test.">');
-    form.append('<input type="hidden" name="#env[]" value="IMPORTANCE=normal">');
-    execCmd(file);
-  }
+  form.find('input[name=text]').val(script.format(vars,"\n"));
+}
+function execCmd(command) {
+  form = $("#formExec");
+  form.find("input[name=#command]").val(command);
+  form.submit();
+}
+function testService(name, file) {
+  form = $("#formExec");
+  form.find("input[name=#command]").val(file);
+  form.append('<input type="hidden" name="#env[]" value="EVENT='+name+' test.">');
+  form.append('<input type="hidden" name="#env[]" value="SUBJECT='+name+' test.">');
+  form.append('<input type="hidden" name="#env[]" value="DESCRIPTION='+name+' test.">');
+  form.append('<input type="hidden" name="#env[]" value="IMPORTANCE=normal">');
+  execCmd(file);
+}
+function initDropdown() {
+  if (openPage) { $("[id^='slot_']").dropdownchecklist({width:300,explicitClose:'...close'}); openPage = false; }
+}
 </script>
 <form method='POST' id="formExec" action='/update.php' target='progressFrame'>
 <input type='hidden' name='#command' value=''>
@@ -85,22 +108,33 @@ foreach ($xml->Agent as $agent) {
   foreach (explode(PHP_EOL,(String) $agent->Script) as $line) {
     if(trim($line)) $Script .= trim($line)."{1}";
   }
-  echo "<div id='title' style='position:relative;margin:0px;top:-21px;'><img src='/plugins/dynamix/icons/".strtolower($Name).".png' class='icon' style='height:16px;width:16px;'>${Name}<span class='status'>".(is_file($FileEnabled) ? "<span class='green'>Enabled</span>": "<span class='red'>Disabled</span>")."</span></div>
-        <form method='POST' action='/update.php' target='progressFrame'>
-        <input type='hidden' name='#include' value='update.file.php'>
-        <input type='hidden' name='#file' value='${File}'>
-        <input type='hidden' name='#command' value=''>
-        <input type='hidden' name='text' value=''>
-        <dl><dt>Enabled</dt><dd><select name='Enabled' size='1'>";
-        echo mk_option(is_file($FileDisabled), 'no', 'No');
-        echo mk_option(is_file($FileEnabled), 'yes', 'Yes');
-        echo "</select></dd></dl><script>Scripts['${Name}']=".json_encode($Script).";FilesEnabled['${Name}']='$FileEnabled';FilesDisabled['${Name}']='$FileDisabled';</script>";
+  echo "<div id='title' style='position:relative;margin:0px;top:-21px;'><img src='/plugins/dynamix/icons/".strtolower($Name).".png' class='icon' style='height:16px;width:16px;'>${Name}<span class='status'>".(is_file($FileEnabled) ? "<span class='green'>Enabled</span>": "<span class='red'>Disabled</span>")."</span></div>";
+  echo  "<form method='POST' name=\"${Name}\" action='/update.php' target='progressFrame'>";
+  echo  "<input type='hidden' name='#include' value='update.file.php'>";
+  echo  "<input type='hidden' name='#file' value='${File}'>";
+  echo  "<input type='hidden' name='#command' value=''>";
+  echo  "<input type='hidden' name='text' value=''>";
+  echo  "<dl><dt>Agent function:</dt><dd><select name='Enabled' size='1'>";
+  echo  mk_option(is_file($FileDisabled), 'no', 'Disabled');
+  echo  mk_option(is_file($FileEnabled), 'yes', 'Enabled');
+  echo "</select></dd></dl>";
+  echo "<script>Scripts['${Name}']=".json_encode($Script).";FilesEnabled['${Name}']='$FileEnabled';FilesDisabled['${Name}']='$FileDisabled';</script>";
+  $i = 1;
   foreach ($agent->Variables->children() as $Var) {
     $vName = preg_replace('#\[([^\]]*)\]#', '<$1>', (string) $Var);
-    $vDesc = preg_replace('#\[([^\]]*)\]#', '<$1>', (String) $Var->attributes()->Desc);
+    $vDesc = ucfirst(strtolower(preg_replace('#\[([^\]]*)\]#', '<$1>', (String) $Var->attributes()->Desc)));
     $vDefault = preg_replace('#\[([^\]]*)\]#', '<$1>', (String) $Var->attributes()->Default);
     $vHelp = preg_replace('#\[([^\]]*)\]#', '<$1>', (String) $Var->attributes()->Help);
-    echo "<dl><dt>${vDesc}</dt><dd><input type=\"text\" name=\"${vName}\" class=\"variable\" required value=\"".( isset($Values[$vName]) ? $Values[$vName] : $vDefault )."\"></dd></dl>";
+    echo "<dl><dt>${vDesc}:</dt><dd>";
+    if (preg_match('/title|message/', ${vDesc})) {
+      echo "<select id=\"slot_$i\" name=\"${vName}\" size=\"1\" multiple style=\"display:none\">"; $i++;
+      $value = isset($Values[$vName]) ? $Values[$vName] : $vDefault;
+      foreach ($fields as $field) echo mk_option_check($value,'$'.strtoupper($field),$field);
+      echo "</select>";
+    } else {
+      echo "<input type=\"text\" name=\"${vName}\" class=\"variable\" required value=\"".( isset($Values[$vName]) ? $Values[$vName] : $vDefault )."\">";
+    }
+    echo "</dd></dl>";
     if ($vHelp) echo "<blockquote class='inline_help'>$vHelp</blockquote>";
   }
   echo "<dl><dt>&nbsp;</dt><dd><input type='submit' onclick='prepareService(this, \"${Name}\")' value='Save'>";

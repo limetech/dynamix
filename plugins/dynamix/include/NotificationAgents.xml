@@ -4,8 +4,8 @@
     <Name>Boxcar</Name>
     <Variables>
       <Variable Help="Get your access token as explained [a href='http://help.boxcar.io/knowledgebase/articles/314474-how-to-get-my-boxcar-access-token' target='_blank'][u]here[/u].[/a]" Desc="Access Token" Default="">ACCESS_TOKEN</Variable>
-      <Variable Help="Available variables are: $EVENT, $SUBJECT, $TIMESTAMP, $DESCRIPTION, $IMPORTANCE and $CONTENT" Desc="Notification Title" Default="$SUBJECT">TITLE</Variable>
-      <Variable Help="Available variables are: $EVENT, $SUBJECT, $TIMESTAMP, $DESCRIPTION, $IMPORTANCE and $CONTENT" Desc="Notification Message" Default="$SUBJECT \n$DESCRIPTION">MESSAGE</Variable>
+      <Variable Help="Specify the fields which are included in the title of the notification." Desc="Notification Title" Default="$SUBJECT">TITLE</Variable>
+      <Variable Help="Specify the fields which are included in the message body of the notification." Desc="Notification Message" Default="$DESCRIPTION">MESSAGE</Variable>
     </Variables>
     <Script>
       <![CDATA[
@@ -29,9 +29,9 @@
     <Name>Prowl</Name>
     <Variables>
       <Variable Help="Get your api key as explained [a href='https://www.prowlapp.com/api_settings.php' target='_blank'][u]here[/u].[/a]" Desc="Api Key" Default="">API_KEY</Variable>
-      <Variable Help="Application name, e.g., unRAID Server" Desc="Application Name" Default="unRAID Server">APP_NAME</Variable>
-      <Variable Help="Available variables are: $EVENT, $SUBJECT, $TIMESTAMP, $DESCRIPTION, $IMPORTANCE and $CONTENT" Desc="Notification Title" Default="$SUBJECT">TITLE</Variable>
-      <Variable Help="Available variables are: $EVENT, $SUBJECT, $TIMESTAMP, $DESCRIPTION, $IMPORTANCE and $CONTENT" Desc="Notification Message" Default="$DESCRIPTION">MESSAGE</Variable>
+      <Variable Help="Application name, e.g., unRAID Server." Desc="Application Name" Default="unRAID Server">APP_NAME</Variable>
+      <Variable Help="Specify the fields which are included in the title of the notification." Desc="Notification Title" Default="$SUBJECT">TITLE</Variable>
+      <Variable Help="Specify the fields which are included in the message body of the notification." Desc="Notification Message" Default="$DESCRIPTION">MESSAGE</Variable>
     </Variables>
     <Script>
       <![CDATA[
@@ -68,8 +68,8 @@
     <Name>Pushbullet</Name>
     <Variables>
       <Variable Help="The Access Token can be found [a href='https://www.pushbullet.com/account' target='_blank'] [u]here[/u].[/a]" Desc="Access Token" Default="">TOKEN</Variable>
-      <Variable Help="Available variables are: $EVENT, $SUBJECT, $TIMESTAMP, $DESCRIPTION, $IMPORTANCE and $CONTENT" Desc="Notification Title" Default="$SUBJECT">TITLE</Variable>
-      <Variable Help="Available variables are: $EVENT, $SUBJECT, $TIMESTAMP, $DESCRIPTION, $IMPORTANCE and $CONTENT" Desc="Notification Message" Default="$DESCRIPTION">MESSAGE</Variable>
+      <Variable Help="Specify the fields which are included in the title of the notification." Desc="Notification Title" Default="$SUBJECT">TITLE</Variable>
+      <Variable Help="Specify the fields which are included in the message body of the notification." Desc="Notification Message" Default="$DESCRIPTION">MESSAGE</Variable>
     </Variables>
     <Script>
       <![CDATA[
@@ -89,7 +89,7 @@
     <Variables>
       <Variable Help="The User Key can be found [a href='https://pushover.net/' target='_blank'][u]here[/u].[/a]" Desc="User Key" Default="">USER_KEY</Variable>
       <Variable Help="The App Token can be found [a href='https://pushover.net/apps' target='_blank'][u]here[/u][/a]." Desc="App Token" Default="">APP_TOKEN</Variable>
-      <Variable Help="Available variables are: $EVENT, $SUBJECT, $TIMESTAMP, $DESCRIPTION, $IMPORTANCE and $CONTENT" Desc="Notification Message" Default="$SUBJECT \n$DESCRIPTION">MESSAGE</Variable>
+      <Variable Help="Specify the fields which are included in the message body of the notification." Desc="Notification Message" Default="$SUBJECT,$DESCRIPTION">MESSAGE</Variable>
     </Variables>
     <Script>
       <![CDATA[
