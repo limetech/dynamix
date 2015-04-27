@@ -62,7 +62,9 @@ function my_check($time) {
 function my_time($time) {
   global $unraid;
   $date = strftime($unraid['display']['date'].($unraid['display']['date']!='%c' ? ", {$unraid['display']['time']}" : ""), $time);
-  $days = date('z')-date('z',$time);
+  $now  = new DateTime();
+  $last = new DateTime("@$time");
+  $days = date_diff($last,$now)->format('%a');
   switch (true) {
   case ($days<0):
     return $date;
