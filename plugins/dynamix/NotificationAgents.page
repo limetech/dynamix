@@ -43,7 +43,7 @@ function prepareService(el, name) {
     var include = '';
     $(this).find('option').each(function() {
       if ($(this).is(':selected')) {
-        if (include.length) include += ',';
+        if (include.length) include += '\\n';
         include += $(this).val();
         $(this).removeAttr('selected');
       }
@@ -128,7 +128,7 @@ foreach ($xml->Agent as $agent) {
     echo "<dl><dt>${vDesc}:</dt><dd>";
     if (preg_match('/title|message/', ${vDesc})) {
       echo "<select id=\"slot_$i\" name=\"${vName}\" size=\"1\" multiple style=\"display:none\">"; $i++;
-      $value = isset($Values[$vName]) ? $Values[$vName] : $vDefault;
+      $value = str_replace('\n',',',isset($Values[$vName]) ? $Values[$vName] : $vDefault);
       foreach ($fields as $field) echo mk_option_check($value,'$'.strtoupper($field),$field);
       echo "</select>";
     } else {
