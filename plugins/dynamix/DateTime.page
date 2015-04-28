@@ -167,6 +167,6 @@ New date and time:
 
 > Enter the current time-of-day.  Use format YYYY-MM-DD HH:MM:SS. Greyed out when using NTP.
 
-&nbsp;
-: <input type="submit" name="setDateTime" value="Apply"><button type="button" onclick="done()">Done</button>
+<input type="reset" value="Reset" onclick="setTimeout(checkDateTimeSettings,0)">
+: <input type="submit" name="setDateTime" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>

@@ -22,6 +22,6 @@ require_once 'webGui/include/Markdown.php';
 $file = $_GET['file'];
 if (file_exists($file)) echo Markdown(file_get_contents($file)); else echo Markdown("*No release notes available!*");
 ?>
-<br><center><button type='button' onclick='top.Shadowbox.close()'>Done</button></center>
+<br><center><input type="button" value="Done" onclick="top.Shadowbox.close()"></center>
 </body>
 </html>

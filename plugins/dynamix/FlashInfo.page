@@ -74,7 +74,7 @@ Replaceable:
 <form markdown="1" name="key_install" method="POST" target="progressFrame">
 <?if ($var['regTy']=="Pro"):?>
 &nbsp;
-: <button type="button" onClick="done()">Done</button>
+: <input type="button" value="Done" onclick="done()">
 
 <?else:?>
 Key file URL:
@@ -85,6 +85,6 @@ and click **Install**
 
 &nbsp;
 : <input type="button" value="Install" onclick="installKey(this.form.file.value)">
-  <button type="button" onClick="done()">Done</button>
+  <input type="button" value="Done" onclick="done()">
 <?endif;?>
 </form>

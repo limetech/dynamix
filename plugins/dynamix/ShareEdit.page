@@ -31,7 +31,7 @@ if ($name == "") {
   $share = $shares[$name];
 } else {
   /* handle share deleted case */
-  echo "<p class='notice'>Share $name has been deleted.</p><button type='button' onclick='done()'>OK</button>";
+  echo "<p class='notice'>Share $name has been deleted.</p><input type='button' value='OK' onclick='done()'>";
   return;
 }
 
@@ -65,6 +65,15 @@ $(function() {
   setDiskList(document.share_edit.shareUseCache);
   presetSpace(document.share_edit.shareFloor);
 });
+
+function prepareShareEdit() {
+  $("#s1").dropdownchecklist('destroy');
+  $("#s1").dropdownchecklist({emptyText:'All', width:300, explicitClose:'...close'});
+  $("#s2").dropdownchecklist('destroy');
+  $("#s2").dropdownchecklist({emptyText:'None', width:300, explicitClose:'...close'});
+  setDiskList(document.share_edit.shareUseCache);
+  presetSpace(document.share_edit.shareFloor);
+}
 
 function setDiskList(cache) {
   var onOff = cache=='only' ? 'disable' : 'enable';
@@ -248,19 +257,19 @@ Use cache disk:
 > is insufficient free space on the Cache disk/pool, *create* operations will fail with *out of space* status.
 
 <?if ($share['name'] == ""):?>
-&nbsp;
-: <input type="submit" name="cmdEditShare" value="Add Share"><button type="button" onclick="done()">Cancel</button>
+<input type="reset" value="Reset" onclick="setTimeout(prepareShareEdit,0)">
+: <input type="submit" name="cmdEditShare" value="Add Share"><input type="button" value="Cancel" onclick="done()">
 <?elseif (shareEmpty($share['name'])):?>
 Share empty?
 : Yes
 
 Delete<input type="checkbox" name="confirmDelete" onchange="chkDelete(this.form, this.form.cmdEditShare);">
-: <input type="submit" name="cmdEditShare" value="Apply"><button type="button" onclick="done()">Done</button>
+: <input type="submit" name="cmdEditShare" value="Apply"><input type="button" value="Done" onclick="done()">
 <?else:?>
 Share empty?
 : No
 
-&nbsp;
-: <input type="submit" name="cmdEditShare" value="Apply"><button type="button" onclick="done()">Done</button>
+<input type="reset" value="Reset" onclick="setTimeout(prepareShareEdit,0)">
+: <input type="submit" name="cmdEditShare" value="Apply"><input type="button" value="Done" onclick="done()">
 <?endif;?>
 </form>

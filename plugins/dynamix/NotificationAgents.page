@@ -43,7 +43,7 @@ function prepareService(el, name) {
     var include = '';
     $(this).find('option').each(function() {
       if ($(this).is(':selected')) {
-        if (include.length) include += ',';
+        if (include.length) include += '\\n';
         include += $(this).val();
         $(this).removeAttr('selected');
       }
@@ -108,7 +108,7 @@ foreach ($xml->Agent as $agent) {
   foreach (explode(PHP_EOL,(String) $agent->Script) as $line) {
     if(trim($line)) $Script .= trim($line)."{1}";
   }
-  echo "<div id='title' style='position:relative;margin:0px;top:-21px;'><img src='/plugins/dynamix/icons/".strtolower($Name).".png' class='icon' style='height:16px;width:16px;'>${Name}<span class='status'>".(is_file($FileEnabled) ? "<span class='green'>Enabled</span>": "<span class='red'>Disabled</span>")."</span></div>";
+  echo "<div id='title' style='position:relative;margin:0px;top:-21px;'><span class='left'><img src='/plugins/dynamix/icons/".strtolower($Name).".png' class='icon' style='height:16px;width:16px;'>${Name}</span><span class='status'>".(is_file($FileEnabled) ? "<span class='green'>Enabled</span>": "<span class='red'>Disabled</span>")."</span></div>";
   echo  "<form method='POST' name=\"${Name}\" action='/update.php' target='progressFrame'>";
   echo  "<input type='hidden' name='#include' value='update.file.php'>";
   echo  "<input type='hidden' name='#file' value='${File}'>";
@@ -128,7 +128,7 @@ foreach ($xml->Agent as $agent) {
     echo "<dl><dt>${vDesc}:</dt><dd>";
     if (preg_match('/title|message/', ${vDesc})) {
       echo "<select id=\"slot_$i\" name=\"${vName}\" size=\"1\" multiple style=\"display:none\">"; $i++;
-      $value = isset($Values[$vName]) ? $Values[$vName] : $vDefault;
+      $value = str_replace('\n',',',isset($Values[$vName]) ? $Values[$vName] : $vDefault);
       foreach ($fields as $field) echo mk_option_check($value,'$'.strtoupper($field),$field);
       echo "</select>";
     } else {
@@ -137,11 +137,11 @@ foreach ($xml->Agent as $agent) {
     echo "</dd></dl>";
     if ($vHelp) echo "<blockquote class='inline_help'>$vHelp</blockquote>";
   }
-  echo "<dl><dt>&nbsp;</dt><dd><input type='submit' onclick='prepareService(this, \"${Name}\")' value='Save'>";
+  echo "<dl><dt>&nbsp;</dt><dd><input type='submit' value='Save' onclick='prepareService(this, \"${Name}\")'>";
   if (is_file($File)) {
-    echo "<button type='button' onclick='execCmd(\"/usr/bin/rm $File\")'>Remove</button>";
-    echo "<button type='button' onclick='testService(\"$Name\",\"$File\")'>Test</button>";
+    echo "<input type='button' value='Remove' onclick='execCmd(\"/usr/bin/rm $File\")'>";
+    echo "<input type='button' value='Test' onclick='testService(\"$Name\",\"$File\")'>";
   }
-  echo "<button type='button' onclick='done()'>Done</button></dd></dl></form><div style='min-height:50px;'></div>";
+  echo "<input type='button' value='Done' onclick='done()'></dd></dl></form><div style='min-height:50px;'></div>";
 }
 ?>

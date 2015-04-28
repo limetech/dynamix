@@ -277,7 +277,7 @@ if ($_POST){
   $DockerTemplates->removeInfo($Name);
   $DockerUpdate->syncVersions($Name);
 
-  echo '<center><button type="button" onclick="done()">Done</button></center><br>';
+  echo '<center><input type="button" value="Done" onclick="done()"></center><br>';
   die();
 }
 
@@ -342,7 +342,7 @@ if ($_GET['updateContainer']){
     $DockerUpdate->syncVersions($Name);
   }
 
-  echo '<center><button type="button" onclick="window.parent.jQuery(\'#iframe-popup\').dialog(\'close\');">Done</button></center><br>';
+  echo '<center><input type="button" value="Done" onclick="window.parent.jQuery(\'#iframe-popup\').dialog(\'close\');"></center><br>';
   die();
 }
 
@@ -945,7 +945,7 @@ $showAdditionalInfo = true;
     <br>
     <div>
       <input type="submit" value="<?= ($xmlType != 'edit') ? 'Create' : 'Save' ?>">
-      <button onclick="done()" type="button">Cancel</button>
+      <input type="button" value="Cancel" onclick="done()">
     </div>
   </form>
 </div>

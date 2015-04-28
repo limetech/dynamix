@@ -67,4 +67,4 @@ $(function(){$('li').StyleSidebar({displayDivId:'mainContent',pageMinHeight:'aut
 </ul>
 <div id="mainContent"><!-- content  --></div>
 </div>
-<a href='/Main/Data?name=<?=$prev?>'><input type='button' value='Previous'></a><a href='/Main/Data?name=<?=$next?>'><input type='button' value='Next'></a><button type="button" onclick="saveSMART()">Attributes</button><button type="button" onclick="done()">Done</button>
+<a href='/Main/Data?name=<?=$prev?>'><input type='button' value='Previous'></a><a href='/Main/Data?name=<?=$next?>'><input type='button' value='Next'></a><input type="button" value="Attributes" onclick="saveSMART()"><input type="button" value="Done" onclick="done()">

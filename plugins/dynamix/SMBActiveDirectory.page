@@ -46,6 +46,6 @@ AD initial owner:
 AD initial group:
 : <input type="text" name="shareInitialGroup" maxlength="40" value="<?=$var['shareInitialGroup'];?>">
 
-&nbsp;
-: <input type="submit" name="changeShare" value="Apply"><button type="button" onclick="done()">Done</button>
+<input type="reset" value="Reset">
+: <input type="submit" name="changeShare" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>

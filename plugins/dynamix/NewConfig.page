@@ -23,8 +23,8 @@ effect of making it ***impossible*** to rebuild an existing failed drive - you h
 
 <form name="newConfig" method="POST" action="/update.htm" target="progressFrame">
 <?if ($var['fsState']=="Started"):?>
-<input type="submit" name="cmdInit" value="Apply" disabled><button type="button" onclick="done()">Done</button>Array must be <strong><big>stopped</big></strong>
+<input type="submit" name="cmdInit" value="Apply" disabled><input type="button" value="Done" onclick="done()">Array must be <strong><big>stopped</big></strong>
 <?else:?>
-<input type="submit" name="cmdInit" value="Apply" disabled><button type="button" onclick="done()">Done</button><input type="checkbox" onClick="cmdInit.disabled=!this.checked"><small>Yes I want to do this</small>
+<input type="submit" name="cmdInit" value="Apply" disabled><input type="button" value="Done" onclick="done()"><input type="checkbox" onClick="cmdInit.disabled=!this.checked"><small>Yes I want to do this</small>
 <?endif;?>
 </form>

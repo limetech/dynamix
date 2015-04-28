@@ -35,6 +35,6 @@ Model:
 
 > This is the server model number.
 
-&nbsp;
-: <input type="submit" name="changeNames" value="Apply"><button type="button" onclick="done()">Done</button>
+<input type="reset" value="Reset">
+: <input type="submit" name="changeNames" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>

@@ -114,10 +114,13 @@ function prepareReport(value) {
   if (value=='') $('.report').hide(); else $('.report').show();
   prepareTitle();
 }
-$(function(){
+function prepareNotifications() {
   preparePlugin(document.notify_settings.version.value);
   prepareDocker(document.notify_settings.docker_update.value);
   prepareReport(document.notify_settings.status.value);
+}
+$(function(){
+  prepareNotifications();
 });
 </script>
 <form markdown="1" name="notify_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareNotify(this)">
@@ -267,7 +270,7 @@ Notification entity:
 > Choose for each classification how you want to be notified.
 
 &nbsp;
-: <button type="button" name="#advanced" onclick="if ($('.advanced').css('display')=='none') {$('.advanced').show(); $(this).html('Basic view');} else {$('.advanced').hide(); $(this).html('Advanced view');}">Advanced view</button>
+: <input type="button" value="Advanced view" name="#advanced" onclick="if ($('.advanced').css('display')=='none') {$('.advanced').show(); $(this).val('Basic view');} else {$('.advanced').hide(); $(this).val('Advanced view');}">
 
 <span class="advanced" style="display:none">SMART attribute notifications:</span>
 : <span class="advanced" style="display:none"><input type="checkbox" name="a1" value="5"<?=in_array(5,$events) ? ' checked' : ''?>><span style="display:inline-block;width:72px">5</span>Reallocated sectors count</span>
@@ -290,6 +293,6 @@ Notification entity:
 > The user can enable or disable notifications for the given SMART attributes. It is recommended to keep the default, which is ALL selected attributes, but when certain attributes are not present on your hard disk, these may be excluded.
 > In addition a custom SMART attribute number can be given to generate notifications. Be careful in the selection, this may cause an avalance of notifcations if an inappropriate SMART attribute is chosen.
 
-<button type="button" onclick="resetNotify(this.form);">Default</button>
-: <input type="submit" name="#apply" value="Apply"><button type="button" onclick="done()">Done</button></td>
+<input type="button" value="Default" onclick="resetNotify(this.form);"><input type="reset" value="Reset" onclick="setTimeout(prepareNotifications,0)">
+: <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()"></td>
 </form>
