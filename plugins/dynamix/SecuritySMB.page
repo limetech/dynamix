@@ -68,4 +68,5 @@ Security:
 
 <input type="reset" value="Reset">
 : <input type="submit" name="changeShareAccess" value="Apply"><input type="button" value="Done" onclick="done()">
+</form>
 <?endif;?>
