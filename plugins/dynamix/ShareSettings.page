@@ -15,12 +15,21 @@ Icon="share-settings.png"
  * all copies or substantial portions of the Software.
  */
 ?>
+
+<? $disabled = $var['fsState']!='Stopped' ? 'disabled' : ''; ?>
+
 <script>
 $(function() {
   $("#s1").dropdownchecklist({emptyText:'All', width:300, explicitClose:'...close'});
   $("#s2").dropdownchecklist({emptyText:'None', width:300, explicitClose:'...close'});
   presetShare(document.share_settings);
 });
+function prepareShareSettings() {
+  $("#s1").dropdownchecklist('destroy');
+  $("#s1").dropdownchecklist({emptyText:'All', width:300, explicitClose:'...close'});
+  $("#s2").dropdownchecklist('destroy');
+  $("#s2").dropdownchecklist({emptyText:'None', width:300, explicitClose:'...close'});
+}  
 // Simulate the original input field
 function prepareShare(form) {
   var include = '';
@@ -47,7 +56,7 @@ function prepareShare(form) {
   item.selected = true;
 }
 function presetShare(form) {
-  var disabled = form.shareUser.value!="e" || <?=$var['fsState']!='Stopped' ? 'true' : 'false'?>;
+  var disabled = <?=$disabled ? 'true' : 'false'?>;
   var onOff = disabled ? 'disable' : 'enable';
   form.shareUserInclude.disabled = disabled;
   form.shareUserExclude.disabled = disabled;
@@ -55,7 +64,6 @@ function presetShare(form) {
   $("#s2").dropdownchecklist(onOff);
 }
 </script>
-<?$disabled = $var['fsState']!="Stopped" ? 'disabled' : ''?>
 <form markdown="1" name="share_settings" method="POST" action="/update.htm" target="progressFrame" onsubmit="prepareShare(this)">
 Enable user shares:
 : <select name="shareUser" size="1" onchange="presetShare(this.form)" <?=$disabled?>>
@@ -66,7 +74,7 @@ Enable user shares:
 > If set to 'Yes' the User Shares feature is activated.
 
 Included disk(s):
-: <select id="s1" name="shareUserInclude" size="1" multiple="multiple" style="display:none" <?=$disabled?>>
+: <select id="s1" name="shareUserInclude" size="1" multiple="multiple" style="display:none">
   <?foreach ($disks as $disk):?>
   <?=mk_option_check($disk['name'], $var['shareUserInclude'])?>
   <?endforeach;?>
@@ -81,7 +89,7 @@ Included disk(s):
 > * disk2,disk4-6,disk10 *another example*
 
 Excluded disk(s):
-: <select id="s2" name="shareUserExclude" size="1" multiple="multiple" style="display:none" <?=$disabled?>>
+: <select id="s2" name="shareUserExclude" size="1" multiple="multiple" style="display:none">
   <?foreach ($disks as $disk):?>
   <?=mk_option_check($disk['name'], $var['shareUserExclude'])?>
   <?endforeach;?>
@@ -94,6 +102,6 @@ Excluded disk(s):
 > **Note:** Each separate User Share also includes its own set of Included and Excluded disks which represent
 > a subset of the Included/Excluded disks defined here.
 
-&nbsp;
-: <input type="submit" name="changeShare" value="Apply" <?=$disabled?>><button type="button" onclick="done()">Done</button> <?=$disabled ? "Array must be Stopped to change" : ""?>
+<?if ($var['fsState']=='Stopped'):?><input type="reset" value="Reset" onclick="setTimeout(prepareShareSettings,0)"><?else:?>&nbsp;<?endif;?>
+: <input type="submit" name="changeShare" value="Apply" <?=$disabled?>><input type="button" value="Done" onclick="done()"> <?=$disabled ? "Array must be <strong>Stopped</strong> to change" : ""?>
 </form>

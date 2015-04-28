@@ -38,4 +38,4 @@ show_map("Tasks", 1);
 show_map("Buttons", 1);
 echo "</div>";
 ?>
-<button type="button" onclick="done()">Done</button>
+<input type="button" value="Done" onclick="done()">

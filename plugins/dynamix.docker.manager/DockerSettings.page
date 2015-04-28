@@ -92,8 +92,8 @@ Docker image:
 > create this file when the Docker service is first started.  If you do not want Docker
 > to run at all, set this field blank and click **Start**.
 
-&nbsp;
-: <input id="applyBtn" type="button" value="Apply"/><button type="button" onclick="done()">Done</button>
+<input type="reset" value="Reset">
+: <input id="applyBtn" type="button" value="Apply"/><input type="button" value="Done" onclick="done()">
 </form>
 
 <?else:
@@ -122,10 +122,11 @@ Docker image:
 > This is the docker volume.
 
 &nbsp;
-: <input id="applyBtn" type="button" value="Apply"/><button type="button" onclick="done()">Done</button>
+: <input type="button" id="applyBtn" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
 
-Docker volume info:
+<div id="title"><img src="/plugins/dynamix.docker.manager/icons/vcard.png" class="icon">Docker volume info</div>
+&nbsp;
 : <?echo "<pre>".shell_exec("btrfs filesystem show /var/lib/docker")."</pre>";?>
 
 > This is the output of *btrfs filesystem show /var/lib/docker*.
@@ -137,18 +138,18 @@ Docker volume info:
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 
 &nbsp;
-: <input type="submit" value="Scrub" disabled /> *Running*
+: <input type="submit" value="Scrub" disabled> *Running*
 
 > If you want to Cancel the operation, close the window where it is running and then Refresh this page.
 
 &nbsp;
-: <input type="submit" value="Stop" disabled />
+: <input type="submit" value="Stop" disabled>
 </form>
 
 <?else:?>
 
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
-&nbsp;
+<input type="reset" value="Reset">
 : <input type="button" value="Scrub" onclick="openBox('<?=$cmd;?> '+document.getElementById('scrub_options').value,'Scrub',490,430)">
   <input type="text" id="scrub_options" maxlength="256" value="-B -R -d -r"> Options (see Help)
 

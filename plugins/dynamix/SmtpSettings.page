@@ -27,9 +27,7 @@ $(function() {
     mailtest();
     $.get('/webGui/include/SMTPtest.php',function(data){clearTimeout(pid); $('#testresult').html(data)});
   });
-  passcheck(document.smtp_setup);
-  tls(document.smtp_setup);
-  pwd(document.smtp_setup);
+  prepareSMTP();
 });
 function mailcheck(form) {
   var email = /^\S+@\S+\.\S+/;
@@ -39,13 +37,13 @@ function mailcheck(form) {
   }
   return true;
 }
+function prepareSMTP() {
+  passcheck(document.smtp_setup);
+  tls(document.smtp_setup);
+  pwd(document.smtp_setup);
+}
 function passcheck(form) {
   if (form.AuthPass.value.indexOf('#')<0) $('#authpass').hide(); else $('#authpass').show();
-}
-function mailtest() {
-  document.getElementById('testcounter').innerHTML = '('+counter+' sec)';
-  counter--;
-  if (counter>0) pid=setTimeout(mailtest,1000);
 }
 function tls(form) {
   form.TLSCert.disabled = form.UseTLSCert.selectedIndex==0;
@@ -53,6 +51,11 @@ function tls(form) {
 function pwd(form) {
   form.AuthUser.disabled = form.AuthMethod.selectedIndex==0;
   form.AuthPass.disabled = form.AuthMethod.selectedIndex==0;
+}
+function mailtest() {
+  document.getElementById('testcounter').innerHTML = '('+counter+' sec)';
+  counter--;
+  if (counter>0) pid=setTimeout(mailtest,1000);
 }
 function disableTest() {
   document.getElementById('testbutton').disabled = true;
@@ -183,7 +186,7 @@ Password:
 
 > Enter the username and password to login to your email account. Be aware that the password is stored unencrypted in the email configuration file.
 
-&nbsp;
-: <input type="submit" name="#apply" value="Apply"><button type="button" onclick="done();">Done</button>
+<input type="reset" value="Reset" onclick="setTimeout(prepareSMTP,0)">
+: <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
   <span id="testresult" style="font-size:13px"><input type="button" id="testbutton" value="Test"<?if ($incomplete):?> disabled<?endif;?>></span>
 </form>

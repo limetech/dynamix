@@ -16,7 +16,7 @@ Title="Edit User"
 
 <?if (!array_key_exists($name, $users)):?>
   <p class="notice">User <?=$name?> has been deleted.</p><br>
-  <button type="button" onClick="done()">OK</button>
+  <input type="button" value="OK" onClick="done()">
 <?return;?>
 <?endif;?>
 
@@ -33,9 +33,9 @@ Description:
 <?if ($user['name']=="root"):?>
 &nbsp;
 <?else:?>
-Delete<input type="checkbox" name="confirmDelete" onChange="chkDelete(this.form, this.form.cmdUserEdit);">
+Delete<input type="checkbox" name="confirmDelete" onChange="chkDelete(this.form, this.form.cmdUserEdit)">
 <?endif;?>
-: <input type="submit" name="cmdUserEdit" value="Apply"><button type="button" onclick="done()">Done</button>
+: <input type="submit" name="cmdUserEdit" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
 
 <br><br>
@@ -49,5 +49,5 @@ Retype password:
 : <input type="password" name="userPasswordConf" maxlength="40" onKeyUp="this.form.cmdUserEdit.disabled = (this.form.userPassword.value != this.form.userPasswordConf.value);">
 
 &nbsp;
-: <input type="submit" name="cmdUserEdit" value="Change"><button type="button" onclick="done()">Done</button>
+: <input type="submit" name="cmdUserEdit" value="Change"><input type="button" value="Done" onclick="done()">
 </form>

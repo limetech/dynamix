@@ -139,8 +139,8 @@ PCIe ACS Override:
 >
 > A reboot will be required for changes to this setting to take affect.
 
-&nbsp;
-: <input id="applyBtn" type="button" value="Apply"/><button type="button" onclick="done()">Done</button>
+<input type="reset" value="Reset">
+: <input type="button" id="applyBtn" value="Apply"/><input type="button" value="Done" onclick="done()">
 </form>
 
 > View the log for libvirt: <a id="openlog" title="/var/log/libvirt/libvirtd.log" href="#" onclick="openWindow('/usr/bin/tail -n 42 -f /var/log/libvirt/libvirtd.log','Log Information',600,900);">/var/log/libvirt/libvirtd.log</a>

@@ -33,4 +33,4 @@ function syslog() {
 }
 $('.tabs').append("<span class='status vhshift'><input type='button' value='Download' onclick='syslog()'></span>");
 </script>
-<button type="button" onclick="syslog()">Download</button><button type="button" onclick="done()">Done</button>
+<input type="button" value="Download" onclick="syslog()"><input type="button" value="Done" onclick="done()">

@@ -137,11 +137,11 @@ foreach ($xml->Agent as $agent) {
     echo "</dd></dl>";
     if ($vHelp) echo "<blockquote class='inline_help'>$vHelp</blockquote>";
   }
-  echo "<dl><dt>&nbsp;</dt><dd><input type='submit' onclick='prepareService(this, \"${Name}\")' value='Save'>";
+  echo "<dl><dt>&nbsp;</dt><dd><input type='submit' value='Save' onclick='prepareService(this, \"${Name}\")'>";
   if (is_file($File)) {
-    echo "<button type='button' onclick='execCmd(\"/usr/bin/rm $File\")'>Remove</button>";
-    echo "<button type='button' onclick='testService(\"$Name\",\"$File\")'>Test</button>";
+    echo "<input type='button' value='Remove' onclick='execCmd(\"/usr/bin/rm $File\")'>";
+    echo "<input type='button' value='Test' onclick='testService(\"$Name\",\"$File\")'>";
   }
-  echo "<button type='button' onclick='done()'>Done</button></dd></dl></form><div style='min-height:50px;'></div>";
+  echo "<input type='button' value='Done' onclick='done()'></dd></dl></form><div style='min-height:50px;'></div>";
 }
 ?>

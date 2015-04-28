@@ -15,7 +15,7 @@ Cond="((isset($disks['cache']))&&($disks['cache']['status']!='DISK_NP'))"
  */
 ?>
 
-<?$disabled = $var['fsState']!="Stopped" ? 'disabled' : ''?>
+<? $disabled = $var['fsState']!='Stopped' ? 'disabled' : ''; ?>
 
 <script>
 function check_cache_settings() {
@@ -23,7 +23,9 @@ function check_cache_settings() {
   var enabled = (form.shareCacheEnabled.value == "no");
   form.shareCacheFloor.disabled = enabled;
 }
+<?if ($var['fsState']=='Stopped'):?>
 $(check_cache_settings);
+<?endif;?>
 </script>
 
 <form markdown="1" name="cache_settings" method="POST" action="/update.htm" target="progressFrame">
@@ -33,11 +35,11 @@ Use cache disk:
   <?=mk_option($var['shareCacheEnabled'], "no", "No")?>
   </select>
 
-> If set to 'Yes' then User Shares can possibly make use of the Cache Disk.  You still need to enable
+> If set to 'Yes' then User Shares can possibly make use of the Cache Disk. You still need to enable
 > use of the Cache Disk on individual user shares.
 
 Min. free space:
-: <input type="text" name="shareCacheFloor" maxlength="16" value="<?=$var['shareCacheFloor']?>" class="narrow" <?=$disabled?>>
+: <input type="text" name="shareCacheFloor" maxlength="16" value="<?=$var['shareCacheFloor']?>" class="narrow" disabled>
 
 > This represents a "floor" of the amount of free space remaining on the cache disk.  If the free
 > space becomes less than this value, then new files written to user shares with cache enabled will go to
@@ -57,6 +59,6 @@ Min. free space:
 > **2GB** => 2,000,000,000 bytes<br>
 > **2000000** => 2,048,000,000 bytes
 
-&nbsp;
-: <input type="submit" name="changeShare" value="Apply" <?=$disabled?>><button type="button" onclick="done()">Done</button> <?=$disabled ? "Array must be Stopped to change" : ""?>
+<?if ($var['fsState']=='Stopped'):?><input type="reset" value="Reset" onclick="setTimeout(check_cache_settings,0)"><?else:?>&nbsp;<?endif;?>
+: <input type="submit" name="changeShare" value="Apply" <?=$disabled?>><input type="button" value="Done" onclick="done()"> <?=$disabled ? "Array must be <strong>Stopped</strong> to change" : ""?>
 </form>
