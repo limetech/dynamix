@@ -112,6 +112,6 @@ Tunable (md_sync_window):
 >
 > Note: For each of these settings, if you delete the value and click Apply, the value is restored to its default.
 
-&nbsp;
-: <input type="submit" name="changeDisk" value="Apply"><button type="button" onclick="done()">Done</button>
+<input type="reset" value="Reset">
+: <input type="submit" name="changeDisk" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>

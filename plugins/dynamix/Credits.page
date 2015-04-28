@@ -23,4 +23,4 @@ and may not be used in any other project without written permission from Lime Te
 
 This file shall be included in all copies or substantial portions of the Software.
 
-<button type="button" onclick="done()">Done</button>
+<input type="button" value="Done" onclick="done()">

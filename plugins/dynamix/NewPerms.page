@@ -49,9 +49,9 @@ completion will terminate the background process - so don't do that. This proces
 </select>
 
 <?if ($var['fsState']!="Started"):?>
-<input type="button" value="Start" disabled><button type="button" onclick="done()">Done</button> Array must be <strong><big>started</big></strong> to change permissions.
+<input type="button" value="Start" disabled><input type="button" value="Done" onclick="done()"> Array must be <strong><big>started</big></strong> to change permissions.
 <?else:?>
-<input type="button" name="submit_button" value="Start" onclick="openBox('<?=$cmd?>'+document.getElementById('includeDisk').value,'New Permissions',490,430)" disabled><button type="button" onclick="done()">Done</button>
+<input type="button" name="submit_button" value="Start" onclick="openBox('<?=$cmd?>'+document.getElementById('includeDisk').value,'New Permissions',490,430)" disabled><input type="button" value="Done" onclick="done()">
 <input type="checkbox" onClick="submit_button.disabled=!this.checked"><small>Yes I want to do this</small>
 <?endif;?>
 

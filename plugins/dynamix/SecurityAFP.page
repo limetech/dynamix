@@ -92,8 +92,8 @@ Security:
 > Note: Private security is available only with ''Plus'' and ''Pro''
 > [registration](http://lime-technology.com/products/registration-keys).
 
-&nbsp;
-: <input type="submit" name="changeShareSecurityAFP" value="Apply"><button type="button" onclick="done()">Done</button>
+<input type="reset" value="Reset">
+: <input type="submit" name="changeShareSecurityAFP" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
 
 <?if ($sec_afp[$name]['security'] == 'secure'):?>
@@ -102,8 +102,8 @@ Security:
 <div id="title"><dt>User Access</dt><em>Guests have <b>read-only</b> access.</em></div>
 <?input_secure_users($sec_afp);?>
 
-&nbsp;
-: <input type='submit' name='changeShareAccessAFP' value='Apply'><button type='button' onclick='done()'>Done</button>
+<input type="reset" value="Reset">
+: <input type="submit" name="changeShareAccessAFP" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
 
 <?elseif ($sec_afp[$name]['security'] == 'private'):?>
@@ -112,7 +112,7 @@ Security:
 <div id="title"><dt>User Access</dt><em>Guests have <b>no</b> access.</em></div>
 <?input_private_users($sec_afp);?>
 
-&nbsp;
-: <input type='submit' name='changeShareAccessAFP' value='Apply'><button type='button' onclick='done()'>Done</button>
+<input type="reset" value="Reset">
+: <input type="submit" name="changeShareAccessAFP" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
 <?endif;?>

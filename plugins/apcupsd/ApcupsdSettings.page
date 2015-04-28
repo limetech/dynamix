@@ -330,11 +330,12 @@ Title="UPS Settings"
 
 		<tr>
 			<td>
+        <input type="reset" value="Reset">
 				<u><a href="http://apcupsd.org/manual/manual.html" target="_blank">Online Manual</a></u>
 			</td>
 			<td>
 				<input type="submit" name="runCmd" value="Apply">
-				<button type="button" onClick="done();">Done</button>
+				<input type="button" value="Done" onclick="done()">
 			</td>
 		</tr>
 	</table>

@@ -126,8 +126,8 @@ Mover logging:
 
 > Write mover messages to the syslog file.
 
-<button type="button" onclick="resetMover(this.form)">Default</button>
-: <input type="submit" name="changeMover" value="Apply"><button type="button" onclick="done()">Done</button>
+<input type="button" value="Default" onclick="resetMover(this.form)"><input type="reset" value="Reset" onclick="setTimeout('presetMover(document.mover_schedule)',0)">
+: <input type="submit" name="changeMover" value="Apply"><input type="button" value="Done" onclick="done()">
 
 &nbsp;
 <?if (file_exists("/var/run/mover.pid")):?>

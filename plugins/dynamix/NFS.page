@@ -16,8 +16,8 @@ Icon="linux-logo.png"
 ?>
 <script>
 function checkNFSenable() {	
-	var form = document.nfs_enable;
-	form.fuse_remember.disabled = form.shareNFSEnabled.value=="no";	
+  var form = document.nfs_enable;
+  form.fuse_remember.disabled = form.shareNFSEnabled.value=="no";	
 }
 $(checkNFSenable);
 </script>
@@ -57,6 +57,6 @@ Tunable (fuse_remember):
 > 108 bytes per file/directory name cached.  Depending how much RAM is installed in your server and how many
 > files/directories you access via NFS this may or may not lead to out-of-memory conditions.
 
-&nbsp;
-: <input type="submit" name="changeShare" value="Apply"><button type="button" onclick="done()">Done</button>
+<input type="reset" value="Reset" onclick="setTimeout(checkNFSenable,0)">
+: <input type="submit" name="changeShare" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>

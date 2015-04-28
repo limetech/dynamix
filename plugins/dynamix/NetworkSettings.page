@@ -149,6 +149,6 @@ DNS Server 3:
 
 > This is the DNS server to use if DNS Servers 1 and 2 are both down.
 
-&nbsp;
-: <input type="submit" name="changeNetwork" value="Apply"><button type="button" onclick="done()">Done</button>
+<input type="reset" value="Reset" onclick="setTimeout(checkNetworkSettings,0)">
+: <input type="submit" name="changeNetwork" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>

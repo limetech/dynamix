@@ -46,8 +46,8 @@ Security:
 > **Private** No guest access at all, you select which of your users have read/write or 
 > read-only access.
 
-&nbsp;
-: <input type="submit" name="changeShareSecurity" value="Apply"><button type="button" onclick="done()">Done</button>
+<input type="reset" value="Reset">
+: <input type="submit" name="changeShareSecurity" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
 
 <?if ($sec[$name]['security'] == 'secure'):?>
@@ -56,8 +56,8 @@ Security:
 <div id="title"><dt>User Access</dt><em>Guests have <b>read-only</b> access.</em></div>
 <?input_secure_users($sec);?>
 
-&nbsp;
-: <input type='submit' name='changeShareAccess' value='Apply'><button type='button' onclick='done()'>Done</button>
+<input type="reset" value="Reset">
+: <input type="submit" name="changeShareAccess" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
 
 <?elseif ($sec[$name]['security'] == 'private'):?>
@@ -66,7 +66,6 @@ Security:
 <div id="title"><dt>User Access</dt><em>Guests have <b>no</b> access.</em></div>
 <?input_private_users($sec);?>
 
-&nbsp;
-: <input type='submit' name='changeShareAccess' value='Apply'><button type='button' onclick='done()'>Done</button>
-</form>
+<input type="reset" value="Reset">
+: <input type="submit" name="changeShareAccess" value="Apply"><input type="button" value="Done" onclick="done()">
 <?endif;?>

@@ -119,8 +119,9 @@ function mk_option_check($name, $value, $text = "") {
   }
 }
 function day_count($time) {
-  global $var;
-  $days = floor($var['currTime']/86400)-floor($time/86400);
+  $now  = new DateTime();
+  $last = new DateTime("@$time");
+  $days = date_diff($last,$now)->format('%a');
   switch (true) {
   case ($days<0):
     return "";

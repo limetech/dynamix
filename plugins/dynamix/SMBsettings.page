@@ -29,10 +29,10 @@ Enable SMB:
 > Note: changing this value with array Started may cause a brief interruption in network services.
 
 <?if ($var['fsState']=="Started"):?>
-&nbsp;
-: <input type="submit" name="changeShare" value="Apply" disabled><button type="button" onclick="done()">Done</button>
+<input type="reset" value="Reset">
+: <input type="submit" name="changeShare" value="Apply" disabled><input type="button" value="Done" onclick="done()">
 <?else:?>
-&nbsp;
-: <input type="submit" name="changeShare" value="Apply"><button type="button" onclick="done()">Done</button>
+<input type="reset" value="Reset">
+: <input type="submit" name="changeShare" value="Apply"><input type="button" value="Done" onclick="done()">
 <?endif;?>
 </form>
