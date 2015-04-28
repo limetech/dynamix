@@ -250,6 +250,6 @@ Page update frequency:
 >
 > A special option exists to disable screen updates while a parity operation is in progress. Use this option when degradation of the parity operation is observed.
 
-<input type="button" value="Default" onclick="resetDisplay(this.form);"><input type="reset" value="Reset" onclick="setTimeout(presetTime,0,document.display_settings)">
+<input type="button" value="Default" onclick="resetDisplay(this.form);"><input type="reset" value="Reset" onclick="setTimeout('presetTime(document.display_settings)',0)">
 : <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
