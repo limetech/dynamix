@@ -270,7 +270,7 @@ Notification entity:
 > Choose for each classification how you want to be notified.
 
 &nbsp;
-: <input type="button" value="Advanced view<" name="#advanced" onclick="if ($('.advanced').css('display')=='none') {$('.advanced').show(); $(this).val('Basic view');} else {$('.advanced').hide(); $(this).val('Advanced view');}">
+: <input type="button" value="Advanced view" name="#advanced" onclick="if ($('.advanced').css('display')=='none') {$('.advanced').show(); $(this).val('Basic view');} else {$('.advanced').hide(); $(this).val('Advanced view');}">
 
 <span class="advanced" style="display:none">SMART attribute notifications:</span>
 : <span class="advanced" style="display:none"><input type="checkbox" name="a1" value="5"<?=in_array(5,$events) ? ' checked' : ''?>><span style="display:inline-block;width:72px">5</span>Reallocated sectors count</span>
