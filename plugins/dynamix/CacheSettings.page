@@ -59,6 +59,6 @@ Min. free space:
 > **2GB** => 2,000,000,000 bytes<br>
 > **2000000** => 2,048,000,000 bytes
 
-<?if ($var['fsState']=='Stopped'):?><input type="reset" value="Reset" onclick="setTimeout(check_cache_settings,0)"><?else:?>&nbsp;<?endif;?>
+<?if ($disabled):?>&nbsp;<?else:?><input type="reset" value="Reset" onclick="setTimeout(check_cache_settings,0)"><?endif;?>
 : <input type="submit" name="changeShare" value="Apply" <?=$disabled?>><input type="button" value="Done" onclick="done()"> <?=$disabled ? "Array must be <strong>Stopped</strong> to change" : ""?>
 </form>

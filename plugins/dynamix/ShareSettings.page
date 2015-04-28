@@ -102,6 +102,6 @@ Excluded disk(s):
 > **Note:** Each separate User Share also includes its own set of Included and Excluded disks which represent
 > a subset of the Included/Excluded disks defined here.
 
-<?if ($var['fsState']=='Stopped'):?><input type="reset" value="Reset" onclick="setTimeout(prepareShareSettings,0)"><?else:?>&nbsp;<?endif;?>
+<?if ($disabled):?>&nbsp;<?else:?><input type="reset" value="Reset" onclick="setTimeout(check_cache_settings,0)"><?endif;?>
 : <input type="submit" name="changeShare" value="Apply" <?=$disabled?>><input type="button" value="Done" onclick="done()"> <?=$disabled ? "Array must be <strong>Stopped</strong> to change" : ""?>
 </form>
