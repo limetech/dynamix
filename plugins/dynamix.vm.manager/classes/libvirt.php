@@ -406,11 +406,10 @@
 							$disk['bus'] = 'virtio';
 						}
 
-						if (empty($disk['dev'])) {
+						if (empty($disk['dev']) || !in_array($disk['dev'], $arrAvailableDevs)) {
 							$disk['dev'] = array_shift($arrAvailableDevs);
-						} else if (in_array($disk['dev'], $arrAvailableDevs)) {
-							unset($arrAvailableDevs[$disk['dev']]);
 						}
+						unset($arrAvailableDevs[$disk['dev']]);
 
 						$bootorder = '';
 						if (!in_array(1, $arrUsedBootOrders)) {
