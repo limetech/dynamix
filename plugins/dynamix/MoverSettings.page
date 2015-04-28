@@ -126,7 +126,7 @@ Mover logging:
 
 > Write mover messages to the syslog file.
 
-<input type="button" value="Default" onclick="resetMover(this.form)"><input type="reset" value="Reset" onclick="setTimeout('presetMover(document.mover_schedule)',0)">
+<input type="button" value="Default" onclick="resetMover(this.form)"><input type="reset" value="Reset" onclick="setTimeout(presetMover,0,document.mover_schedule)">
 : <input type="submit" name="changeMover" value="Apply"><input type="button" value="Done" onclick="done()">
 
 &nbsp;
