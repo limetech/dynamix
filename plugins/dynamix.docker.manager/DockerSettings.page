@@ -125,7 +125,7 @@ Docker image:
 : <input type="button" id="applyBtn" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
 
-<div id="title"><img src="/plugins/dynamix.docker.manager/icons/vcard.png" class="icon">Docker volume info</div>
+<div id="title"><span class="left"><img src="/plugins/dynamix.docker.manager/icons/vcard.png" class="icon">Docker volume info</span></div>
 &nbsp;
 : <?echo "<pre>".shell_exec("btrfs filesystem show /var/lib/docker")."</pre>";?>
 
