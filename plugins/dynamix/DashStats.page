@@ -204,9 +204,9 @@ echo "<td>Array Status</td>".implode('',$row0);
 for ($c=0; $c<$cores; $c+=2):
   if ($c) echo "<tr>";
   if ($c+1<$cores)
-    echo "<td>core ".($c+1)." / ".($c+2)."</td><td class='blue' id='cpu{$c}'>"."</td><td class='blue' id='cpu".($c+1)."'></td>";
+    echo "<td>core ".($c)." / ".($c+1)."</td><td class='blue' id='cpu{$c}'>"."</td><td class='blue' id='cpu".($c+1)."'></td>";
   else
-    echo "<td>core ".($c+1)."</td><td colspan='2' class='blue' id='cpu{$c}'>";
+    echo "<td>core ".($c)."</td><td colspan='2' class='blue' id='cpu{$c}'>";
   echo "</tr>";
 endfor;
 if ($fans>0):
@@ -215,9 +215,9 @@ if ($fans>0):
   for ($f=0; $f<$fans; $f+=2):
     if ($f) echo "<tr>";
     if ($f+1<$fans)
-      echo "<td>fan ".($f+1)." / ".($f+2)."</td><td class='blue' id='fan{$f}'>"."</td><td class='blue' id='fan".($f+1)."'></td>";
+      echo "<td>fan ".($f)." / ".($f+1)."</td><td class='blue' id='fan{$f}'>"."</td><td class='blue' id='fan".($f+1)."'></td>";
     else
-      echo "<td>fan ".($f+1)."</td><td colspan='2' class='blue' id='fan{$f}'>";
+      echo "<td>fan ".($f)."</td><td colspan='2' class='blue' id='fan{$f}'>";
     echo "</tr>";
   endfor;
 endif;
