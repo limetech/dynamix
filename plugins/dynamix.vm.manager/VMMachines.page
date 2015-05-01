@@ -169,8 +169,8 @@ if ($action) {
   	      				<thead>
   	      				<th class='header'><i class='fa fa-th-list'></i></th>
   		          		<th class='header'>Name</th>
-   	         	   <th class='header'>vCPU</th>
-							<th class='header'>RAM (MiB)</th>
+   	         	   <th class='header'>CPUs</th>
+							<th class='header'>Memory</th>
          	     		<th class='header'>Hard Drive(s)</th>
               		 	<th class='header'>VNC Port</th>
               			<th class='header'>Autostart</th>
@@ -240,41 +240,8 @@ if ($action) {
         	      <td>
 						<a href='#' onclick=\"return toggle_id('name$i');\" title='click for more domain info'>$name</a>
                </td>
-               <td>";
-     		/* display and change vcpus */
-         /*
-	     	if ($state == 'shutoff'){
-				echo	'<select name="vcpu_count" class="narrow" onchange="location = this.options[this.selectedIndex].value;" title="define number of vpus for domain">';
-	  			for ($ii = 1; $ii <= $maxcpu; $ii++) {
-        			echo "<option value='?subaction=vcpu-change&amp;vcpu=$ii&amp;uuid=$uuid'";
-        			if ($ii == $vcpu)
-     	   			echo ' selected="selected"';
-          		echo ">$ii</option>";
-           	}
-				echo "</select>";
-			}
-			else
-         */
-				echo $vcpu;
-         echo "</td>
-               <td>";
-			/* display memory*/
-         /*
-     		if ($state == 'shutoff') {
-     			echo '<select name="memory" class="narrow" onchange="location = this.options[this.selectedIndex].value;" title="define the amount memory">';
-				echo "<option value=''>*****</option>";
-        		for ($ii = 1; $ii <= ($maxmem*2); $ii++) {
-        			$mem2 = ($ii*512);
-         		echo "<option value='?subaction=memory-change&amp;uuid=$uuid&amp;memory=$mem2'";
-					if ((int)$mem == $mem2)
-						echo " selected";
-         		echo ">$mem2</option>";
-				}
-				echo "</select>";
-			} else
-         */
-     			echo $mem;
-         echo "</td>
+               <td>$vcpu</td>
+               <td>$mem</td>
                <td title='$diskdesc'>$disks</td>
                <td>$vncport</td>
                <td><input class='autostart' type='checkbox' name='auto_$name' title='Toggle VM auostart' $auto uuid='$uuid'></td>
@@ -284,17 +251,17 @@ if ($action) {
          if ($vnc) {
 			   echo "<a class='btn btn-sm btn-primary' onClick=\"window.open('$vnc','_blank','scrollbars=yes,resizable=yes'); return false;\" title='open VNC connection'><i class='fa fa-desktop'></i></a> | ";
          }
-         echo "<a class='btn btn-sm btn-warning' href='?subaction=domain-pause&amp;uuid=$uuid' title='Pause domain'><i class='fa fa-pause'></i></a> |
+         echo "<a class='btn btn-sm btn-danger' href='?subaction=domain-stop&amp;uuid=$uuid' title='safely shutdown domain'><i class='fa fa-power-off'></i></a> |
+               <a class='btn btn-sm btn-warning' href='?subaction=domain-pause&amp;uuid=$uuid' title='Pause domain'><i class='fa fa-pause'></i></a> |
                <a class='btn btn-sm btn-primary' href='?subaction=domain-restart&amp;uuid=$uuid' title='restart domain'><i class='fa fa-refresh'></i></a> |
                <a class='btn btn-sm btn-warning' href='?subaction=domain-save&amp;uuid=$uuid' title='Suspend to disk, save domain state'><i class='fa fa-download'></i></a> |
-               <a class='btn btn-sm btn-danger' href='?subaction=domain-stop&amp;uuid=$uuid' title='safely shutdown domain'><i class='fa fa-power-off'></i></a> |
                <a class='btn btn-sm btn-default' href='?subaction=domain-destroy&amp;uuid=$uuid' onClick=\"return confirm('Are your sure you want to force shutdown $name?')\" title='force domain to shutdown'><i class=\"fa fa-bomb red\" style=\"padding: 0\"></i></a>";
  		}else {
         	if ($state == 'paused' | $state == 'unknown')
-        		echo "<a class='btn btn-sm btn-success' href='?subaction=domain-resume&amp;uuid=$uuid' title='resume domain'><i class='fa fa-play'></i></a> |
+        		echo "<a class='btn btn-sm btn-success' href='?subaction=domain-resume&amp;uuid=$uuid' title='resume domain'><i class='fa fa-power-off'></i></a> |
                   <a class='btn btn-sm btn-warning' href='?subaction=domain-save&amp;uuid=$uuid' title='Suspend to disk, save domain state'><i class='fa fa-download'></i></a>";
 			else
-        		echo "<a class='btn btn-sm btn-success' href='?subaction=domain-start&amp;uuid=$uuid' title='start domain'><i class='fa fa-play'></i></a>";
+        		echo "<a class='btn btn-sm btn-success' href='?subaction=domain-start&amp;uuid=$uuid' title='start domain'><i class='fa fa-power-off'></i></a>";
 		}
       if ($state == 'shutoff')
       	echo " | <a class='btn btn-sm btn-warning' href='?subaction=domain-undefine&amp;uuid=$uuid' onClick=\"return confirm('Remove $name definition?')\" title='remove $name definition'><i class='fa fa-minus'></i></a>
