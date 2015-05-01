@@ -816,7 +816,7 @@ $(function() {
 			var $other_sections = $input.closest('table').find('.disk_file_options');
 
 			$.get("/plugins/dynamix.vm.manager/VMajax.php?action=file-info&file=" + encodeURIComponent($input.val()), function( info ) {
-				if (info.isfile) {
+				if (info.isfile || info.isblock) {
 					slideUpRows($other_sections);
 
 					$other_sections.filter('.advanced').removeClass('advanced').addClass('wasadvanced');
