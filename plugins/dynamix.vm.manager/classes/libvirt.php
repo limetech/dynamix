@@ -48,6 +48,18 @@
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
+		function get_machine_types($arch = 'x86_64' /* or 'i686' */) {
+			$tmp = libvirt_connect_get_machine_types($this->conn);
+
+			if (!$tmp)
+				return $this->_set_last_error();
+
+			if (empty($tmp[$arch]))
+				return [];
+
+			return $tmp[$arch];
+		}
+
 		function get_default_emulator() {
 			$tmp = libvirt_connect_get_capabilities($this->conn, '//capabilities/guest/arch/domain/emulator');
 			return ($tmp) ? $tmp : $this->_set_last_error();
@@ -406,11 +418,10 @@
 							$disk['bus'] = 'virtio';
 						}
 
-						if (empty($disk['dev'])) {
+						if (empty($disk['dev']) || !in_array($disk['dev'], $arrAvailableDevs)) {
 							$disk['dev'] = array_shift($arrAvailableDevs);
-						} else if (in_array($disk['dev'], $arrAvailableDevs)) {
-							unset($arrAvailableDevs[$disk['dev']]);
 						}
+						unset($arrAvailableDevs[$disk['dev']]);
 
 						$bootorder = '';
 						if (!in_array(1, $arrUsedBootOrders)) {

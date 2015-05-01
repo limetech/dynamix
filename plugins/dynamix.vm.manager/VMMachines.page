@@ -167,13 +167,13 @@ if ($action) {
 	echo "<table class='tablesorter kvm' id='kvm_table'>
   	      			<tr>
   	      				<thead>
-  	      				<th class='header'><i class='glyphicon glyphicon-th-list'></i></th>
-  		          		<th class='header'><a href='#' onClick='window.location.reload()'>Name</a></th>
-   	         	   <th class='header'>vCPU</th>
-							<th class='header'>RAM (MiB)</th>
+  	      				<th class='header'><i class='fa fa-th-list'></i></th>
+  		          		<th class='header'>Name</th>
+   	         	   <th class='header'>CPUs</th>
+							<th class='header'>Memory</th>
          	     		<th class='header'>Hard Drive(s)</th>
-              		 	<th class='header'>ID/VNC Port</th>
-              			<th class='header'>Auto</th>
+              		 	<th class='header'>VNC Port</th>
+              			<th class='header'>Autostart</th>
               			<th class='header'>Action</th><th class='header'></th><th class='header'></th>
               			</thead>
               			<tbody>
@@ -196,15 +196,16 @@ if ($action) {
       $id = $lv->domain_get_id($res);
       $state = $lv->domain_state_translate($dom['state']);
    	if ($state == 'running') {
-		   $mem = number_format($dom['memory'] / 1024, 0, '.', ' ');
-		 	$color = 'green';
+         $mem = $dom['memory'] / 1024;
+		 	$color = 'circle started';
 		}else{
 			$mem = $lv->domain_get_memory($res)/1024;
 			if($state == 'paused')
-			 	$color = 'yellow';
+			 	$color = 'pause paused';
 			else
-      	  	$color = 'red';
+      	  	$color = 'square stopped';
       }
+      $mem = number_format($mem, 0);
    	$vcpu = $dom['nrVirtCpu'];
 		$auto = $lv->domain_get_autostart($name) ? 'checked="checked"':"";
       if (($diskcnt = $lv->get_disk_count($res)) > 0) {
@@ -214,14 +215,17 @@ if ($action) {
         	$disks = '-';
          $diskdesc = '';
       }
+
       $vncport = $lv->domain_get_vnc_port($res);
-      $wsport = $lv->domain_get_ws_port($res);
-		if ($vncport < 0){
-        	$vnc = '-';
-        	$wsport = '-';
-        	$vncport = "auto";
-      }else
-         $vnc = '/plugins/dynamix.vm.manager/vnc.html?autoconnect=true&host='.$var['IPADDR'].'&port='.$wsport;
+
+      $vnc = '';
+      if ($vncport > 0) {
+         $wsport = $lv->domain_get_ws_port($res);
+         $vnc = '/plugins/dynamix.vm.manager/vnc.html?autoconnect=true&host=' . $var['IPADDR'] . '&port=' . $wsport;
+      } else {
+        	$vncport = ($vncport < 0) ? "auto" : "";
+      }
+
 		$bootdev = $lv->domain_get_boot_devices($name)[0];
 
       unset($tmp);
@@ -231,82 +235,41 @@ if ($action) {
 		//Domain information
       echo "<tr style='background-color:".bcolor($i,$theme)."'>
       			<td>
-						<img src='/plugins/dynamix.vm.manager/images/".$color."-on.png' title='$state'>
+                  <i class='fa iconstatus fa-$color' title='$state'></i>
       			</td>
         	      <td>
-						<a href='#' onclick=\"toggle_id('name$i')\" title='click for more domain info'>$name</a>
+						<a href='#' onclick=\"return toggle_id('name$i');\" title='click for more domain info'>$name</a>
                </td>
-               <td>";
-     		/* display and change vcpus */
-	     	if ($state == 'shutoff'){
-				echo	'<select name="vcpu_count" class="narrow" onchange="location = this.options[this.selectedIndex].value;" title="define number of vpus for domain">';
-	  			for ($ii = 1; $ii <= $maxcpu; $ii++) {
-        			echo "<option value='?subaction=vcpu-change&amp;vcpu=$ii&amp;uuid=$uuid'";
-        			if ($ii == $vcpu)
-     	   			echo ' selected="selected"';
-          		echo ">$ii</option>";
-           	}
-				echo "</select>";
-			}
-			else
-				echo $vcpu;
-         echo "</td>
-               <td>";
-			/* display memory*/
-     		if ($state == 'shutoff') {
-     			echo '<select name="memory" class="narrow" onchange="location = this.options[this.selectedIndex].value;" title="define the amount memory">';
-				echo "<option value=''>*****</option>";
-        		for ($ii = 1; $ii <= ($maxmem*2); $ii++) {
-        			$mem2 = ($ii*512);
-         		echo "<option value='?subaction=memory-change&amp;uuid=$uuid&amp;memory=$mem2'";
-					if ((int)$mem == $mem2)
-						echo " selected";
-         		echo ">$mem2</option>";
-				}
-				echo "</select>";
-			} else
-     			echo $mem;
-         echo "</td>
+               <td>$vcpu</td>
+               <td>$mem</td>
                <td title='$diskdesc'>$disks</td>
-               <td>$id / $vncport</td>
-               <td><input class='checkbox' type='checkbox' name='auto_$name' title='Toggle VM auostart' $auto onClick=\"javascript:location.href='?subaction=domain-autostart&amp;uuid=$uuid'\" ></td>
+               <td>$vncport</td>
+               <td><input class='autostart' type='checkbox' name='auto_$name' title='Toggle VM auostart' $auto uuid='$uuid'></td>
                <td>";
 		//Domain Action Buttons
       if ($state == 'running'){
-			echo "<button class='btn btn-sm btn-primary' onClick=\"window.open('$vnc','_blank','scrollbars=yes,resizable=yes'); return false;\"
-      	  			title='open VNC connection'><i class='glyphicon glyphicon-eye-open'></i></button> |
-           		<button class='btn btn-sm btn-warning' onClick=\"javascript:location.href='?subaction=domain-pause&amp;uuid=$uuid'\"
-        				title='Pause domain'><i class='glyphicon glyphicon-pause'></i></button> |
-            	<button class='btn btn-sm btn-primary' onClick=\"javascript:location.href='?subaction=domain-restart&amp;uuid=$uuid'\"
-        				title='restart domain'><i class='glyphicon glyphicon-refresh'></i></button> |
-        			<button class='btn btn-sm btn-warning' onClick=\"javascript:location.href='?subaction=domain-save&amp;uuid=$uuid'\"
-        				title='Suspend to disk, save domain state'><i class='glyphicon glyphicon-save'></i></button> |
-        			<button class='btn btn-sm btn-danger' onClick=\"javascript:location.href='?subaction=domain-stop&amp;uuid=$uuid'\"
-        				title='safely shutdown domain'><i class='glyphicon glyphicon-stop'></i></button> |
-              	<a class='btn btn-sm btn-default' href=\"?subaction=domain-destroy&amp;uuid=$uuid\"
-              		onClick=\"return confirm('Are your sure you want to force shutdown $name?')\" title='force domain to shutdown'><i class=\"glyphicon glyphicon-eject\"></i></a>";
+         if ($vnc) {
+			   echo "<a class='btn btn-sm btn-primary' onClick=\"window.open('$vnc','_blank','scrollbars=yes,resizable=yes'); return false;\" title='open VNC connection'><i class='fa fa-desktop'></i></a> | ";
+         }
+         echo "<a class='btn btn-sm btn-danger' href='?subaction=domain-stop&amp;uuid=$uuid' title='safely shutdown domain'><i class='fa fa-power-off'></i></a> |
+               <a class='btn btn-sm btn-warning' href='?subaction=domain-pause&amp;uuid=$uuid' title='Pause domain'><i class='fa fa-pause'></i></a> |
+               <a class='btn btn-sm btn-primary' href='?subaction=domain-restart&amp;uuid=$uuid' title='restart domain'><i class='fa fa-refresh'></i></a> |
+               <a class='btn btn-sm btn-warning' href='?subaction=domain-save&amp;uuid=$uuid' title='Suspend to disk, save domain state'><i class='fa fa-download'></i></a> |
+               <a class='btn btn-sm btn-default' href='?subaction=domain-destroy&amp;uuid=$uuid' onClick=\"return confirm('Are your sure you want to force shutdown $name?')\" title='force domain to shutdown'><i class=\"fa fa-bomb red\" style=\"padding: 0\"></i></a>";
  		}else {
         	if ($state == 'paused' | $state == 'unknown')
-        		echo "<button class='btn btn-sm btn-success' onClick=\"javascript:location.href='?subaction=domain-resume&amp;uuid=$uuid'\"
-        				title='resume domain'><i class='glyphicon glyphicon-play'></i></button> |
-        			<button class='btn btn-sm btn-warning' onClick=\"javascript:location.href='?subaction=domain-save&amp;uuid=$uuid'\"
-        				title='Suspend to disk, save domain state'><i class='glyphicon glyphicon-save'></i></button>";
+        		echo "<a class='btn btn-sm btn-success' href='?subaction=domain-resume&amp;uuid=$uuid' title='resume domain'><i class='fa fa-power-off'></i></a> |
+                  <a class='btn btn-sm btn-warning' href='?subaction=domain-save&amp;uuid=$uuid' title='Suspend to disk, save domain state'><i class='fa fa-download'></i></a>";
 			else
-        		echo "<button class='btn btn-sm btn-success' onClick=\"javascript:location.href='?subaction=domain-start&amp;uuid=$uuid'\"
-        				title='start domain'><i class='glyphicon glyphicon-play'></i></button>";
+        		echo "<a class='btn btn-sm btn-success' href='?subaction=domain-start&amp;uuid=$uuid' title='start domain'><i class='fa fa-power-off'></i></a>";
 		}
       if ($state == 'shutoff')
-      	echo " | <a class='btn btn-sm btn-warning' href='?subaction=domain-undefine&amp;uuid=$uuid'
-          		 onClick=\"return confirm('Remove $name definition?')\" title='remove $name definition'><i class='glyphicon glyphicon-minus'></i></a>
-					 | <a class='btn btn-sm btn-danger' href='?subaction=domain-delete&amp;uuid=$uuid'
-          		 onClick=\"return confirm('Completely remove $name xml and image?')\" title='remove $name xml and image'><i class=' glyphicon glyphicon-remove'></i></a>
-          		  | <button class='btn btn-sm btn-info' onClick=\"javascript:location.href='VMs/UpdateVM?uuid=$uuid'\"
-          title='edit domain'><i class='glyphicon glyphicon-pencil'></i></button>
-          | <button class='btn btn-sm btn-info' onClick=\"javascript:location.href='VMs/UpdateVM?template=XML_Expert&amp;uuid=$uuid'\"
-          title='edit domain XML'><i class='fa fa-code'></i></button>";
+      	echo " | <a class='btn btn-sm btn-warning' href='?subaction=domain-undefine&amp;uuid=$uuid' onClick=\"return confirm('Remove $name definition?')\" title='remove $name definition'><i class='fa fa-minus'></i></a>
+					 | <a class='btn btn-sm btn-danger' href='?subaction=domain-delete&amp;uuid=$uuid' onClick=\"return confirm('Completely remove $name xml and image?')\" title='remove $name xml and image'><i class='fa fa-trash'></i></a>
+          		 | <a class='btn btn-sm btn-info' href='VMs/UpdateVM?uuid=$uuid' title='edit domain'><i class='fa fa-pencil'></i></a>
+                | <a class='btn btn-sm btn-info' href='VMs/UpdateVM?template=XML_Expert&amp;uuid=$uuid' title='edit domain XML'><i class='fa fa-code'></i></a>";
 		else
-			echo " | <button class='btn btn-sm btn-info' onClick=\"javascript:location.href='VMs/UpdateVM?template=XML_Expert&amp;uuid=$uuid'\"
-          title='view domain XML'><i class=\"fa fa-code\"></i></button>";
+			echo " | <a class='btn btn-sm btn-info' href='VMs/UpdateVM?template=XML_Expert&amp;uuid=$uuid' title='view domain XML'><i class='fa fa-code'></i></a>";
 			echo "</td>
 			</tr>
 			<tr id='name$i' style='display: none'>";
@@ -314,7 +277,7 @@ if ($action) {
          echo "<td colspan='8'><table class='tablesorter domdisk' id='domdisk_table'>
          			<tr>
          				<thead>
-                  	<th class='header'><i class='glyphicon glyphicon-hdd '></i><b> Disk devices &nbsp;</b>
+                  	<th class='header'><i class='fa fa-hdd-o'></i><b> Disk devices &nbsp;</b>
                   	<select name='boot_dev' class='narrow' onchange='location = this.options[this.selectedIndex].value;' title='change boot device'>
                   	<option ";
                //boot device select
@@ -398,7 +361,7 @@ if ($action) {
                      if ($state == 'shutoff')
                  	      echo "remove <a href='?subaction=disk-remove&amp;uuid=$uuid&amp;dev=$dev'
                   	      onclick=\"return confirm('Disk is not deleted. Remove from domain?')\" title='remove disk from domain'>
-                  	      <i class='glyphicon glyphicon-remove red'></i></a>";
+                  	      <i class='fa fa-trash-o red'></i></a>";
                  	   else
                  	   	echo "N/A";
 					echo '</td>
@@ -412,9 +375,9 @@ if ($action) {
          /*	echo "<table class='tablesorter domsnap' id='backup_table'>
 		        	      <tr>
 		        	      <thead>
-      	      	   	<th class='header'><i class='glyphicon glyphicon-floppy-disk '></i><b> Backups &nbsp;&nbsp;&nbsp;</b>";
+      	      	   	<th class='header'><i class='fa fa-floppy-o'></i><b> Backups &nbsp;&nbsp;&nbsp;</b>";
       	          if ($state == 'shutoff')
-      	          	echo "<a href='?subaction=backup-create&amp;uuid=$uuid' title='create a backup of current domain'><i class='glyphicon glyphicon-plus green'></i></a>";
+      	          	echo "<a href='?subaction=backup-create&amp;uuid=$uuid' title='create a backup of current domain'><i class='fa fa-plus green'></i></a>";
       	          echo	"</th>
          	       		<th class='header'>Name</th>
          	       		<th class='header'>Date</th>
@@ -449,10 +412,10 @@ if ($action) {
 									 </span></form>
 								</td>
    	                  <td>
-   	                  	revert &nbsp;<a href='?subaction=backup-revert&amp;uuid=$uuid&amp;backup=$backup'><i class='glyphicon glyphicon-refresh lightblue'></i></a>
+   	                  	revert &nbsp;<a href='?subaction=backup-revert&amp;uuid=$uuid&amp;backup=$backup'><i class='fa fa-refresh lightblue'></i></a>
             	         </td>
    	                  <td>
-									delete&nbsp;<a href='?subaction=backup-delete&amp;uuid=$uuid&amp;backup=$backup'><i class='glyphicon glyphicon-remove red'></i></a>
+									delete&nbsp;<a href='?subaction=backup-delete&amp;uuid=$uuid&amp;backup=$backup'><i class='fa fa-remove red'></i></a>
             	          </td>
                	   </tr>";
 				}
@@ -473,9 +436,9 @@ if ($action) {
          	echo "<table class='tablesorter domsnap' id='domsnap_table'>
 		        	      <tr>
 		        	      <thead>
-      	      	   	<th class='header'><i class='glyphicon glyphicon-camera '></i><b> Snapshots </b>";
+      	      	   	<th class='header'><i class='fa fa-camera-retro'></i><b> Snapshots </b>";
   	         if ($state == 'shutoff')
-						echo "<a href='?subaction=snap-create&amp;uuid=$uuid' title='create a snapshot of current domain state'><i class='glyphicon glyphicon-plus green'></i></a>";
+						echo "<a href='?subaction=snap-create&amp;uuid=$uuid' title='create a snapshot of current domain state'><i class='fa fa-plus green'></i></a>";
 						echo "</th>
          	       		<th class='header'>Name</th>
          	       		<th class='header'>Date</th>
@@ -511,10 +474,10 @@ if ($action) {
 									 </span></form>
 								</td>
    	                  <td>
-   	                  	revert &nbsp;<a href='?subaction=snap-revert&amp;uuid=$uuid&amp;snap=$snap'><i class='glyphicon glyphicon-refresh lightblue'></i></a>
+   	                  	revert &nbsp;<a href='?subaction=snap-revert&amp;uuid=$uuid&amp;snap=$snap'><i class='fa fa-refresh lightblue'></i></a>
             	         </td>
    	                  <td>
-									delete&nbsp;<a href='?subaction=snap-delete&amp;uuid=$uuid&amp;snap=$snap'><i class='glyphicon glyphicon-remove red'></i></a>
+									delete&nbsp;<a href='?subaction=snap-delete&amp;uuid=$uuid&amp;snap=$snap'><i class='fa fa-trash red'></i></a>
             	          </td>
                	   </tr>";
 				}
@@ -555,12 +518,12 @@ function vncOpen() {
 
 function toggle_id(itemID){
    if ((document.getElementById(itemID).style.display == 'none')) {
-      document.getElementById(itemID).style.display = 'table-row';
-      event.preventDefault();
+      slideDownRows($('#'+itemID));
    } else {
-      document.getElementById(itemID).style.display = 'none';
-      event.preventDefault();
+      slideUpRows($('#'+itemID));
    }
+
+   return false;
 }
 
 function showInput(){
@@ -577,11 +540,20 @@ function hideInput(){
 }
 
 $(function() {
-  $('.text').click(showInput);
-  $('.input').blur(hideInput);
-  $('#btnAddVM').click(function AddVMEvent() {
-    window.location = '/VMs/AddVM';
-  });
+   $('.text').click(showInput);
+   $('.input').blur(hideInput);
+   $('#btnAddVM').click(function AddVMEvent() {
+      window.location = '/VMs/AddVM';
+   });
+
+   $('.autostart').switchButton({
+      labels_placement: "right"
+   });
+   $('.autostart').change(function () {
+      $.post( "/plugins/dynamix.vm.manager/VMajax.php", { action: "domain-autostart", uuid: $(this).attr('uuid'), autostart: $(this).prop('checked'), response: "json" }, function( data ) {
+         $(this).prop('checked', data.autostart );
+      }, "json");
+   });
 });
 </script>
 
