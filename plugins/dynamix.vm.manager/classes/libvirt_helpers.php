@@ -205,10 +205,35 @@
 
 
 	function getValidMachineTypes() {
-		$arrValidMachineTypes = [
-			'q35' => 'Q35',
-			'pc' => 'i440fx'
-		];
+		global $lv;
+
+		$arrValidMachineTypes = [];
+
+		$arrQEMUInfo = $lv->get_connect_information();
+		$arrMachineTypes = $lv->get_machine_types('x86_64');
+
+		$strQEMUVersion = $arrQEMUInfo['hypervisor_major'] . '.' .  $arrQEMUInfo['hypervisor_minor'];
+
+		foreach ($arrMachineTypes as $arrMachine) {
+			if ($arrMachine['name'] == 'q35') {
+				// Latest Q35
+				$arrValidMachineTypes[$arrMachine['name']] = 'Q35-' . $strQEMUVersion;
+			}
+			if (strpos($arrMachine['name'], 'q35-') !== false) {
+				// Prior releases of Q35
+				$arrValidMachineTypes[$arrMachine['name']] = str_replace(['q35', 'pc-'], ['Q35', ''], $arrMachine['name']);
+			}
+			if ($arrMachine['name'] == 'pc') {
+				// Latest i440fx
+				$arrValidMachineTypes[$arrMachine['name']] = 'i440fx-' . $strQEMUVersion;
+			}
+			if (strpos($arrMachine['name'], 'i440fx-') !== false) {
+				// Prior releases of i440fx
+				$arrValidMachineTypes[$arrMachine['name']] = str_replace('pc-', '', $arrMachine['name']);
+			}
+		}
+
+		arsort($arrValidMachineTypes);
 
 		return $arrValidMachineTypes;
 	}
@@ -354,7 +379,7 @@
 				'clock' => $lv->domain_get_clock_offset($res),
 				'os' => ($lv->domain_get_clock_offset($res) == 'localtime' ? 'windows' : 'other'),
 				'arch' => $lv->domain_get_arch($res),
-				'machine' => (strpos($lv->domain_get_machine($res), 'i440fx') !== false ? 'pc' : 'q35'),
+				'machine' => $lv->domain_get_machine($res),
 				'mem' => $lv->domain_get_current_memory($res),
 				'maxmem' => $lv->domain_get_memory($res),
 				'password' => '', //TODO?
