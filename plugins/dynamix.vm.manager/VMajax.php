@@ -40,8 +40,8 @@ $arrResponse = [];
 switch ($action) {
 
 	case 'domain-autostart':
-		$arrResponse = $lv->domain_set_autostart($domName, !empty($_REQUEST['autostart'])) ?
-						['success' => true, 'autostart' => $lv->domain_get_autostart($domName)] :
+		$arrResponse = $lv->domain_set_autostart($domName, ($_REQUEST['autostart'] != "false")) ?
+						['success' => true, 'autostart' => (bool)$lv->domain_get_autostart($domName)] :
 						['error' => $lv->get_last_error()];
 		break;
 
