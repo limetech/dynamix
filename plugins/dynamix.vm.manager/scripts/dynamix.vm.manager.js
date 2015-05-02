@@ -97,52 +97,6 @@ function toggleRows(what, val, what2, onComplete) {
 	}
 }
 
-function universalTreePicker() {
-	var input = $(this);
-	var config = input.data();
-	var picker = input.next(".fileTree");
-
-	if (picker.length === 0) {
-		$(document).mousedown(function hideTreePicker(e) {
-			var container = $(".fileTree");
-			if (!container.is(e.target) && container.has(e.target).length === 0) {
-				container.slideUp('fast');
-			}
-		});
-
-		picker = $('<div>', {'class': 'textarea fileTree'});
-
-		input.after(picker);
-	}
-
-	if (picker.is(':visible')) {
-		picker.slideUp('fast');
-	} else {
-		if (picker.html() === "") {
-			picker.html('<span style="padding-left: 20px"><img src="/webGui/images/spinner.gif"> Loading...</span>');
-
-			picker.fileTree({
-				root: config.pickroot,
-				filter: (config.pickfilter || '').split(",")
-			},
-			function(file) {
-				input.val(file).change();
-				if (config.hasOwnProperty('pickcloseonfile')) {
-					picker.slideUp('fast');
-				}
-			},
-			function(folder) {
-				if (config.hasOwnProperty('pickfolders')) {
-					input.val(folder).change();
-				}
-			});
-		}
-
-		picker.offset({left: input.position().left});
-		picker.slideDown('fast');
-	}
-}
-
 function updatePrefixLabels(category) {
 	$("#form_content table:data(category)").filter(function() {
 		return $(this).data('category') == category;
@@ -245,7 +199,7 @@ function clickAddSection() {
 			maximum: config.maximum
 		})
 		.find('tr').hide()
-		.find("input[data-pickroot]").click(universalTreePicker);
+		.find("input[data-pickroot]").fileTreeAttach();
 
 	$table.after($template);
 

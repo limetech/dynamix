@@ -165,6 +165,6 @@ $(function(){
 		}
 	});
 
-	$("input[data-pickroot]").click(universalTreePicker);
+	$("input[data-pickroot]").fileTreeAttach();
 });
 </script>

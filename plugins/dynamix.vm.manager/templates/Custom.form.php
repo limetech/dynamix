@@ -857,7 +857,7 @@ $(function() {
 		});
 	});
 
-	$("#form_content input[data-pickroot]").click(universalTreePicker);
+	$("#form_content input[data-pickroot]").fileTreeAttach();
 
 	$("#form_content #btnSubmit").click(function frmSubmit() {
 		var $button = $(this);
