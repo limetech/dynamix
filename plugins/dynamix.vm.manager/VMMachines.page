@@ -171,10 +171,9 @@ if ($action) {
   		          		<th class='header'>Name</th>
    	         	   <th class='header'>CPUs</th>
 							<th class='header'>Memory</th>
-         	     		<th class='header'>Hard Drive(s)</th>
+         	     		<th class='header'>Hard Drives</th>
               		 	<th class='header'>VNC Port</th>
               			<th class='header'>Autostart</th>
-              			<th class='header'>Action</th><th class='header'></th><th class='header'></th>
               			</thead>
               			<tbody>
             		</tr>";
@@ -188,12 +187,15 @@ if ($action) {
 			$msg = "Libvirt is not running. Goto Settings tab then click Start.";
 	} else {
 	sort($doms);
+   $contextMenus = array();
+
    for ($i = 0; $i < sizeof($doms); $i++) {
    	$name = $doms[$i];
       $res = $lv->get_domain_by_name($name);
       $uuid = libvirt_domain_get_uuid_string($res);
       $dom = $lv->domain_get_info($res);
       $id = $lv->domain_get_id($res);
+      $is_autostart = $lv->domain_get_autostart($name);
       $state = $lv->domain_state_translate($dom['state']);
    	if ($state == 'running') {
          $mem = $dom['memory'] / 1024;
@@ -207,7 +209,7 @@ if ($action) {
       }
       $mem = number_format($mem, 0);
    	$vcpu = $dom['nrVirtCpu'];
-		$auto = $lv->domain_get_autostart($name) ? 'checked="checked"':"";
+		$auto = $is_autostart ? 'checked="checked"':"";
       if (($diskcnt = $lv->get_disk_count($res)) > 0) {
         	$disks = $diskcnt.' / '.$lv->get_disk_capacity($res);
          $diskdesc = 'Current physical size: '.$lv->get_disk_capacity($res, true);
@@ -232,11 +234,38 @@ if ($action) {
       if (!$id)
         	$id = '-';
       unset($dom);
+
+      $arrIcons = [
+         '/plugins/dynamix.vm.manager/templates/images/arch.png',
+         '/plugins/dynamix.vm.manager/templates/images/centos.png',
+         '/plugins/dynamix.vm.manager/templates/images/coreos.png',
+         '/plugins/dynamix.vm.manager/templates/images/debian.png',
+         '/plugins/dynamix.vm.manager/templates/images/fedora.png',
+         '/plugins/dynamix.vm.manager/templates/images/freebsd.png',
+         '/plugins/dynamix.vm.manager/templates/images/opensuse.png',
+         '/plugins/dynamix.vm.manager/templates/images/redhat.png',
+         '/plugins/dynamix.vm.manager/templates/images/scientific_linux.png',
+         '/plugins/dynamix.vm.manager/templates/images/slackware.png',
+         '/plugins/dynamix.vm.manager/templates/images/ubuntu.png',
+         '/plugins/dynamix.vm.manager/templates/images/windows.png',
+         '/plugins/dynamix.vm.manager/templates/images/windows7.png',
+         '/plugins/dynamix.vm.manager/templates/images/windowsxp.png'
+      ];
+      shuffle($arrIcons);
+
+      $contextMenus[] = sprintf("addVMContext('%s', '%s', '%s', %s, '%s');", addslashes($name), addslashes($uuid), $state, $is_autostart?1:0, addslashes($vnc));
+
+
 		//Domain information
       echo "<tr style='background-color:".bcolor($i,$theme)."'>
-      			<td>
-                  <i class='fa iconstatus fa-$color' title='$state'></i>
-      			</td>
+               <td style=\"width: 48px; padding: 4px\">
+                  <div id=\"vm-" . htmlspecialchars($uuid) . "\" style=\"display:block; cursor:pointer\">
+                     <div style=\"position: relative; width: 48px; height: 48px; margin: 0px auto;\">
+                        <img src=\"" . $arrIcons[0] . "\" style=\"position: absolute; z-index: 1; opacity: 1.0; top: 0; bottom: 0; left: 0; right: 0; width: 48px; height: 48px;\"/>
+                        <i class=\"fa iconstatus fa-$color\" title='$state'></i>
+                     </div>
+                  </div>
+               </td>
         	      <td>
 						<a href='#' onclick=\"return toggle_id('name$i');\" title='click for more domain info'>$name</a>
                </td>
@@ -245,34 +274,8 @@ if ($action) {
                <td title='$diskdesc'>$disks</td>
                <td>$vncport</td>
                <td><input class='autostart' type='checkbox' name='auto_$name' title='Toggle VM auostart' $auto uuid='$uuid'></td>
-               <td>";
-		//Domain Action Buttons
-      if ($state == 'running'){
-         if ($vnc) {
-			   echo "<a class='btn btn-sm btn-primary' onClick=\"window.open('$vnc','_blank','scrollbars=yes,resizable=yes'); return false;\" title='open VNC connection'><i class='fa fa-desktop'></i></a> | ";
-         }
-         echo "<a class='btn btn-sm btn-danger' href='?subaction=domain-stop&amp;uuid=$uuid' title='safely shutdown domain'><i class='fa fa-power-off'></i></a> |
-               <a class='btn btn-sm btn-warning' href='?subaction=domain-pause&amp;uuid=$uuid' title='Pause domain'><i class='fa fa-pause'></i></a> |
-               <a class='btn btn-sm btn-primary' href='?subaction=domain-restart&amp;uuid=$uuid' title='restart domain'><i class='fa fa-refresh'></i></a> |
-               <a class='btn btn-sm btn-warning' href='?subaction=domain-save&amp;uuid=$uuid' title='Suspend to disk, save domain state'><i class='fa fa-download'></i></a> |
-               <a class='btn btn-sm btn-default' href='?subaction=domain-destroy&amp;uuid=$uuid' onClick=\"return confirm('Are your sure you want to force shutdown $name?')\" title='force domain to shutdown'><i class=\"fa fa-bomb red\" style=\"padding: 0\"></i></a>";
- 		}else {
-        	if ($state == 'paused' | $state == 'unknown')
-        		echo "<a class='btn btn-sm btn-success' href='?subaction=domain-resume&amp;uuid=$uuid' title='resume domain'><i class='fa fa-power-off'></i></a> |
-                  <a class='btn btn-sm btn-warning' href='?subaction=domain-save&amp;uuid=$uuid' title='Suspend to disk, save domain state'><i class='fa fa-download'></i></a>";
-			else
-        		echo "<a class='btn btn-sm btn-success' href='?subaction=domain-start&amp;uuid=$uuid' title='start domain'><i class='fa fa-power-off'></i></a>";
-		}
-      if ($state == 'shutoff')
-      	echo " | <a class='btn btn-sm btn-warning' href='?subaction=domain-undefine&amp;uuid=$uuid' onClick=\"return confirm('Remove $name definition?')\" title='remove $name definition'><i class='fa fa-minus'></i></a>
-					 | <a class='btn btn-sm btn-danger' href='?subaction=domain-delete&amp;uuid=$uuid' onClick=\"return confirm('Completely remove $name xml and image?')\" title='remove $name xml and image'><i class='fa fa-trash'></i></a>
-          		 | <a class='btn btn-sm btn-info' href='VMs/UpdateVM?uuid=$uuid' title='edit domain'><i class='fa fa-pencil'></i></a>
-                | <a class='btn btn-sm btn-info' href='VMs/UpdateVM?template=XML_Expert&amp;uuid=$uuid' title='edit domain XML'><i class='fa fa-code'></i></a>";
-		else
-			echo " | <a class='btn btn-sm btn-info' href='VMs/UpdateVM?template=XML_Expert&amp;uuid=$uuid' title='view domain XML'><i class='fa fa-code'></i></a>";
-			echo "</td>
-			</tr>
-			<tr id='name$i' style='display: none'>";
+            </tr>
+			   <tr id='name$i' style='display: none'>";
 		/* Disk device information */
          echo "<td colspan='8'><table class='tablesorter domdisk' id='domdisk_table'>
          			<tr>
@@ -539,6 +542,52 @@ function hideInput(){
     $(this).siblings('span').click(showInput);
 }
 
+function addVMContext(name, uuid, state, autostart, vncurl){
+   var opts = [{header: name}];
+
+   if (vncurl !== "") {
+      opts.push({text: 'VNC Remote', icon:'fa-desktop', href: vncurl, target: '_blank' });
+      opts.push({divider: true});
+   }
+
+   if (state == "running") {
+      opts.push({text: 'Stop', icon:'fa-stop', href: '?subaction=domain-stop&amp;uuid='+uuid });
+      opts.push({text: 'Pause', icon:'fa-pause', href: '?subaction=domain-pause&amp;uuid='+uuid });
+      opts.push({text: 'Restart', icon:'fa-refresh', href: '?subaction=domain-restart&amp;uuid='+uuid });
+      opts.push({text: 'Suspend', icon:'fa-download', href: '?subaction=domain-save&amp;uuid='+uuid });
+      opts.push({text: 'Force Stop', icon:'fa-bomb', href: '?subaction=domain-destroy&amp;uuid='+uuid, action: function(e){ confirm('Are your sure you want to force shutdown ' + name + '?') || e.preventDefault(); } });
+   } else if (state == "paused" || state == "unknown") {
+      opts.push({text: 'Resume', icon:'fa-play', href: '?subaction=domain-resume&amp;uuid='+uuid });
+      opts.push({text: 'Suspend', icon:'fa-download', href: '?subaction=domain-save&amp;uuid='+uuid });
+   } else {
+      opts.push({text: 'Start', icon:'fa-play', href: '?subaction=domain-start&amp;uuid='+uuid });
+   }
+
+   opts.push({divider: true});
+
+   if (autostart){
+      opts.push({text: 'Disable autostart', icon:'fa-check-square-o', href: '?subaction=domain-autostart&amp;uuid='+uuid });
+   } else {
+      opts.push({text: 'Enable autostart', icon:'fa-square-o', href: '?subaction=domain-autostart&amp;uuid='+uuid});
+   }
+
+   opts.push({divider: true});
+
+   if (state == "shutoff") {
+      opts.push({text: 'Edit', icon:'fa-pencil', href: 'VMs/UpdateVM?uuid='+uuid, action: function(e){ confirm('Are your sure you want edit?') || e.preventDefault(); } });
+      opts.push({text: 'Edit XML', icon:'fa-code', href: 'VMs/UpdateVM?template=XML_Expert&amp;uuid='+uuid });
+      opts.push({divider: true});
+      opts.push({text: 'Remove xml', icon:'fa-minus', href: '?subaction=domain-undefine&amp;uuid='+uuid, action: function(e){ confirm('Are your sure you want to remove the definition ' + name + '?') || e.preventDefault(); } });
+      opts.push({text: 'Remove ALL', icon:'fa-trash', href: '?subaction=domain-delete&amp;uuid='+uuid, action: function(e){ confirm('Completely REMOVE ' + name + ' disk image and definition?') || e.preventDefault(); } });
+   } else {
+      opts.push({text: 'View XML', icon:'fa-code', href: 'VMs/UpdateVM?template=XML_Expert&amp;uuid='+uuid });
+   }
+
+   context.attach('#vm-'+uuid, opts);
+}
+
+
+
 $(function() {
    $('.text').click(showInput);
    $('.input').blur(hideInput);
@@ -554,6 +603,9 @@ $(function() {
          $(this).prop('checked', data.autostart );
       }, "json");
    });
+
+   context.init({ above: false, preventDoubleContext: false });
+   <?=implode("\n\t", $contextMenus);?>
 });
 </script>
 

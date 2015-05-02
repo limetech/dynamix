@@ -661,8 +661,13 @@ table.tablesorter.domsnap td:nth-child(5){width:9%;text-align:left;}
 table.tablesorter.domsnap tr>td+td+td{width:9%;white-space:nowrap;}
 table.tablesorter.domsnap td:last-child{width:96px;padding:0;}
 
+
 .iconstatus {
-  cursor: default;
+  position: absolute;
+  z-index: 2;
+  bottom: -4px;
+  right: -4px;
+  font-size: 14px;
 }
 .iconstatus.started {
   color: #009900;

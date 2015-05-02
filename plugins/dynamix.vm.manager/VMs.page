@@ -18,6 +18,7 @@ Cond="(pgrep('libvirtd')!==false && !is_dir('/proc/xen'))"
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/context.standalone.css">
 <style type="text/css">
   body { -webkit-overflow-scrolling: touch;}
   .fileTree {
@@ -31,6 +32,7 @@ Cond="(pgrep('libvirtd')!==false && !is_dir('/proc/xen'))"
 </style>
 <script type="text/javascript" src="/webGui/scripts/jqueryFileTree.js"></script>
 <script type="text/javascript" src="/webGui/scripts/jquery.switchButton.js"></script>
+<script type="text/javascript" src="/webGui/scripts/context.js"></script>
 <script type="text/javascript" src="/plugins/dynamix.vm.manager/scripts/dynamix.vm.manager.js"></script>
 
 <?php
