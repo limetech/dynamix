@@ -93,7 +93,7 @@ if ($boolACSEnabled != $boolACSInSyslinux) {
 <input type="hidden" id="command" name="#command" value="/etc/rc.d/rc.libvirt start" />
 
 Enable VMs:
-: <select id="SERVICE" name="SERVICE" size="1">
+: <select id="SERVICE" name="SERVICE" class="narrow">
 <?= mk_option($libvirt_service, 'disable', 'No'); ?>
 <?= mk_option($libvirt_service, 'enable', 'Yes'); ?>
 </select>
@@ -130,7 +130,7 @@ Alternate Network Bridge:
 > NOTE:  You can also specify an alternate network bridge on a per-VM basis.
 
 PCIe ACS Override:
-: <select id="pcie_acs_override" size="1">
+: <select id="pcie_acs_override" class="narrow">
 <?= mk_option(($boolACSInSyslinux ? '1' : '0'), '0', 'No'); ?>
 <?= mk_option(($boolACSInSyslinux ? '1' : '0'), '1', 'Yes'); ?>
 </select>
