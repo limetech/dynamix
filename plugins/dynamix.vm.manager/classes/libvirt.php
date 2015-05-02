@@ -106,12 +106,20 @@
 			//     create folder dirname('new') if needed
 			//     create image file as new --> if size is specified
 
-			if (!empty($disk['new']) && is_file($disk['new'])) {
-				$disk['image'] = $disk['new'];
+			if (!empty($disk['new'])) {
+				if (is_file($disk['new']) || is_block($disk['new'])) {
+					$disk['image'] = $disk['new'];
+				}
 			}
 
 			if (!empty($disk['image'])) {
 				// Use existing disk image
+
+				if (is_block($disk['image'])) {
+					// Valid block device, return as-is
+					return $disk;
+				}
+
 				if (is_file($disk['image'])) {
 					$json_info = json_decode(shell_exec("qemu-img info --output json " . escapeshellarg($disk['image'])), true);
 					$disk['driver'] = $json_info['format'];
@@ -126,10 +134,28 @@
 				$disk['new'] = $disk['image'];
 			}
 
-			if (!empty($disk['new']) && !empty($disk['size'])) {
+			if (!empty($disk['new'])) {
 				// Create new disk image
 				$strImgFolder = $disk['new'];
 				$strImgPath = '';
+
+				if (strpos($strImgFolder, '/dev/') === 0) {
+					// ERROR invalid block device
+					$arrReturn = [
+						'error' => "Not a valid block device location '" . $strImgFolder . "'"
+					];
+
+					return $arrReturn;
+				}
+
+				if (empty($disk['size'])) {
+					// ERROR invalid disk size
+					$arrReturn = [
+						'error' => "Please specify a disk size for '" . $strImgFolder . "'"
+					];
+
+					return $arrReturn;
+				}
 
 				$path_parts = pathinfo($strImgFolder);
 				if (empty($path_parts['extension'])) {
@@ -352,8 +378,10 @@
 						//TODO: check if image/new is a block device
 						$diskcount++;
 
-						if (!empty($disk['new']) && is_file($disk['new'])) {
-							$disk['image'] = $disk['new'];
+						if (!empty($disk['new'])) {
+							if (is_file($disk['new']) || is_block($disk['new'])) {
+								$disk['image'] = $disk['new'];
+							}
 						}
 
 						if (!empty($disk['image'])) {
@@ -429,12 +457,18 @@
 							$arrUsedBootOrders[] = 1;
 						}
 
-						$diskstr .= "<disk type='file' device='disk'>
-										<driver name='qemu' type='{$disk['driver']}' cache='none' io='native'/>
-										<source file='{$disk['image']}'/>
-										<target bus='{$disk['bus']}' dev='{$disk['dev']}'/>
-										$bootorder
-									</disk>";
+						$strDevType = @filetype(realpath($disk['image']));
+
+						if ($strDevType == 'file' || $strDevType == 'block') {
+							$strSourceType = ($strDevType == 'file' ? 'file' : 'dev');
+
+							$diskstr .= "<disk type='" . $strDevType . "' device='disk'>
+											<driver name='qemu' type='" . $disk['driver'] . "' cache='none' io='native'/>
+											<source " . $strSourceType . "='" . $disk['image'] . "'/>
+											<target bus='" . $disk['bus'] . "' dev='" . $disk['dev'] . "'/>
+											$bootorder
+										</disk>";
+						}
 					}
 				}
 			}

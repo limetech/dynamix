@@ -219,12 +219,12 @@ switch ($action) {
 		break;
 
 	case 'file-info':
-		$file = realpath($_REQUEST['file']);
+		$file = $_REQUEST['file'];
 
 		$arrResponse = [
 			'isfile' => (!empty($file) ? is_file($file) : false),
 			'isdir' => (!empty($file) ? is_dir($file) : false),
-			'isblock' => (!empty($file) ? (@filetype($file) == 'block') : false)
+			'isblock' => (!empty($file) ? is_block($file) : false)
 		];
 
 		// if file, get size and format info
