@@ -67,7 +67,7 @@ if (file_exists($realfile)) {
 <input type="hidden" name="#file" value="<?=$cfgfile;?>" />
 <input type="hidden" id="command" name="#command" value="/etc/rc.d/rc.docker stop" />
 Enable Docker:
-: <select id="DOCKER_ENABLED" name="DOCKER_ENABLED" size="1">
+: <select id="DOCKER_ENABLED" name="DOCKER_ENABLED" class="narrow">
 <?= mk_option($dockercfg['DOCKER_ENABLED'], 'no', 'No'); ?>
 <?= mk_option($dockercfg['DOCKER_ENABLED'], 'yes', 'Yes'); ?>
 </select>
@@ -77,7 +77,7 @@ Enable Docker:
 > after the array has been started.
 
 Default image size:
-: <input id="DOCKER_IMAGE_SIZE" type="number" name="DOCKER_IMAGE_SIZE" value="<?=$dockercfg['DOCKER_IMAGE_SIZE'];?>" required="required" />GB <span id="SIZE_ERROR" class="errortext"></span>
+: <input id="DOCKER_IMAGE_SIZE" type="number" name="DOCKER_IMAGE_SIZE" value="<?=$dockercfg['DOCKER_IMAGE_SIZE'];?>" class="narrow" required="required" />GB <span id="SIZE_ERROR" class="errortext"></span>
 
 > If the system needs to create a new docker image file, this is the default size to use
 > specified in GB.
@@ -104,7 +104,7 @@ Docker image:
 <input type="hidden" name="#file" value="<?=$cfgfile;?>" />
 <input type="hidden" id="command" name="#command" value="/etc/rc.d/rc.docker start" />
 Enable Docker:
-: <select id="DOCKER_ENABLED" name="DOCKER_ENABLED" size="1">
+: <select id="DOCKER_ENABLED" name="DOCKER_ENABLED" class="narrow">
 <?= mk_option($dockercfg['DOCKER_ENABLED'], 'no', 'No'); ?>
 <?= mk_option($dockercfg['DOCKER_ENABLED'], 'yes', 'Yes'); ?>
 </select>
