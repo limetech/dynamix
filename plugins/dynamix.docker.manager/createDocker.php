@@ -448,7 +448,7 @@ if($_GET['xmlTemplate']){
         <input type="number" min="1" max="65535" name="hostPort[]" value="%s" class="textPort" %s title="Set the port you use to interact with the app."/>
       </td>
       <td>
-        <select name="portProtocol[]">
+        <select name="portProtocol[]" class="narrow">
           <option value="tcp">TCP</option>
           <option value="udp" %s>UDP</option>
         </select>
@@ -731,7 +731,7 @@ $showAdditionalInfo = true;
       <tr>
         <td>Network type:</td>
 
-        <td><select id="NetworkType" name="NetworkType" size="1">
+        <td><select id="NetworkType" name="NetworkType" class="narrow">
           <? foreach (array('bridge', 'host', 'none') as $value) {
             $selected = ($templateMode == $value) ? "selected" : "";
             echo "<option value=\"{$value}\" {$selected}>".ucwords($value)."</option>";
@@ -834,7 +834,7 @@ $showAdditionalInfo = true;
               <input type="number" min="1" max="65535" id="hostPort1" name="hostPort[]" class="textPort" title="Set the port you use to interact with the app.">
             </td>
             <td>
-              <select id="portProtocol1" name="portProtocol[]">
+              <select id="portProtocol1" name="portProtocol[]" class="narrow">
                 <option value="tcp" selected="selected">TCP</option>
                 <option value="udp">UDP</option>
               </select>
