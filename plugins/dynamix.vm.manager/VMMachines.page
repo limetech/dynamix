@@ -174,6 +174,7 @@ if ($action) {
                   <th class='header'>Hard Drives</th>
                   <th class='header'>VNC Port</th>
                   <th class='header'>Autostart</th>
+                  <th class='header'>Log</th>
                </tr>
             </thead>
             <tbody>";
@@ -272,8 +273,16 @@ if ($action) {
                <td>$mem</td>
                <td title='$diskdesc'>$disks</td>
                <td>$vncport</td>
-               <td><input class='autostart' type='checkbox' name='auto_$name' title='Toggle VM auostart' $auto uuid='$uuid'></td>
-            </tr>
+               <td><input class='autostart' type='checkbox' name='auto_$name' title='Toggle VM auostart' $auto uuid='$uuid'></td>";
+
+      // Log file
+      if (is_file('/var/log/libvirt/qemu/' . $name . '.log')) {
+         echo "<td><a href='#' onclick=\"openWindow('/usr/bin/tail -n 42 -f " . addslashes(escapeshellarg('/var/log/libvirt/qemu/' . $name . '.log')) . "', '" . addslashes($name) . " QEMU Log', 600, 900); return false;\"><img class='basic' src='/plugins/dynamix/icons/log.png'/></a></td>";
+      } else {
+         echo "<td><img class='basic' src='/plugins/dynamix/icons/log.png' style='opacity: 0.3' title='Log not available'/></a></td>";
+      }
+
+      echo "</tr>
 			   <tr id='name$i' style='display: none'>";
 		/* Disk device information */
          echo "<td colspan='8' style='overflow: hidden'>
