@@ -252,6 +252,7 @@
 			}
 			$uuid = (!empty($domain['uuid']) ? $domain['uuid'] : $this->domain_generate_uuid());
 			$machine = $domain['machine'];
+			$machine_type = (stripos($machine, 'q35') !== false ? 'q35' : 'pc');
 			$emulator = $this->get_default_emulator();
 			$arch = $domain['arch'];
 			$pae = '';
@@ -294,7 +295,7 @@
 
 			$bus = "ide";
 			$ctrl = '';
-			if ($machine == 'q35'){
+			if ($machine_type == 'q35'){
 				$bus = "sata";
 				$ctrl = "<controller type='usb' index='0' model='ich9-ehci1'/>
 						<controller type='usb' index='0' model='ich9-uhci1'/>";
@@ -566,7 +567,7 @@
 					} else {
 
 						// VGA BIOS passthrough uses qemu args and we have to manage the device (libvirt wont attach/detach the device driver to vfio-pci)
-						switch ($machine) {
+						switch ($machine_type) {
 
 							case 'q35':
 								$gpuargs .= "<qemu:arg value='-device'/>
@@ -615,7 +616,7 @@
 					} else {
 
 						// VGA BIOS passthrough uses qemu args and we have to manage the device (libvirt wont attach/detach the device driver to vfio-pci)
-						switch ($machine) {
+						switch ($machine_type) {
 
 							case 'q35':
 								$audioargs .= "<qemu:arg value='-device'/>
@@ -644,7 +645,7 @@
 
 			$cmdargs='';
 			if (!empty($gpuargs) || !empty($audioargs)) {
-				switch ($machine) {
+				switch ($machine_type) {
 
 					case 'q35':
 						$cmdargs .= "<qemu:commandline>
