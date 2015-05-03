@@ -18,11 +18,6 @@ function addDockerContainerContext(container, image, template, started, update, 
   if (template) {
     opts.push({text: 'Edit', icon:'fa-wrench', action: function(e){ e.preventDefault(); editContainer(container, template); }});
   }
-  if (autostart){
-    opts.push({text: 'Disable autostart', icon:'fa-check-square-o', action: function(e){ e.preventDefault();  autoStart(container, e); }});
-  } else {
-    opts.push({text: 'Enable autostart', icon:'fa-square-o', action: function(e){ e.preventDefault(); autoStart(container, e); }});
-  }
   opts.push({divider: true});
   opts.push({text: 'Remove', icon:'fa-trash', action: function(e){ e.preventDefault(); rmContainer(container, image); }});
   context.attach('#context-'+container, opts);
