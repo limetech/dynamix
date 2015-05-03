@@ -165,18 +165,18 @@ if ($action) {
 	echo "<script>clearHistory();</script>";
 	}
 	echo "<table class='tablesorter kvm' id='kvm_table'>
-  	      			<tr>
-  	      				<thead>
-  	      				<th class='header'><i class='fa fa-th-list'></i></th>
-  		          		<th class='header'>Name</th>
-   	         	   <th class='header'>CPUs</th>
-							<th class='header'>Memory</th>
-         	     		<th class='header'>Hard Drives</th>
-              		 	<th class='header'>VNC Port</th>
-              			<th class='header'>Autostart</th>
-              			</thead>
-              			<tbody>
-            		</tr>";
+            <thead>
+               <tr>
+                  <th class='header'><i class='fa fa-th-list'></i></th>
+                  <th class='header'>Name</th>
+                  <th class='header'>CPUs</th>
+                  <th class='header'>Memory</th>
+                  <th class='header'>Hard Drives</th>
+                  <th class='header'>VNC Port</th>
+                  <th class='header'>Autostart</th>
+               </tr>
+            </thead>
+            <tbody>";
    //Get domain variables for each domain
    if ($libvirt_running == "yes")
 		$doms = $lv->get_domains();
@@ -266,9 +266,7 @@ if ($action) {
                      </div>
                   </div>
                </td>
-        	      <td>
-						<a href='#' onclick=\"return toggle_id('name$i');\" title='click for more domain info'>$name</a>
-               </td>
+        	      <td><a href='#' onclick=\"return toggle_id('name$i');\" title='click for more domain info'>$name</a></td>
                <td>$vcpu</td>
                <td>$mem</td>
                <td title='$diskdesc'>$disks</td>
@@ -277,29 +275,31 @@ if ($action) {
             </tr>
 			   <tr id='name$i' style='display: none'>";
 		/* Disk device information */
-         echo "<td colspan='8'><table class='tablesorter domdisk' id='domdisk_table'>
-         			<tr>
-         				<thead>
-                  	<th class='header'><i class='fa fa-hdd-o'></i><b> Disk devices &nbsp;</b>
-                  	<select name='boot_dev' class='narrow' onchange='location = this.options[this.selectedIndex].value;' title='change boot device'>
-                  	<option ";
-               //boot device select
-							if($bootdev == 'hd')
-								echo "selected ";
-              	echo "value='?subaction=bootdev-change&amp;uuid=$uuid&amp;bootdev=hd'>hd</option>
-              			<option ";
-							if($bootdev == 'cdrom')
-								echo "selected ";
-               echo "value='?subaction=bootdev-change&amp;uuid=$uuid&amp;bootdev=cdrom'>cd</option>
-                  	</select><font size='-6'>(boot)</font>
-                  	</th>
-                     <th class='header'>Driver type</th>
-                     <th class='header'>Dev Name</th>
-                     <th class='header'>Capacity</th>
-                		<th class='header'>Allocation</th>
-                 		<th class='header'>Actions</th><th class='header'></th>
-                 		</thead>
-                 	</tr>";
+         echo "<td colspan='8' style='overflow: hidden'>
+                  <table class='tablesorter domdisk' id='domdisk_table'>
+                     <thead>
+                        <tr>
+                           <th class='header'><i class='fa fa-hdd-o'></i><b> Disk devices &nbsp;</b>
+                              <select name='boot_dev' class='narrow' onchange='location = this.options[this.selectedIndex].value;' title='change boot device'>
+                              <option ";
+                              //boot device select
+                              if($bootdev == 'hd')
+                                 echo "selected ";
+                              echo "value='?subaction=bootdev-change&amp;uuid=$uuid&amp;bootdev=hd'>hd</option>
+                                 <option ";
+                              if($bootdev == 'cdrom')
+                                 echo "selected ";
+                              echo "value='?subaction=bootdev-change&amp;uuid=$uuid&amp;bootdev=cdrom'>cd</option>
+                              </select><font size='-6'>(boot)</font>
+                           </th>
+                           <th class='header'>Driver type</th>
+                           <th class='header'>Dev Name</th>
+                           <th class='header'>Capacity</th>
+                           <th class='header'>Allocation</th>
+                           <th class='header'>Actions</th><th class='header'></th>
+                        </tr>
+                     </thead>
+                     <tbody>";
 		/* Display domain disks */
 			$tmp = $lv->get_disk_stats($name);
          if (!empty($tmp)) {
@@ -372,7 +372,7 @@ if ($action) {
 				}
          }
 			/*end display cdrom display*/
-         echo "</table>";
+         echo "</tbody></table>";
 			unset($capacity, $dev, $disk, $type, $vcpu);
 			/* Backup  information */
          /*	echo "<table class='tablesorter domsnap' id='backup_table'>
@@ -437,8 +437,8 @@ if ($action) {
 
 			/* Snapshot  information */
          	echo "<table class='tablesorter domsnap' id='domsnap_table'>
+                     <thead>
 		        	      <tr>
-		        	      <thead>
       	      	   	<th class='header'><i class='fa fa-camera-retro'></i><b> Snapshots </b>";
   	         if ($state == 'shutoff')
 						echo "<a href='?subaction=snap-create&amp;uuid=$uuid' title='create a snapshot of current domain state'><i class='fa fa-plus green'></i></a>";
@@ -451,8 +451,9 @@ if ($action) {
   	         if ($state == 'running')
   	         	echo " <small>(stop to enable)</small>";
                   echo "</th><th class='header'></th><th class='header'></th>
-                  		</thead>
-	                  </tr>";
+	                  </tr>
+                     </thead>
+                     <tbody>";
          $tmp = $lv->domain_snapshots_list($res);
          if (!empty($tmp)) {
          	sort($tmp);
@@ -493,7 +494,7 @@ if ($action) {
    	                <td>N/A</td>
    	                <td>N/A</td>
    	            </tr>";
-     	echo '</table></td>
+     	echo '</tbody></table></td>
 			</tr>';
 		}
 	}
