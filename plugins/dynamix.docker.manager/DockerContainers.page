@@ -249,7 +249,7 @@ $(function() {
 	$('#docker_containers').tablesorter( {sortList: [[1,0]], headers: {0: {sorter: false }, 7: {sorter: false }}});
 	$('#docker_containers tr:even').addClass('odd');
 
-	context.init({ above: false, preventDoubleContext: false });
+	context.init({ preventDoubleContext: false });
 	<?=implode("\n\t", $contextMenus);?>
 });
 </script>
