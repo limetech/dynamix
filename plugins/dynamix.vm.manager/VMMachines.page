@@ -242,6 +242,7 @@ if ($action) {
          '/plugins/dynamix.vm.manager/templates/images/debian.png',
          '/plugins/dynamix.vm.manager/templates/images/fedora.png',
          '/plugins/dynamix.vm.manager/templates/images/freebsd.png',
+         '/plugins/dynamix.vm.manager/templates/images/openelec.png',
          '/plugins/dynamix.vm.manager/templates/images/opensuse.png',
          '/plugins/dynamix.vm.manager/templates/images/redhat.png',
          '/plugins/dynamix.vm.manager/templates/images/scientific_linux.png',
