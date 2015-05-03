@@ -607,7 +607,7 @@ $(function() {
       }, "json");
    });
 
-   context.init({ above: false, preventDoubleContext: false });
+   context.init({ preventDoubleContext: false });
    <?=implode("\n\t", $contextMenus);?>
 });
 </script>
