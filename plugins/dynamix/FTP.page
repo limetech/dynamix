@@ -40,7 +40,7 @@ FTP user(s):
 >
 > **Note:** do not enter user name `root` since this may cause problems in the future.
 
-&nbsp;
+<input type="reset" value="Reset">
 : <input type="submit" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
 
