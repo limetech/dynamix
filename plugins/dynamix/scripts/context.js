@@ -116,32 +116,29 @@ var context = context || (function () {
 
 		$('body').append($menu);
 
-
 		$(document).on('click', selector, function (e) {
 			e.preventDefault();
 			e.stopPropagation();
 
 			$('.dropdown-context:not(.dropdown-context-sub)').hide();
-
 			$dd = $('#dropdown-' + id);
-			if (typeof options.above == 'boolean' && options.above) {
-				$dd.addClass('dropdown-context-up').css({
-					top: e.pageY - 20 - $('#dropdown-' + id).height(),
-					left: e.pageX - 13
-				}).fadeIn(options.fadeSpeed);
+
+			var place_above = false;
+			if (typeof options.above == 'boolean') {
+				place_above = options.above;
 			} else if (typeof options.above == 'string' && options.above == 'auto') {
-				$dd.removeClass('dropdown-context-up');
-				var autoH = $dd.height() + 12;
-				if ((e.pageY + autoH) > $('html').height()) {
-					$dd.addClass('dropdown-context-up').css({
-						top: e.pageY - 20 - autoH,
-						left: e.pageX - 13
-					}).fadeIn(options.fadeSpeed);
-				}
-			} else if (typeof options.above == 'boolean' && ! options.above) {
-				$dd.css({
-					top: e.pageY + 25,
-					left: e.pageX - 13
+				place_above = ((e.pageY + $dd.height() + 32) > $(document).height());
+			}
+
+			if (place_above) {
+				$dd.addClass('dropdown-context-up').css({
+					top: e.pageY - 24 - $dd.height(),
+					left: Math.max(e.pageX - 13, 0)
+				}).fadeIn(options.fadeSpeed);
+			} else {
+				$dd.removeClass('dropdown-context-up').css({
+					top: e.pageY + 24,
+					left: Math.max(e.pageX - 13, 0)
 				}).fadeIn(options.fadeSpeed);
 			}
 		});
