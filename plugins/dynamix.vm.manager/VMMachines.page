@@ -567,14 +567,6 @@ function addVMContext(name, uuid, state, autostart, vncurl){
 
    opts.push({divider: true});
 
-   if (autostart){
-      opts.push({text: 'Disable autostart', icon:'fa-check-square-o', href: '?subaction=domain-autostart&amp;uuid='+uuid });
-   } else {
-      opts.push({text: 'Enable autostart', icon:'fa-square-o', href: '?subaction=domain-autostart&amp;uuid='+uuid});
-   }
-
-   opts.push({divider: true});
-
    if (state == "shutoff") {
       opts.push({text: 'Edit', icon:'fa-pencil', href: 'VMs/UpdateVM?uuid='+uuid });
       opts.push({text: 'Edit XML', icon:'fa-code', href: 'VMs/UpdateVM?template=XML_Expert&amp;uuid='+uuid });
