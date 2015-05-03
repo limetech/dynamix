@@ -621,8 +621,9 @@ table.tablesorter.kvm th:nth-child(6){width:9%;text-align:center;}
 table.tablesorter.kvm td:nth-child(6){width:9%;text-align:center;}
 table.tablesorter.kvm th:nth-child(7){width:80px;text-align:center;}
 table.tablesorter.kvm td:nth-child(7){width:80px;text-align:left;}
+table.tablesorter.kvm th:nth-child(8){width:24px;text-align:center;}
+table.tablesorter.kvm td:nth-child(8){width:24px;text-align:center;}
 table.tablesorter.kvm tr>td+td+td{width:9%;white-space:nowrap;}
-table.tablesorter.kvm td:last-child{width:96px;padding:0;}
 table.tablesorter.kvm-span{margin-top:-20px;}
 table.tablesorter.kvm-span tr:nth-child(odd){background:none;}
 table.tablesorter.kvm-span tr:nth-child(even){background:none;}
@@ -661,7 +662,6 @@ table.tablesorter.domsnap td:nth-child(5){width:9%;text-align:left;}
 table.tablesorter.domsnap tr>td+td+td{width:9%;white-space:nowrap;}
 table.tablesorter.domsnap td:last-child{width:96px;padding:0;}
 
-
 .iconstatus {
   position: absolute;
   z-index: 2;
@@ -669,12 +669,8 @@ table.tablesorter.domsnap td:last-child{width:96px;padding:0;}
   right: -4px;
   font-size: 14px;
 }
-.iconstatus.started {
-  color: #009900;
-}
-.iconstatus.stopped {
-  color: #EF3D47;
-}
-.iconstatus.paused {
-  color: #DEAF11;
-}
+.iconstatus.started{color:#009900;}
+.iconstatus.stopped{color:#EF3D47;}
+.iconstatus.paused{color:#DEAF11;}
+
+.log{cursor:zoom-in;}
