@@ -387,7 +387,7 @@
 
 <table class="domain_os windows">
 	<tr>
-		<td><a href="http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/" target="_blank">VirtIO Drivers ISO:</a></td>
+		<td><a href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers#Direct_download" target="_blank">VirtIO Drivers ISO:</a></td>
 		<td>
 			<input type="text" data-pickcloseonfile="true" data-pickfilter="iso" data-pickroot="<?=$domain_cfg['MEDIADIR']?>" name="media[drivers]" value="<?=$arrConfig['media']['drivers']?>" placeholder="Download, Click and Select virtio drivers image">
 		</td>
