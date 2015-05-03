@@ -575,7 +575,7 @@ function addVMContext(name, uuid, state, autostart, vncurl){
    opts.push({divider: true});
 
    if (state == "shutoff") {
-      opts.push({text: 'Edit', icon:'fa-pencil', href: 'VMs/UpdateVM?uuid='+uuid, action: function(e){ confirm('Are your sure you want edit?') || e.preventDefault(); } });
+      opts.push({text: 'Edit', icon:'fa-pencil', href: 'VMs/UpdateVM?uuid='+uuid });
       opts.push({text: 'Edit XML', icon:'fa-code', href: 'VMs/UpdateVM?template=XML_Expert&amp;uuid='+uuid });
       opts.push({divider: true});
       opts.push({text: 'Remove xml', icon:'fa-minus', href: '?subaction=domain-undefine&amp;uuid='+uuid, action: function(e){ confirm('Are your sure you want to remove the definition ' + name + '?') || e.preventDefault(); } });
