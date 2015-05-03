@@ -3,8 +3,8 @@ Title="Archived Notifications"
 ---
 <?PHP
 /* Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
- * Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+ * Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -26,7 +26,7 @@ function archiveList(init) {
     if (init) {
       $('#archive_table').tablesorter({headers:{5:{sorter:false}}});
     } else {
-      $('#archive_table').trigger('update',[$('#archive_table').get(0).config.sortList]);
+      $('#archive_table').trigger('update',true);
     }
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
     setTimeout(archiveList,<?=max(abs($display['refresh']),30000)?>);
