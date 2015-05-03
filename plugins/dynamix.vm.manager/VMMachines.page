@@ -547,7 +547,7 @@ function addVMContext(name, uuid, state, autostart, vncurl){
    var opts = [{header: name}];
 
    if (vncurl !== "") {
-      opts.push({text: 'VNC Remote', icon:'fa-desktop', href: vncurl, target: '_blank' });
+      opts.push({text: 'VNC Remote', icon:'fa-desktop', action: function(e){ e.preventDefault(); window.open(vncurl, '_blank', 'scrollbars=yes,resizable=yes'); } });
       opts.push({divider: true});
    }
 
