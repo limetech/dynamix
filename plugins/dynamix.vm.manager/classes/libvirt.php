@@ -706,6 +706,9 @@
 							<console type='pty'/>
 							$pcidevs
 							$usbstr
+							<channel type='unix'>
+								<target type='virtio' name='org.qemu.guest_agent.0'/>
+							</channel>
 							<memballoon model='virtio'>
 								<alias name='balloon0'/>
 							</memballoon>
