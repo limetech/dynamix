@@ -914,9 +914,9 @@ $(function() {
 	slideDownRows($('.domain_os.' + $("#form_content #domain_os").val()).not(isVMAdvancedMode() ? '.basic' : '.advanced'));
 
 	if ($(".gpu option[value='vnc']:selected").length) {
-		$('.vncpassword').show();
+		$('.vncpassword,.vnckeymap').not(isVMAdvancedMode() ? '.basic' : '.advanced').show();
 	} else {
-		$('.vncpassword').hide();
+		$('.vncpassword,.vnckeymap').hide();
 	}
 
 	$("#form_content .disk").not("[value='']")
