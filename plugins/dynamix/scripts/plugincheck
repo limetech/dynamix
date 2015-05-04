@@ -28,8 +28,12 @@ exec("$plugin checkall >/dev/null");
 foreach (glob("/tmp/plugins/*.plg", GLOB_NOSORT) as $file) {
   $plg = basename($file);
   $old = exec("$plugin version '/var/log/plugins/$plg'");
-  $new = exec("$plugin version '$file'");
-  if ($new && strcmp($new, $old) > 0) {
+  unset($new);
+  exec("$plugin version '$file'", $new, $error);
+  // Silently suppress bad download of PLG file
+  if ($error) continue;
+  $new = $new[0];
+  if (strcmp($new, $old) > 0) {
     $name = basename($file, '.plg');
     exec("$notify -e 'Plugin - $name [$new]' -s 'Notice [$server] - Version update $new' -d 'A new version of $name is available' -i 'normal $output' -x");
   }

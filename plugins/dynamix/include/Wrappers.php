@@ -13,7 +13,7 @@
 <?
 // Wrapper functions
 function parse_plugin_cfg($plugin, $sections=false) {
-  $ram = "plugins/$plugin/default.cfg";
+  $ram = "/usr/local/emhttp/plugins/$plugin/default.cfg";
   $rom = "/boot/config/plugins/$plugin/$plugin.cfg";
   $cfg = file_exists($ram) ? parse_ini_file($ram, $sections) : array();
   return file_exists($rom) ? array_replace_recursive($cfg, parse_ini_file($rom, $sections)) : $cfg;
