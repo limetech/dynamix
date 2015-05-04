@@ -58,6 +58,10 @@ if ($action) {
       		"$domName has been resumed" :
       		"Error: ".$lv->get_last_error();
 		}
+      elseif ($subaction == 'domain-pmwakeup') {
+         $strLastLine = system("virsh dompmwakeup $uuid", $intReturn);
+         $msg = (($intReturn == 0) ? "$domName has been resumed" : "Error: " . $strLastLine);
+      }
       elseif ($subaction == 'domain-restart') {
         	$msg = $lv->domain_reboot($domName) ?
         		"$domName has been restarted" :
@@ -567,6 +571,8 @@ function addVMContext(name, uuid, state, autostart, vncurl){
       opts.push({text: 'Restart', icon:'fa-refresh', href: '?subaction=domain-restart&amp;uuid='+uuid });
       opts.push({text: 'Suspend', icon:'fa-download', href: '?subaction=domain-save&amp;uuid='+uuid });
       opts.push({text: 'Force Stop', icon:'fa-bomb', href: '?subaction=domain-destroy&amp;uuid='+uuid, action: function(e){ confirm('Are your sure you want to force shutdown ' + name + '?') || e.preventDefault(); } });
+   } else if (state == "pmsuspended") {
+      opts.push({text: 'Resume', icon:'fa-play', href: '?subaction=domain-pmwakeup&amp;uuid='+uuid });
    } else if (state == "paused" || state == "unknown") {
       opts.push({text: 'Resume', icon:'fa-play', href: '?subaction=domain-resume&amp;uuid='+uuid });
       opts.push({text: 'Suspend', icon:'fa-download', href: '?subaction=domain-save&amp;uuid='+uuid });
