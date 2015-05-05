@@ -127,7 +127,9 @@
 		$strOSUSBController = trim(shell_exec("udevadm info -q path -n /dev/disk/by-label/UNRAID | grep -Po '0000:\K\w{2}:\w{2}\.\w{1}'"));
 		//TODO: add any drive controllers currently being used by unraid to the blacklist
 
-		$arrBlacklist = array($strOSUSBController);
+		$arrBlacklistIDs = array($strOSUSBController);
+		$arrBlacklistTypes = array('Host bridge', 'PCI bridge', 'ISA bridge', 'SMBus');
+
 		$arrWhitelistGPUNames = array('VGA compatible controller', 'Video Device');
 		$arrWhitelistAudioNames = array('Audio device');
 
@@ -149,7 +151,7 @@
 					continue;
 				}
 
-				if (in_array($arrMatch['id'], $arrBlacklist)) {
+				if (in_array($arrMatch['id'], $arrBlacklistIDs) || in_array($arrMatch['type'], $arrBlacklistTypes)) {
 					// Device blacklisted, skip device
 					continue;
 				}
