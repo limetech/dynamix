@@ -240,30 +240,18 @@ if ($action) {
         	$id = '-';
       unset($dom);
 
-      $arrIcons = [
-         '/plugins/dynamix.vm.manager/templates/images/arch.png',
-         '/plugins/dynamix.vm.manager/templates/images/centos.png',
-         '/plugins/dynamix.vm.manager/templates/images/coreos.png',
-         '/plugins/dynamix.vm.manager/templates/images/chromeos.png',
-         '/plugins/dynamix.vm.manager/templates/images/debian.png',
-         '/plugins/dynamix.vm.manager/templates/images/fedora.png',
-         '/plugins/dynamix.vm.manager/templates/images/freebsd.png',
-         '/plugins/dynamix.vm.manager/templates/images/openelec.png',
-         '/plugins/dynamix.vm.manager/templates/images/opensuse.png',
-         '/plugins/dynamix.vm.manager/templates/images/redhat.png',
-         '/plugins/dynamix.vm.manager/templates/images/scientific_linux.png',
-         '/plugins/dynamix.vm.manager/templates/images/slackware.png',
-         '/plugins/dynamix.vm.manager/templates/images/steamos.png',
-         '/plugins/dynamix.vm.manager/templates/images/ubuntu.png',
-         '/plugins/dynamix.vm.manager/templates/images/windows.png',
-         '/plugins/dynamix.vm.manager/templates/images/windows7.png',
-         '/plugins/dynamix.vm.manager/templates/images/windowsxp.png'
-      ];
-      shuffle($arrIcons);
-      $vmicon = $arrIcons[0];
-
       $contextMenus[] = sprintf("addVMContext('%s', '%s', '%s', %s, '%s');", addslashes($name), addslashes($uuid), $state, $is_autostart?1:0, addslashes($vnc));
 
+      $vmicon = '/plugins/dynamix.vm.manager/templates/images/default.png';
+
+      $vmtemplateicon = $lv->_get_single_xpath_result($res, '//domain/metadata/vmtemplate/@icon');
+      if (!empty($vmtemplateicon)) {
+         if (file_exists($vmtemplateicon)) {
+            $vmicon = $vmtemplateicon;
+         } else if (file_exists('/usr/local/emhttp/plugins/dynamix.vm.manager/templates/images/' . $vmtemplateicon)) {
+            $vmicon = '/plugins/dynamix.vm.manager/templates/images/' . $vmtemplateicon;
+         }
+      }
 
 		//Domain information
       echo "<tr style='background-color:".bcolor($i,$theme)."'>
