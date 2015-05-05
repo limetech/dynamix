@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Only start if array is starting in Normal operation mode
-if grep -q 'startMode="Normal"' /var/local/emhttp/var.ini; then
+if ! [ -f /var/local/emhttp/var.ini ] || grep -q 'startMode="Normal"' /var/local/emhttp/var.ini; then
 
 	SERVICE="disable"
 	if [ -f /boot/config/domain.cfg ]; then
