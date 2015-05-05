@@ -1194,7 +1194,7 @@
 		function domain_change_xml($domain, $xml) {
 			$dom = $this->get_domain_object($domain);
 
-			if (!($old_xml = libvirt_domain_get_xml_desc($dom, NULL)))
+			if (!($old_xml = domain_get_xml($dom)))
 				return $this->_set_last_error();
 			if (!libvirt_domain_undefine($dom))
 				return $this->_set_last_error();
@@ -1325,12 +1325,12 @@
 			return $this->last_error;
 		}
 
-		function domain_get_xml($domain, $get_inactive = false) {
+		function domain_get_xml($domain, $xpath = NULL) {
 			$dom = $this->get_domain_object($domain);
 			if (!$dom)
 				return false;
 
-			$tmp = libvirt_domain_get_xml_desc($dom, $get_inactive ? VIR_DOMAIN_XML_INACTIVE : 0);
+			$tmp = libvirt_domain_get_xml_desc($dom, $xpath);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
@@ -1934,7 +1934,7 @@
 			if ($this->domain_get_feature($domain, $feature) == $val)
 				return true;
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			if ($val) {
 				if (strpos('features', $xml))
 					$xml = str_replace('<features>', "<features>\n<$feature/>", $xml);
@@ -1953,7 +1953,7 @@
 			if (($old_offset = $this->domain_get_clock_offset($domain)) == $offset)
 				return true;
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$xml = str_replace("<clock offset='$old_offset'/>", "<clock offset='$offset'/>", $xml);
 
 			return $this->domain_define($xml);
@@ -1966,7 +1966,7 @@
 			if (($old_vcpu = $this->domain_get_vcpu($domain)) == $vcpu)
 				return true;
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$xml = str_replace("$old_vcpu</vcpu>", "$vcpu</vcpu>", $xml);
 
 			return $this->domain_define($xml);
@@ -1978,7 +1978,7 @@
 			if (($old_memory = $this->domain_get_memory($domain)) == $memory)
 				return true;
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$xml = str_replace("$old_memory</memory>", "$memory</memory>", $xml);
 
 			return $this->domain_define($xml);
@@ -1990,7 +1990,7 @@
 			if (($old_memory = $this->domain_get_current_memory($domain)) == $memory)
 				return true;
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$xml = str_replace("$old_memory</currentMemory>", "$memory</currentMemory>", $xml);
 
 			return $this->domain_define($xml);
@@ -2000,7 +2000,7 @@
 		function domain_set_disk_dev($domain, $olddev, $dev) {
 			$domain = $this->get_domain_object($domain);
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$tmp = explode("\n", $xml);
 			for ($i = 0; $i < sizeof($tmp); $i++)
 				if (strpos('.'.$tmp[$i], "<target dev='".$olddev))
@@ -2019,7 +2019,7 @@
 			if ($description == $desc)
 				return true;
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			if (!$description)
 				$xml = str_replace("</uuid>", "</uuid><description>$desc</description>", $xml);
 			else {
@@ -2038,7 +2038,7 @@
 		function domain_set_metadata($domain) {
 			$domain = $this->get_domain_object($domain);
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$metadata = $this->get_xpath($domain, '//domain/metadata', false);
 			if (empty($metadata)){
 				$description = $this->domain_get_description($domain);
@@ -2057,7 +2057,7 @@
 			$this->domain_set_metadata($domain);
 			$domain = $this->get_domain_object($domain);
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$metadata = $this->get_xpath($domain, '//domain/metadata/snapshot'.$name, false);
 			if (empty($metadata)){
 				$desc = "<metadata>\n<snapshot$name>$desc</snapshot$name>\n";
@@ -2143,7 +2143,7 @@
 		function snapshot_remove_metadata($domain, $name) {
 			$domain = $this->get_domain_object($domain);
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$tmp = explode("\n", $xml);
 			for ($i = 0; $i < sizeof($tmp); $i++)
 				if (strpos('.'.$tmp[$i], '<snapshot'.$name))
@@ -2165,7 +2165,7 @@
 
 //change disk capacity
 		function disk_set_cap($disk, $cap) {
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$tmp = explode("\n", $xml);
 			for ($i = 0; $i < sizeof($tmp); $i++)
 				if (strpos('.'.$tmp[$i], "<target dev='".$olddev))
@@ -2178,7 +2178,7 @@
 
 //change domain boot device
 		function domain_set_boot_device($domain, $bootdev) {
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$tmp = explode("\n", $xml);
 			for ($i = 0; $i < sizeof($tmp); $i++)
 				if (strpos('.'.$tmp[$i], "<boot dev="))
