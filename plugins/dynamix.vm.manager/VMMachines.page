@@ -244,6 +244,7 @@ if ($action) {
          '/plugins/dynamix.vm.manager/templates/images/arch.png',
          '/plugins/dynamix.vm.manager/templates/images/centos.png',
          '/plugins/dynamix.vm.manager/templates/images/coreos.png',
+         '/plugins/dynamix.vm.manager/templates/images/chromeos.png',
          '/plugins/dynamix.vm.manager/templates/images/debian.png',
          '/plugins/dynamix.vm.manager/templates/images/fedora.png',
          '/plugins/dynamix.vm.manager/templates/images/freebsd.png',
@@ -252,12 +253,14 @@ if ($action) {
          '/plugins/dynamix.vm.manager/templates/images/redhat.png',
          '/plugins/dynamix.vm.manager/templates/images/scientific_linux.png',
          '/plugins/dynamix.vm.manager/templates/images/slackware.png',
+         '/plugins/dynamix.vm.manager/templates/images/steamos.png',
          '/plugins/dynamix.vm.manager/templates/images/ubuntu.png',
          '/plugins/dynamix.vm.manager/templates/images/windows.png',
          '/plugins/dynamix.vm.manager/templates/images/windows7.png',
          '/plugins/dynamix.vm.manager/templates/images/windowsxp.png'
       ];
       shuffle($arrIcons);
+      $vmicon = $arrIcons[0];
 
       $contextMenus[] = sprintf("addVMContext('%s', '%s', '%s', %s, '%s');", addslashes($name), addslashes($uuid), $state, $is_autostart?1:0, addslashes($vnc));
 
@@ -267,7 +270,7 @@ if ($action) {
                <td style=\"width: 48px; padding: 4px\">
                   <div id=\"vm-" . htmlspecialchars($uuid) . "\" style=\"display:block; cursor:pointer\">
                      <div style=\"position: relative; width: 48px; height: 48px; margin: 0px auto;\">
-                        <img src=\"" . $arrIcons[0] . "\" style=\"position: absolute; z-index: 1; opacity: 1.0; top: 0; bottom: 0; left: 0; right: 0; width: 48px; height: 48px;\"/>
+                        <img src=\"" . $vmicon . "\" style=\"position: absolute; z-index: 1; opacity: 1.0; top: 0; bottom: 0; left: 0; right: 0; width: 48px; height: 48px;\"/>
                         <i class=\"fa iconstatus fa-$color\" title='$state'></i>
                      </div>
                   </div>
