@@ -35,6 +35,9 @@ Markdown="false"
 		right: -4px;
 		font-size: 14px;
 	}
+	img.started{opacity: 1.0;}
+	img.stopped{opacity: 0.3;}
+	img.paused{opacity: 0.3;}
 	.iconstatus.started{color:#009900;}
 	.iconstatus.stopped{color:#EF3D47;}
 	.iconstatus.paused{color:#DEAF11;}
@@ -106,7 +109,7 @@ foreach ($allContainers as $ct) {
 		<div class=\"Panel\">
 			<div id='context-" . htmlspecialchars($name) . "' style='display:block; cursor:pointer'>
 				<div style=\"position: relative; width: 48px; height: 48px; margin: 0px auto;\">
-					<img src=\"" . $Icon . "\" style=\"position: absolute; z-index: 1; opacity: 1.0; top: 0; bottom: 0; left: 0; right: 0; width: 48px; height: 48px;\"/>
+					<img src=\"" . $Icon . "\" class=\"$status\" style=\"position: absolute; z-index: 1; top: 0; bottom: 0; left: 0; right: 0; width: 48px; height: 48px;\"/>
 					<i class=\"fa iconstatus fa-$shape $status\" title='$status'></i>
 				</div>
 				<div class=\"PanelText\">
@@ -166,7 +169,7 @@ foreach ($allVMs as $name) {
 		<div class=\"Panel\">
 			<div id='vm-" . htmlspecialchars($uuid) . "' style='display:block; cursor:pointer'>
 				<div style=\"position: relative; width: 48px; height: 48px; margin: 0px auto;\">
-					<img src=\"" . $vmicon . "\" style=\"position: absolute; z-index: 1; opacity: 1.0; top: 0; bottom: 0; left: 0; right: 0; width: 48px; height: 48px;\"/>
+					<img src=\"" . $vmicon . "\" class=\"$status\" style=\"position: absolute; z-index: 1; top: 0; bottom: 0; left: 0; right: 0; width: 48px; height: 48px;\"/>
 					<i class=\"fa iconstatus fa-$shape $status\" title='$status'></i>
 				</div>
 				<div class=\"PanelText\">
