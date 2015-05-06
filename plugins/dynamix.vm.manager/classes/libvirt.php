@@ -1448,7 +1448,12 @@
 		}
 
 		function domain_get_uuid($domain) {
-			return libvirt_domain_get_uuid_string($domain);
+			$dom = $this->get_domain_object($domain);
+			if (!$dom)
+				return false;
+
+			$tmp = libvirt_domain_get_uuid_string($dom);
+			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
 		function domain_get_domain_by_uuid($uuid) {

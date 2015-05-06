@@ -197,10 +197,10 @@ if ($action) {
    for ($i = 0; $i < sizeof($doms); $i++) {
    	$name = $doms[$i];
       $res = $lv->get_domain_by_name($name);
-      $uuid = libvirt_domain_get_uuid_string($res);
+      $uuid = $lv->domain_get_uuid($res);
       $dom = $lv->domain_get_info($res);
       $id = $lv->domain_get_id($res);
-      $is_autostart = $lv->domain_get_autostart($name);
+      $is_autostart = $lv->domain_get_autostart($res);
       $state = $lv->domain_state_translate($dom['state']);
    	if ($state == 'running') {
          $mem = $dom['memory'] / 1024;
@@ -233,14 +233,14 @@ if ($action) {
         	$vncport = ($vncport < 0) ? "auto" : "";
       }
 
-		$bootdev = $lv->domain_get_boot_devices($name)[0];
+		$bootdev = $lv->domain_get_boot_devices($res)[0];
 
       unset($tmp);
       if (!$id)
         	$id = '-';
       unset($dom);
 
-      $contextMenus[] = sprintf("addVMContext('%s', '%s', '%s', %s, '%s');", addslashes($name), addslashes($uuid), $state, addslashes($vnc));
+      $contextMenus[] = sprintf("addVMContext('%s', '%s', '%s', '%s');", addslashes($name), addslashes($uuid), $state, addslashes($vnc));
 
       // fallback icon for users that created VMs before metadata support was added
       $vmicon = '/plugins/dynamix.vm.manager/templates/images/' . ($lv->domain_get_clock_offset($res) == 'localtime' ? 'windows.png' : 'linux.png');
@@ -307,7 +307,7 @@ if ($action) {
                      </thead>
                      <tbody>";
 		/* Display domain disks */
-			$tmp = $lv->get_disk_stats($name);
+			$tmp = $lv->get_disk_stats($res);
          if (!empty($tmp)) {
 				for ($ii = 0; $ii < sizeof($tmp); $ii++) {
             	$capacity = $lv->format_size($tmp[$ii]['capacity'], 0);
@@ -337,7 +337,7 @@ if ($action) {
 		/*end display disk display*/
 
 		/* Display domain cdroms */
-         $tmp = $lv->get_cdrom_stats($name);
+         $tmp = $lv->get_cdrom_stats($res);
          if (!empty($tmp)) {
 				for ($ii = 0; $ii < sizeof($tmp); $ii++) {
             	$capacity = $lv->format_size($tmp[$ii]['capacity'], 2);
@@ -467,7 +467,7 @@ if ($action) {
 					$snap = $tmp[$ii];
 					$date = date("D d M  Y",$snap);
 					$time = date("H:i:s",$snap);
-					$info = $lv->domain_snapshot_get_info($name, $snap);
+					$info = $lv->domain_snapshot_get_info($res, $snap);
 					if(empty($info)){
 						$info = "Click to change description";
 						$val = "";}
