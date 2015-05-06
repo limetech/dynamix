@@ -28,7 +28,6 @@
 	background-color: #FFF;
 	border: 1px solid #ccc;
 	border: 1px solid rgba(0, 0, 0, 0.2);
-	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	font-size: 14px;
 	*border-right-width: 2px;
 	*border-bottom-width: 2px;
@@ -58,11 +57,11 @@
 }
 .dropdown-menu a {
 	display: block;
-	padding: 2px 20px 2px 7px;
+	padding: 2px 20px 2px 6px;
 	clear: both;
 	font-weight: normal;
-	line-height: 20px;
-	color: #333333;
+	line-height: 24px;
+	color: #303030;
 	white-space: nowrap;
 	text-decoration: none;
 }

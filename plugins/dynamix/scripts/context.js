@@ -78,7 +78,7 @@ var context = context || (function () {
 						largeIcon = "";
 					}
 					if (typeof data[i].icon !== 'undefined' && data[i].icon !== '' ) {
-						icon = ' <i class="fa ' + data[i].icon + largeIcon + '"></i>';
+						icon = ' <i class="fa fa-fw ' + data[i].icon + largeIcon + '"></i>';
 					} else {
 						icon = ' <i class="fa fa-fw"></i>';
 					}
@@ -110,6 +110,7 @@ var context = context || (function () {
 	}
 
 	function addContext(selector, data) {
+		destroyContext(selector);
 
 		var id = selector.replace('#', ''),
 			$menu = buildMenu(data, id);
