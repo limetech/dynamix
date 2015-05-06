@@ -1600,6 +1600,8 @@
 				case VIR_DOMAIN_SHUTDOWN: return 'shutdown';
 				case VIR_DOMAIN_SHUTOFF:  return 'shutoff';
 				case VIR_DOMAIN_CRASHED:  return 'crashed';
+				//VIR_DOMAIN_PMSUSPENDED is 7 (not defined in libvirt-php yet)
+				case 7:  return 'pmsuspended';
 			}
 
 			return 'unknown';
