@@ -140,6 +140,11 @@
 
 		foreach ($arrAllPCIDevices as $strPCIDevice) {
 			if (preg_match('/^(?P<id>\S+) (?P<type>.+): (?P<name>.+)$/', $strPCIDevice, $arrMatch)) {
+				if (in_array($arrMatch['id'], $arrBlacklistIDs) || in_array($arrMatch['type'], $arrBlacklistTypes)) {
+					// Device blacklisted, skip device
+					continue;
+				}
+
 				$strClass = 'other';
 				if (in_array($arrMatch['type'], $arrWhitelistGPUNames)) {
 					$strClass = 'vga';
@@ -149,11 +154,6 @@
 
 				if (!file_exists('/sys/bus/pci/devices/0000:' . $arrMatch['id'] . '/iommu_group/')) {
 					// No IOMMU support for device, skip device
-					continue;
-				}
-
-				if (in_array($arrMatch['id'], $arrBlacklistIDs) || in_array($arrMatch['type'], $arrBlacklistTypes)) {
-					// Device blacklisted, skip device
 					continue;
 				}
 
@@ -182,6 +182,9 @@
 
 		$arrValidUSBDevices = array();
 
+		// Get a list of all usb hubs so we can blacklist them
+		exec("cat /sys/bus/usb/drivers/hub/*/modalias | grep -Po 'usb:v\K\w{9}' | tr 'p' ':'", $arrAllUSBHubs);
+
 		exec("lsusb 2>/dev/null", $arrAllUSBDevices);
 
 		foreach ($arrAllUSBDevices as $strUSBDevice) {
@@ -198,7 +201,7 @@
 					continue;
 				}
 
-				if (trim(shell_exec('lsusb -d ' . $arrMatch['id'] . ' -v 2>/dev/null | grep \'bDeviceClass            9 Hub\'')) != '') {
+				if (in_array(strtoupper($arrMatch['id']), $arrAllUSBHubs)) {
 					// Device class is a Hub, skip device
 					continue;
 				}
