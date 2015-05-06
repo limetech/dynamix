@@ -244,8 +244,8 @@
 </div>
 
 <table>
-	<tr class="advanced">
-		<td>CPU Pinning:</td>
+	<tr>
+		<td>CPUs:</td>
 		<td>
 			<div class="textarea four">
 			<?php
@@ -267,22 +267,6 @@
 <div class="advanced">
 	<blockquote class="inline_help">
 		<p>By default, VMs created will be pinned to physical CPU cores to improve performance.  From this view, you can adjust which actual CPU cores a VM will be pinned (minimum 1).</p>
-	</blockquote>
-</div>
-
-<table>
-	<tr class="basic">
-		<td>CPUs:</td>
-		<td>
-			<select name="domain[vcpus]" id="domain_vcpus" class="narrow" title="define number of cpu cores used by this vm">
-			<?php mk_dropdown_options(array_combine(range(1, $maxcpu), range(1, $maxcpu)), $arrConfig['domain']['vcpus']); ?>
-			</select>
-		</td>
-	</tr>
-</table>
-<div class="basic">
-	<blockquote class="inline_help">
-		<p>Select which CPU cores you wish to run this VM upon (minimum 1).</p>
 	</blockquote>
 </div>
 
@@ -819,25 +803,12 @@ $(function() {
 
 	$("#form_content .domain_vcpu").change(function changeVCPUEvent() {
 		var $cores = $(".domain_vcpu:checked");
-		$("#domain_vcpus").val($cores.length);
 
 		if ($cores.length == 1) {
 			$cores.prop("disabled", true);
 		} else {
 			$(".domain_vcpu").prop("disabled", false);
 		}
-	});
-
-	$("#form_content #domain_vcpus").change(function changeVCPUsEvent() {
-		var cores = $(this).val();
-
-		$(".domain_vcpu")
-			.prop('checked', false)
-			.prop('disabled', false)
-			.slice(0, cores)
-			.prop('checked', true)
-			.prop('disabled', (cores == 1));
-
 	});
 
 	$("#form_content #domain_maxmem").change(function changeMaxMemEvent() {
