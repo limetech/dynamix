@@ -30,7 +30,7 @@
 	$arrOperatingSystems = [
 		'windows' => 'Windows 8.1 / 2012',
 		'windows7' => 'Windows 7 / 2008',
-		'windowsxp' => 'Windows XP / 2000',
+		'windowsxp' => 'Windows XP / 2003',
 		'linux' => 'Linux',
 		'arch' => 'Arch',
 		'centos' => 'CentOS',
