@@ -3,8 +3,8 @@ Title="Archived Notifications"
 ---
 <?PHP
 /* Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
- * Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+ * Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -20,19 +20,25 @@ $path = "{$notify['path']}/archive/*.notify";
 $files = count(glob($path, GLOB_NOSORT));
 ?>
 <script>
-function archiveList() {
+function archiveList(init) {
   $.post('/webGui/include/NotificationsArchive.php',{log:'<?=$path?>',date:'<?=$notify['date']?>',time:'<?=$notify['time']?>'},function(data) {
     if (data) $('#archive_list').html(data);
-    $('#archive_table').tablesorter({headers:{5:{sorter:false}}});
+    if (init) {
+      $('#archive_table').tablesorter({headers:{5:{sorter:false}}});
+    } else {
+      $('#archive_table').trigger('update',true);
+    }
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
-    setTimeout(archiveList,<?=max(abs($display['refresh']),15000)?>);
+    setTimeout(archiveList,<?=max(abs($display['refresh']),30000)?>);
 <?endif;?>
   });
 }
 function askConfirmation() {
   return confirm('This will delete all notification files!\n\nAre you sure?');
 }
-$(archiveList);
+$(function(){
+  archiveList(true);
+});
 </script>
 
 <table class="tablesorter shift" id="archive_table">
