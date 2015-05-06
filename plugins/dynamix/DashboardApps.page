@@ -151,7 +151,9 @@ foreach ($allVMs as $name) {
 		$vncport = ($vncport < 0) ? "auto" : "";
 	}
 
-	$contextMenus[] = sprintf("addVMContext('%s', '%s', '%s', '%s');", addslashes($name), addslashes($uuid), $state, addslashes($vnc));
+	$log = (is_file('/var/log/libvirt/qemu/' . $name . '.log') ? '/var/log/libvirt/qemu/' . $name . '.log' : '');
+
+	$contextMenus[] = sprintf("addVMContext('%s', '%s', '%s', '%s', '%s');", addslashes($name), addslashes($uuid), $state, addslashes($vnc), addslashes($log));
 
 	// fallback icon for users that created VMs before metadata support was added
 	$vmicon = '/plugins/dynamix.vm.manager/templates/images/' . ($lv->domain_get_clock_offset($res) == 'localtime' ? 'windows.png' : 'linux.png');
@@ -196,7 +198,7 @@ function ajaxVMDispatch(currentstate, params){
   }, "json");
 }
 
-function addVMContext(name, uuid, state, vncurl){
+function addVMContext(name, uuid, state, vncurl, log){
   var opts = [{header: name}];
 
   var path = location.pathname;
@@ -264,6 +266,12 @@ function addVMContext(name, uuid, state, vncurl){
   }
 
   opts.push({divider: true});
+
+  if (log !== "") {
+    if (location.pathname.indexOf("/Dashboard") === 0) {
+      opts.push({text: "Logs", icon: "fa-navicon", action: function(e){ e.preventDefault(); openWindow(encodeURIComponent('/usr/bin/tail -n 42 -f ' + log), 'Log for: ' + name, 600, 900); } });
+    }
+  }
 
   if (state == "shutoff") {
 

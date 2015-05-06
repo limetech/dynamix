@@ -224,6 +224,7 @@ if ($action) {
     $mem = number_format($mem, 0);
    	$vcpu = $dom['nrVirtCpu'];
 		$auto = $is_autostart ? 'checked="checked"':"";
+    $log = (is_file('/var/log/libvirt/qemu/' . $name . '.log') ? '/var/log/libvirt/qemu/' . $name . '.log' : '');
       if (($diskcnt = $lv->get_disk_count($res)) > 0) {
         	$disks = $diskcnt.' / '.$lv->get_disk_capacity($res);
          $diskdesc = 'Current physical size: '.$lv->get_disk_capacity($res, true);
@@ -249,7 +250,7 @@ if ($action) {
         	$id = '-';
       unset($dom);
 
-      $contextMenus[] = sprintf("addVMContext('%s', '%s', '%s', '%s');", addslashes($name), addslashes($uuid), $state, addslashes($vnc));
+      $contextMenus[] = sprintf("addVMContext('%s', '%s', '%s', '%s', '%s');", addslashes($name), addslashes($uuid), $state, addslashes($vnc), addslashes($log));
 
       // fallback icon for users that created VMs before metadata support was added
       $vmicon = '/plugins/dynamix.vm.manager/templates/images/' . ($lv->domain_get_clock_offset($res) == 'localtime' ? 'windows.png' : 'linux.png');
@@ -281,8 +282,8 @@ if ($action) {
                <td><input class='autostart' type='checkbox' name='auto_$name' title='Toggle VM auostart' $auto uuid='$uuid'></td>";
 
       // Log file
-      if (is_file('/var/log/libvirt/qemu/' . $name . '.log')) {
-         echo "<td><a class='log' href='#' onclick=\"openWindow('/usr/bin/tail -n 42 -f " . addslashes(escapeshellarg('/var/log/libvirt/qemu/' . $name . '.log')) . "', '" . addslashes($name) . " QEMU Log', 600, 900); return false;\"><img class='basic' src='/plugins/dynamix/icons/log.png'/></a></td>";
+      if (!empty($log)) {
+         echo "<td><a class='log' href='#' onclick=\"openWindow('/usr/bin/tail -n 42 -f " . addslashes(escapeshellarg($log)) . "', '" . addslashes($name) . " QEMU Log', 600, 900); return false;\"><img class='basic' src='/plugins/dynamix/icons/log.png'/></a></td>";
       } else {
          echo "<td><img class='basic' src='/plugins/dynamix/icons/log.png' style='opacity: 0.3' title='Log not available'/></a></td>";
       }
@@ -570,7 +571,7 @@ function ajaxVMDispatch(currentstate, params){
   }, "json");
 }
 
-function addVMContext(name, uuid, state, vncurl){
+function addVMContext(name, uuid, state, vncurl, log){
   var opts = [{header: name}];
 
   var path = location.pathname;
@@ -638,6 +639,12 @@ function addVMContext(name, uuid, state, vncurl){
   }
 
   opts.push({divider: true});
+
+  if (log !== "") {
+    if (location.pathname.indexOf("/Dashboard") === 0) {
+      opts.push({text: "Logs", icon: "fa-navicon", action: function(e){ e.preventDefault(); openWindow(encodeURIComponent('/usr/bin/tail -n 42 -f ' + log), 'Log for: ' + name, 600, 900); } });
+    }
+  }
 
   if (state == "shutoff") {
 
