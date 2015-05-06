@@ -185,8 +185,9 @@ Show banner image:
 
 Show Dashboard apps:
 : <select name="dashapps" size="1">
-  <?=mk_option($display['dashapps'], "icons", "Icons")?>
-  <?=mk_option($display['dashapps'], "banners", "Banners")?>
+  <?=mk_option($display['dashapps'], "icons", "Docker + VMs")?>
+  <?=mk_option($display['dashapps'], "docker", "Docker only")?>
+  <?=mk_option($display['dashapps'], "vms", "VMs only")?>
   <?=mk_option($display['dashapps'], "none", "None")?>
   </select>
 
