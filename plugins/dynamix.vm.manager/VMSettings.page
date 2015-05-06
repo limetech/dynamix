@@ -24,16 +24,6 @@ if ($var['fsState'] != "Started") {
 require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt.php');
 require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt_helpers.php');
 
-// Check if domain.img exists
-$libvirt_filecheck = (file_exists( "/boot/config/plugins/dynamix.kvm.manager/domain.img" )) ? true : false;
-
-// if domain.img exists check if it's not mounted then mount
-if ($libvirt_filecheck) {
-	if (!shell_exec("mount | grep domain.img" )) {
-		shell_exec("mount -t ext4 /boot/config/plugins/dynamix.kvm.manager/domain.img /etc/libvirt" );
-	}
-}
-
 
 // Check for Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support
 $strCPUInfo = file_get_contents('/proc/cpuinfo');
