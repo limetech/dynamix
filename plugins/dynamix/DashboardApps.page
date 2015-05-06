@@ -5,6 +5,7 @@ Markdown="false"
 ---
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.docker.manager/assets/gh-buttons.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery-ui.min.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/context.standalone.css">
 <style>
 	body {
@@ -61,6 +62,12 @@ Markdown="false"
 		overflow: visible;
 		z-index: 10;
 	}
+	.switch-button-label.off {
+		color: inherit;
+	}
+	.switch-button-label.on {
+		color: #009900;
+	}
 </style>
 <form method="POST" id="formStartStop" action="/update.php" target="progressFrame">
 <input type="hidden" id="cmdStartStop" name="#command" value="" />
@@ -71,7 +78,8 @@ Markdown="false"
 </form>
 <div id="dialog-confirm" style="display:none;" title="Dialog Title"></div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
-<div id="apps_icons">
+<span class="status" style="margin-top: -44px; margin-right: 56px"><input type="checkbox" class="appview"></span>
+<div id="apps_icons" style="display: none">
 <?
 $allContainers = array();
 if ((pgrep('docker')!==false) && (empty($display['dashapps']) || $display['dashapps'] == 'icons' || $display['dashapps'] == 'docker')) {
@@ -119,7 +127,7 @@ foreach ($allContainers as $ct) {
 	}
 
 	print "
-		<div class=\"Panel\">
+		<div class=\"Panel $status\">
 			<div id='context-" . htmlspecialchars($name) . "' style='display:block; cursor:pointer'>
 				<div style=\"position: relative; width: 48px; height: 48px; margin: 0px auto;\">
 					<img src=\"" . $Icon . "\" class=\"$status\" style=\"position: absolute; z-index: 1; top: 0; bottom: 0; left: 0; right: 0; width: 48px; height: 48px;\"/>
@@ -181,7 +189,7 @@ foreach ($allVMs as $name) {
 	}
 
 	print "
-		<div class=\"Panel\">
+		<div class=\"Panel $status\">
 			<div id='vm-" . htmlspecialchars($uuid) . "' style='display:block; cursor:pointer'>
 				<div style=\"position: relative; width: 48px; height: 48px; margin: 0px auto;\">
 					<img src=\"" . $vmicon . "\" class=\"$status\" style=\"position: absolute; z-index: 1; top: 0; bottom: 0; left: 0; right: 0; width: 48px; height: 48px;\"/>
@@ -196,6 +204,7 @@ foreach ($allVMs as $name) {
 
 ?>
 </div>
+<script type="text/javascript" src="/webGui/scripts/jquery.switchButton.js"></script>
 <script type="text/javascript" src="/webGui/scripts/context.js"></script>
 <script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/docker.js"></script>
 <script type="text/javascript">
@@ -318,6 +327,22 @@ function addVMContext(name, uuid, state, vncurl, log){
 
 
 $(function() {
+	if ($.cookie('dashapps_view_mode') == 'startedonly') {
+		$('.Panel').not('.started').hide();
+	}
+	$('#apps_icons').fadeIn('slow');
+
+	$('.appview').switchButton({
+		labels_placement: "left",
+		on_label: 'Started Only',
+		off_label: 'All Apps',
+		checked: $.cookie('dashapps_view_mode') == 'startedonly'
+	});
+	$('.appview').change(function () {
+		$('.Panel').not('.started').finish().toggle('fast');
+		$.cookie('dashapps_view_mode', $('.appview').is(':checked') ? 'startedonly' : 'allapps', { expires: 3650 });
+	});
+
 	context.init({ preventDoubleContext: false });
 	<?=implode("\n\t", $contextMenus);?>
 });
