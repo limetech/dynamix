@@ -12,8 +12,10 @@
 ?>
 <?
 
-	if (!isset($var)) {
-		$var = parse_ini_file('state/var.ini');
+	// Load emhttp variables if needed.
+	if (! isset($var)){
+		if (! is_file("/usr/local/emhttp/state/var.ini")) shell_exec("wget -qO /dev/null localhost:$(lsof -nPc emhttp | grep -Po 'TCP[^\d]*\K\d+')");
+		$var = @parse_ini_file("/usr/local/emhttp/state/var.ini");
 	}
 
 
@@ -41,11 +43,10 @@
 	$libvirt_service = isset($domain_cfg['SERVICE']) ?	$domain_cfg['SERVICE'] : "disable";
 
 	if ($libvirt_running == "yes"){
-		$uri = is_dir('/proc/xen') ? 'xen:///system' : 'qemu:///system';
-		$lv = new Libvirt($uri, null, null, false);
-		$info = $lv->host_get_node_info();
-		$maxcpu = (int)$info['cpus'];
-		$maxmem = number_format(($info['memory'] / 1048576), 1, '.', ' ');
+		$lv = new Libvirt((is_dir('/proc/xen') ? 'xen:///system' : 'qemu:///system'), null, null, false);
+		$arrHostInfo = $lv->host_get_node_info();
+		$maxcpu = (int)$arrHostInfo['cpus'];
+		$maxmem = number_format(($arrHostInfo['memory'] / 1048576), 1, '.', ' ');
 	}
 
 	$theme = $display['theme'];
