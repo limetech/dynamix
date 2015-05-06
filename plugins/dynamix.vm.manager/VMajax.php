@@ -63,6 +63,12 @@ switch ($action) {
 						['error' => $lv->get_last_error()];
 		break;
 
+	case 'domain-pmwakeup':
+		$arrResponse = $lv->domain_resume($domName) ?
+						['success' => true, 'state' => $lv->domain_get_state($domName)] :
+						['error' => $lv->get_last_error()];
+		break;
+
 	case 'domain-restart':
 		$arrResponse = $lv->domain_reboot($domName) ?
 						['success' => true, 'state' => $lv->domain_get_state($domName)] :
@@ -89,13 +95,13 @@ switch ($action) {
 
 	case 'domain-delete':
 		$arrResponse = $lv->domain_delete($domName) ?
-						['success' => true, 'state' => $lv->domain_get_state($domName)] :
+						['success' => true] :
 						['error' => $lv->get_last_error()];
 		break;
 
 	case 'domain-undefine':
 		$arrResponse = $lv->domain_undefine($domName) ?
-						['success' => true, 'state' => $lv->domain_get_state($domName)] :
+						['success' => true] :
 						['error' => $lv->get_last_error()];
 		break;
 
