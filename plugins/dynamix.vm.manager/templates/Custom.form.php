@@ -28,9 +28,9 @@
 	$strCPUModel = getHostCPUModel();
 
 	$arrOperatingSystems = [
-		'windows' => 'Windows 8 or newer',
-		'windows7' => 'Windows 7',
-		'windowsxp' => 'Windows XP',
+		'windows' => 'Windows 8.1 / 2012',
+		'windows7' => 'Windows 7 / 2008',
+		'windowsxp' => 'Windows XP / 2000',
 		'linux' => 'Linux',
 		'arch' => 'Arch',
 		'centos' => 'CentOS',
@@ -39,10 +39,12 @@
 		'debian' => 'Debian',
 		'fedora' => 'Fedora',
 		'freebsd' => 'FreeBSD',
+		'openelec' => 'OpenELEC',
 		'opensuse' => 'OpenSUSE',
 		'redhat' => 'RedHat',
 		'scientific' => 'Scientific',
 		'slackware' => 'Slackware',
+		'steamos' => 'SteamOS',
 		'ubuntu' => 'Ubuntu'
 	];
 
