@@ -47,6 +47,20 @@ Markdown="false"
 	.show {
 		display: block;
 	}
+	div.Panel {
+		float: none;
+		display: inline-block;
+		margin: 0 18px 15px 0;
+		height: 90px;
+		overflow: hidden;
+		vertical-align: top;
+		width: 94px;
+		word-wrap: break-word;
+	}
+	div.Panel:hover {
+		overflow: visible;
+		z-index: 10;
+	}
 </style>
 <form method="POST" id="formStartStop" action="/update.php" target="progressFrame">
 <input type="hidden" id="cmdStartStop" name="#command" value="" />
