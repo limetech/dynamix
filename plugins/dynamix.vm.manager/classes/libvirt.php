@@ -1584,7 +1584,7 @@
 			if (!$dom)
 				return false;
 
-			$info = $this->domain_get_info( $domain, $name );
+			$info = libvirt_domain_get_info($dom);
 			if (!$info)
 				return $this->_set_last_error();
 
