@@ -27,12 +27,34 @@
 
 	$strCPUModel = getHostCPUModel();
 
+	$arrOperatingSystems = [
+		'windows' => 'Windows 8 or newer',
+		'windows7' => 'Windows 7',
+		'windowsxp' => 'Windows XP',
+		'linux' => 'Linux',
+		'arch' => 'Arch',
+		'centos' => 'CentOS',
+		'chromeos' => 'ChromeOS',
+		'coreos' => 'CoreOS',
+		'debian' => 'Debian',
+		'fedora' => 'Fedora',
+		'freebsd' => 'FreeBSD',
+		'opensuse' => 'OpenSUSE',
+		'redhat' => 'RedHat',
+		'scientific' => 'Scientific',
+		'slackware' => 'Slackware',
+		'ubuntu' => 'Ubuntu'
+	];
+
 	$arrConfigDefaults = [
+		'template' => [
+			'name' => 'Custom',
+			'icon' => 'windows.png'
+		],
 		'domain' => [
 			'persistent' => 1,
 			'uuid' => $lv->domain_generate_uuid(),
 			'clock' => 'localtime',
-			'os' => 'windows',
 			'arch' => 'x86_64',
 			'machine' => 'pc',
 			'mem' => 512 * 1024,
@@ -89,6 +111,10 @@
 	// Active config for this page
 	$arrConfig = array_replace_recursive($arrConfigDefaults, $arrExistingConfig);
 
+	// Add any custom metadata field defaults (e.g. os)
+	if (empty($arrConfig['template']['os'])) {
+		$arrConfig['template']['os'] = ($arrConfig['domain']['clock'] == 'localtime' ? 'windows' : 'linux');
+	}
 
 	$boolRunning = (!empty($arrConfig['domain']['state']) && $arrConfig['domain']['state'] == 'running');
 
@@ -181,8 +207,8 @@
 	<tr>
 		<td>Operating System:</td>
 		<td>
-			<select name="domain[os]" id="domain_os" class="narrow" title="define the base OS">
-			<?php mk_dropdown_options(['windows' => 'Windows', 'other' => 'Other'], $arrConfig['domain']['os']); ?>
+			<select name="template[os]" id="domain_os" class="narrow" title="define the base OS">
+			<?php mk_dropdown_options($arrOperatingSystems, $arrConfig['template']['os']); ?>
 			</select>
 		</td>
 	</tr>
@@ -774,7 +800,17 @@
 
 
 <script type="text/javascript">
+var OS2ImageMap = {<?php
+	$arrItems = array();
+	foreach ($arrOperatingSystems as $key => $value) {
+		$arrItems[] = "'$key':'{$key}.png'";
+	}
+	echo implode(',', $arrItems);
+?>};
+
 $(function() {
+	var initComplete = false;
+
 	$("#form_content #domain_mem").change(function changeMemEvent() {
 		$("#domain_maxmem").val($(this).val());
 	});
@@ -897,21 +933,27 @@ $(function() {
 	});
 
 	$("#form_content #domain_os").change(function changeOSEvent() {
-		slideUpRows($('.domain_os').not($('.' + $(this).val())));
-		slideDownRows($('.domain_os.' + $(this).val()).not(isVMAdvancedMode() ? '.basic' : '.advanced'));
+		var os_casted = ($(this).val().indexOf('windows') == -1 ? 'other' : 'windows');
 
-		if ($(this).val() == 'windows') {
-			$('#domain_clock').val('localtime');
-			$('#domain_machine').val('pc');
-		} else {
-			$('#domain_clock').val('utc');
-			$('#domain_machine').val('q35');
+		if (initComplete && !$('#template_img').attr('touched')) {
+			var vmicon = OS2ImageMap[$(this).val()] || OS2ImageMap[os_casted];
+			$('#template_icon').val(vmicon);
+			$('#template_img').prop('src', '<?=str_replace("/usr/local/emhttp", "", __DIR__)?>/images/' + vmicon);
 		}
-	});
 
-	// Toggle OS-dependent fields now (we could fire the change event but we don't want to change the clock and machine)
-	slideUpRows($('.domain_os').not($('.' + $("#form_content #domain_os").val())));
-	slideDownRows($('.domain_os.' + $("#form_content #domain_os").val()).not(isVMAdvancedMode() ? '.basic' : '.advanced'));
+		slideUpRows($('.domain_os').not($('.' + os_casted)));
+		slideDownRows($('.domain_os.' + os_casted).not(isVMAdvancedMode() ? '.basic' : '.advanced'));
+
+		if (initComplete) {
+			if (os_casted == 'windows') {
+				$('#domain_clock').val('localtime');
+				$('#domain_machine').val('pc');
+			} else {
+				$('#domain_clock').val('utc');
+				$('#domain_machine').val('q35');
+			}
+		}
+	}).change(); // Fire now too!
 
 	if ($(".gpu option[value='vnc']:selected").length) {
 		$('.vncpassword,.vnckeymap').not(isVMAdvancedMode() ? '.basic' : '.advanced').show();
@@ -923,5 +965,7 @@ $(function() {
 		.attr('name', function(){ return $(this).attr('name').replace('new', 'image'); })
 		.closest('table').find('.disk_file_options').hide()
 		.filter('.advanced').removeClass('advanced').addClass('wasadvanced');
+
+	initComplete = true;
 });
 </script>

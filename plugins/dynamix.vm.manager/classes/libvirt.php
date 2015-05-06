@@ -241,6 +241,7 @@
 			$shares = $config['shares'];
 			$gpus = $config['gpu'];
 			$audios = $config['audio'];
+			$template = $config['template'];
 
 
 			$type = $domain['type'];
@@ -263,6 +264,15 @@
 			$loader = '';
 			if (!empty($domain['ovmf'])) {
 				$loader = "<loader type='pflash'>/usr/share/qemu/ovmf-x64/OVMF-pure-efi.fd</loader>";
+			}
+
+			$metadata = '';
+			if (!empty($template)) {
+				$template_options = '';
+				foreach ($template as $key => $value) {
+					$template_options .= $key . "='" . htmlspecialchars($value) . "' ";
+				}
+				$metadata = "<metadata><vmtemplate " . $template_options . "/></metadata>";
 			}
 
 			$vcpus = 1;
@@ -673,6 +683,7 @@
 						<uuid>$uuid</uuid>
 						<name>$name</name>
 						<description>{$domain['desc']}</description>
+						$metadata
 						<currentMemory>$mem</currentMemory>
 						<memory>$maxmem</memory>
 						<memoryBacking>

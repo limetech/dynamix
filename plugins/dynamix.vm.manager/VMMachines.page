@@ -242,7 +242,8 @@ if ($action) {
 
       $contextMenus[] = sprintf("addVMContext('%s', '%s', '%s', %s, '%s');", addslashes($name), addslashes($uuid), $state, $is_autostart?1:0, addslashes($vnc));
 
-      $vmicon = '/plugins/dynamix.vm.manager/templates/images/default.png';
+      // fallback icon for users that created VMs before metadata support was added
+      $vmicon = '/plugins/dynamix.vm.manager/templates/images/' . ($lv->domain_get_clock_offset($res) == 'localtime' ? 'windows.png' : 'linux.png');
 
       $vmtemplateicon = $lv->_get_single_xpath_result($res, '//domain/metadata/vmtemplate/@icon');
       if (!empty($vmtemplateicon)) {

@@ -327,6 +327,27 @@
 		$arrHostDevs = $lv->domain_get_host_devices_pci($res);
 		$arrUSBDevs = $lv->domain_get_host_devices_usb($res);
 
+
+		// Metadata Parsing
+		// libvirt xpath parser sucks, use php's xpath parser instead
+		$strDOMXML = $lv->domain_get_xml($res);
+		$xmldoc = new DOMDocument();
+        $xmldoc->loadXML($strDOMXML);
+        $xpath = new DOMXPath($xmldoc);
+        $objNodes = $xpath->query('//domain/metadata/vmtemplate/@*');
+
+        $arrTemplateValues = [];
+        if ($objNodes->length > 0) {
+        	foreach ($objNodes as $objNode) {
+        		$arrTemplateValues[$objNode->nodeName] = $objNode->nodeValue;
+        	}
+        }
+
+		if (empty($arrTemplateValues['name'])) {
+			$arrTemplateValues['name'] = 'Custom';
+		}
+
+
 		$arrGPUDevices = [];
 		$arrAudioDevices = [];
 		$arrOtherDevices = [];
@@ -382,13 +403,13 @@
 		}
 
 		return [
+			'template' => $arrTemplateValues,
 			'domain' => [
 				'name' => $lv->domain_get_name($res),
 				'desc' => $lv->domain_get_description($res),
 				'persistent' => 1,
 				'uuid' => $lv->domain_get_uuid($res),
 				'clock' => $lv->domain_get_clock_offset($res),
-				'os' => ($lv->domain_get_clock_offset($res) == 'localtime' ? 'windows' : 'other'),
 				'arch' => $lv->domain_get_arch($res),
 				'machine' => $lv->domain_get_machine($res),
 				'mem' => $lv->domain_get_current_memory($res),
