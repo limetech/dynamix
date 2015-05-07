@@ -30,8 +30,18 @@ $_REQUEST = array_merge($_GET, $_POST);
 $action = array_key_exists('action', $_REQUEST) ? $_REQUEST['action'] : '';
 $uuid = array_key_exists('uuid', $_REQUEST) ? $_REQUEST['uuid'] : '';
 
+// Make sure libvirt is connected to qemu
+if (!isset($lv) || !$lv->enabled()) {
+	header('Content-Type: application/json');
+	die(json_encode(['error' => 'failed to connect to the hypervisor']));
+}
+
 if ($uuid) {
 	$domName = $lv->domain_get_name_by_uuid($uuid);
+	if (!$domName) {
+		header('Content-Type: application/json');
+		die(json_encode(['error' => $lv->get_last_error()]));
+	}
 }
 
 $arrResponse = [];
