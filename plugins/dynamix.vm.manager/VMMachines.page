@@ -204,10 +204,11 @@ if ($action) {
       $state = $lv->domain_state_translate($dom['state']);
       switch ($state) {
         case 'running':
-          $shape = 'circle';
+          $shape = 'play';
           $status = 'started';
           break;
-        case 'paused':
+        case 'paused': //no break on purpose
+        case 'pmsuspended':
           $shape = 'pause';
           $status = 'paused';
           break;

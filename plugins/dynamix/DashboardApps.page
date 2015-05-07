@@ -33,16 +33,17 @@ Markdown="false"
 		z-index: 2;
 		bottom: -4px;
 		right: -4px;
-		font-size: 14px;
+		font-size: 1.2em;
+		text-shadow: 0 0 2px #FFF;
+	}
+	.iconstatus.started {
+		font-size: 1.3em;
 	}
 	img.started{opacity: 1.0;}
 	img.stopped{opacity: 0.3;}
-	img.paused{opacity: 0.3;}
-	.iconstatus.started{color:#009900;}
-	.iconstatus.stopped{color:#EF3D47;}
-	.iconstatus.paused{color:#DEAF11;}
+	img.paused{opacity: 1.0;}
 	.started{color: #009900;}
-	.paused{color: #DEAF11;}
+	.paused{color: #F0DD33;}
 	.stopped{color: #EF3D47;}
 	.update{color: #3300FF;}
 	.show {
@@ -125,7 +126,7 @@ foreach ($allContainers as $ct) {
 	$running        = ($ct['Running']) ? 'true' : 'false';
 	$webGuiUrl      = $info['url'];
 	$contextMenus[] = sprintf("addDockerContainerContext('%s', '%s', '%s', %s, %s, %s, '%s');", addslashes($ct['Name']), addslashes($ct['ImageId']), addslashes($info['template']), $running, $updateStatus, $is_autostart, addslashes($webGuiUrl));
-	$shape          = ($ct["Running"]) ? "circle" : "square";
+	$shape          = ($ct["Running"]) ? "play" : "square";
 	$status         = ($ct["Running"]) ? "started" : "stopped";
 
 	$Icon           = $info['icon'];
@@ -157,10 +158,11 @@ foreach ($allVMs as $name) {
 	$state = $lv->domain_state_translate($dom['state']);
 	switch ($state) {
 		case 'running':
-			$shape = 'circle';
+			$shape = 'play';
 			$status = 'started';
 			break;
-		case 'paused':
+		case 'paused': //no break on purpose
+        case 'pmsuspended':
 			$shape = 'pause';
 			$status = 'paused';
 			break;

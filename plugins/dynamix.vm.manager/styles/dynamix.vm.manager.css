@@ -667,13 +667,17 @@ table.tablesorter.domsnap td:last-child{width:96px;padding:0;}
   z-index: 2;
   bottom: -4px;
   right: -4px;
-  font-size: 14px;
+  font-size: 1.2em;
+  text-shadow: 0 0 2px #FFF;
+}
+.iconstatus.started {
+  font-size: 1.3em;
 }
 img.started{opacity: 1.0;}
 img.stopped{opacity: 0.3;}
-img.paused{opacity: 0.3;}
-.iconstatus.started{color:#009900;}
-.iconstatus.stopped{color:#EF3D47;}
-.iconstatus.paused{color:#DEAF11;}
+img.paused{opacity: 1.0;}
+.started{color:#009900;}
+.stopped{color:#EF3D47;}
+.paused{color:#F0DD33;}
 
 .log{cursor:zoom-in;}

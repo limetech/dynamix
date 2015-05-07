@@ -43,12 +43,19 @@ $DockerTemplates = new DockerTemplates();
 		z-index: 2;
 		bottom: -4px;
 		right: -4px;
-		font-size: 14px;
+		font-size: 1.2em;
+		text-shadow: 0 0 2px #FFF;
+	}
+	.iconstatus.started {
+		font-size: 1.3em;
+	}
+	.iconstatus.stopped {
+		font-size: 1.2em;
 	}
 	img.started{opacity:1.0;}
 	img.stopped{opacity:0.3;}
-	.iconstatus.started{color:#009900;}
-	.iconstatus.stopped{color:#EF3D47;}
+	.started{color:#009900;}
+	.stopped{color:#EF3D47;}
 </style>
 <form id="formAutostart" method="POST" action="/plugins/dynamix.docker.manager/update_cfg.php" target="progressFrame">
   <input type="hidden" name="action" value="autostart" />
@@ -92,7 +99,7 @@ $DockerTemplates = new DockerTemplates();
 			$running        = ($ct['Running']) ? 'true' : 'false';
 			$webGuiUrl      = $info[$name]['url'];
 			$contextMenus[] = sprintf("addDockerContainerContext('%s', '%s', '%s', %s, %s, %s, '%s');", addslashes($ct['Name']), addslashes($ct['ImageId']), addslashes($info[$name]['template']), $running, $updateStatus, $is_autostart, addslashes($webGuiUrl));
-			$shape          = ($ct["Running"]) ? "circle" : "square";
+			$shape          = ($ct["Running"]) ? "play" : "square";
 			$status         = ($ct["Running"]) ? "started" : "stopped";
 
 			$Icon           = $info[$name]['icon'];
