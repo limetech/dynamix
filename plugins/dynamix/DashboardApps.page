@@ -221,7 +221,7 @@ function ajaxVMDispatch(currentstate, params){
 }
 
 function addVMContext(name, uuid, state, vncurl, log){
-  var opts = [{header: name}];
+  var opts = [{header: name, image: "/plugins/dynamix.vm.manager/images/dynamix.vm.manager.png"}];
 
   var path = location.pathname;
   var x = path.indexOf("?");
