@@ -74,9 +74,11 @@ switch ($action) {
 		break;
 
 	case 'domain-pmwakeup':
-		$arrResponse = $lv->domain_resume($domName) ?
+		// No support in libvirt-php to do a dompmwakeup, use virsh tool instead
+		exec("virsh dompmwakeup " . escapeshellarg($uuid) . " 2>&1", $arrOutput, $intReturnCode);
+		$arrResponse = ($intReturnCode == 0) ?
 						['success' => true, 'state' => $lv->domain_get_state($domName)] :
-						['error' => $lv->get_last_error()];
+						['error' => str_replace('error: ', '', implode('. ', $arrOutput))];
 		break;
 
 	case 'domain-restart':
