@@ -22,8 +22,7 @@
 			if ($debug)
 				$this->set_logfile($debug);
 			if ($uri != false) {
-				$this->enabled = true;
-				$this->connect($uri, $login, $pwd);
+				$this->enabled = $this->connect($uri, $login, $pwd);
 			}
 		}
 
@@ -819,6 +818,8 @@
 			}
 			if ($this->conn==false)
 				return $this->_set_last_error();
+
+			return true;
 		}
 
 		function domain_change_boot_devices($domain, $first, $second) {
@@ -1462,7 +1463,7 @@
 		}
 
 		function domain_get_name_by_uuid($uuid) {
-			$dom = libvirt_domain_lookup_by_uuid_string($this->conn, $uuid);
+			$dom = $this->domain_get_domain_by_uuid($uuid);
 			if (!$dom)
 				return false;
 			$tmp = libvirt_domain_get_name($dom);
