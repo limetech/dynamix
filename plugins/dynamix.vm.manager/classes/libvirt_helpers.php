@@ -125,10 +125,12 @@
 			return $cacheValidPCIDevices;
 		}
 
-		$strOSUSBController = trim(shell_exec("udevadm info -q path -n /dev/disk/by-label/UNRAID | grep -Po '0000:\K\w{2}:\w{2}\.\w{1}'"));
+		$strOSUSBController = trim(shell_exec("udevadm info -q path -n /dev/disk/by-label/UNRAID 2>/dev/null | grep -Po '0000:\K\w{2}:\w{2}\.\w{1}'"));
+		$strOSNetworkDevice = trim(shell_exec("udevadm info -q path -p /sys/class/net/eth0 2>/dev/null | grep -Po '0000:\K\w{2}:\w{2}\.\w{1}'"));
+
 		//TODO: add any drive controllers currently being used by unraid to the blacklist
 
-		$arrBlacklistIDs = array($strOSUSBController);
+		$arrBlacklistIDs = array($strOSUSBController, $strOSNetworkDevice);
 		$arrBlacklistTypes = array('Host bridge', 'PCI bridge', 'ISA bridge', 'SMBus');
 
 		$arrWhitelistGPUNames = array('VGA compatible controller', 'Video Device');
