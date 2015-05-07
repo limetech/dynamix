@@ -63,7 +63,12 @@ var context = context || (function () {
 			if (typeof data[i].divider !== 'undefined') {
 				$menu.append('<li class="divider"></li>');
 			} else if (typeof data[i].header !== 'undefined') {
-				$menu.append('<li class="nav-header">' + data[i].header + '</li>');
+				if (typeof data[i].image !== 'undefined' && data[i].image !== '') {
+					$menu.append('<li class="nav-header"><img src="' + data[i].image + '"/> ' + data[i].header + '</li>');
+				} else {
+					$menu.append('<li class="nav-header">' + data[i].header + '</li>');
+				}
+
 			} else {
 				if (typeof data[i].href == 'undefined') {
 					data[i].href = '#';
