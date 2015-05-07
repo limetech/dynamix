@@ -242,7 +242,8 @@ switch ($action) {
 		$arrResponse = [
 			'isfile' => (!empty($file) ? is_file($file) : false),
 			'isdir' => (!empty($file) ? is_dir($file) : false),
-			'isblock' => (!empty($file) ? is_block($file) : false)
+			'isblock' => (!empty($file) ? is_block($file) : false),
+			'resizable' => false
 		];
 
 		// if file, get size and format info
@@ -265,6 +266,25 @@ switch ($action) {
 				$arrResponse['actual-size'] = $json_info['actual-size'];
 				$arrResponse['format'] = $json_info['format'];
 				$arrResponse['dirty-flag'] = $json_info['dirty-flag'];
+				$arrResponse['resizable'] = true;
+			}
+		} else if (is_block($file)) {
+			$strDevSize = trim(shell_exec("blockdev --getsize64 " . escapeshellarg($file)));
+			if (!empty($strDevSize) && is_numeric($strDevSize)) {
+				$arrResponse['actual-size'] = (int)$strDevSize;
+				$arrResponse['format'] = 'raw';
+
+				$intDisplaySize = (int)$strDevSize;
+				$intShifts = 0;
+				while (!empty($intDisplaySize) &&
+						($intDisplaySize >= 2) &&
+						isset($arrSizePrefix[$intShifts])) {
+
+					$arrResponse['display-size'] = round($intDisplaySize, 0) . $arrSizePrefix[$intShifts];
+
+					$intDisplaySize /= 1000; // 1000 looks better than 1024 for block devs
+					$intShifts++;
+				}
 			}
 		}
 		break;
