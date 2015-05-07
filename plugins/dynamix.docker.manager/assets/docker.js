@@ -1,5 +1,5 @@
 function addDockerContainerContext(container, image, template, started, update, autostart, webui){
-  var opts = [{header: container}];
+  var opts = [{header: container, image: "/plugins/dynamix.docker.manager/images/dynamix.docker.manager.png"}];
   if (started && (webui != "#")) {
     opts.push({text: 'WebUI', icon:'fa-globe', href: webui, target: '_blank' });
     opts.push({divider: true});
