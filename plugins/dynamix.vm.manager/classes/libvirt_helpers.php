@@ -154,6 +154,14 @@
 					$strClass = 'audio';
 				}
 
+				if ($strClass == 'vga' &&
+					strpos($arrMatch['id'], '00:') === 0 &&
+					(stripos($arrMatch['name'], 'integrated') !== false || strpos($arrMatch['name'], 'Intel ') !== false)) {
+					// Our sorry attempt to detect a integrated gpu
+					// Integrated gpus dont work for passthrough, skip device
+					continue;
+				}
+
 				if (!file_exists('/sys/bus/pci/devices/0000:' . $arrMatch['id'] . '/iommu_group/')) {
 					// No IOMMU support for device, skip device
 					continue;
