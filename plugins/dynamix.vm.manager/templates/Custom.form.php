@@ -16,15 +16,12 @@
 	require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt_helpers.php');
 
 	$arrValidMachineTypes = getValidMachineTypes();
-	$arrValidPCIDevices = getValidPCIDevices();
+	$arrValidGPUDevices = getValidGPUDevices();
+	$arrValidAudioDevices = getValidAudioDevices();
+	$arrValidOtherDevices = getValidOtherDevices();
 	$arrValidUSBDevices = getValidUSBDevices();
 	$arrValidDiskDrivers = getValidDiskDrivers();
 	$arrValidKeyMaps = getValidKeyMaps();
-
-	$arrValidGPUDevices = array_filter($arrValidPCIDevices, function($arrDev) { return ($arrDev['class'] == 'vga'); });
-	$arrValidAudioDevices = array_filter($arrValidPCIDevices, function($arrDev) { return ($arrDev['class'] == 'audio'); });
-	$arrValidOtherDevices = array_filter($arrValidPCIDevices, function($arrDev) { return ($arrDev['class'] == 'other'); });
-
 	$strCPUModel = getHostCPUModel();
 
 	$arrOperatingSystems = [

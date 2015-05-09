@@ -185,6 +185,39 @@
 	}
 
 
+	function getValidGPUDevices() {
+		$arrValidPCIDevices = getValidPCIDevices();
+
+		$arrValidGPUDevices = array_filter($arrValidPCIDevices, function($arrDev) {
+			return ($arrDev['class'] == 'vga');
+		});
+
+		return $arrValidGPUDevices;
+	}
+
+
+	function getValidAudioDevices() {
+		$arrValidPCIDevices = getValidPCIDevices();
+
+		$arrValidAudioDevices = array_filter($arrValidPCIDevices, function($arrDev) {
+			return ($arrDev['class'] == 'audio');
+		});
+
+		return $arrValidAudioDevices;
+	}
+
+
+	function getValidOtherDevices() {
+		$arrValidPCIDevices = getValidPCIDevices();
+
+		$arrValidOtherDevices = array_filter($arrValidPCIDevices, function($arrDev) {
+			return ($arrDev['class'] == 'other');
+		});
+
+		return $arrValidOtherDevices;
+	}
+
+
 	$cacheValidUSBDevices = null;
 	function getValidUSBDevices() {
 		global $cacheValidUSBDevices;
@@ -328,13 +361,11 @@
 	function domain_to_config($uuid) {
 		global $lv;
 
-		$arrValidPCIDevices = getValidPCIDevices();
+		$arrValidGPUDevices = getValidGPUDevices();
+		$arrValidAudioDevices = getValidAudioDevices();
+		$arrValidOtherDevices = getValidOtherDevices();
 		$arrValidUSBDevices = getValidUSBDevices();
 		$arrValidDiskDrivers = getValidDiskDrivers();
-
-		$arrValidGPUDevices = array_filter($arrValidPCIDevices, function($arrDev) { return ($arrDev['class'] == 'vga'); });
-		$arrValidAudioDevices = array_filter($arrValidPCIDevices, function($arrDev) { return ($arrDev['class'] == 'audio'); });
-		$arrValidOtherDevices = array_filter($arrValidPCIDevices, function($arrDev) { return ($arrDev['class'] == 'other'); });
 
 		$res = $lv->domain_get_domain_by_uuid($uuid);
 		$dom = $lv->domain_get_info($res);
