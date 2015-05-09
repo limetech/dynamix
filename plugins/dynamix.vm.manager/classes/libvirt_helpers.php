@@ -131,10 +131,10 @@
 		//TODO: add any drive controllers currently being used by unraid to the blacklist
 
 		$arrBlacklistIDs = array($strOSUSBController, $strOSNetworkDevice);
-		$arrBlacklistTypes = array('Host bridge', 'PCI bridge', 'ISA bridge', 'SMBus');
-
-		$arrWhitelistGPUNames = array('VGA compatible controller', 'Video Device');
-		$arrWhitelistAudioNames = array('Audio device');
+		$arrBlacklistClassIDregex = '/^(05|06|08|0a|0b|0c05)/';
+		// Got Class IDs at the bottom of /usr/share/hwdata/pci.ids
+		$arrWhitelistGPUClassIDregex = '/^(0001|03|0400)/';
+		$arrWhitelistAudioClassIDregex = '/^(0401|0403)/';
 
 		$arrValidPCIDevices = array();
 
@@ -142,15 +142,15 @@
 
 		foreach ($arrAllPCIDevices as $strPCIDevice) {
 			if (preg_match('/^(?P<id>\S+) (?P<type>.+) \[(?P<typeid>[a-f0-9]{4})\]: (?P<name>.+) \[(?P<vendorid>[a-f0-9]{4}):(?P<productid>[a-f0-9]{4})\]/', $strPCIDevice, $arrMatch)) {
-				if (in_array($arrMatch['id'], $arrBlacklistIDs) || in_array($arrMatch['type'], $arrBlacklistTypes)) {
+				if (in_array($arrMatch['id'], $arrBlacklistIDs) || preg_match($arrBlacklistClassIDregex, $arrMatch['typeid'])) {
 					// Device blacklisted, skip device
 					continue;
 				}
 
 				$strClass = 'other';
-				if (in_array($arrMatch['type'], $arrWhitelistGPUNames)) {
+				if (preg_match($arrWhitelistGPUClassIDregex, $arrMatch['typeid'])) {
 					$strClass = 'vga';
-				} else if (in_array($arrMatch['type'], $arrWhitelistAudioNames)) {
+				} else if (preg_match($arrWhitelistAudioClassIDregex, $arrMatch['typeid'])) {
 					$strClass = 'audio';
 				}
 
