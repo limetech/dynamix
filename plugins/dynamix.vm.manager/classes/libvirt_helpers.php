@@ -138,10 +138,10 @@
 
 		$arrValidPCIDevices = array();
 
-		exec("lspci 2>/dev/null", $arrAllPCIDevices);
+		exec("lspci -nn 2>/dev/null", $arrAllPCIDevices);
 
 		foreach ($arrAllPCIDevices as $strPCIDevice) {
-			if (preg_match('/^(?P<id>\S+) (?P<type>.+): (?P<name>.+)$/', $strPCIDevice, $arrMatch)) {
+			if (preg_match('/^(?P<id>\S+) (?P<type>.+) \[(?P<typeid>[a-f0-9]{4})\]: (?P<name>.+) \[(?P<vendorid>[a-f0-9]{4}):(?P<productid>[a-f0-9]{4})\]/', $strPCIDevice, $arrMatch)) {
 				if (in_array($arrMatch['id'], $arrBlacklistIDs) || in_array($arrMatch['type'], $arrBlacklistTypes)) {
 					// Device blacklisted, skip device
 					continue;
@@ -170,6 +170,9 @@
 				$arrValidPCIDevices[] = array(
 					'id' => $arrMatch['id'],
 					'type' => $arrMatch['type'],
+					'typeid' => $arrMatch['typeid'],
+					'vendorid' => $arrMatch['vendorid'],
+					'productid' => $arrMatch['productid'],
 					'class' => $strClass,
 					'name' => $arrMatch['name']
 				);
