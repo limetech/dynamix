@@ -35,21 +35,7 @@ if ($action) {
 }else{
    if ($subaction) {
      	$domName = $lv->domain_get_name_by_uuid($uuid);
-      if ($subaction == 'domain-define') {
-         if (@$_POST['xmldesc']) {
-      	   $msg = $lv->domain_define( $_POST['xmldesc']) ? "Domain definition has been added" :
-   	      	'Error: '.$lv->get_last_error();
-         }
-      }
-      //edit domain XML
-      elseif ($subaction == 'domain-create') {
-         if (@$_POST['xmldesc']) {
-         	$xml = $_POST['xmldesc'];
-           	$msg = $lv->domain_define($xml) ? "$domName definition has been changed" :
-         	  	"Error: ".$lv->get_last_error();
-         }
-		}
-		elseif ($subaction == 'domain-diskdev') {
+      if ($subaction == 'domain-diskdev') {
 			$msg = $lv->domain_set_disk_dev($domName, $_GET['olddev'], $_POST['diskdev']) ?
 				$domName.' disk dev has been changed from '.$_GET['olddev'].' to '.$_POST['diskdev']:
 				'Error: '.$lv->get_last_error();
@@ -397,6 +383,7 @@ if ($action) {
 /* End Backup information*/
 
 			/* Snapshot  information */
+      /*
          	echo "<table class='tablesorter domsnap' id='domsnap_table'>
                      <thead>
 		        	      <tr>
@@ -455,8 +442,9 @@ if ($action) {
    	                <td>N/A</td>
    	                <td>N/A</td>
    	            </tr>";
-     	echo '</tbody></table></td>
-			</tr>';
+     	echo '</tbody></table>';
+      */
+      echo '</td></tr>';
 		}
 	}
 	echo '</tbody></table>';
