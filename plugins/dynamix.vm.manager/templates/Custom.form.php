@@ -22,6 +22,7 @@
 	$arrValidUSBDevices = getValidUSBDevices();
 	$arrValidDiskDrivers = getValidDiskDrivers();
 	$arrValidKeyMaps = getValidKeyMaps();
+	$arrValidBridges = getNetworkBridges();
 	$strCPUModel = getHostCPUModel();
 
 	$arrOperatingSystems = [
@@ -690,7 +691,13 @@
 		<tr class="advanced">
 			<td>Network Bridge:</td>
 			<td>
-				<input type="text" name="nic[<?=$i?>][network]" value="<?=$arrNic['network']?>" placeholder="name of bridge in unRAID" title="name of bridge in unRAID automatically filled in" />
+				<select name="nic[<?=$i?>][network]">
+				<?php
+					foreach ($arrValidBridges as $strBridge) {
+						echo mk_option($arrNic['network'], $strBridge, $strBridge);
+					}
+				?>
+				</select>
 			</td>
 		</tr>
 	</table>
@@ -724,7 +731,13 @@
 		<tr class="advanced">
 			<td>Network Bridge:</td>
 			<td>
-				<input type="text" name="nic[{{INDEX}}][network]" value="" placeholder="name of bridge in unRAID" title="name of bridge in unRAID automatically filled in" />
+				<select name="nic[{{INDEX}}][network]">
+				<?php
+					foreach ($arrValidBridges as $strBridge) {
+						echo mk_option($domain_bridge, $strBridge, $strBridge);
+					}
+				?>
+				</select>
 			</td>
 		</tr>
 	</table>

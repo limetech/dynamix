@@ -289,24 +289,6 @@ switch ($action) {
 		}
 		break;
 
-	case 'list-bridges':
-		exec("brctl show | awk -F'\t' 'FNR > 1 {print \$1}' | awk 'NF > 0'", $output);
-
-		if (!is_array($output)) {
-			$output = [];
-		}
-
-		// Make sure the bridge setup for unRAID is first in the list
-		if (($key = array_search($domain_bridge, $output)) !== false) {
-			unset($output[$key]);
-			array_unshift($output, $domain_bridge);
-		}
-
-		$arrResponse = [
-			'bridges' => array_values($output)
-		];
-		break;
-
 	case 'generate-mac':
 		$arrResponse = [
 			'mac' => $lv->generate_random_mac_addr()

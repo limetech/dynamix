@@ -370,6 +370,24 @@
 	}
 
 
+	function getNetworkBridges() {
+		exec("brctl show | awk -F'\t' 'FNR > 1 {print \$1}' | awk 'NF > 0'", $arrValidBridges);
+
+		if (!is_array($arrValidBridges)) {
+			$arrValidBridges = [];
+		}
+
+		// Make sure the default libvirt bridge is first in the list
+		if (($key = array_search('virbr0', $arrValidBridges)) !== false) {
+			unset($arrValidBridges[$key]);
+		}
+		// We always list virbr0 because libvirt might not be started yet (thus the bridge doesn't exists)
+		array_unshift($arrValidBridges, 'virbr0');
+
+		return array_values($arrValidBridges);
+	}
+
+
 	function domain_to_config($uuid) {
 		global $lv;
 

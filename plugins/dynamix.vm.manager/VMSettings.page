@@ -34,6 +34,9 @@ if (strpos($strCPUInfo, 'vmx') === false && strpos($strCPUInfo, 'svm') === false
 }
 
 
+$arrValidBridges = getNetworkBridges();
+
+
 // Check for PCIE ACS capabilities
 $boolACSEnabled = (strpos(file_get_contents('/proc/cmdline'), 'pcie_acs_override=') !== false);
 
@@ -109,14 +112,20 @@ vDisk Share <span style="font-weight: normal">(optional)</span>:
 : <input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/" name="DISKDIR" maxlength="60" value="<?=$domain_cfg['DISKDIR']?>" placeholder="Click to Select (ie. /mnt/cache/images)" title="Click to Select (ie. /mnt/cache/images)">
 -->
 
-Alternate Network Bridge:
-: <input type="text" id="bridge" name="BRNAME" maxlength="60" value="<?=$domain_cfg['BRNAME']?>" placeholder="Leave blank to use the default libVirt managed network bridge" title="Leave blank to use the default libVirt managed network bridge">
+Default Network Bridge:
+: <select id="bridge" name="BRNAME">
+<?php
+	foreach ($arrValidBridges as $strBridge) {
+		echo mk_option($domain_cfg['BRNAME'], $strBridge, $strBridge);
+	}
+?>
+</select>
 
-> Enter the name of the alternate network bridge you wish to use for your VMs here, otherwise leave the field blank and
+> Enter the name of the network bridge you wish to use for your VMs here, otherwise leave the field blank and
 > libvirt will create a bridge that will utilize NAT (network address translation) and act as a DHCP server to hand out
 > IP addresses to virtual machines directly.
 >
-> NOTE:  You can also specify an alternate network bridge on a per-VM basis.
+> NOTE:  You can also specify an network bridge on a per-VM basis.
 
 PCIe ACS Override:
 : <select id="pcie_acs_override" class="narrow">
