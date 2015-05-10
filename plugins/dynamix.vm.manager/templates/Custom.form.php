@@ -690,7 +690,7 @@
 		<tr class="advanced">
 			<td>Network MAC:</td>
 			<td>
-				<input type="text" name="nic[<?=$i?>][mac]" value="<?=$arrNic['mac']?>" title="random mac, you can supply your own" /> <i class="fa fa-refresh mac_generate" title="re-generate random mac address"></i>
+				<input type="text" name="nic[<?=$i?>][mac]" class="narrow" value="<?=$arrNic['mac']?>" title="random mac, you can supply your own" /> <i class="fa fa-refresh mac_generate" title="re-generate random mac address"></i>
 			</td>
 		</tr>
 
@@ -730,7 +730,7 @@
 		<tr class="advanced">
 			<td>Network MAC:</td>
 			<td>
-				<input type="text" name="nic[{{INDEX}}][mac]" value="" title="random mac, you can supply your own" /> <i class="fa fa-refresh mac_generate" title="re-generate random mac address"></i>
+				<input type="text" name="nic[{{INDEX}}][mac]" class="narrow" value="" title="random mac, you can supply your own" /> <i class="fa fa-refresh mac_generate" title="re-generate random mac address"></i>
 			</td>
 		</tr>
 
