@@ -35,63 +35,7 @@ if ($action) {
 }else{
    if ($subaction) {
      	$domName = $lv->domain_get_name_by_uuid($uuid);
-      if ($subaction == 'domain-start') {
-        	$msg = $lv->domain_start($domName) ? "$domName has been started" :
-        		"error";
-			 }
-		elseif ($subaction == 'domain-autostart') {
-	 		if ($lv->domain_get_autostart($domName)) {
-	 			$msg = $lv->domain_set_autostart($domName, false) ? "$domName has been removed from autostart" :
-	 				"Error: ".$lv->get_last_error();
-	 		} else {
-	 			$msg = $lv->domain_set_autostart($domName, true) ? "$domName has been set to autostart" :
-       			"Error: ".$lv->get_last_error();
-			}
-		}
-      elseif ($subaction == 'domain-pause') {
-        	$msg = $lv->domain_suspend($domName) ?
-  	      	"$domName has been paused" :
-   	     	"Error: ".$lv->get_last_error();
-		}
-      elseif ($subaction == 'domain-resume') {
-      	$msg = $lv->domain_resume($domName) ?
-      		"$domName has been resumed" :
-      		"Error: ".$lv->get_last_error();
-		}
-      elseif ($subaction == 'domain-pmwakeup') {
-         $strLastLine = system("virsh dompmwakeup $uuid", $intReturn);
-         $msg = (($intReturn == 0) ? "$domName has been resumed" : "Error: " . $strLastLine);
-      }
-      elseif ($subaction == 'domain-restart') {
-        	$msg = $lv->domain_reboot($domName) ?
-        		"$domName has been restarted" :
-        		"Error: ".$lv->get_last_error();
-		}
-      elseif ($subaction == 'domain-save') {
-        	$msg = $lv->domain_save($domName) ?
-        		"$domName has been shutdown and saved" :
-        		'Error: '.$lv->get_last_error();
-		}
-		elseif ($subaction == 'domain-stop') {
-         $msg = $lv->domain_shutdown($domName) ?
-         	"Waiting for $domName to shutdown..." :
-         	"Error: ".$lv->get_last_error();
-			echo "<meta http-equiv='refresh' content='5; url=/VMs?name=$domName&amp;refresh=true'>";
-         	}
-      elseif ($subaction == 'domain-destroy') {
-         $msg = $lv->domain_destroy($domName) ?
-         	"$domName has been destroyed" :
-         	"Error: ".$lv->get_last_error();
-      }
-      elseif ($subaction == 'domain-delete') {
-         $msg = $lv->domain_delete($domName) ? "$domName has been deleted" :
-         	"Error: ".$lv->get_last_error();
-      }
-      elseif ($subaction == 'domain-undefine') {
-         $msg = $lv->domain_undefine($domName) ? "$domName has been undefined" :
-         	"Error: ".$lv->get_last_error();
-      }
-      elseif ($subaction == 'domain-define') {
+      if ($subaction == 'domain-define') {
          if (@$_POST['xmldesc']) {
       	   $msg = $lv->domain_define( $_POST['xmldesc']) ? "Domain definition has been added" :
    	      	'Error: '.$lv->get_last_error();
