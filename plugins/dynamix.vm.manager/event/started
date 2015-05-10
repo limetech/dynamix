@@ -29,6 +29,9 @@ if ! [ -f /var/local/emhttp/var.ini ] || grep -q 'startMode="Normal"' /var/local
 			cp /boot/config/plugins/dynamix.kvm.manager/qemu /etc/libvirt/hooks/
 		fi
 
+		# delete seed image, not needed anymore
+		rm -r /usr/local/emhttp/plugins/dynamix.vm.manager/dynamix.kvm.manager
+
 		# Start libvirt
 		if [ -x /etc/rc.d/rc.libvirt ]; then
 			logger "Starting libvirt"
