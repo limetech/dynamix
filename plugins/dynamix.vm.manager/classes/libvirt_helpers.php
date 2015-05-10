@@ -133,15 +133,16 @@
 		$arrBlacklistIDs = array($strOSUSBController, $strOSNetworkDevice);
 		$arrBlacklistClassIDregex = '/^(05|06|08|0a|0b|0c05)/';
 		// Got Class IDs at the bottom of /usr/share/hwdata/pci.ids
-		$arrWhitelistGPUClassIDregex = '/^(0001|03|0400)/';
-		$arrWhitelistAudioClassIDregex = '/^(0401|0403)/';
+		$arrWhitelistGPUClassIDregex = '/^(0001|03)/';
+		$arrWhitelistAudioClassIDregex = '/^(0403)/';
 
 		$arrValidPCIDevices = array();
 
-		exec("lspci -nn 2>/dev/null", $arrAllPCIDevices);
+		exec("lspci -m -nn 2>/dev/null", $arrAllPCIDevices);
 
 		foreach ($arrAllPCIDevices as $strPCIDevice) {
-			if (preg_match('/^(?P<id>\S+) (?P<type>.+) \[(?P<typeid>[a-f0-9]{4})\]: (?P<name>.+) \[(?P<vendorid>[a-f0-9]{4}):(?P<productid>[a-f0-9]{4})\]/', $strPCIDevice, $arrMatch)) {
+			// Example: 00:1f.0 "ISA bridge [0601]" "Intel Corporation [8086]" "Z77 Express Chipset LPC Controller [1e44]" -r04 "Micro-Star International Co., Ltd. [MSI] [1462]" "Device [7759]"
+			if (preg_match('/^(?P<id>\S+) \"(?P<type>.+) \[(?P<typeid>[a-f0-9]{4})\]\" \"(?P<vendorname>.+) \[(?P<vendorid>[a-f0-9]{4})\]\" \"(?P<productname>.+) \[(?P<productid>[a-f0-9]{4})\]\" (\-r.+).?/', $strPCIDevice, $arrMatch)) {
 				if (in_array($arrMatch['id'], $arrBlacklistIDs) || preg_match($arrBlacklistClassIDregex, $arrMatch['typeid'])) {
 					// Device blacklisted, skip device
 					continue;
@@ -150,13 +151,18 @@
 				$strClass = 'other';
 				if (preg_match($arrWhitelistGPUClassIDregex, $arrMatch['typeid'])) {
 					$strClass = 'vga';
+					// Specialized product name cleanup for GPU
+					// GF116 [GeForce GTX 550 Ti] --> GeForce GTX 550 Ti
+					if (preg_match('/.+\[(?P<gpuname>.+)\]/', $arrMatch['productname'], $arrGPUMatch)) {
+						$arrMatch['productname'] = $arrGPUMatch['gpuname'];
+					}
 				} else if (preg_match($arrWhitelistAudioClassIDregex, $arrMatch['typeid'])) {
 					$strClass = 'audio';
 				}
 
 				if ($strClass == 'vga' &&
 					strpos($arrMatch['id'], '00:') === 0 &&
-					(stripos($arrMatch['name'], 'integrated') !== false || strpos($arrMatch['name'], 'Intel ') !== false)) {
+					(stripos($arrMatch['productname'], 'integrated') !== false || strpos($arrMatch['vendorname'], 'Intel ') !== false)) {
 					// Our sorry attempt to detect a integrated gpu
 					// Integrated gpus dont work for passthrough, skip device
 					continue;
@@ -167,14 +173,20 @@
 					continue;
 				}
 
+				// Clean up the vendor and product name
+				$arrMatch['vendorname'] = str_replace([' Corporation', ' Semiconductor Co., Ltd.', ' Technology Group Ltd.', ' Electronics Systems Ltd.', ' Systems, Inc.'], '', $arrMatch['vendorname']);
+				$arrMatch['productname'] = str_replace([' PCI Express'], [' PCIe'], $arrMatch['productname']);
+
 				$arrValidPCIDevices[] = array(
 					'id' => $arrMatch['id'],
 					'type' => $arrMatch['type'],
 					'typeid' => $arrMatch['typeid'],
 					'vendorid' => $arrMatch['vendorid'],
+					'vendorname' => $arrMatch['vendorname'],
 					'productid' => $arrMatch['productid'],
+					'productname' => $arrMatch['productname'],
 					'class' => $strClass,
-					'name' => $arrMatch['name']
+					'name' => $arrMatch['vendorname'] . ' ' . $arrMatch['productname']
 				);
 			}
 		}
