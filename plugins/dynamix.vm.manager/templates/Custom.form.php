@@ -196,6 +196,12 @@
 		float: none;
 		clear: both;
 	}
+	.mac_generate {
+		cursor: pointer;
+		margin-left: -8px;
+		color: #08C;
+		font-size: 1.1em;
+	}
 </style>
 
 <input type="hidden" name="domain[persistent]" value="<?=$arrConfig['domain']['persistent']?>">
@@ -684,7 +690,7 @@
 		<tr class="advanced">
 			<td>Network MAC:</td>
 			<td>
-				<input type="text" name="nic[<?=$i?>][mac]" value="<?=$arrNic['mac']?>" title="random mac, you can supply your own" />
+				<input type="text" name="nic[<?=$i?>][mac]" value="<?=$arrNic['mac']?>" title="random mac, you can supply your own" /> <i class="fa fa-refresh mac_generate" title="re-generate random mac address"></i>
 			</td>
 		</tr>
 
@@ -724,7 +730,7 @@
 		<tr class="advanced">
 			<td>Network MAC:</td>
 			<td>
-				<input type="text" name="nic[{{INDEX}}][mac]" value="" title="random mac, you can supply your own" />
+				<input type="text" name="nic[{{INDEX}}][mac]" value="" title="random mac, you can supply your own" /> <i class="fa fa-refresh mac_generate" title="re-generate random mac address"></i>
 			</td>
 		</tr>
 
@@ -877,6 +883,16 @@ $(function() {
 	});
 
 	$("#form_content input[data-pickroot]").fileTreeAttach();
+
+	$("#form_content").on("click", ".mac_generate", function generateMac() {
+		var $input = $(this).prev('input');
+
+		$.get("/plugins/dynamix.vm.manager/VMajax.php?action=generate-mac", function( data ) {
+			if (data.mac) {
+				$input.val(data.mac);
+			}
+		}, "json");
+	});
 
 	$("#form_content #btnSubmit").click(function frmSubmit() {
 		var $button = $(this);
