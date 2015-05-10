@@ -256,7 +256,7 @@ function addVMContext(name, uuid, state, vncurl, log){
 
     opts.push({text: "Restart", icon: "fa-refresh", action: function(e) {
       e.preventDefault();
-      ajaxVMDispatch(state, { action: "domain-refresh", uuid: uuid });
+      ajaxVMDispatch(state, { action: "domain-restart", uuid: uuid });
     }});
 
     opts.push({text: "Suspend", icon: "fa-download", action: function(e) {
