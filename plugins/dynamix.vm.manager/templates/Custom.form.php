@@ -574,7 +574,7 @@
 					}
 
 					foreach($arrValidGPUDevices as $arrDev) {
-						echo mk_option($arrGPU['id'], $arrDev['id'], trim($arrDev['name'] . ' | ' . $arrDev['id'], ' |'));
+						echo mk_option($arrGPU['id'], $arrDev['id'], $arrDev['name']);
 					}
 				?>
 				</select>
@@ -627,7 +627,7 @@
 					echo mk_option('', '', 'None');
 
 					foreach($arrValidGPUDevices as $arrDev) {
-						echo mk_option('', $arrDev['id'], trim($arrDev['name'] . ' | ' . $arrDev['id'], ' |'));
+						echo mk_option('', $arrDev['id'], $arrDev['name']);
 					}
 				?>
 				</select>
@@ -650,7 +650,7 @@
 					echo mk_option($arrAudio['id'], '', 'None');
 
 					foreach($arrValidAudioDevices as $arrDev) {
-						echo mk_option($arrAudio['id'], $arrDev['id'], trim($arrDev['name'] . ' | ' . $arrDev['id'], ' |'));
+						echo mk_option($arrAudio['id'], $arrDev['id'], $arrDev['name']);
 					}
 				?>
 				</select>
@@ -672,7 +672,7 @@
 				<select name="audio[{{INDEX}}][id]" class="audio narrow">
 				<?php
 					foreach($arrValidAudioDevices as $arrDev) {
-						echo mk_option('', $arrDev['id'], trim($arrDev['name'] . ' | ' . $arrDev['id'], ' |'));
+						echo mk_option('', $arrDev['id'], $arrDev['name']);
 					}
 				?>
 				</select>
@@ -759,7 +759,7 @@
 				if (!empty($arrValidUSBDevices)) {
 					foreach($arrValidUSBDevices as $i => $arrDev) {
 					?>
-					<label for="usb<?=$i?>"><input type="checkbox" name="usb[]" id="usb<?=$i?>" value="<?=$arrDev['id']?>" <?php if (count(array_filter($arrConfig['usb'], function($arr) use ($arrDev) { return ($arr['id'] == $arrDev['id']); }))) echo 'checked="checked"'; ?>/> <?=$arrDev['name']?><span class="advanced"> | <?=$arrDev['id']?></span></label><br/>
+					<label for="usb<?=$i?>"><input type="checkbox" name="usb[]" id="usb<?=$i?>" value="<?=$arrDev['id']?>" <?php if (count(array_filter($arrConfig['usb'], function($arr) use ($arrDev) { return ($arr['id'] == $arrDev['id']); }))) echo 'checked="checked"'; ?>/> <?=$arrDev['name']?></label><br/>
 					<?php
 					}
 				} else {
