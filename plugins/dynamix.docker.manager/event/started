@@ -1,12 +1,14 @@
 #!/bin/sh
 
 # Only start if array is starting in Normal operation mode
-if grep -q 'startMode="Normal"' /var/local/emhttp/var.ini; then
+if grep -q 'mdState=STARTED' /proc/mdcmd; then
+	if ! [ -f /var/local/emhttp/var.ini ] || grep -q 'startMode="Normal"' /var/local/emhttp/var.ini; then
 
-	# Start Docker.io
-	if [ -x /etc/rc.d/rc.docker ]; then
-		logger "Starting docker.io"
-		/etc/rc.d/rc.docker start | logger
+		# Start Docker.io
+		if [ -x /etc/rc.d/rc.docker ]; then
+			logger "Starting docker.io"
+			/etc/rc.d/rc.docker start | logger
+		fi
+
 	fi
-
 fi
