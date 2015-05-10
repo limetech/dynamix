@@ -86,7 +86,7 @@ Markdown="false"
 </form>
 <div id="dialog-confirm" style="display:none;" title="Dialog Title"></div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
-<span class="status" style="margin-top: -44px; margin-right: 56px"><input type="checkbox" class="appview"></span>
+<span class="status" style="margin-top: -44px; margin-right: <?= ($display['refresh']==0 || ($display['refresh']<0 && $var['mdResync']>0)) ? '60' : '0' ?>px"><input type="checkbox" class="appview"></span>
 <div id="apps_icons" style="display: none">
 <?
 $allContainers = array();
