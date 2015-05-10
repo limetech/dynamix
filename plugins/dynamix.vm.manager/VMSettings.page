@@ -103,7 +103,7 @@ QEMU Version:
 <? } ?>
 
 ISO Library Share <span style="font-weight: normal">(optional)</span>:
-: <input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/user/" name="MEDIADIR" maxlength="60" value="<?=$domain_cfg['MEDIADIR']?>" placeholder="Click to Select">
+: <input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="<?= (is_dir('/mnt/user/') ? '/mnt/user/' : '/mnt/') ?>" name="MEDIADIR" maxlength="60" value="<?=$domain_cfg['MEDIADIR']?>" placeholder="Click to Select">
 
 > Specify a user share that contains all your installation media for operating systems
 
