@@ -1,0 +1,48 @@
+#!/bin/sh
+
+# Only start if array is starting in Normal operation mode
+if grep -q 'mdState=STARTED' /proc/mdcmd; then
+	if ! [ -f /var/local/emhttp/var.ini ] || grep -q 'startMode="Normal"' /var/local/emhttp/var.ini; then
+
+		SERVICE="disable"
+		if [ -f /boot/config/domain.cfg ]; then
+			source /boot/config/domain.cfg
+		fi
+
+		#copy old image to new
+		if [ -f /boot/config/plugins/virtMan/virtMan.img ]; then
+		    if [ "$(mount | grep virtMan.img)" ]; then
+		    	umount /etc/libvirt
+		    fi
+		    if [ ! -f /boot/config/plugins/dynamix.kvm.manager/domain.img ]; then
+		    	mkdir -p /boot/config/plugins/dynamix.kvm.manager
+		    	cp /boot/config/plugins/virtMan/virtMan.img /boot/config/plugins/dynamix.kvm.manager/domain.img
+		    fi
+		fi
+
+		if [ -d /usr/local/emhttp/plugins/dynamix.vm.manager/dynamix.kvm.manager ]; then
+			cp -nr /usr/local/emhttp/plugins/dynamix.vm.manager/dynamix.kvm.manager /boot/config/plugins
+		fi
+
+		if [ "$SERVICE" = "enable" ]; then
+			# mount xml/conf image if not already mounted
+			if [ ! "$(mount | grep domain.img)" ]; then
+				mount -t ext4 /boot/config/plugins/dynamix.kvm.manager/domain.img /etc/libvirt
+				mkdir -p /etc/libvirt/hooks
+				cp /boot/config/plugins/dynamix.kvm.manager/qemu /etc/libvirt/hooks/
+			fi
+
+			# delete seed image, not needed anymore
+			if [ -d /usr/local/emhttp/plugins/dynamix.vm.manager/dynamix.kvm.manager ]; then
+				rm -r /usr/local/emhttp/plugins/dynamix.vm.manager/dynamix.kvm.manager
+			fi
+
+			# Start libvirt
+			if [ -x /etc/rc.d/rc.libvirt ]; then
+				logger "Starting libvirt"
+				/etc/rc.d/rc.libvirt start |& logger
+			fi
+		fi
+
+	fi
+fi

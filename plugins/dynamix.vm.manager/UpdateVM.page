@@ -18,8 +18,50 @@ Markdown="false"
 require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt.php');
 require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt_helpers.php');
 
+$arrLoad = [
+	'name' => '',
+	'icon' => 'default.png',
+	'desc' => '',
+	'autostart' => false
+];
+
+$strSelectedTemplate = 'Custom';
+$strIconURL = '/plugins/dynamix.vm.manager/templates/images/windows.png';
+
+if (!empty($_GET['uuid'])) {
+	$res = $lv->domain_get_domain_by_uuid($_GET['uuid']);
+
+	$strIcon = $lv->_get_single_xpath_result($res, '//domain/metadata/vmtemplate/@icon');
+
+	if (!empty($strIcon)) {
+		if (file_exists($strIcon)) {
+			$strIconURL = $strIcon;
+		} else if (file_exists('/usr/local/emhttp/plugins/dynamix.vm.manager/templates/images/' . $strIcon)) {
+			$strIconURL = '/plugins/dynamix.vm.manager/templates/images/' . $strIcon;
+		}
+	} else {
+		$strIcon = ($lv->domain_get_clock_offset($res) == 'localtime' ? 'windows.png' : 'linux.png');
+		$strIconURL = '/plugins/dynamix.vm.manager/templates/images/' . $strIcon;
+	}
+
+	$arrLoad = [
+		'name' => $lv->domain_get_name($res),
+		'icon' => $strIcon,
+		'desc' => $lv->domain_get_description($res),
+		'autostart' => $lv->domain_get_autostart($res)
+	];
+
+	if (!empty($_GET['template'])) {
+		$strSelectedTemplate = $_GET['template'];
+	} else {
+		$strTemplate = $lv->_get_single_xpath_result($res, '//domain/metadata/vmtemplate/@name');
+		if (!empty($strTemplate)) {
+			$strSelectedTemplate = $strTemplate;
+		}
+	}
+}
+
 $arrTemplates = array();
-$strSelectedTemplate = $_GET['template'];
 
 // Read files from the templates folder
 foreach (glob('plugins/dynamix.vm.manager/templates/*.form.php') as $template) {
@@ -30,25 +72,8 @@ if (!empty($arrTemplates) && !in_array($strSelectedTemplate, $arrTemplates)) {
 	$strSelectedTemplate = $arrTemplates[0];
 }
 
-$arrLoad = [
-	'name' => '',
-	'desc' => '',
-	'autostart' => false
-];
-
-if (!empty($_GET['uuid'])) {
-	$res = $lv->domain_get_domain_by_uuid($_GET['uuid']);
-
-	$arrLoad = [
-		'name' => $lv->domain_get_name($res),
-		'desc' => $lv->domain_get_description($res),
-		'autostart' => $lv->domain_get_autostart($res)
-	];
-}
-
 ?>
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.min.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
 <style type="text/css">
@@ -137,6 +162,9 @@ if (!empty($_GET['uuid'])) {
 	.advanced {
 		display: none;
 	}
+	.switch-button-label.off {
+		color: inherit;
+	}
 </style>
 
 <div id="content" style="margin-top:-21px;margin-left:0px">
@@ -147,7 +175,7 @@ if (!empty($_GET['uuid'])) {
 		<tr <? if (!empty($arrLoad['name'])) echo 'style="display: none"'; ?>>
 			<td>Template:</td>
 			<td>
-				<select id="domain_template" name="domain[template]" class="narrow" title="Select domain operating system type. Windows or Other for Linux, OSX and others">
+				<select id="domain_template" name="template[name]" class="narrow" title="Select domain operating system type. Windows or Other for Linux, OSX and others">
 					<?php
 						foreach ($arrTemplates as $strTemplate) {
 							echo mk_option($strSelectedTemplate, $strTemplate, str_replace('_', ' ', $strTemplate));
@@ -164,6 +192,13 @@ if (!empty($_GET['uuid'])) {
 	</div>
 
 	<table>
+		<tr>
+			<td>Icon:</td>
+			<td><input type="hidden" name="template[icon]" id="template_icon" value="<?=$arrLoad['icon']?>" /><img id="template_img" src="<?=$strIconURL?>" width="48" height="48" /></td>
+		</tr>
+	</table>
+
+	<table>
 		<tr class="non_expert_xml">
 			<td>Name:</td>
 			<td><input type="text" name="domain[name]" class="textTemplate" title="Name of virtual machine" placeholder="e.g. My Workstation" value="<?=$arrLoad['name']?>" /></td>
@@ -178,7 +213,7 @@ if (!empty($_GET['uuid'])) {
 	<table>
 		<tr class="non_expert_xml">
 			<td>Description:</td>
-			<td><input type="text" name="domain[desc]" title="description of vitual machine" placeholder="description of vitual machine (optional)" value="<?=$arrLoad['desc']?>" /></td>
+			<td><input type="text" name="domain[desc]" title="description of virtual machine" placeholder="description of virtual machine (optional)" value="<?=$arrLoad['desc']?>" /></td>
 		</tr>
 	</table>
 	<div class="non_expert_xml">

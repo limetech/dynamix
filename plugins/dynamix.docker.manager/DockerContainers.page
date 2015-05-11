@@ -43,14 +43,19 @@ $DockerTemplates = new DockerTemplates();
 		z-index: 2;
 		bottom: -4px;
 		right: -4px;
-		font-size: 14px;
+		font-size: 1.2em;
+		text-shadow: 0 0 2px #FFF;
 	}
 	.iconstatus.started {
-		color: #009900;
+		font-size: 1.3em;
 	}
 	.iconstatus.stopped {
-		color: #EF3D47;
+		font-size: 1.2em;
 	}
+	img.started{opacity:1.0;}
+	img.stopped{opacity:0.3;}
+	.started{color:#009900;}
+	.stopped{color:#EF3D47;}
 </style>
 <form id="formAutostart" method="POST" action="/plugins/dynamix.docker.manager/update_cfg.php" target="progressFrame">
   <input type="hidden" name="action" value="autostart" />
@@ -94,6 +99,8 @@ $DockerTemplates = new DockerTemplates();
 			$running        = ($ct['Running']) ? 'true' : 'false';
 			$webGuiUrl      = $info[$name]['url'];
 			$contextMenus[] = sprintf("addDockerContainerContext('%s', '%s', '%s', %s, %s, %s, '%s');", addslashes($ct['Name']), addslashes($ct['ImageId']), addslashes($info[$name]['template']), $running, $updateStatus, $is_autostart, addslashes($webGuiUrl));
+			$shape          = ($ct["Running"]) ? "play" : "square";
+			$status         = ($ct["Running"]) ? "started" : "stopped";
 
 			$Icon           = $info[$name]['icon'];
 			if ( $Icon == "#" ){
@@ -127,8 +134,8 @@ $DockerTemplates = new DockerTemplates();
 				<?
 				echo "	<div id=\"context-" . htmlspecialchars($name) . "\" style=\"display:block; cursor:pointer\">
 							<div style=\"position: relative; width: 48px; height: 48px; margin: 0px auto;\">
-								<img src=\"" . $Icon . "\" style=\"position: absolute; z-index: 1; opacity: 1.0; top: 0; bottom: 0; left: 0; right: 0; width: 48px; height: 48px;\"/>
-								<i class=\"fa iconstatus " . ($ct['Running'] ? "fa-circle started" : "fa-square stopped") . "\"></i>
+								<img src=\"" . $Icon . "\" class=\"$status\" style=\"position: absolute; z-index: 1; top: 0; bottom: 0; left: 0; right: 0; width: 48px; height: 48px;\"/>
+								<i class=\"fa iconstatus fa-$shape $status\" title='$status'></i>
 							</div>
 						</div>";
 
@@ -248,7 +255,7 @@ $(function() {
 	$('#docker_containers').tablesorter( {sortList: [[1,0]], headers: {0: {sorter: false }, 7: {sorter: false }}});
 	$('#docker_containers tr:even').addClass('odd');
 
-	context.init({ above: false, preventDoubleContext: false });
+	context.init({ preventDoubleContext: false });
 	<?=implode("\n\t", $contextMenus);?>
 });
 </script>

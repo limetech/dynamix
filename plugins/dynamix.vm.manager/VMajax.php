@@ -30,8 +30,18 @@ $_REQUEST = array_merge($_GET, $_POST);
 $action = array_key_exists('action', $_REQUEST) ? $_REQUEST['action'] : '';
 $uuid = array_key_exists('uuid', $_REQUEST) ? $_REQUEST['uuid'] : '';
 
+// Make sure libvirt is connected to qemu
+if (!isset($lv) || !$lv->enabled()) {
+	header('Content-Type: application/json');
+	die(json_encode(['error' => 'failed to connect to the hypervisor']));
+}
+
 if ($uuid) {
 	$domName = $lv->domain_get_name_by_uuid($uuid);
+	if (!$domName) {
+		header('Content-Type: application/json');
+		die(json_encode(['error' => $lv->get_last_error()]));
+	}
 }
 
 $arrResponse = [];
@@ -40,8 +50,8 @@ $arrResponse = [];
 switch ($action) {
 
 	case 'domain-autostart':
-		$arrResponse = $lv->domain_set_autostart($domName, !empty($_REQUEST['autostart'])) ?
-						['success' => true, 'autostart' => $lv->domain_get_autostart($domName)] :
+		$arrResponse = $lv->domain_set_autostart($domName, ($_REQUEST['autostart'] != "false")) ?
+						['success' => true, 'autostart' => (bool)$lv->domain_get_autostart($domName)] :
 						['error' => $lv->get_last_error()];
 		break;
 
@@ -61,6 +71,14 @@ switch ($action) {
 		$arrResponse = $lv->domain_resume($domName) ?
 						['success' => true, 'state' => $lv->domain_get_state($domName)] :
 						['error' => $lv->get_last_error()];
+		break;
+
+	case 'domain-pmwakeup':
+		// No support in libvirt-php to do a dompmwakeup, use virsh tool instead
+		exec("virsh dompmwakeup " . escapeshellarg($uuid) . " 2>&1", $arrOutput, $intReturnCode);
+		$arrResponse = ($intReturnCode == 0) ?
+						['success' => true, 'state' => $lv->domain_get_state($domName)] :
+						['error' => str_replace('error: ', '', implode('. ', $arrOutput))];
 		break;
 
 	case 'domain-restart':
@@ -89,13 +107,13 @@ switch ($action) {
 
 	case 'domain-delete':
 		$arrResponse = $lv->domain_delete($domName) ?
-						['success' => true, 'state' => $lv->domain_get_state($domName)] :
+						['success' => true] :
 						['error' => $lv->get_last_error()];
 		break;
 
 	case 'domain-undefine':
 		$arrResponse = $lv->domain_undefine($domName) ?
-						['success' => true, 'state' => $lv->domain_get_state($domName)] :
+						['success' => true] :
 						['error' => $lv->get_last_error()];
 		break;
 
@@ -222,9 +240,10 @@ switch ($action) {
 		$file = $_REQUEST['file'];
 
 		$arrResponse = [
-			'isfile' => is_file($file),
-			'isdir' => is_dir($file),
-			'isblock' => (@filetype($file) == 'block')
+			'isfile' => (!empty($file) ? is_file($file) : false),
+			'isdir' => (!empty($file) ? is_dir($file) : false),
+			'isblock' => (!empty($file) ? is_block($file) : false),
+			'resizable' => false
 		];
 
 		// if file, get size and format info
@@ -247,26 +266,27 @@ switch ($action) {
 				$arrResponse['actual-size'] = $json_info['actual-size'];
 				$arrResponse['format'] = $json_info['format'];
 				$arrResponse['dirty-flag'] = $json_info['dirty-flag'];
+				$arrResponse['resizable'] = true;
+			}
+		} else if (is_block($file)) {
+			$strDevSize = trim(shell_exec("blockdev --getsize64 " . escapeshellarg($file)));
+			if (!empty($strDevSize) && is_numeric($strDevSize)) {
+				$arrResponse['actual-size'] = (int)$strDevSize;
+				$arrResponse['format'] = 'raw';
+
+				$intDisplaySize = (int)$strDevSize;
+				$intShifts = 0;
+				while (!empty($intDisplaySize) &&
+						($intDisplaySize >= 2) &&
+						isset($arrSizePrefix[$intShifts])) {
+
+					$arrResponse['display-size'] = round($intDisplaySize, 0) . $arrSizePrefix[$intShifts];
+
+					$intDisplaySize /= 1000; // 1000 looks better than 1024 for block devs
+					$intShifts++;
+				}
 			}
 		}
-		break;
-
-	case 'list-bridges':
-		exec("brctl show | awk -F'\t' 'FNR > 1 {print \$1}' | awk 'NF > 0'", $output);
-
-		if (!is_array($output)) {
-			$output = [];
-		}
-
-		// Make sure the bridge setup for unRAID is first in the list
-		if (($key = array_search($domain_bridge, $output)) !== false) {
-			unset($output[$key]);
-			array_unshift($output, $domain_bridge);
-		}
-
-		$arrResponse = [
-			'bridges' => array_values($output)
-		];
 		break;
 
 	case 'generate-mac':

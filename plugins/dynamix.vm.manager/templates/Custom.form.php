@@ -16,23 +16,45 @@
 	require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt_helpers.php');
 
 	$arrValidMachineTypes = getValidMachineTypes();
-	$arrValidPCIDevices = getValidPCIDevices();
+	$arrValidGPUDevices = getValidGPUDevices();
+	$arrValidAudioDevices = getValidAudioDevices();
+	$arrValidOtherDevices = getValidOtherDevices();
 	$arrValidUSBDevices = getValidUSBDevices();
 	$arrValidDiskDrivers = getValidDiskDrivers();
 	$arrValidKeyMaps = getValidKeyMaps();
-
-	$arrValidGPUDevices = array_filter($arrValidPCIDevices, function($arrDev) { return ($arrDev['class'] == 'vga'); });
-	$arrValidAudioDevices = array_filter($arrValidPCIDevices, function($arrDev) { return ($arrDev['class'] == 'audio'); });
-	$arrValidOtherDevices = array_filter($arrValidPCIDevices, function($arrDev) { return ($arrDev['class'] == 'other'); });
-
+	$arrValidBridges = getNetworkBridges();
 	$strCPUModel = getHostCPUModel();
 
+	$arrOperatingSystems = [
+		'windows' => 'Windows 8.1 / 2012',
+		'windows7' => 'Windows 7 / 2008',
+		'windowsxp' => 'Windows XP / 2003',
+		'linux' => 'Linux',
+		'arch' => 'Arch',
+		'centos' => 'CentOS',
+		'chromeos' => 'ChromeOS',
+		'coreos' => 'CoreOS',
+		'debian' => 'Debian',
+		'fedora' => 'Fedora',
+		'freebsd' => 'FreeBSD',
+		'openelec' => 'OpenELEC',
+		'opensuse' => 'OpenSUSE',
+		'redhat' => 'RedHat',
+		'scientific' => 'Scientific',
+		'slackware' => 'Slackware',
+		'steamos' => 'SteamOS',
+		'ubuntu' => 'Ubuntu'
+	];
+
 	$arrConfigDefaults = [
+		'template' => [
+			'name' => 'Custom',
+			'icon' => 'windows.png'
+		],
 		'domain' => [
 			'persistent' => 1,
 			'uuid' => $lv->domain_generate_uuid(),
 			'clock' => 'localtime',
-			'os' => 'windows',
 			'arch' => 'x86_64',
 			'machine' => 'pc',
 			'mem' => 512 * 1024,
@@ -89,6 +111,10 @@
 	// Active config for this page
 	$arrConfig = array_replace_recursive($arrConfigDefaults, $arrExistingConfig);
 
+	// Add any custom metadata field defaults (e.g. os)
+	if (empty($arrConfig['template']['os'])) {
+		$arrConfig['template']['os'] = ($arrConfig['domain']['clock'] == 'localtime' ? 'windows' : 'linux');
+	}
 
 	$boolRunning = (!empty($arrConfig['domain']['state']) && $arrConfig['domain']['state'] == 'running');
 
@@ -109,7 +135,7 @@
 			$vncport = $lv->domain_get_vnc_port($res);
 			$wsport = $lv->domain_get_ws_port($res);
 
-			if ($vncport >= 0) {
+			if ($vncport > 0) {
 				$vnc = '/plugins/dynamix.vm.manager/vnc.html?autoconnect=true&host='.$var['IPADDR'].'&port='.$wsport;
 				$arrResponse['vncurl'] = $vnc;
 			}
@@ -170,6 +196,12 @@
 		float: none;
 		clear: both;
 	}
+	.mac_generate {
+		cursor: pointer;
+		margin-left: -8px;
+		color: #08C;
+		font-size: 1.1em;
+	}
 </style>
 
 <input type="hidden" name="domain[persistent]" value="<?=$arrConfig['domain']['persistent']?>">
@@ -181,8 +213,8 @@
 	<tr>
 		<td>Operating System:</td>
 		<td>
-			<select name="domain[os]" id="domain_os" class="narrow" title="define the base OS">
-			<?php mk_dropdown_options(['windows' => 'Windows', 'other' => 'Other'], $arrConfig['domain']['os']); ?>
+			<select name="template[os]" id="domain_os" class="narrow" title="define the base OS">
+			<?php mk_dropdown_options($arrOperatingSystems, $arrConfig['template']['os']); ?>
 			</select>
 		</td>
 	</tr>
@@ -216,8 +248,8 @@
 </div>
 
 <table>
-	<tr class="advanced">
-		<td>CPU Pinning:</td>
+	<tr>
+		<td>CPUs:</td>
 		<td>
 			<div class="textarea four">
 			<?php
@@ -239,22 +271,6 @@
 <div class="advanced">
 	<blockquote class="inline_help">
 		<p>By default, VMs created will be pinned to physical CPU cores to improve performance.  From this view, you can adjust which actual CPU cores a VM will be pinned (minimum 1).</p>
-	</blockquote>
-</div>
-
-<table>
-	<tr class="basic">
-		<td>CPUs:</td>
-		<td>
-			<select name="domain[vcpus]" id="domain_vcpus" class="narrow" title="define number of cpu cores used by this vm">
-			<?php mk_dropdown_options(array_combine(range(1, $maxcpu), range(1, $maxcpu)), $arrConfig['domain']['vcpus']); ?>
-			</select>
-		</td>
-	</tr>
-</table>
-<div class="basic">
-	<blockquote class="inline_help">
-		<p>Select which CPU cores you wish to run this VM upon (minimum 1).</p>
 	</blockquote>
 </div>
 
@@ -387,7 +403,7 @@
 
 <table class="domain_os windows">
 	<tr>
-		<td><a href="http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/" target="_blank">VirtIO Drivers ISO:</a></td>
+		<td><a href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers#Direct_download" target="_blank">VirtIO Drivers ISO:</a></td>
 		<td>
 			<input type="text" data-pickcloseonfile="true" data-pickfilter="iso" data-pickroot="<?=$domain_cfg['MEDIADIR']?>" name="media[drivers]" value="<?=$arrConfig['media']['drivers']?>" placeholder="Download, Click and Select virtio drivers image">
 		</td>
@@ -558,7 +574,7 @@
 					}
 
 					foreach($arrValidGPUDevices as $arrDev) {
-						echo mk_option($arrGPU['id'], $arrDev['id'], trim($arrDev['name'] . ' | ' . $arrDev['id'], ' |'));
+						echo mk_option($arrGPU['id'], $arrDev['id'], $arrDev['name']);
 					}
 				?>
 				</select>
@@ -611,7 +627,7 @@
 					echo mk_option('', '', 'None');
 
 					foreach($arrValidGPUDevices as $arrDev) {
-						echo mk_option('', $arrDev['id'], trim($arrDev['name'] . ' | ' . $arrDev['id'], ' |'));
+						echo mk_option('', $arrDev['id'], $arrDev['name']);
 					}
 				?>
 				</select>
@@ -634,7 +650,7 @@
 					echo mk_option($arrAudio['id'], '', 'None');
 
 					foreach($arrValidAudioDevices as $arrDev) {
-						echo mk_option($arrAudio['id'], $arrDev['id'], trim($arrDev['name'] . ' | ' . $arrDev['id'], ' |'));
+						echo mk_option($arrAudio['id'], $arrDev['id'], $arrDev['name']);
 					}
 				?>
 				</select>
@@ -656,7 +672,7 @@
 				<select name="audio[{{INDEX}}][id]" class="audio narrow">
 				<?php
 					foreach($arrValidAudioDevices as $arrDev) {
-						echo mk_option('', $arrDev['id'], trim($arrDev['name'] . ' | ' . $arrDev['id'], ' |'));
+						echo mk_option('', $arrDev['id'], $arrDev['name']);
 					}
 				?>
 				</select>
@@ -674,14 +690,20 @@
 		<tr class="advanced">
 			<td>Network MAC:</td>
 			<td>
-				<input type="text" name="nic[<?=$i?>][mac]" value="<?=$arrNic['mac']?>" title="random mac, you can supply your own" />
+				<input type="text" name="nic[<?=$i?>][mac]" class="narrow" value="<?=$arrNic['mac']?>" title="random mac, you can supply your own" /> <i class="fa fa-refresh mac_generate" title="re-generate random mac address"></i>
 			</td>
 		</tr>
 
 		<tr class="advanced">
 			<td>Network Bridge:</td>
 			<td>
-				<input type="text" name="nic[<?=$i?>][network]" value="<?=$arrNic['network']?>" placeholder="name of bridge in unRAID" title="name of bridge in unRAID automatically filled in" />
+				<select name="nic[<?=$i?>][network]">
+				<?php
+					foreach ($arrValidBridges as $strBridge) {
+						echo mk_option($arrNic['network'], $strBridge, $strBridge);
+					}
+				?>
+				</select>
 			</td>
 		</tr>
 	</table>
@@ -708,14 +730,20 @@
 		<tr class="advanced">
 			<td>Network MAC:</td>
 			<td>
-				<input type="text" name="nic[{{INDEX}}][mac]" value="" title="random mac, you can supply your own" />
+				<input type="text" name="nic[{{INDEX}}][mac]" class="narrow" value="" title="random mac, you can supply your own" /> <i class="fa fa-refresh mac_generate" title="re-generate random mac address"></i>
 			</td>
 		</tr>
 
 		<tr class="advanced">
 			<td>Network Bridge:</td>
 			<td>
-				<input type="text" name="nic[{{INDEX}}][network]" value="" placeholder="name of bridge in unRAID" title="name of bridge in unRAID automatically filled in" />
+				<select name="nic[{{INDEX}}][network]">
+				<?php
+					foreach ($arrValidBridges as $strBridge) {
+						echo mk_option($domain_bridge, $strBridge, $strBridge);
+					}
+				?>
+				</select>
 			</td>
 		</tr>
 	</table>
@@ -731,7 +759,7 @@
 				if (!empty($arrValidUSBDevices)) {
 					foreach($arrValidUSBDevices as $i => $arrDev) {
 					?>
-					<label for="usb<?=$i?>"><input type="checkbox" name="usb[]" id="usb<?=$i?>" value="<?=$arrDev['id']?>" <?php if (count(array_filter($arrConfig['usb'], function($arr) use ($arrDev) { return ($arr['id'] == $arrDev['id']); }))) echo 'checked="checked"'; ?>/> <?=$arrDev['name']?><span class="advanced"> | <?=$arrDev['id']?></span></label><br/>
+					<label for="usb<?=$i?>"><input type="checkbox" name="usb[]" id="usb<?=$i?>" value="<?=$arrDev['id']?>" <?php if (count(array_filter($arrConfig['usb'], function($arr) use ($arrDev) { return ($arr['id'] == $arrDev['id']); }))) echo 'checked="checked"'; ?>/> <?=$arrDev['name']?></label><br/>
 					<?php
 					}
 				} else {
@@ -774,32 +802,29 @@
 
 
 <script type="text/javascript">
+var OS2ImageMap = {<?php
+	$arrItems = array();
+	foreach ($arrOperatingSystems as $key => $value) {
+		$arrItems[] = "'$key':'{$key}.png'";
+	}
+	echo implode(',', $arrItems);
+?>};
+
 $(function() {
+	var initComplete = false;
+
 	$("#form_content #domain_mem").change(function changeMemEvent() {
 		$("#domain_maxmem").val($(this).val());
 	});
 
 	$("#form_content .domain_vcpu").change(function changeVCPUEvent() {
 		var $cores = $(".domain_vcpu:checked");
-		$("#domain_vcpus").val($cores.length);
 
 		if ($cores.length == 1) {
 			$cores.prop("disabled", true);
 		} else {
 			$(".domain_vcpu").prop("disabled", false);
 		}
-	});
-
-	$("#form_content #domain_vcpus").change(function changeVCPUsEvent() {
-		var cores = $(this).val();
-
-		$(".domain_vcpu")
-			.prop('checked', false)
-			.prop('disabled', false)
-			.slice(0, cores)
-			.prop('checked', true)
-			.prop('disabled', (cores == 1));
-
 	});
 
 	$("#form_content #domain_maxmem").change(function changeMaxMemEvent() {
@@ -816,7 +841,7 @@ $(function() {
 			var $other_sections = $input.closest('table').find('.disk_file_options');
 
 			$.get("/plugins/dynamix.vm.manager/VMajax.php?action=file-info&file=" + encodeURIComponent($input.val()), function( info ) {
-				if (info.isfile) {
+				if (info.isfile || info.isblock) {
 					slideUpRows($other_sections);
 
 					$other_sections.filter('.advanced').removeClass('advanced').addClass('wasadvanced');
@@ -857,7 +882,17 @@ $(function() {
 		});
 	});
 
-	$("#form_content input[data-pickroot]").click(universalTreePicker);
+	$("#form_content input[data-pickroot]").fileTreeAttach();
+
+	$("#form_content").on("click", ".mac_generate", function generateMac() {
+		var $input = $(this).prev('input');
+
+		$.get("/plugins/dynamix.vm.manager/VMajax.php?action=generate-mac", function( data ) {
+			if (data.mac) {
+				$input.val(data.mac);
+			}
+		}, "json");
+	});
 
 	$("#form_content #btnSubmit").click(function frmSubmit() {
 		var $button = $(this);
@@ -897,31 +932,39 @@ $(function() {
 	});
 
 	$("#form_content #domain_os").change(function changeOSEvent() {
-		slideUpRows($('.domain_os').not($('.' + $(this).val())));
-		slideDownRows($('.domain_os.' + $(this).val()).not(isVMAdvancedMode() ? '.basic' : '.advanced'));
+		var os_casted = ($(this).val().indexOf('windows') == -1 ? 'other' : 'windows');
 
-		if ($(this).val() == 'windows') {
-			$('#domain_clock').val('localtime');
-			$('#domain_machine').val('pc');
-		} else {
-			$('#domain_clock').val('utc');
-			$('#domain_machine').val('q35');
+		if (initComplete && !$('#template_img').attr('touched')) {
+			var vmicon = OS2ImageMap[$(this).val()] || OS2ImageMap[os_casted];
+			$('#template_icon').val(vmicon);
+			$('#template_img').prop('src', '<?=str_replace("/usr/local/emhttp", "", __DIR__)?>/images/' + vmicon);
 		}
-	});
 
-	// Toggle OS-dependent fields now (we could fire the change event but we don't want to change the clock and machine)
-	slideUpRows($('.domain_os').not($('.' + $("#form_content #domain_os").val())));
-	slideDownRows($('.domain_os.' + $("#form_content #domain_os").val()).not(isVMAdvancedMode() ? '.basic' : '.advanced'));
+		slideUpRows($('.domain_os').not($('.' + os_casted)));
+		slideDownRows($('.domain_os.' + os_casted).not(isVMAdvancedMode() ? '.basic' : '.advanced'));
+
+		if (initComplete) {
+			if (os_casted == 'windows') {
+				$('#domain_clock').val('localtime');
+				$('#domain_machine').val('pc');
+			} else {
+				$('#domain_clock').val('utc');
+				$('#domain_machine').val('q35');
+			}
+		}
+	}).change(); // Fire now too!
 
 	if ($(".gpu option[value='vnc']:selected").length) {
-		$('.vncpassword').show();
+		$('.vncpassword,.vnckeymap').not(isVMAdvancedMode() ? '.basic' : '.advanced').show();
 	} else {
-		$('.vncpassword').hide();
+		$('.vncpassword,.vnckeymap').hide();
 	}
 
 	$("#form_content .disk").not("[value='']")
 		.attr('name', function(){ return $(this).attr('name').replace('new', 'image'); })
 		.closest('table').find('.disk_file_options').hide()
 		.filter('.advanced').removeClass('advanced').addClass('wasadvanced');
+
+	initComplete = true;
 });
 </script>
