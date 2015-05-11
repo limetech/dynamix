@@ -214,9 +214,10 @@ echo "<div id='menu'><div id='nav-block'><div id='nav-left'>";
 $pages = find_pages('Tasks');
 foreach ($pages as $page) {
   $pagename = $page['name'];
+  $pagelink = $var['regStatus']=="Valid" ? $pagename : "Tools/Registration";
   echo "<div id='nav-item'";
   echo $pagename==$task ? " class='active'>" : ">";
-  echo "<a href='/$pagename' onclick='initab()'>$pagename</a></div>";
+  echo "<a href='/$pagelink' onclick='initab()'>$pagename</a></div>";
 }
 if ($display['usage']) my_usage();
 echo "</div>";
