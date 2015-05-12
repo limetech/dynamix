@@ -195,4 +195,7 @@ function input_private_users($sec) {
   }
   echo "</table>";
 }
+function is_block($path) {
+  return (@filetype(realpath($path)) == 'block');
+}
 ?>

@@ -1,11 +1,11 @@
 Menu="Dashboard:1"
 Title="Apps"
-Cond="((pgrep('docker')!==false) && ($display['dashapps']!='none'))"
+Cond="(((pgrep('docker')!==false) || (pgrep('libvirtd')!==false)) && ($display['dashapps']!='none'))"
 Markdown="false"
 ---
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.docker.manager/assets/gh-buttons.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.min.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery-ui.min.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/context.standalone.css">
 <style>
 	body {
@@ -33,71 +33,48 @@ Markdown="false"
 		z-index: 2;
 		bottom: -4px;
 		right: -4px;
-		font-size: 14px;
+		font-size: 1.2em;
+		text-shadow: 0 0 2px #FFF;
 	}
 	.iconstatus.started {
-		color: #009900;
+		font-size: 1.3em;
 	}
-	.iconstatus.stopped {
-		color: #EF3D47;
-	}
-	.appblock {
-		position: relative;
-		display: inline-block;
-		vertical-align: top;
-		width: 350px;
-		height: 75px;
-		margin: 20px;
-		background-color: #FFF;
-		padding: 5px 5px 5px 5px;
-		box-shadow: 0 0 5px 1px #E3E3E3;
-		color: #444;
-		border-radius: 3px;
-	}
-	.appblock.started {
-		box-shadow: 0 0 5px 1px #009900;
-	}
-	.appblock.stopped {
-		box-shadow: 0 0 10px 1px #EF3D47;
-	}
-	.bannerstatus {
-		background-color: #FFF;
-		position: absolute;
-		z-index: 1;
-		right: -18px;
-		top: -10px;
-		display: block;
-	}
-	.started{
-		color: #009900;
-	}
-	.stopped{
-		color: #EF3D47;
-	}
-	.update {
-		color: #3300FF;
-	}
-	.ctrbtn {
-		position: absolute;
-		vertical-align: top;
-		text-align: right;
-		z-index: 100;
-		right: 5px;
-		bottom: 0;
-		display: none;
-	}
+	img.started{opacity: 1.0;}
+	img.stopped{opacity: 0.3;}
+	img.paused{opacity: 1.0;}
+	.started{color: #009900;}
+	.paused{color: #F0DD33;}
+	.stopped{color: #EF3D47;}
+	.update{color: #3300FF;}
 	.show {
 		display: block;
 	}
-	.appblock:hover .ctrbtn {
-		display: block;
+	div.Panel {
+		float: none;
+		display: inline-block;
+		margin: 0 18px 15px 0;
+		height: 90px;
+		overflow: hidden;
+		vertical-align: top;
+		width: 94px;
+		word-wrap: break-word;
 	}
-	img.appblock:hover {
-		opacity: 0.4;
-		filter: alpha(opacity=40); /* For IE8 and earlier */
+	div.Panel:hover {
+		overflow: visible;
+		z-index: 10;
 	}
-	h2.appblock:hover {
-		color: #d3d3d3;
+	#noapps {
+		display: none;
+		font-style: italic;
+		font-size: 16px;
+		opacity: 0.5;
+		padding: 5px;
+	}
+	.switch-button-label.off {
+		color: inherit;
+	}
+	.switch-button-label.on {
+		color: #009900;
 	}
 </style>
 <form method="POST" id="formStartStop" action="/update.php" target="progressFrame">
@@ -109,136 +86,275 @@ Markdown="false"
 </form>
 <div id="dialog-confirm" style="display:none;" title="Dialog Title"></div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
+<span class="status" style="margin-top: -44px; margin-right: <?= ($display['refresh']==0 || ($display['refresh']<0 && $var['mdResync']>0)) ? '60' : '0' ?>px"><input type="checkbox" class="appview"></span>
+<div id="apps_icons" style="display: none">
 <?
-require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerClient.php");
-$DockerClient    = new DockerClient();
-$DockerUpdate    = new DockerUpdate();
-$DockerTemplates = new DockerTemplates();
+$allContainers = array();
+if ((pgrep('docker')!==false) && (empty($display['dashapps']) || $display['dashapps'] == 'icons' || $display['dashapps'] == 'docker')) {
+	require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerClient.php");
+	$DockerClient    = new DockerClient();
+	$DockerUpdate    = new DockerUpdate();
+	$DockerTemplates = new DockerTemplates();
 
-$allContainers = $DockerClient->getDockerContainers();
-if ( ! $allContainers) { $allContainers = array(); }
+	$allContainers = $DockerClient->getDockerContainers();
+	if ( ! $allContainers) { $allContainers = array(); }
 
-$info = $DockerTemplates->getAllInfo();
-
-if (empty($display['dashapps']) || $display['dashapps'] == 'icons') {
-
-	# Add icons DIV
-	echo "<div id=\"apps_icons\">";
-	$contextMenus = array();
-
-	foreach ($allContainers as $ct) {
-		$name           = $ct["Name"];
-		$is_autostart   = ( $info[$name]['autostart'] ) ? 'true' : 'false';
-		$updateStatus   = $info[$name]['updated'];
-		$updateStatus   = ($updateStatus == "true" or $updateStatus == "undef" ) ? 'true' : 'false';
-		$running        = ($ct['Running']) ? 'true' : 'false';
-		$webGuiUrl      = $info[$name]['url'];
-		$contextMenus[] = sprintf("addDockerContainerContext('%s', '%s', '%s', %s, %s, %s, '%s');", $ct['Name'], $ct['ImageId'], $info[$name]['template'], $running, $updateStatus, $is_autostart, $webGuiUrl);
-		$status         = ($ct["Running"]) ? "started" : "stopped";
-		$status         = ($updateStatus == "false") ? "update" : $status;
-
-		$Icon           = $info[$name]['icon'];
-		if ( $Icon == "#" ){
-			$Icon = "/plugins/dynamix.docker.manager/assets/images/question.png";
-		}
-
-		print "
-			<div class=\"Panel\">
-				<div id='context-" . $name . "' style='display:block; cursor:pointer'>
-					<div style=\"position: relative; width: 48px; height: 48px; margin: 0px auto;\">
-						<img src=\"" . $Icon . "\" style=\"position: absolute; z-index: 1; opacity: 1.0; top: 0; bottom: 0; left: 0; right: 0; width: 48px; height: 48px;\"/>
-						<i class=\"fa iconstatus " . ($ct['Running'] ? "fa-circle started" : "fa-square stopped") . "\"></i>
-					</div>
-					<div class=\"PanelText\">
-						<span class=\"PanelText " . $status . "\">" . $name . "</span>
-					</div>
-				</div>
-			</div>";
-	}
-	echo "</div>\n";
-
-} else if ($display['dashapps'] == 'banners') {
-
-	# Add banners DIV
-	echo "<div id=\"apps_banners\">";
-	foreach ($allContainers as $ct) {
-		$ctrbtn = "";
-
-		$updateStatus = $info[$ct['Name']]['updated'];
-		if ($updateStatus == "true" or $updateStatus == "undef"){
-			$statusbadge = ($ct["Running"]) ? "<div class=\"bannerstatus started\"><i class=\"fa fa-check-circle fa-lg\"></i></div>" :
-																				"<div class=\"bannerstatus stopped\"><i class=\"fa fa-times-circle fa-lg\"></i></div>";
-		} else {
-			$statusbadge = ($ct["Running"]) ? "<div class=\"bannerstatus update\"><i class=\"fa fa-arrow-circle-down fa-lg\"></i></div>" :
-																				"<div class=\"bannerstatus stopped\"><i class=\"fa fa-arrow-circle-down fa-lg\"></i></div>";
-			# Add update button
-			$ctrbtn = "<i class=\"button blue\" onclick=\"execUpContainer('".$ct['Name']."');\" title=\"Update\"><i class=\"fa  fa-arrow-down fa-lg\"></i></i>$ctrbtn";
-		}
-
-		# Add start/stop button
-		$ctrbtn .= ($ct["Running"]) ? '<i class="button danger" onclick="containerControl(\''.$ct['Name'].'\', \'stop\');" title="Stop"><i class="fa fa-stop fa-lg"></i></i>' :
-																 '<i class="button green" onclick="containerControl(\''.$ct['Name'].'\', \'start\');" title="Start"><i class="fa fa-play fa-lg"></i></i>';
-
-		if ($ct["Running"]) {
-			# Add WebUI button
-			$webGuiUrl = $info[$ct['Name']]['url'];
-			if ($webGuiUrl != "#"){
-				$ctrbtn .= "<i class=\"button\" onclick=\"window.open('$webGuiUrl','_blank');\" title=\"Web UI\"><i class=\"fa fa-globe fa-lg\"></i></i>";
-			}
-		}
-
-		# Add log button
-		$ctrbtn .= '<i class="button" onclick="containerLogs(\''.$ct['Name'].'\');" title="Logs"><i class="fa fa-navicon fa-lg"></i></i>';
-
-		# Add edit button
-		$ctrbtn .= ($DockerTemplates->getUserTemplate($ct['Name'])) ? "<i class=\"button\" onclick=\"editContainer('". $ct['Name'] ."','". $info[$ct['Name']]['template'] ."');\" title=\"Edit\"><i class=\"fa fa-wrench fa-lg\"></i></i>" : "";
-
-		# Add autostart button
-		$ctrbtn .= ($info[$ct["Name"]]['autostart']) ? "<i class=\"button\" onclick=\"autoStart('".$ct['Name']."');\" title=\"Disable autostart\"><i class=\"fa fa-check-square-o fa-lg\"></i></i>" :
-																														"<i class=\"button\" onclick=\"autoStart('".$ct['Name']."');\" title=\"Enable autostart\"><i class=\"fa fa-square-o fa-lg\"></i></i>";
-
-		# Add remove button
-		$ctrbtn .= "<i class=\"button\" onclick=\"rmContainer('" . $ct['Name'] . "','" . $ct["ImageId"] . "');\" title=\"Remove\"><i class=\"fa fa-trash fa-lg\"></i></i>";
-
-		$banner = $info[$ct['Name']]['banner'];
-		$content = ( $banner != "#") ? "<img src=\"$banner\" height=\"70px\" title='%s' class=\"banner\" style=\"position: relative; \">" :
-		"<div><h2 style=\"padding: 15px; vertical-align: middle;\">%s</h2></div>";
-
-		$ctnt = "
-		<div class=\"appblock\">
-			<div class=\"ctrbtn\" id=\"cntrl_btn\">
-				<div class=\"button-group\" style=\"position:relative;\">
-					%s
-				</div>
-			</div>
-			%s
-			<div style=\" display: table; width:350px; height:75px;background-color:#fff;\">
-				<div style=\"vertical-align: middle; text-align: center; display: table-cell; \">
-					<div style=\"color:#625D5D; display: inline-block;\">
-						$content
-					</div>
-				</div>
-			</div>
-		</div>
-		";
-		printf($ctnt, $ctrbtn, $statusbadge , $ct["Name"] );
-	}
-
+	$arrDockerInfo = $DockerTemplates->getAllInfo();
 }
+
+$allVMs = array();
+if ((pgrep('libvirtd')!==false) && (empty($display['dashapps']) || $display['dashapps'] == 'icons' || $display['dashapps'] == 'vms')) {
+	require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt.php');
+	require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt_helpers.php');
+
+	$doms = $lv->get_domains();
+	if (is_array($doms)) {
+		sort($doms);
+		$allVMs = $doms;
+	}
+}
+
+$contextMenus = array();
+
+// Docker Apps
+foreach ($allContainers as $ct) {
+	$name           = $ct["Name"];
+	$info 			= $arrDockerInfo[$name];
+	$is_autostart   = ( $info['autostart'] ) ? 'true' : 'false';
+	$updateStatus   = $info['updated'];
+	$updateStatus   = ($updateStatus == "true" or $updateStatus == "undef" ) ? 'true' : 'false';
+	$running        = ($ct['Running']) ? 'true' : 'false';
+	$webGuiUrl      = $info['url'];
+	$contextMenus[] = sprintf("addDockerContainerContext('%s', '%s', '%s', %s, %s, %s, '%s');", addslashes($ct['Name']), addslashes($ct['ImageId']), addslashes($info['template']), $running, $updateStatus, $is_autostart, addslashes($webGuiUrl));
+	$shape          = ($ct["Running"]) ? "play" : "square";
+	$status         = ($ct["Running"]) ? "started" : "stopped";
+
+	$Icon           = $info['icon'];
+	if ( $Icon == "#" ){
+		$Icon = "/plugins/dynamix.docker.manager/assets/images/question.png";
+	}
+
+	print "
+		<div class=\"Panel $status\">
+			<div id='context-" . htmlspecialchars($name) . "' style='display:block; cursor:pointer'>
+				<div style=\"position: relative; width: 48px; height: 48px; margin: 0px auto;\">
+					<img src=\"" . $Icon . "\" class=\"$status\" style=\"position: absolute; z-index: 1; top: 0; bottom: 0; left: 0; right: 0; width: 48px; height: 48px;\"/>
+					<i class=\"fa iconstatus fa-$shape $status\" title='$status'></i>
+				</div>
+				<div class=\"PanelText\">
+					<span class=\"PanelText " . (($updateStatus == "false") ? "update" : $status) . "\">" . $name . "</span>
+				</div>
+			</div>
+		</div>";
+}
+
+// VM Apps
+foreach ($allVMs as $name) {
+	$res = $lv->get_domain_by_name($name);
+	$uuid = libvirt_domain_get_uuid_string($res);
+	$dom = $lv->domain_get_info($res);
+	$id = $lv->domain_get_id($res);
+
+	$state = $lv->domain_state_translate($dom['state']);
+	switch ($state) {
+		case 'running':
+			$shape = 'play';
+			$status = 'started';
+			break;
+		case 'paused': //no break on purpose
+        case 'pmsuspended':
+			$shape = 'pause';
+			$status = 'paused';
+			break;
+		default:
+			$shape = 'square';
+			$status = 'stopped';
+			break;
+	}
+
+	$vncport = $lv->domain_get_vnc_port($res);
+	$vnc = '';
+	if ($vncport > 0) {
+		$wsport = $lv->domain_get_ws_port($res);
+		$vnc = '/plugins/dynamix.vm.manager/vnc.html?autoconnect=true&host=' . $var['IPADDR'] . '&port=' . $wsport;
+	} else {
+		$vncport = ($vncport < 0) ? "auto" : "";
+	}
+
+	$log = (is_file('/var/log/libvirt/qemu/' . $name . '.log') ? '/var/log/libvirt/qemu/' . $name . '.log' : '');
+
+	$contextMenus[] = sprintf("addVMContext('%s', '%s', '%s', '%s', '%s');", addslashes($name), addslashes($uuid), $state, addslashes($vnc), addslashes($log));
+
+	// fallback icon for users that created VMs before metadata support was added
+	$vmicon = '/plugins/dynamix.vm.manager/templates/images/' . ($lv->domain_get_clock_offset($res) == 'localtime' ? 'windows.png' : 'linux.png');
+
+	$vmtemplateicon = $lv->_get_single_xpath_result($res, '//domain/metadata/vmtemplate/@icon');
+	if (!empty($vmtemplateicon)) {
+		if (file_exists($vmtemplateicon)) {
+			$vmicon = $vmtemplateicon;
+		} else if (file_exists('/usr/local/emhttp/plugins/dynamix.vm.manager/templates/images/' . $vmtemplateicon)) {
+			$vmicon = '/plugins/dynamix.vm.manager/templates/images/' . $vmtemplateicon;
+		}
+	}
+
+	print "
+		<div class=\"Panel $status\">
+			<div id='vm-" . htmlspecialchars($uuid) . "' style='display:block; cursor:pointer'>
+				<div style=\"position: relative; width: 48px; height: 48px; margin: 0px auto;\">
+					<img src=\"" . $vmicon . "\" class=\"$status\" style=\"position: absolute; z-index: 1; top: 0; bottom: 0; left: 0; right: 0; width: 48px; height: 48px;\"/>
+					<i class=\"fa iconstatus fa-$shape $status\" title='$status'></i>
+				</div>
+				<div class=\"PanelText\">
+					<span class=\"PanelText " . $status . "\">" . $name . "</span>
+				</div>
+			</div>
+		</div>";
+}
+
 ?>
+<div id="noapps">No apps available to show</div>
+</div>
+<script type="text/javascript" src="/webGui/scripts/jquery.switchButton.js"></script>
 <script type="text/javascript" src="/webGui/scripts/context.js"></script>
 <script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/docker.js"></script>
 <script type="text/javascript">
-$(function() {
-	if (jQuery.browser.mobile) {
-		$("[id=cntrl_btn]").addClass( "show" );
-		$("img.banner").css( "opacity", "0.4" );
-	} else {
-		$("i").tooltip( {track: true, show: { delay: 300 }} );
-		$("img").tooltip( {track: true, show: { delay: 1000 }} );
-	}
+function ajaxVMDispatch(currentstate, params){
+  $.post("/plugins/dynamix.vm.manager/VMajax.php", params, function( data ) {
+    if (data.error) {
+      alert('Error: ' + data.error);
+    } else {
+      if (!data.state || currentstate != data.state) {
+        location = window.location.href;
+      }
+    }
+  }, "json");
+}
 
-	context.init({ above: false, preventDoubleContext: false });
+function addVMContext(name, uuid, state, vncurl, log){
+  var opts = [{header: name, image: "/plugins/dynamix.vm.manager/images/dynamix.vm.manager.png"}];
+
+  var path = location.pathname;
+  var x = path.indexOf("?");
+  if (x!=-1) path = path.substring(0,x);
+
+  if (vncurl !== "") {
+    opts.push({text: "VNC Remote", icon: "fa-desktop", action: function(e){ e.preventDefault(); window.open(vncurl, '_blank', 'scrollbars=yes,resizable=yes'); } });
+    opts.push({divider: true});
+  }
+
+  if (state == "running") {
+
+    opts.push({text: "Stop", icon: "fa-stop", action: function(e) {
+      e.preventDefault();
+      ajaxVMDispatch(state, { action: "domain-stop", uuid: uuid });
+    }});
+
+    opts.push({text: "Pause", icon: "fa-pause", action: function(e) {
+      e.preventDefault();
+      ajaxVMDispatch(state, { action: "domain-pause", uuid: uuid });
+    }});
+
+    opts.push({text: "Restart", icon: "fa-refresh", action: function(e) {
+      e.preventDefault();
+      ajaxVMDispatch(state, { action: "domain-restart", uuid: uuid });
+    }});
+
+    opts.push({text: "Force Stop", icon: "fa-bomb", action: function(e) {
+      e.preventDefault();
+      ajaxVMDispatch(state, { action: "domain-destroy", uuid: uuid });
+    }});
+
+  } else if (state == "pmsuspended") {
+
+    opts.push({text: "Resume", icon: "fa-play", action: function(e) {
+      e.preventDefault();
+      ajaxVMDispatch(state, { action: "domain-pmwakeup", uuid: uuid });
+    }});
+
+  } else if (state == "paused" || state == "unknown") {
+
+    opts.push({text: "Resume", icon: "fa-play", action: function(e) {
+      e.preventDefault();
+      ajaxVMDispatch(state, { action: "domain-resume", uuid: uuid });
+    }});
+
+  } else {
+
+    opts.push({text: "Start", icon: "fa-play", action: function(e) {
+      e.preventDefault();
+      ajaxVMDispatch(state, { action: "domain-start", uuid: uuid });
+    }});
+
+  }
+
+  opts.push({divider: true});
+
+  if (log !== "") {
+    if (location.pathname.indexOf("/Dashboard") === 0) {
+      opts.push({text: "Logs", icon: "fa-navicon", action: function(e){ e.preventDefault(); openWindow('/usr/bin/tail -n 42 -f \'' + log.replace(/'/g, '\'\\\'\'') + '\'', 'Log for: ' + name, 600, 900); } });
+    }
+  }
+
+  if (state == "shutoff") {
+
+    opts.push({text: "Edit", icon: "fa-pencil", href: path+'/UpdateVM?uuid='+uuid });
+    opts.push({text: "Edit XML", icon: "fa-code", href: path+'/UpdateVM?template=XML_Expert&amp;uuid='+uuid });
+
+    opts.push({divider: true});
+
+    opts.push({text: "Remove VM", icon: "fa-minus", action: function(e) {
+      e.preventDefault();
+      if (confirm('Are your sure you want to remove the definition ' + name + '?')) {
+        ajaxVMDispatch(state, { action: "domain-undefine", uuid: uuid });
+      }
+    }});
+
+    opts.push({text: "Remove VM + Disks", icon: "fa-trash", action: function(e) {
+      e.preventDefault();
+      if (confirm('Completely REMOVE ' + name + ' disk image and definition?')) {
+        ajaxVMDispatch(state, { action: "domain-delete", uuid: uuid });
+      }
+    }});
+
+  } else {
+
+    opts.push({text: "View XML", icon: "fa-code", href: path+'/UpdateVM?template=XML_Expert&amp;uuid='+uuid });
+
+  }
+
+  context.attach('#vm-'+uuid, opts);
+}
+
+
+$(function() {
+	if ($.cookie('dashapps_view_mode') == 'startedonly') {
+		$('.Panel').not('.started').hide();
+		if ($('.Panel.started').length === 0) {
+			$('#noapps').show();
+		}
+	}
+	if ($('.Panel').length === 0) {
+		$('#noapps').show();
+	}
+	$('#apps_icons').fadeIn('slow');
+
+	$('.appview').switchButton({
+		labels_placement: "left",
+		on_label: 'Started Only',
+		off_label: 'All Apps',
+		checked: $.cookie('dashapps_view_mode') == 'startedonly'
+	});
+	$('.appview').change(function () {
+		$('.Panel').not('.started').finish().toggle('fast');
+		if ($('.Panel').length === 0 || ($('.appview').is(':checked') && $('.Panel.started').length === 0)) {
+			$('#noapps').fadeIn('fast');
+		} else {
+			$('#noapps').fadeOut('fast');
+		}
+		$.cookie('dashapps_view_mode', $('.appview').is(':checked') ? 'startedonly' : 'allapps', { expires: 3650 });
+	});
+
+	context.init({ preventDoubleContext: false });
 	<?=implode("\n\t", $contextMenus);?>
 });
 </script>

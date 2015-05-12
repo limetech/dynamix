@@ -18,8 +18,17 @@ Markdown="false"
 require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt.php');
 require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt_helpers.php');
 
+$arrLoad = [];
+
+$strSelectedTemplate = 'Custom';
+$strIcon = 'windows.png';
+$strIconURL = '/plugins/dynamix.vm.manager/templates/images/windows.png';
+
+if (!empty($_GET['template'])) {
+	$strSelectedTemplate = $_GET['template'];
+}
+
 $arrTemplates = array();
-$strSelectedTemplate = '';
 
 // Read files from the templates folder
 foreach (glob('plugins/dynamix.vm.manager/templates/*.form.php') as $template) {
@@ -30,11 +39,8 @@ if (!empty($arrTemplates) && !in_array($strSelectedTemplate, $arrTemplates)) {
 	$strSelectedTemplate = $arrTemplates[0];
 }
 
-$arrLoad = [];
-
 ?>
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.min.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
 <style type="text/css">
@@ -123,6 +129,9 @@ $arrLoad = [];
 	.advanced {
 		display: none;
 	}
+	.switch-button-label.off {
+		color: inherit;
+	}
 </style>
 
 <div id="content" style="margin-top:-21px;margin-left:0px">
@@ -133,7 +142,7 @@ $arrLoad = [];
 		<tr>
 			<td>Template:</td>
 			<td>
-				<select id="domain_template" name="domain[template]" class="narrow" title="Select domain operating system type. Windows or Other for Linux, OSX and others">
+				<select id="domain_template" name="template[name]" class="narrow" title="Select domain operating system type. Windows or Other for Linux, OSX and others">
 					<?php
 						foreach ($arrTemplates as $strTemplate) {
 							echo mk_option($strSelectedTemplate, $strTemplate, str_replace('_', ' ', $strTemplate));
@@ -148,6 +157,13 @@ $arrLoad = [];
 			<p>Choose a preconfigured template or select Custom to create your own from scratch.</p>
 		</blockquote>
 	</div>
+
+	<table>
+		<tr>
+			<td>Icon:</td>
+			<td><input type="hidden" name="template[icon]" id="template_icon" value="<?=$strIcon?>" /><img id="template_img" src="<?=$strIconURL?>" width="48" height="48" /></td>
+		</tr>
+	</table>
 
 	<table>
 		<tr class="non_expert_xml">

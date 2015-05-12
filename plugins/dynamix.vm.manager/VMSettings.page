@@ -24,24 +24,19 @@ if ($var['fsState'] != "Started") {
 require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt.php');
 require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt_helpers.php');
 
-// Check if domain.img exists
-$libvirt_filecheck = (file_exists( "/boot/config/plugins/dynamix.kvm.manager/domain.img" )) ? true : false;
-
-// if domain.img exists check if it's not mounted then mount
-if ($libvirt_filecheck) {
-	if (!shell_exec("mount | grep domain.img" )) {
-		shell_exec("mount -t ext4 /boot/config/plugins/dynamix.kvm.manager/domain.img /etc/libvirt" );
-	}
-}
-
 
 // Check for Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support
-$strCPUInfo = file_get_contents('/proc/cpuinfo');
-
-if (strpos($strCPUInfo, 'vmx') === false && strpos($strCPUInfo, 'svm') === false) {
+// Attempt to load either of the kvm modules to see if virtualzation hw is supported
+// If there's no hardware support, we should see an error:
+//    modprobe: ERROR: could not insert 'kvm_intel': Operation not supported
+exec('modprobe kvm_intel kvm_amd 2>&1', $arrOut, $intReturn);
+if ($intReturn !== 0) {
 	?><p class="notice">Your hardware does not have Intel VT-x or AMD-V capability.  This is required to create VMs in KVM. <a href="http://lime-technology.com/wiki/index.php/UnRAID_Manual_6#Hardware-Assisted_Virtualization_.28HVM.29" target="_blank">Click here to see the unRAID Wiki for more information</a></p><?php
 	exit;
 }
+
+
+$arrValidBridges = getNetworkBridges();
 
 
 // Check for PCIE ACS capabilities
@@ -72,7 +67,6 @@ if ($boolACSEnabled != $boolACSInSyslinux) {
 }
 ?>
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.min.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
 <style type="text/css">
@@ -93,7 +87,7 @@ if ($boolACSEnabled != $boolACSInSyslinux) {
 <input type="hidden" id="command" name="#command" value="/etc/rc.d/rc.libvirt start" />
 
 Enable VMs:
-: <select id="SERVICE" name="SERVICE" size="1">
+: <select id="SERVICE" name="SERVICE" class="narrow">
 <?= mk_option($libvirt_service, 'disable', 'No'); ?>
 <?= mk_option($libvirt_service, 'enable', 'Yes'); ?>
 </select>
@@ -111,7 +105,7 @@ QEMU Version:
 <? } ?>
 
 ISO Library Share <span style="font-weight: normal">(optional)</span>:
-: <input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/user/" name="MEDIADIR" maxlength="60" value="<?=$domain_cfg['MEDIADIR']?>" placeholder="Click to Select">
+: <input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="<?= (is_dir('/mnt/user/') ? '/mnt/user/' : '/mnt/') ?>" name="MEDIADIR" maxlength="60" value="<?=$domain_cfg['MEDIADIR']?>" placeholder="Click to Select">
 
 > Specify a user share that contains all your installation media for operating systems
 
@@ -120,17 +114,23 @@ vDisk Share <span style="font-weight: normal">(optional)</span>:
 : <input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/" name="DISKDIR" maxlength="60" value="<?=$domain_cfg['DISKDIR']?>" placeholder="Click to Select (ie. /mnt/cache/images)" title="Click to Select (ie. /mnt/cache/images)">
 -->
 
-Alternate Network Bridge:
-: <input type="text" id="bridge" name="BRNAME" maxlength="60" value="<?=$domain_cfg['BRNAME']?>" placeholder="Leave blank to use the default libVirt managed network bridge" title="Leave blank to use the default libVirt managed network bridge">
+Default Network Bridge:
+: <select id="bridge" name="BRNAME">
+<?php
+	foreach ($arrValidBridges as $strBridge) {
+		echo mk_option($domain_cfg['BRNAME'], $strBridge, $strBridge);
+	}
+?>
+</select>
 
-> Enter the name of the alternate network bridge you wish to use for your VMs here, otherwise leave the field blank and
+> Enter the name of the network bridge you wish to use for your VMs here, otherwise leave the field blank and
 > libvirt will create a bridge that will utilize NAT (network address translation) and act as a DHCP server to hand out
 > IP addresses to virtual machines directly.
 >
-> NOTE:  You can also specify an alternate network bridge on a per-VM basis.
+> NOTE:  You can also specify an network bridge on a per-VM basis.
 
 PCIe ACS Override:
-: <select id="pcie_acs_override" size="1">
+: <select id="pcie_acs_override" class="narrow">
 <?= mk_option(($boolACSInSyslinux ? '1' : '0'), '0', 'No'); ?>
 <?= mk_option(($boolACSInSyslinux ? '1' : '0'), '1', 'Yes'); ?>
 </select>
@@ -165,6 +165,6 @@ $(function(){
 		}
 	});
 
-	$("input[data-pickroot]").click(universalTreePicker);
+	$("input[data-pickroot]").fileTreeAttach();
 });
 </script>

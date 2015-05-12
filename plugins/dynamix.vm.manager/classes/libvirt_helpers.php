@@ -12,8 +12,10 @@
 ?>
 <?
 
-	if (!isset($var)) {
-		$var = parse_ini_file('state/var.ini');
+	// Load emhttp variables if needed.
+	if (! isset($var)){
+		if (! is_file("/usr/local/emhttp/state/var.ini")) shell_exec("wget -qO /dev/null localhost:$(lsof -nPc emhttp | grep -Po 'TCP[^\d]*\K\d+')");
+		$var = @parse_ini_file("/usr/local/emhttp/state/var.ini");
 	}
 
 
@@ -41,11 +43,10 @@
 	$libvirt_service = isset($domain_cfg['SERVICE']) ?	$domain_cfg['SERVICE'] : "disable";
 
 	if ($libvirt_running == "yes"){
-		$uri = is_dir('/proc/xen') ? 'xen:///system' : 'qemu:///system';
-		$lv = new Libvirt($uri, null, null, false);
-		$info = $lv->host_get_node_info();
-		$maxcpu = (int)$info['cpus'];
-		$maxmem = number_format(($info['memory'] / 1048576), 1, '.', ' ');
+		$lv = new Libvirt((is_dir('/proc/xen') ? 'xen:///system' : 'qemu:///system'), null, null, false);
+		$arrHostInfo = $lv->host_get_node_info();
+		$maxcpu = (int)$arrHostInfo['cpus'];
+		$maxmem = number_format(($arrHostInfo['memory'] / 1048576), 1, '.', ' ');
 	}
 
 	$theme = $display['theme'];
@@ -124,20 +125,47 @@
 			return $cacheValidPCIDevices;
 		}
 
-		$arrWhitelistGPUNames = array('VGA compatible controller', 'Video Device');
-		$arrWhitelistAudioNames = array('Audio device');
+		$strOSUSBController = trim(shell_exec("udevadm info -q path -n /dev/disk/by-label/UNRAID 2>/dev/null | grep -Po '0000:\K\w{2}:\w{2}\.\w{1}'"));
+		$strOSNetworkDevice = trim(shell_exec("udevadm info -q path -p /sys/class/net/eth0 2>/dev/null | grep -Po '0000:\K\w{2}:\w{2}\.\w{1}'"));
+
+		//TODO: add any drive controllers currently being used by unraid to the blacklist
+
+		$arrBlacklistIDs = array($strOSUSBController, $strOSNetworkDevice);
+		$arrBlacklistClassIDregex = '/^(05|06|08|0a|0b|0c05)/';
+		// Got Class IDs at the bottom of /usr/share/hwdata/pci.ids
+		$arrWhitelistGPUClassIDregex = '/^(0001|03)/';
+		$arrWhitelistAudioClassIDregex = '/^(0403)/';
 
 		$arrValidPCIDevices = array();
 
-		exec("lspci 2>/dev/null", $arrAllPCIDevices);
+		exec("lspci -m -nn 2>/dev/null", $arrAllPCIDevices);
 
 		foreach ($arrAllPCIDevices as $strPCIDevice) {
-			if (preg_match('/^(?P<id>\S+) (?P<type>.+): (?P<name>.+)$/', $strPCIDevice, $arrMatch)) {
+			// Example: 00:1f.0 "ISA bridge [0601]" "Intel Corporation [8086]" "Z77 Express Chipset LPC Controller [1e44]" -r04 "Micro-Star International Co., Ltd. [MSI] [1462]" "Device [7759]"
+			if (preg_match('/^(?P<id>\S+) \"(?P<type>.+) \[(?P<typeid>[a-f0-9]{4})\]\" \"(?P<vendorname>.+) \[(?P<vendorid>[a-f0-9]{4})\]\" \"(?P<productname>.+) \[(?P<productid>[a-f0-9]{4})\]\" (\-r.+).?/', $strPCIDevice, $arrMatch)) {
+				if (in_array($arrMatch['id'], $arrBlacklistIDs) || preg_match($arrBlacklistClassIDregex, $arrMatch['typeid'])) {
+					// Device blacklisted, skip device
+					continue;
+				}
+
 				$strClass = 'other';
-				if (in_array($arrMatch['type'], $arrWhitelistGPUNames)) {
+				if (preg_match($arrWhitelistGPUClassIDregex, $arrMatch['typeid'])) {
 					$strClass = 'vga';
-				} else if (in_array($arrMatch['type'], $arrWhitelistAudioNames)) {
+					// Specialized product name cleanup for GPU
+					// GF116 [GeForce GTX 550 Ti] --> GeForce GTX 550 Ti
+					if (preg_match('/.+\[(?P<gpuname>.+)\]/', $arrMatch['productname'], $arrGPUMatch)) {
+						$arrMatch['productname'] = $arrGPUMatch['gpuname'];
+					}
+				} else if (preg_match($arrWhitelistAudioClassIDregex, $arrMatch['typeid'])) {
 					$strClass = 'audio';
+				}
+
+				if ($strClass == 'vga' &&
+					strpos($arrMatch['id'], '00:') === 0 &&
+					(stripos($arrMatch['productname'], 'integrated') !== false || strpos($arrMatch['vendorname'], 'Intel ') !== false)) {
+					// Our sorry attempt to detect a integrated gpu
+					// Integrated gpus dont work for passthrough, skip device
+					continue;
 				}
 
 				if (!file_exists('/sys/bus/pci/devices/0000:' . $arrMatch['id'] . '/iommu_group/')) {
@@ -145,11 +173,20 @@
 					continue;
 				}
 
+				// Clean up the vendor and product name
+				$arrMatch['vendorname'] = str_replace([' Corporation', ' Semiconductor Co., Ltd.', ' Technology Group Ltd.', ' Electronics Systems Ltd.', ' Systems, Inc.'], '', $arrMatch['vendorname']);
+				$arrMatch['productname'] = str_replace([' PCI Express'], [' PCIe'], $arrMatch['productname']);
+
 				$arrValidPCIDevices[] = array(
 					'id' => $arrMatch['id'],
 					'type' => $arrMatch['type'],
+					'typeid' => $arrMatch['typeid'],
+					'vendorid' => $arrMatch['vendorid'],
+					'vendorname' => $arrMatch['vendorname'],
+					'productid' => $arrMatch['productid'],
+					'productname' => $arrMatch['productname'],
 					'class' => $strClass,
-					'name' => $arrMatch['name']
+					'name' => $arrMatch['vendorname'] . ' ' . $arrMatch['productname']
 				);
 			}
 		}
@@ -157,6 +194,39 @@
 		$cacheValidPCIDevices = $arrValidPCIDevices;
 
 		return $arrValidPCIDevices;
+	}
+
+
+	function getValidGPUDevices() {
+		$arrValidPCIDevices = getValidPCIDevices();
+
+		$arrValidGPUDevices = array_filter($arrValidPCIDevices, function($arrDev) {
+			return ($arrDev['class'] == 'vga');
+		});
+
+		return $arrValidGPUDevices;
+	}
+
+
+	function getValidAudioDevices() {
+		$arrValidPCIDevices = getValidPCIDevices();
+
+		$arrValidAudioDevices = array_filter($arrValidPCIDevices, function($arrDev) {
+			return ($arrDev['class'] == 'audio');
+		});
+
+		return $arrValidAudioDevices;
+	}
+
+
+	function getValidOtherDevices() {
+		$arrValidPCIDevices = getValidPCIDevices();
+
+		$arrValidOtherDevices = array_filter($arrValidPCIDevices, function($arrDev) {
+			return ($arrDev['class'] == 'other');
+		});
+
+		return $arrValidOtherDevices;
 	}
 
 
@@ -169,6 +239,9 @@
 		}
 
 		$arrValidUSBDevices = array();
+
+		// Get a list of all usb hubs so we can blacklist them
+		exec("cat /sys/bus/usb/drivers/hub/*/modalias | grep -Po 'usb:v\K\w{9}' | tr 'p' ':'", $arrAllUSBHubs);
 
 		exec("lsusb 2>/dev/null", $arrAllUSBDevices);
 
@@ -186,7 +259,7 @@
 					continue;
 				}
 
-				if (trim(shell_exec('lsusb -d ' . $arrMatch['id'] . ' -v 2>/dev/null | grep \'bDeviceClass            9 Hub\'')) != '') {
+				if (in_array(strtoupper($arrMatch['id']), $arrAllUSBHubs)) {
 					// Device class is a Hub, skip device
 					continue;
 				}
@@ -205,10 +278,35 @@
 
 
 	function getValidMachineTypes() {
-		$arrValidMachineTypes = [
-			'q35' => 'Q35',
-			'pc' => 'i440fx'
-		];
+		global $lv;
+
+		$arrValidMachineTypes = [];
+
+		$arrQEMUInfo = $lv->get_connect_information();
+		$arrMachineTypes = $lv->get_machine_types('x86_64');
+
+		$strQEMUVersion = $arrQEMUInfo['hypervisor_major'] . '.' .  $arrQEMUInfo['hypervisor_minor'];
+
+		foreach ($arrMachineTypes as $arrMachine) {
+			if ($arrMachine['name'] == 'q35') {
+				// Latest Q35
+				$arrValidMachineTypes[$arrMachine['name']] = 'Q35-' . $strQEMUVersion;
+			}
+			if (strpos($arrMachine['name'], 'q35-') !== false) {
+				// Prior releases of Q35
+				$arrValidMachineTypes[$arrMachine['name']] = str_replace(['q35', 'pc-'], ['Q35', ''], $arrMachine['name']);
+			}
+			if ($arrMachine['name'] == 'pc') {
+				// Latest i440fx
+				$arrValidMachineTypes[$arrMachine['name']] = 'i440fx-' . $strQEMUVersion;
+			}
+			if (strpos($arrMachine['name'], 'i440fx-') !== false) {
+				// Prior releases of i440fx
+				$arrValidMachineTypes[$arrMachine['name']] = str_replace('pc-', '', $arrMachine['name']);
+			}
+		}
+
+		arsort($arrValidMachineTypes);
 
 		return $arrValidMachineTypes;
 	}
@@ -272,16 +370,32 @@
 	}
 
 
+	function getNetworkBridges() {
+		exec("brctl show | awk -F'\t' 'FNR > 1 {print \$1}' | awk 'NF > 0'", $arrValidBridges);
+
+		if (!is_array($arrValidBridges)) {
+			$arrValidBridges = [];
+		}
+
+		// Make sure the default libvirt bridge is first in the list
+		if (($key = array_search('virbr0', $arrValidBridges)) !== false) {
+			unset($arrValidBridges[$key]);
+		}
+		// We always list virbr0 because libvirt might not be started yet (thus the bridge doesn't exists)
+		array_unshift($arrValidBridges, 'virbr0');
+
+		return array_values($arrValidBridges);
+	}
+
+
 	function domain_to_config($uuid) {
 		global $lv;
 
-		$arrValidPCIDevices = getValidPCIDevices();
+		$arrValidGPUDevices = getValidGPUDevices();
+		$arrValidAudioDevices = getValidAudioDevices();
+		$arrValidOtherDevices = getValidOtherDevices();
 		$arrValidUSBDevices = getValidUSBDevices();
 		$arrValidDiskDrivers = getValidDiskDrivers();
-
-		$arrValidGPUDevices = array_filter($arrValidPCIDevices, function($arrDev) { return ($arrDev['class'] == 'vga'); });
-		$arrValidAudioDevices = array_filter($arrValidPCIDevices, function($arrDev) { return ($arrDev['class'] == 'audio'); });
-		$arrValidOtherDevices = array_filter($arrValidPCIDevices, function($arrDev) { return ($arrDev['class'] == 'other'); });
 
 		$res = $lv->domain_get_domain_by_uuid($uuid);
 		$dom = $lv->domain_get_info($res);
@@ -290,6 +404,27 @@
 		$arrNICs = $lv->get_nic_info($res);
 		$arrHostDevs = $lv->domain_get_host_devices_pci($res);
 		$arrUSBDevs = $lv->domain_get_host_devices_usb($res);
+
+
+		// Metadata Parsing
+		// libvirt xpath parser sucks, use php's xpath parser instead
+		$strDOMXML = $lv->domain_get_xml($res);
+		$xmldoc = new DOMDocument();
+        $xmldoc->loadXML($strDOMXML);
+        $xpath = new DOMXPath($xmldoc);
+        $objNodes = $xpath->query('//domain/metadata/vmtemplate/@*');
+
+        $arrTemplateValues = [];
+        if ($objNodes->length > 0) {
+        	foreach ($objNodes as $objNode) {
+        		$arrTemplateValues[$objNode->nodeName] = $objNode->nodeValue;
+        	}
+        }
+
+		if (empty($arrTemplateValues['name'])) {
+			$arrTemplateValues['name'] = 'Custom';
+		}
+
 
 		$arrGPUDevices = [];
 		$arrAudioDevices = [];
@@ -346,15 +481,15 @@
 		}
 
 		return [
+			'template' => $arrTemplateValues,
 			'domain' => [
 				'name' => $lv->domain_get_name($res),
 				'desc' => $lv->domain_get_description($res),
 				'persistent' => 1,
 				'uuid' => $lv->domain_get_uuid($res),
 				'clock' => $lv->domain_get_clock_offset($res),
-				'os' => ($lv->domain_get_clock_offset($res) == 'localtime' ? 'windows' : 'other'),
 				'arch' => $lv->domain_get_arch($res),
-				'machine' => (strpos($lv->domain_get_machine($res), 'i440fx') !== false ? 'pc' : 'q35'),
+				'machine' => $lv->domain_get_machine($res),
 				'mem' => $lv->domain_get_current_memory($res),
 				'maxmem' => $lv->domain_get_memory($res),
 				'password' => '', //TODO?

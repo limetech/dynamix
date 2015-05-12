@@ -1,5 +1,5 @@
 function addDockerContainerContext(container, image, template, started, update, autostart, webui){
-  var opts = [{header: container}];
+  var opts = [{header: container, image: "/plugins/dynamix.docker.manager/images/dynamix.docker.manager.png"}];
   if (started && (webui != "#")) {
     opts.push({text: 'WebUI', icon:'fa-globe', href: webui, target: '_blank' });
     opts.push({divider: true});
@@ -14,14 +14,11 @@ function addDockerContainerContext(container, image, template, started, update, 
     opts.push({text: 'Start', icon:'fa-play', action: function(e){ e.preventDefault(); containerControl(container, 'start'); }});
   }
   opts.push({divider: true});
-  opts.push({text: 'Logs', icon:'fa-navicon', action: function(e){ e.preventDefault(); containerLogs(container); }});
+  if (location.pathname.indexOf("/Dashboard") === 0) {
+    opts.push({text: 'Logs', icon:'fa-navicon', action: function(e){ e.preventDefault(); containerLogs(container); }});
+  }
   if (template) {
     opts.push({text: 'Edit', icon:'fa-wrench', action: function(e){ e.preventDefault(); editContainer(container, template); }});
-  }
-  if (autostart){
-    opts.push({text: 'Disable autostart', icon:'fa-check-square-o', action: function(e){ e.preventDefault();  autoStart(container, e); }});
-  } else {
-    opts.push({text: 'Enable autostart', icon:'fa-square-o', action: function(e){ e.preventDefault(); autoStart(container, e); }});
   }
   opts.push({divider: true});
   opts.push({text: 'Remove', icon:'fa-trash', action: function(e){ e.preventDefault(); rmContainer(container, image); }});

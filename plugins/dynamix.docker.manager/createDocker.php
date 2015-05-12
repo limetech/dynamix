@@ -62,6 +62,7 @@ function pullImage($image) {
   fwrite($fp, $out);
   $cid = "";
   $cstatus="";
+  $lastprogress=[];
   $gtotal = 0;
   while (!feof($fp)) {
     $cnt =  json_decode( fgets($fp, 5000), TRUE );
@@ -74,20 +75,45 @@ function pullImage($image) {
     }
     $status = ( isset( $cnt['status'] )) ? $cnt['status'] : "";
     if ($status != $cstatus && strlen($status)) {
+      if ($status == "Download complete" &&
+          isset($cnt['id'], $lastprogress['id'], $lastprogress['progressDetail']['total']) &&
+          $cnt['id'] == $lastprogress['id'] &&
+          $lastprogress['progressDetail']['total'] == -1) {
+        // Docker didn't know the total from the last downloaded file so just
+        //  use the latest value of current bytes to add to the grand total
+        $gtotal += $lastprogress['progressDetail']['current'];
+      }
       $cstatus = $status;
-      if ( isset($cnt['progressDetail']['total']) ) $gtotal += $cnt['progressDetail']['total'];
+      if ( isset($cnt['progressDetail']['total']) && $cnt['progressDetail']['total'] > 0) $gtotal += $cnt['progressDetail']['total'];
       echo "<script>add_to_id('". $status ."<span class=\"progress\"></span>.');</script>";
       @flush();
     }
     if ($status == "Downloading") {
+      $lastprogress = $cnt;
       $total = $cnt['progressDetail']['total'];
       $current = $cnt['progressDetail']['current'];
-      $percentage = round(($current/$total) * 100);
-      echo "<script>show_Prog(' ". $percentage ."% of " . ceil($total/1024/1024) . "MB');</script>\n";
+      if ($total > 0) {
+        $percentage = round(($current/$total) * 100);
+        echo "<script>show_Prog(' ". $percentage ."% of " . sizeToHuman($total) . "');</script>\n";
+      } else {
+        // Docker must not know the total download size (http-chunked or something?)
+        //  just show the current download progress without the percentage
+        echo "<script>show_Prog(' " . sizeToHuman($current) . "');</script>\n";
+      }
       @flush();
     }
   }
-  echo "<script>addLog('<br><b>TOTAL DATA PULLED:</b> " . ceil($gtotal/1024/1024) . " MB<span class=\"progress\"></span>');</script>\n";
+  echo "<script>addLog('<br><b>TOTAL DATA PULLED:</b> " . sizeToHuman($gtotal) . "<span class=\"progress\"></span>');</script>\n";
+}
+
+function sizeToHuman($size) {
+  $units = ['B','KB','MB','GB'];
+  $unitsIndex = 0;
+  while ($size > 1024 && (($unitsIndex+1) < count($units))) {
+    $size /= 1024;
+    $unitsIndex++;
+  }
+  return ceil($size) . " " . $units[$unitsIndex];
 }
 
 function xmlToCommand($xmlFile){
@@ -267,7 +293,7 @@ if ($_POST){
   $existing = isset($_POST['existingContainer']) ? $_POST['existingContainer'] : FALSE;
   if ($existing && ContainerExist($existing)){
     $_GET['cmd'] = "/usr/bin/docker rm -f $existing";
-    include($dockerManPaths['plugin'] . "/exec.php"); 
+    include($dockerManPaths['plugin'] . "/exec.php");
   }
 
   // Injecting the command in $_GET variable and executing.
@@ -422,7 +448,7 @@ if($_GET['xmlTemplate']){
         <input type="number" min="1" max="65535" name="hostPort[]" value="%s" class="textPort" %s title="Set the port you use to interact with the app."/>
       </td>
       <td>
-        <select name="portProtocol[]">
+        <select name="portProtocol[]" class="narrow">
           <option value="tcp">TCP</option>
           <option value="udp" %s>UDP</option>
         </select>
@@ -705,7 +731,7 @@ $showAdditionalInfo = true;
       <tr>
         <td>Network type:</td>
 
-        <td><select id="NetworkType" name="NetworkType" size="1">
+        <td><select id="NetworkType" name="NetworkType" class="narrow">
           <? foreach (array('bridge', 'host', 'none') as $value) {
             $selected = ($templateMode == $value) ? "selected" : "";
             echo "<option value=\"{$value}\" {$selected}>".ucwords($value)."</option>";
@@ -808,7 +834,7 @@ $showAdditionalInfo = true;
               <input type="number" min="1" max="65535" id="hostPort1" name="hostPort[]" class="textPort" title="Set the port you use to interact with the app.">
             </td>
             <td>
-              <select id="portProtocol1" name="portProtocol[]">
+              <select id="portProtocol1" name="portProtocol[]" class="narrow">
                 <option value="tcp" selected="selected">TCP</option>
                 <option value="udp">UDP</option>
               </select>

@@ -22,8 +22,7 @@
 			if ($debug)
 				$this->set_logfile($debug);
 			if ($uri != false) {
-				$this->enabled = true;
-				$this->connect($uri, $login, $pwd);
+				$this->enabled = $this->connect($uri, $login, $pwd);
 			}
 		}
 
@@ -46,6 +45,18 @@
 		function get_capabilities() {
 			$tmp = libvirt_connect_get_capabilities($this->conn);
 			return ($tmp) ? $tmp : $this->_set_last_error();
+		}
+
+		function get_machine_types($arch = 'x86_64' /* or 'i686' */) {
+			$tmp = libvirt_connect_get_machine_types($this->conn);
+
+			if (!$tmp)
+				return $this->_set_last_error();
+
+			if (empty($tmp[$arch]))
+				return [];
+
+			return $tmp[$arch];
 		}
 
 		function get_default_emulator() {
@@ -94,12 +105,20 @@
 			//     create folder dirname('new') if needed
 			//     create image file as new --> if size is specified
 
-			if (!empty($disk['new']) && is_file($disk['new'])) {
-				$disk['image'] = $disk['new'];
+			if (!empty($disk['new'])) {
+				if (is_file($disk['new']) || is_block($disk['new'])) {
+					$disk['image'] = $disk['new'];
+				}
 			}
 
 			if (!empty($disk['image'])) {
 				// Use existing disk image
+
+				if (is_block($disk['image'])) {
+					// Valid block device, return as-is
+					return $disk;
+				}
+
 				if (is_file($disk['image'])) {
 					$json_info = json_decode(shell_exec("qemu-img info --output json " . escapeshellarg($disk['image'])), true);
 					$disk['driver'] = $json_info['format'];
@@ -114,10 +133,28 @@
 				$disk['new'] = $disk['image'];
 			}
 
-			if (!empty($disk['new']) && !empty($disk['size'])) {
+			if (!empty($disk['new'])) {
 				// Create new disk image
 				$strImgFolder = $disk['new'];
 				$strImgPath = '';
+
+				if (strpos($strImgFolder, '/dev/') === 0) {
+					// ERROR invalid block device
+					$arrReturn = [
+						'error' => "Not a valid block device location '" . $strImgFolder . "'"
+					];
+
+					return $arrReturn;
+				}
+
+				if (empty($disk['size'])) {
+					// ERROR invalid disk size
+					$arrReturn = [
+						'error' => "Please specify a disk size for '" . $strImgFolder . "'"
+					];
+
+					return $arrReturn;
+				}
 
 				$path_parts = pathinfo($strImgFolder);
 				if (empty($path_parts['extension'])) {
@@ -203,6 +240,7 @@
 			$shares = $config['shares'];
 			$gpus = $config['gpu'];
 			$audios = $config['audio'];
+			$template = $config['template'];
 
 
 			$type = $domain['type'];
@@ -214,6 +252,7 @@
 			}
 			$uuid = (!empty($domain['uuid']) ? $domain['uuid'] : $this->domain_generate_uuid());
 			$machine = $domain['machine'];
+			$machine_type = (stripos($machine, 'q35') !== false ? 'q35' : 'pc');
 			$emulator = $this->get_default_emulator();
 			$arch = $domain['arch'];
 			$pae = '';
@@ -224,6 +263,15 @@
 			$loader = '';
 			if (!empty($domain['ovmf'])) {
 				$loader = "<loader type='pflash'>/usr/share/qemu/ovmf-x64/OVMF-pure-efi.fd</loader>";
+			}
+
+			$metadata = '';
+			if (!empty($template)) {
+				$template_options = '';
+				foreach ($template as $key => $value) {
+					$template_options .= $key . "='" . htmlspecialchars($value) . "' ";
+				}
+				$metadata = "<metadata><vmtemplate " . $template_options . "/></metadata>";
 			}
 
 			$vcpus = 1;
@@ -256,7 +304,7 @@
 
 			$bus = "ide";
 			$ctrl = '';
-			if ($machine == 'q35'){
+			if ($machine_type == 'q35'){
 				$bus = "sata";
 				$ctrl = "<controller type='usb' index='0' model='ich9-ehci1'/>
 						<controller type='usb' index='0' model='ich9-uhci1'/>";
@@ -340,8 +388,10 @@
 						//TODO: check if image/new is a block device
 						$diskcount++;
 
-						if (!empty($disk['new']) && is_file($disk['new'])) {
-							$disk['image'] = $disk['new'];
+						if (!empty($disk['new'])) {
+							if (is_file($disk['new']) || is_block($disk['new'])) {
+								$disk['image'] = $disk['new'];
+							}
 						}
 
 						if (!empty($disk['image'])) {
@@ -406,11 +456,10 @@
 							$disk['bus'] = 'virtio';
 						}
 
-						if (empty($disk['dev'])) {
+						if (empty($disk['dev']) || !in_array($disk['dev'], $arrAvailableDevs)) {
 							$disk['dev'] = array_shift($arrAvailableDevs);
-						} else if (in_array($disk['dev'], $arrAvailableDevs)) {
-							unset($arrAvailableDevs[$disk['dev']]);
 						}
+						unset($arrAvailableDevs[$disk['dev']]);
 
 						$bootorder = '';
 						if (!in_array(1, $arrUsedBootOrders)) {
@@ -418,12 +467,18 @@
 							$arrUsedBootOrders[] = 1;
 						}
 
-						$diskstr .= "<disk type='file' device='disk'>
-										<driver name='qemu' type='{$disk['driver']}' cache='none' io='native'/>
-										<source file='{$disk['image']}'/>
-										<target bus='{$disk['bus']}' dev='{$disk['dev']}'/>
-										$bootorder
-									</disk>";
+						$strDevType = @filetype(realpath($disk['image']));
+
+						if ($strDevType == 'file' || $strDevType == 'block') {
+							$strSourceType = ($strDevType == 'file' ? 'file' : 'dev');
+
+							$diskstr .= "<disk type='" . $strDevType . "' device='disk'>
+											<driver name='qemu' type='" . $disk['driver'] . "' cache='none' io='native'/>
+											<source " . $strSourceType . "='" . $disk['image'] . "'/>
+											<target bus='" . $disk['bus'] . "' dev='" . $disk['dev'] . "'/>
+											$bootorder
+										</disk>";
+						}
 					}
 				}
 			}
@@ -521,7 +576,7 @@
 					} else {
 
 						// VGA BIOS passthrough uses qemu args and we have to manage the device (libvirt wont attach/detach the device driver to vfio-pci)
-						switch ($machine) {
+						switch ($machine_type) {
 
 							case 'q35':
 								$gpuargs .= "<qemu:arg value='-device'/>
@@ -570,7 +625,7 @@
 					} else {
 
 						// VGA BIOS passthrough uses qemu args and we have to manage the device (libvirt wont attach/detach the device driver to vfio-pci)
-						switch ($machine) {
+						switch ($machine_type) {
 
 							case 'q35':
 								$audioargs .= "<qemu:arg value='-device'/>
@@ -599,7 +654,7 @@
 
 			$cmdargs='';
 			if (!empty($gpuargs) || !empty($audioargs)) {
-				switch ($machine) {
+				switch ($machine_type) {
 
 					case 'q35':
 						$cmdargs .= "<qemu:commandline>
@@ -627,6 +682,7 @@
 						<uuid>$uuid</uuid>
 						<name>$name</name>
 						<description>{$domain['desc']}</description>
+						$metadata
 						<currentMemory>$mem</currentMemory>
 						<memory>$maxmem</memory>
 						<memoryBacking>
@@ -660,6 +716,9 @@
 							<console type='pty'/>
 							$pcidevs
 							$usbstr
+							<channel type='unix'>
+								<target type='virtio' name='org.qemu.guest_agent.0'/>
+							</channel>
 							<memballoon model='virtio'>
 								<alias name='balloon0'/>
 							</memballoon>
@@ -759,6 +818,8 @@
 			}
 			if ($this->conn==false)
 				return $this->_set_last_error();
+
+			return true;
 		}
 
 		function domain_change_boot_devices($domain, $first, $second) {
@@ -1145,7 +1206,7 @@
 		function domain_change_xml($domain, $xml) {
 			$dom = $this->get_domain_object($domain);
 
-			if (!($old_xml = libvirt_domain_get_xml_desc($dom, NULL)))
+			if (!($old_xml = domain_get_xml($dom)))
 				return $this->_set_last_error();
 			if (!libvirt_domain_undefine($dom))
 				return $this->_set_last_error();
@@ -1276,12 +1337,12 @@
 			return $this->last_error;
 		}
 
-		function domain_get_xml($domain, $get_inactive = false) {
+		function domain_get_xml($domain, $xpath = NULL) {
 			$dom = $this->get_domain_object($domain);
 			if (!$dom)
 				return false;
 
-			$tmp = libvirt_domain_get_xml_desc($dom, $get_inactive ? VIR_DOMAIN_XML_INACTIVE : 0);
+			$tmp = libvirt_domain_get_xml_desc($dom, $xpath);
 			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
@@ -1388,7 +1449,12 @@
 		}
 
 		function domain_get_uuid($domain) {
-			return libvirt_domain_get_uuid_string($domain);
+			$dom = $this->get_domain_object($domain);
+			if (!$dom)
+				return false;
+
+			$tmp = libvirt_domain_get_uuid_string($dom);
+			return ($tmp) ? $tmp : $this->_set_last_error();
 		}
 
 		function domain_get_domain_by_uuid($uuid) {
@@ -1397,7 +1463,7 @@
 		}
 
 		function domain_get_name_by_uuid($uuid) {
-			$dom = libvirt_domain_lookup_by_uuid_string($this->conn, $uuid);
+			$dom = $this->domain_get_domain_by_uuid($uuid);
 			if (!$dom)
 				return false;
 			$tmp = libvirt_domain_get_name($dom);
@@ -1519,7 +1585,7 @@
 			if (!$dom)
 				return false;
 
-			$info = $this->domain_get_info( $domain, $name );
+			$info = libvirt_domain_get_info($dom);
 			if (!$info)
 				return $this->_set_last_error();
 
@@ -1535,6 +1601,8 @@
 				case VIR_DOMAIN_SHUTDOWN: return 'shutdown';
 				case VIR_DOMAIN_SHUTOFF:  return 'shutoff';
 				case VIR_DOMAIN_CRASHED:  return 'crashed';
+				//VIR_DOMAIN_PMSUSPENDED is 7 (not defined in libvirt-php yet)
+				case 7:  return 'pmsuspended';
 			}
 
 			return 'unknown';
@@ -1885,7 +1953,7 @@
 			if ($this->domain_get_feature($domain, $feature) == $val)
 				return true;
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			if ($val) {
 				if (strpos('features', $xml))
 					$xml = str_replace('<features>', "<features>\n<$feature/>", $xml);
@@ -1904,7 +1972,7 @@
 			if (($old_offset = $this->domain_get_clock_offset($domain)) == $offset)
 				return true;
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$xml = str_replace("<clock offset='$old_offset'/>", "<clock offset='$offset'/>", $xml);
 
 			return $this->domain_define($xml);
@@ -1917,7 +1985,7 @@
 			if (($old_vcpu = $this->domain_get_vcpu($domain)) == $vcpu)
 				return true;
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$xml = str_replace("$old_vcpu</vcpu>", "$vcpu</vcpu>", $xml);
 
 			return $this->domain_define($xml);
@@ -1929,7 +1997,7 @@
 			if (($old_memory = $this->domain_get_memory($domain)) == $memory)
 				return true;
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$xml = str_replace("$old_memory</memory>", "$memory</memory>", $xml);
 
 			return $this->domain_define($xml);
@@ -1941,7 +2009,7 @@
 			if (($old_memory = $this->domain_get_current_memory($domain)) == $memory)
 				return true;
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$xml = str_replace("$old_memory</currentMemory>", "$memory</currentMemory>", $xml);
 
 			return $this->domain_define($xml);
@@ -1951,7 +2019,7 @@
 		function domain_set_disk_dev($domain, $olddev, $dev) {
 			$domain = $this->get_domain_object($domain);
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$tmp = explode("\n", $xml);
 			for ($i = 0; $i < sizeof($tmp); $i++)
 				if (strpos('.'.$tmp[$i], "<target dev='".$olddev))
@@ -1970,7 +2038,7 @@
 			if ($description == $desc)
 				return true;
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			if (!$description)
 				$xml = str_replace("</uuid>", "</uuid><description>$desc</description>", $xml);
 			else {
@@ -1989,7 +2057,7 @@
 		function domain_set_metadata($domain) {
 			$domain = $this->get_domain_object($domain);
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$metadata = $this->get_xpath($domain, '//domain/metadata', false);
 			if (empty($metadata)){
 				$description = $this->domain_get_description($domain);
@@ -2008,7 +2076,7 @@
 			$this->domain_set_metadata($domain);
 			$domain = $this->get_domain_object($domain);
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$metadata = $this->get_xpath($domain, '//domain/metadata/snapshot'.$name, false);
 			if (empty($metadata)){
 				$desc = "<metadata>\n<snapshot$name>$desc</snapshot$name>\n";
@@ -2094,7 +2162,7 @@
 		function snapshot_remove_metadata($domain, $name) {
 			$domain = $this->get_domain_object($domain);
 
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$tmp = explode("\n", $xml);
 			for ($i = 0; $i < sizeof($tmp); $i++)
 				if (strpos('.'.$tmp[$i], '<snapshot'.$name))
@@ -2116,7 +2184,7 @@
 
 //change disk capacity
 		function disk_set_cap($disk, $cap) {
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$tmp = explode("\n", $xml);
 			for ($i = 0; $i < sizeof($tmp); $i++)
 				if (strpos('.'.$tmp[$i], "<target dev='".$olddev))
@@ -2129,7 +2197,7 @@
 
 //change domain boot device
 		function domain_set_boot_device($domain, $bootdev) {
-			$xml = $this->domain_get_xml($domain, true);
+			$xml = $this->domain_get_xml($domain);
 			$tmp = explode("\n", $xml);
 			for ($i = 0; $i < sizeof($tmp); $i++)
 				if (strpos('.'.$tmp[$i], "<boot dev="))

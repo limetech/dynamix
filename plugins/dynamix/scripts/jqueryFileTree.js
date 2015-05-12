@@ -156,6 +156,77 @@ if(jQuery) (function($){
 						_trigger($(this), 'filetreeunchecked', data);
 				});
 			});
+		},
+
+		// Univeral file tree attacher
+		//
+		// Valid options:
+		//   pickfolders (true/false)  -- if true, the input value is populated when clicking folders within the tree picker
+		//   pickfilter (string)  -- File extension to filter on, comma-seperated for multiple
+		//   pickroot (string)  -- The initial path to "start in" and list folders from
+		//   pickcloseonfile (true/false)  -- if true, hides the tree picker after selecting a file
+		//
+		// The above options can exists (and override) as html data attributes (e.g. data-pickroot="/mnt/" )
+		fileTreeAttach: function(options, file_event, folder_event) {
+			var baseconfig = {};
+
+			if ($.isFunction(options)) {
+				if ($.isFunction(file_event)) {
+					folder_event = file_event;
+				}
+				file_event = options;
+			} else if (options) {
+				$.extend(baseconfig, options);
+			}
+
+			$(this).each( function() {
+				var input = $(this);
+				var config = $.extend({}, baseconfig, input.data());
+				var picker = input.next(".fileTree");
+
+				if (picker.length === 0) {
+					$(document).mousedown(function hideTreePicker(e) {
+						var container = $(".fileTree");
+						if (!container.is(e.target) && container.has(e.target).length === 0) {
+							container.slideUp('fast');
+						}
+					});
+
+					picker = $('<div>', {'class': 'textarea fileTree'});
+
+					input.after(picker);
+				}
+
+				input.click(function() {
+					if (picker.is(':visible')) {
+						picker.slideUp('fast');
+					} else {
+						if (picker.html() === "") {
+							picker.html('<span style="padding-left: 20px"><img src="/webGui/images/spinner.gif"> Loading...</span>');
+
+							picker.fileTree({
+									root: config.pickroot,
+									filter: (config.pickfilter || '').split(",")
+								},
+								($.isFunction(file_event) ? file_event : function(file) {
+									input.val(file).change();
+									if (config.hasOwnProperty('pickcloseonfile')) {
+										picker.slideUp('fast');
+									}
+								}),
+								($.isFunction(folder_event) ? folder_event : function(folder) {
+									if (config.hasOwnProperty('pickfolders')) {
+										input.val(folder).change();
+									}
+								})
+							);
+						}
+
+						picker.offset({left: input.position().left});
+						picker.slideDown('fast');
+					}
+				});
+			});
 		}
 	});
 
