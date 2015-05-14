@@ -905,7 +905,7 @@ $(function() {
 		$form.find('input').prop('disabled', true);
 		$button.val($button.attr('busyvalue'));
 
-		$.post("<?=str_replace('/usr/local/emhttp', '', __FILE__)?>", postdata, function( data ) {
+		$.post("/plugins/dynamix.vm.manager/templates/<?=basename(__FILE__)?>", postdata, function( data ) {
 			if (data.success) {
 				if (data.vncurl) {
 					window.open(data.vncurl, '_blank', 'scrollbars=yes,resizable=yes');
@@ -937,7 +937,7 @@ $(function() {
 		if (initComplete && !$('#template_img').attr('touched')) {
 			var vmicon = OS2ImageMap[$(this).val()] || OS2ImageMap[os_casted];
 			$('#template_icon').val(vmicon);
-			$('#template_img').prop('src', '<?=str_replace("/usr/local/emhttp", "", __DIR__)?>/images/' + vmicon);
+			$('#template_img').prop('src', '/plugins/dynamix.vm.manager/templates/images/' + vmicon);
 		}
 
 		slideUpRows($('.domain_os').not($('.' + os_casted)));
