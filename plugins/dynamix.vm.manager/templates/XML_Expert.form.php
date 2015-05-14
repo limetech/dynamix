@@ -181,7 +181,7 @@ $(function() {
 		$form.find('input').prop('disabled', true);
 		$button.val($button.attr('busyvalue'));
 
-		$.post("<?=str_replace('/usr/local/emhttp', '', __FILE__)?>", postdata, function( data ) {
+		$.post("/plugins/dynamix.vm.manager/templates/<?=basename(__FILE__)?>", postdata, function( data ) {
 			if (data.success) {
 				done();
 			}
