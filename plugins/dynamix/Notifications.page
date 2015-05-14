@@ -21,6 +21,11 @@ Icon="notifications.png"
 $events = explode('|', $notify['events']);
 $disabled = $notify['system'] ? '' : 'disabled';
 ?>
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
+<style>
+  .advanced{display:none;}
+  .switch-button-label.off{color:inherit;}
+</style>
 <script>
 function resetNotify(form) {
   form.date.selectedIndex = 0;
@@ -99,7 +104,7 @@ function prepareTitle() {
   var title = 'Available notifications:';
   $('#pluginTitle,#dockerTitle,#reportTitle').html('&nbsp;');
   if ($('.plugin').is(':visible')) { $('#pluginTitle').html(title); return; }
-  if ($('.docker').is(':visible')) { $('#dockerTitle').html(title); return; } 
+  if ($('.docker').is(':visible')) { $('#dockerTitle').html(title); return; }
   if ($('.report').is(':visible')) { $('#reportTitle').html(title); return; }
 }
 function preparePlugin(value) {
@@ -269,26 +274,25 @@ Notification entity:
 >
 > Choose for each classification how you want to be notified.
 
+<div class="advanced" markdown="1">
+SMART attribute notifications:
+: <input type="checkbox" name="a1" value="5"<?=in_array(5,$events) ? ' checked' : ''?>><span style="display:inline-block;width:72px">5</span>Reallocated sectors count
+
 &nbsp;
-: <input type="button" value="Advanced view" name="#advanced" onclick="if ($('.advanced').css('display')=='none') {$('.advanced').show(); $(this).val('Basic view');} else {$('.advanced').hide(); $(this).val('Advanced view');}">
+: <input type="checkbox" name="a2" value="187"<?=in_array(187,$events) ? ' checked' : ''?>><span style="display:inline-block;width:72px">187</span>Reported uncorrectable errors
 
-<span class="advanced" style="display:none">SMART attribute notifications:</span>
-: <span class="advanced" style="display:none"><input type="checkbox" name="a1" value="5"<?=in_array(5,$events) ? ' checked' : ''?>><span style="display:inline-block;width:72px">5</span>Reallocated sectors count</span>
+&nbsp;
+: <input type="checkbox" name="a3" value="188"<?=in_array(188,$events) ? ' checked' : ''?>><span style="display:inline-block;width:72px">188</span>Command timeout
 
-<span class="advanced" style="display:none">&nbsp;</span>
-: <span class="advanced" style="display:none"><input type="checkbox" name="a2" value="187"<?=in_array(187,$events) ? ' checked' : ''?>><span style="display:inline-block;width:72px">187</span>Reported uncorrectable errors</span>
+&nbsp;
+: <input type="checkbox" name="a4" value="197"<?=in_array(197,$events) ? ' checked' : ''?>><span style="display:inline-block;width:72px">197</span>Current pending sector count
 
-<span class="advanced" style="display:none">&nbsp;</span>
-: <span class="advanced" style="display:none"><input type="checkbox" name="a3" value="188"<?=in_array(188,$events) ? ' checked' : ''?>><span style="display:inline-block;width:72px">188</span>Command timeout</span>
+&nbsp;
+: <input type="checkbox" name="a5" value="198"<?=in_array(198,$events) ? ' checked' : ''?>><span style="display:inline-block;width:72px">198</span>Uncorrectable sector count
 
-<span class="advanced" style="display:none">&nbsp;</span>
-: <span class="advanced" style="display:none"><input type="checkbox" name="a4" value="197"<?=in_array(197,$events) ? ' checked' : ''?>><span style="display:inline-block;width:72px">197</span>Current pending sector count</span>
-
-<span class="advanced" style="display:none">&nbsp;</span>
-: <span class="advanced" style="display:none"><input type="checkbox" name="a5" value="198"<?=in_array(198,$events) ? ' checked' : ''?>><span style="display:inline-block;width:72px">198</span>Uncorrectable sector count</span>
-
-<span class="advanced" style="display:none">&nbsp;</span>
-: <span class="advanced" style="display:none"><input type="text" name="custom" value="<?=$notify['custom']?>" maxlength="3" style="width:25px;margin-right:57px">Custom attribute number</span>
+&nbsp;
+: <input type="text" name="custom" value="<?=$notify['custom']?>" maxlength="3" style="width:25px;margin-right:57px">Custom attribute number</dd>
+</div>
 
 > The user can enable or disable notifications for the given SMART attributes. It is recommended to keep the default, which is ALL selected attributes, but when certain attributes are not present on your hard disk, these may be excluded.
 > In addition a custom SMART attribute number can be given to generate notifications. Be careful in the selection, this may cause an avalance of notifcations if an inappropriate SMART attribute is chosen.
@@ -296,3 +300,23 @@ Notification entity:
 <input type="button" value="Default" onclick="resetNotify(this.form);"><input type="reset" value="Reset" onclick="setTimeout(prepareNotifications,0)">
 : <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()"></td>
 </form>
+<script type="text/javascript" src="/webGui/scripts/jquery.switchButton.js"></script>
+<script type="text/javascript">
+$(function() {
+  if ($.cookie('notifcations_view_mode') == 'advanced') {
+    $('.advanced').show();
+  }
+  $('.tabs').append($('<span class="status" style="margin-top: 2px;"><input type="checkbox" class="advancedview"></span>'));
+
+  $('.advancedview').switchButton({
+    labels_placement: "left",
+    on_label: 'Advanced View',
+    off_label: 'Basic View',
+    checked: $.cookie('notifcations_view_mode') == 'advanced'
+  });
+  $('.advancedview').change(function () {
+    $('.advanced').finish().toggle('fast');
+    $.cookie('notifcations_view_mode', $(this).is(':checked') ? 'advanced' : 'basic', { expires: 3650 });
+  });
+});
+</script>
