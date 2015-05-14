@@ -14,7 +14,7 @@ Title="Diagnostics"
  */
 ?>
 <?
-$zip = $docroot."/".strtolower($var['NAME'])."-diagnostics-".date('Ymd-Hi').".zip";
+$zip = $docroot."/".str_replace(' ','_',strtolower($var['NAME']))."-diagnostics-".date('Ymd-Hi').".zip";
 ?>
 <script>
 function cleanUp() {

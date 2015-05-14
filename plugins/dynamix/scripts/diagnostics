@@ -1,0 +1,41 @@
+#!/usr/bin/php
+<?PHP
+/* Copyright 2015, Bergware International.
+ * Copyright 2015, Lime Technology
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+if ($argv[1]) {
+  $zip = $argv[1];
+} else {
+  exec("mkdir -p /boot/logs");
+  $var = parse_ini_file("/var/local/emhttp/var.ini");
+  $zip = "/boot/logs/".strtolower($var['NAME'])."-diagnostics-".date('Ymd-Hi').".zip";
+}
+exec("mkdir -p /diagnostics/array /diagnostics/config /diagnostics/log /diagnostics/shares /diagnostics/smart");
+file_put_contents("/diagnostics/array/array.txt", str_replace("\n","\r\n",print_r(parse_ini_file('/var/local/emhttp/disks.ini',true),true)));
+foreach (glob("/boot/config/*.cfg") as $file) {
+  exec("todos <$file >/diagnostics/config/".basename($file,'.cfg').".txt");
+}
+exec("cp /boot/config/super.dat /diagnostics/config");
+exec("todos </boot/config/go >/diagnostics/config/go.txt");
+foreach (glob("/var/log/syslog*") as $file) {
+  exec("todos <$file >/diagnostics/log/".basename($file).".txt");
+}
+foreach (glob("/boot/config/shares/*.cfg") as $file) {
+  exec("todos <$file >/diagnostics/shares/".basename($file,'.cfg').".txt");
+}
+exec("ls -l /dev/disk/by-id/[au]*|awk '$0!~/-part/{split($11,a,\"/\");print a[3],substr($9,21)}'", $devices);
+foreach ($devices as $device) {
+  $disk = explode(' ',$device);
+  exec("smartctl -a /dev/${disk[0]} >/diagnostics/smart/${disk[1]}.txt");
+}
+exec("zip -qmr $zip /diagnostics");
+?>

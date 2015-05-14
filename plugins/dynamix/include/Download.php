@@ -10,7 +10,6 @@
  * all copies or substantial portions of the Software.
  */
 ?>
-
 <?
 switch ($_POST['cmd']) {
 case 'save':
@@ -38,19 +37,7 @@ case 'delete':
   break;
 case 'diag':
   $zip = $_POST['file'];
-  exec("mkdir -p /diagnostics/array /diagnostics/config /diagnostics/log /diagnostics/shares /diagnostics/smart");
-  file_put_contents("/diagnostics/array/array.txt", str_replace("\n","\r\n",print_r(parse_ini_file('/var/local/emhttp/disks.ini',true),true)));
-  foreach (glob("/boot/config/*.cfg") as $file) exec("todos <$file >/diagnostics/config/".basename($file,'.cfg').".txt");
-  exec("cp /boot/config/super.dat /diagnostics/config");
-  exec("todos </boot/config/go >/diagnostics/config/go.txt");
-  foreach (glob("/var/log/syslog*") as $file) exec("todos <$file >/diagnostics/log/".basename($file).".txt");
-  foreach (glob("/boot/config/shares/*.cfg") as $file) exec("todos <$file >/diagnostics/shares/".basename($file,'.cfg').".txt");
-  exec("ls -l /dev/disk/by-id/[au]*|awk '$0!~/-part/{split($11,a,\"/\");print a[3],substr($9,21)}'|sort", $devices);
-  foreach ($devices as $device) {
-    $disk = explode(' ',$device);
-    exec("smartctl -a /dev/${disk[0]} >/diagnostics/smart/${disk[1]}.txt");
-  }
-  exec("zip -qmr $zip /diagnostics");
+  exec("/usr/local/emhttp/plugins/dynamix/scripts/diagnostics $zip");
   echo "/".basename($zip);
   break;
 }
