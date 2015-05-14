@@ -1,0 +1,62 @@
+Menu="UNRAID-OS"
+Title="Diagnostics"
+---
+<?PHP
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+$zip = $docroot."/".strtolower($var['NAME'])."-diagnostics-".date('Ymd-Hi').".zip";
+?>
+<script>
+function cleanUp() {
+  if (document.hasFocus()) {
+    $('#pleaseWait').hide('slow');
+    $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?=$zip?>'});
+  } else {
+    setTimeout(cleanUp,2000);
+  }
+}
+function diagnostics() {
+  $('#pleaseWait').show('slow');
+  $.post('/webGui/include/Download.php',{cmd:'diag',file:'<?=$zip?>'},function(data) {
+    location = data;
+    setTimeout(cleanUp,4000);
+  });
+}
+</script>
+This utility is used for troubleshooting purposes. It will collect the relevant system information and configuration files.
+And store these in a single ZIP file which can be saved locally, subsequently the file can be included in your correspondance with Limetech or the unRAID forum.
+
+This will help others to quickly get the inside information of your system and provide better support to your problem. The following information
+and configuration files are collected:
+
++ */config*
+  * copy all '*.cfg' files, 'go' file and the 'super.dat' file. These are configuration files.
+
++ */config/shares*
+  * copy all '*.cfg' files. These are the share definition files.
+
++ *Syslog file*
+  * copy the current 'syslog' file and copy any previous existing syslog files.
+
++ *Array*
+  * Create disk status information about disks present in the unRAID array.
+
++ *SMART reports*
+  * Create a SMART report of each individual disk present in your system, regardless of unRAID array usage.
+
+<br>
+Clicking **Collect** will start the collection and may open a new window to allow local saving of the zip file.
+
+<input type="button" value="Collect" onclick="diagnostics()"><input type="button" value="Done" onclick="done()">
+
+<br><div id="pleaseWait" style="display:none;font-weight:bold;color:red;text-align:center">Please wait, collecting diagnostic information...</div>
