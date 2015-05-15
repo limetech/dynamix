@@ -33,8 +33,8 @@ function diagnostics() {
   });
 }
 </script>
-This utility is used for troubleshooting purposes. It will collect the relevant system information and configuration files.
-And store these in a single ZIP file which can be saved locally, subsequently the file can be included in your correspondance with Limetech or the unRAID forum.
+This utility is used for troubleshooting purposes. It will collect all of the system information and configuration files, and package these files in a single ZIP file which can be saved locally.
+Subsequently, this file can be included in your correspondence with Limetech or the unRAID forum.
 
 This will help others to quickly get the inside information of your system and provide better support to your problem. The following information
 and configuration files are collected:
