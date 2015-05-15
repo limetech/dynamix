@@ -34,7 +34,7 @@ foreach (glob("/var/log/syslog*") as $file) {
 exec("ls -l /dev/disk/by-id/[au]*|awk '$0!~/-part/{split($11,a,\"/\");print a[3],substr($9,21)}'", $devices);
 foreach ($devices as $device) {
   $disk = explode(' ',$device);
-  exec("smartctl -a /dev/${disk[0]} >/diagnostics/smart/${disk[1]}.txt");
+  exec("smartctl -a /dev/${disk[0]}|todos >/diagnostics/smart/${disk[1]}.txt");
 }
 exec("zip -qmr $zip /diagnostics");
 ?>
