@@ -56,7 +56,7 @@ function device_info($disk) {
     $status = "$arrow{$a}
     <img src='$ball' title='$title' class='icon' onclick=\"$.removeCookie('one',{path:'/'});\"><span{$left}>
     <img src='/webGui/images/green-on.png' class='icon'>Normal operation<br>
-    <img src='/webGui/images/yellow-on.png' class='icon'>Invalid data content<br>
+    <img src='/webGui/images/yellow-on.png' class='icon'>Content being reconstructed<br>
     <img src='/webGui/images/red-off.png' class='icon'>Device disabled<br>
     <img src='/webGui/images/blue-on.png' class='icon'>New device not in array<br>
     <img src='/webGui/images/green-blink.png' class='icon'>Device spun-down<br>
