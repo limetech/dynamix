@@ -38,6 +38,7 @@ Subsequently, this file can be included in your correspondence with Limetech or 
 
 This will help others to quickly get the inside information of your system and provide better support to your problem. The following information
 and configuration files are collected:
+
 <pre markdown="1">
 + */config*
   <br>copy all '*.cfg' files, 'go' file and the 'super.dat' file. These are configuration files.
@@ -50,6 +51,7 @@ and configuration files are collected:
 + *SMART reports*
   <br>Create a SMART report of each individual disk present in your system, regardless of unRAID array usage.
 </pre>
+
 Clicking **Collect** will start the collection and may open a new window to allow local saving of the zip file.
 
 <input type="button" value="Collect" onclick="diagnostics()"><input type="button" value="Done" onclick="done()">
