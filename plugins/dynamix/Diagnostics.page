@@ -38,23 +38,18 @@ Subsequently, this file can be included in your correspondence with Limetech or 
 
 This will help others to quickly get the inside information of your system and provide better support to your problem. The following information
 and configuration files are collected:
-
+<pre markdown="1">
 + */config*
-  * copy all '*.cfg' files, 'go' file and the 'super.dat' file. These are configuration files.
-
+  <br>copy all '*.cfg' files, 'go' file and the 'super.dat' file. These are configuration files.
 + */config/shares*
-  * copy all '*.cfg' files. These are the share definition files.
-
+  <br>copy all '*.cfg' files. These are the share definition files.
 + *Syslog file*
-  * copy the current 'syslog' file and copy any previous existing syslog files.
-
+  <br>copy the current 'syslog' file and copy any previous existing syslog files.
 + *Array*
-  * Create disk status information about disks present in the unRAID array.
-
+  <br>Create disk status information about disks present in the unRAID array.
 + *SMART reports*
-  * Create a SMART report of each individual disk present in your system, regardless of unRAID array usage.
-
-<br>
+  <br>Create a SMART report of each individual disk present in your system, regardless of unRAID array usage.
+</pre>
 Clicking **Collect** will start the collection and may open a new window to allow local saving of the zip file.
 
 <input type="button" value="Collect" onclick="diagnostics()"><input type="button" value="Done" onclick="done()">
