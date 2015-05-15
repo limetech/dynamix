@@ -21,7 +21,7 @@ if ($argv[1]) {
 }
 exec("mkdir -p /diagnostics/array /diagnostics/config /diagnostics/log /diagnostics/shares /diagnostics/smart");
 file_put_contents("/diagnostics/array/array.txt", str_replace("\n","\r\n",print_r(parse_ini_file('/var/local/emhttp/disks.ini',true),true)));
-exec("cp /boot/config/*.{cfg,dat} /boot/config/go /diagnostics/config");
+exec("cp /boot/config/*.{cfg,conf,dat} /boot/config/go /diagnostics/config");
 exec("cp /boot/config/shares/*.cfg /diagnostics/shares");
 $shares = parse_ini_file("/var/local/emhttp/shares.ini",true);
 foreach ($shares as $share) {
