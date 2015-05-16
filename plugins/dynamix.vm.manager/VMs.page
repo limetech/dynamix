@@ -1,7 +1,7 @@
 Menu="Tasks:70"
 Type="xmenu"
 Tabs="true"
-Cond="(pgrep('libvirtd')!==false && !is_dir('/proc/xen'))"
+Cond="(pgrep('libvirtd')!==false)"
 ---
 <?PHP
 /* Copyright 2015, Lime Technology

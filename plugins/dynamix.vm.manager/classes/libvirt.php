@@ -253,6 +253,7 @@
 			$uuid = (!empty($domain['uuid']) ? $domain['uuid'] : $this->domain_generate_uuid());
 			$machine = $domain['machine'];
 			$machine_type = (stripos($machine, 'q35') !== false ? 'q35' : 'pc');
+			$os_type = ((empty($template['os']) || stripos($template['os'], 'windows') === false) ? 'other' : 'windows');
 			$emulator = $this->get_default_emulator();
 			$arch = $domain['arch'];
 			$pae = '';
@@ -322,7 +323,7 @@
 					</clock>";
 
 			$hyperv = '';
-			if (!empty($domain['os']) && $domain['os'] == "windows" && $domain['hyperv']) {
+			if (!empty($domain['hyperv']) && $os_type == "windows") {
 				$hyperv = "<hyperv>
 							<relaxed state='on'/>
 							<vapic state='on'/>
@@ -369,7 +370,7 @@
 			}
 
 			$driverstr = '';
-			if (!empty($media['drivers']) && $domain['os'] == "windows") {
+			if (!empty($media['drivers']) && $os_type == "windows") {
 				unset($arrAvailableDevs['hdb']);
 				$driverstr = "<disk type='file' device='cdrom'>
 								<driver name='qemu'/>
@@ -499,7 +500,7 @@
 			}
 
 			$sharestr = '';
-			if (!empty($shares) && $domain['os'] != "windows") {
+			if (!empty($shares) && $os_type != "windows") {
 				foreach ($shares as $i => $share) {
 					if (empty($share['source']) || empty($share['target'])) {
 						continue;
@@ -875,9 +876,6 @@
 			if ($this->get_hypervisor_name() == 'qemu')
 				$prefix = '52:54:00';
 			else
-			if ($this->get_hypervisor_name() == 'xen')
-				$prefix = '00:16:3e';
-			else
 				$prefix = $this->macbyte(($seed * rand()) % 256).':'.
 						  $this->macbyte(($seed * rand()) % 256).':'.
 						  $this->macbyte(($seed * rand()) % 256);
@@ -932,7 +930,7 @@
 
 			$ret = array();
 			for ($i = 0; $i < $disks['num']; $i++) {
-				$tmp = ($this->get_uri == "xen:///system") ? false : libvirt_domain_get_block_info($dom, $disks[$i]);
+				$tmp = libvirt_domain_get_block_info($dom, $disks[$i]);
 				if ($tmp) {
 					$tmp['bus'] = $buses[$i];
 					$ret[] = $tmp;
@@ -980,7 +978,7 @@
 
 			$ret = array();
 			for ($i = 0; $i < $disks['num']; $i++) {
-				$tmp = ($this->get_uri == "xen:///system") ? false : libvirt_domain_get_block_info($dom, $disks[$i]);
+				$tmp = libvirt_domain_get_block_info($dom, $disks[$i]);
 				if ($tmp) {
 					$tmp['bus'] = $buses[$i];
 					$ret[] = $tmp;
@@ -1187,8 +1185,6 @@
 
 			switch (strtoupper($hv)) {
 				case 'QEMU': $type = 'qemu';
-					break;
-				case 'XEN': $type = 'xen';
 					break;
 
 				default:
