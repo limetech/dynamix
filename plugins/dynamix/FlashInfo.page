@@ -22,7 +22,7 @@ Flash Product:
 Flash GUID:
 : <?=$var['flashGUID'];?>&nbsp;
 
-<?if (strstr($var['regStatus'], "Blacklisted")):?>
+<?if (strstr($var['regTy'], "blacklisted")):?>
 
 &nbsp;
 : **Blacklisted** - <a href="http://lime-technology.com/contact" target="_blank">Contact Support</a>

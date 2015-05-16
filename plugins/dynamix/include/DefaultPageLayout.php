@@ -200,8 +200,8 @@ for (var i=0,mobile; mobile=mobiles[i]; i++) {
  <div id="template">
   <div id="header" class="<?=$display['banner']?>">
    <div class="logo">
-   <a href="http://lime-technology.com"><img src="/webGui/images/logo-<?=$display['theme']?>.png" title="unRAID" border="0"/><br/>
-   <strong>unRAID Server <em><?=$var['regTy']?></em></strong></a>
+   <a href="http://lime-technology.com"><img src="/webGui/images/logo-<?=$display['theme']?>.png" title="Lime Technology, Inc." border="0"/></a><br/>
+   <a href="/Tools/Registration"><strong>unRAID Server <em><?=$var['regTy']?></em></strong></a>
    </div>
    <div class="block">
     <span class="text-left">Server<br/>Description<br/>Version<br/>Uptime</span>
@@ -214,10 +214,9 @@ echo "<div id='menu'><div id='nav-block'><div id='nav-left'>";
 $pages = find_pages('Tasks');
 foreach ($pages as $page) {
   $pagename = $page['name'];
-  $pagelink = $var['regStatus']=="Valid" ? $pagename : "Tools/Registration";
   echo "<div id='nav-item'";
   echo $pagename==$task ? " class='active'>" : ">";
-  echo "<a href='/$pagelink' onclick='initab()'>$pagename</a></div>";
+  echo "<a href='/$pagename' onclick='initab()'>$pagename</a></div>";
 }
 if ($display['usage']) my_usage();
 echo "</div>";

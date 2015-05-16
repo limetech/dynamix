@@ -41,14 +41,9 @@ function updateTime() {
 echo empty($var['SYS_MODEL']) ? 'N/A' : "{$var['SYS_MODEL']}";
 ?>
 </div>
-<div><span style="width:90px;display:inline-block"><strong>System:</strong></span>
+<div><span style="width:90px;display:inline-block"><strong>M/B:</strong></span>
 <?
 echo exec("dmidecode -q -t 2|awk -F: '{if(/^\tManufacturer:/) m=$2; else if(/^\tProduct Name:/) p=$2} END{print m\" -\"p}'");
-?>
-</div>
-<div><span style="width:90px;display:inline-block"><strong>Flash GUID:</strong></span>
-<?
-echo $var['flashGUID'];
 ?>
 </div>
 <div><span style="width:90px; display:inline-block"><strong>CPU:</strong></span>
@@ -134,7 +129,6 @@ endforeach;
   echo $openssl_ver;
 ?></div>
 <div><span style="width:94px; display:inline-block"><strong>Uptime:</strong></span><span id="uptime"></span></div>
-</div>
 <center>
 <?if ($_GET['more']):?>
 <a href="<?=$_GET['more']?>" class="button" target="_parent" style="margin-top:10px">More Info</a>
