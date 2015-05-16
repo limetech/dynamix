@@ -16,7 +16,7 @@ Title="Statistics"
 
 <?
 $cores = exec('nproc');
-$fans  = exec("sensors -uA|grep -c 'fan[0-9]_input'");
+$fans  = exec("sensors -uA 2>/dev/null|grep -c 'fan[0-9]_input'");
 $group = $var['shareSMBEnabled']=='yes' | $var['shareAFPEnabled']=='yes' | $var['shareNFSEnabled']=='yes';
 $names = "";
 $url   = "/webGui/include/DashUpdate.php";

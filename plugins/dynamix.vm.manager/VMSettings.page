@@ -1,7 +1,6 @@
 Menu="OtherSettings"
 Title="VM Manager"
 Icon="dynamix.vm.manager.png"
-Cond="(!is_dir('/proc/xen'))"
 ---
 <?PHP
 /* Copyright 2015, Lime Technology
