@@ -292,12 +292,12 @@
 		$arrQEMUInfo = $lv->get_connect_information();
 		$arrMachineTypes = $lv->get_machine_types('x86_64');
 
-		$strQEMUVersion = $arrQEMUInfo['hypervisor_major'] . '.' .  $arrQEMUInfo['hypervisor_minor'];
+		$strQEMUVersion = $arrQEMUInfo['hypervisor_major'] . '.' . $arrQEMUInfo['hypervisor_minor'];
 
 		foreach ($arrMachineTypes as $arrMachine) {
 			if ($arrMachine['name'] == 'q35') {
 				// Latest Q35
-				$arrValidMachineTypes[$arrMachine['name']] = 'Q35-' . $strQEMUVersion;
+				$arrValidMachineTypes['pc-q35-' . $strQEMUVersion] = 'Q35-' . $strQEMUVersion;
 			}
 			if (strpos($arrMachine['name'], 'q35-') !== false) {
 				// Prior releases of Q35
@@ -305,7 +305,7 @@
 			}
 			if ($arrMachine['name'] == 'pc') {
 				// Latest i440fx
-				$arrValidMachineTypes[$arrMachine['name']] = 'i440fx-' . $strQEMUVersion;
+				$arrValidMachineTypes['pc-i440fx-' . $strQEMUVersion] = 'i440fx-' . $strQEMUVersion;
 			}
 			if (strpos($arrMachine['name'], 'i440fx-') !== false) {
 				// Prior releases of i440fx
