@@ -142,7 +142,7 @@
 
 		foreach ($arrAllPCIDevices as $strPCIDevice) {
 			// Example: 00:1f.0 "ISA bridge [0601]" "Intel Corporation [8086]" "Z77 Express Chipset LPC Controller [1e44]" -r04 "Micro-Star International Co., Ltd. [MSI] [1462]" "Device [7759]"
-			if (preg_match('/^(?P<id>\S+) \"(?P<type>.+) \[(?P<typeid>[a-f0-9]{4})\]\" \"(?P<vendorname>.+) \[(?P<vendorid>[a-f0-9]{4})\]\" \"(?P<productname>.+) \[(?P<productid>[a-f0-9]{4})\]\" (\-r.+).?/', $strPCIDevice, $arrMatch)) {
+			if (preg_match('/^(?P<id>\S+) \"(?P<type>[^"]+) \[(?P<typeid>[a-f0-9]{4})\]\" \"(?P<vendorname>[^"]+) \[(?P<vendorid>[a-f0-9]{4})\]\" \"(?P<productname>[^"]+) \[(?P<productid>[a-f0-9]{4})\]\"/', $strPCIDevice, $arrMatch)) {
 				if (in_array($arrMatch['id'], $arrBlacklistIDs) || preg_match($arrBlacklistClassIDregex, $arrMatch['typeid'])) {
 					// Device blacklisted, skip device
 					continue;
@@ -173,7 +173,14 @@
 					continue;
 				}
 
+				// Specialized vendor name cleanup
+				// e.g.: Advanced Micro Devices, Inc. [AMD/ATI] --> Advanced Micro Devices, Inc.
+				if (preg_match('/(?P<gpuvendor>.+) \[.+\]/', $arrMatch['vendorname'], $arrGPUMatch)) {
+					$arrMatch['vendorname'] = $arrGPUMatch['gpuvendor'];
+				}
+
 				// Clean up the vendor and product name
+				$arrMatch['vendorname'] = str_replace(['Advanced Micro Devices, Inc.'], 'AMD', $arrMatch['vendorname']);
 				$arrMatch['vendorname'] = str_replace([' Corporation', ' Semiconductor Co., Ltd.', ' Technology Group Ltd.', ' Electronics Systems Ltd.', ' Systems, Inc.'], '', $arrMatch['vendorname']);
 				$arrMatch['productname'] = str_replace([' PCI Express'], [' PCIe'], $arrMatch['productname']);
 
