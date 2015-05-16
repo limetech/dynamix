@@ -176,7 +176,7 @@ if (!empty($arrTemplates) && !in_array($strSelectedTemplate, $arrTemplates)) {
 
 <div id="content" style="margin-top:-21px;margin-left:0px">
 	<form id="createform" method="POST">
-	<input type="hidden" name="domain[type]" value="<?php echo is_dir('/proc/xen') ? 'xen' : 'kvm'; ?>" />
+	<input type="hidden" name="domain[type]" value="kvm" />
 
 	<table>
 		<tr <? if (!empty($arrLoad['name'])) echo 'style="display: none"'; ?>>

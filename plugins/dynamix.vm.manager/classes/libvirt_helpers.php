@@ -43,7 +43,7 @@
 	$libvirt_service = isset($domain_cfg['SERVICE']) ?	$domain_cfg['SERVICE'] : "disable";
 
 	if ($libvirt_running == "yes"){
-		$lv = new Libvirt((is_dir('/proc/xen') ? 'xen:///system' : 'qemu:///system'), null, null, false);
+		$lv = new Libvirt('qemu:///system', null, null, false);
 		$arrHostInfo = $lv->host_get_node_info();
 		$maxcpu = (int)$arrHostInfo['cpus'];
 		$maxmem = number_format(($arrHostInfo['memory'] / 1048576), 1, '.', ' ');

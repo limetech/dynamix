@@ -876,9 +876,6 @@
 			if ($this->get_hypervisor_name() == 'qemu')
 				$prefix = '52:54:00';
 			else
-			if ($this->get_hypervisor_name() == 'xen')
-				$prefix = '00:16:3e';
-			else
 				$prefix = $this->macbyte(($seed * rand()) % 256).':'.
 						  $this->macbyte(($seed * rand()) % 256).':'.
 						  $this->macbyte(($seed * rand()) % 256);
@@ -933,7 +930,7 @@
 
 			$ret = array();
 			for ($i = 0; $i < $disks['num']; $i++) {
-				$tmp = ($this->get_uri == "xen:///system") ? false : libvirt_domain_get_block_info($dom, $disks[$i]);
+				$tmp = libvirt_domain_get_block_info($dom, $disks[$i]);
 				if ($tmp) {
 					$tmp['bus'] = $buses[$i];
 					$ret[] = $tmp;
@@ -981,7 +978,7 @@
 
 			$ret = array();
 			for ($i = 0; $i < $disks['num']; $i++) {
-				$tmp = ($this->get_uri == "xen:///system") ? false : libvirt_domain_get_block_info($dom, $disks[$i]);
+				$tmp = libvirt_domain_get_block_info($dom, $disks[$i]);
 				if ($tmp) {
 					$tmp['bus'] = $buses[$i];
 					$ret[] = $tmp;
@@ -1188,8 +1185,6 @@
 
 			switch (strtoupper($hv)) {
 				case 'QEMU': $type = 'qemu';
-					break;
-				case 'XEN': $type = 'xen';
 					break;
 
 				default:
