@@ -13,18 +13,6 @@ Title="Flash Device Settings"
  * all copies or substantial portions of the Software.
  */
 ?>
-<script>
-function installKey(name) {
-  var file = name.trim();
-  if (file)
-    openBox('/usr/bin/wget -q -O /boot/config/'+file.replace(/.*\//,"")+' '+file,'Install Key',600,900,true);
-}
-</script>
-<?if (strstr($var['flashGUID'], "No flash")):?>
-Flash GUID:
-: <?=$var['flashGUID'];?>&nbsp;
-
-<?else:?>
 Flash Vendor:
 : <?=$var['flashVendor'];?>
 
@@ -34,57 +22,15 @@ Flash Product:
 Flash GUID:
 : <?=$var['flashGUID'];?>&nbsp;
 
-<?if (strstr($var['regTo'], "Blacklisted")):?>
+<?if (strstr($var['regTy'], "blacklisted")):?>
+
 &nbsp;
 : **Blacklisted** - <a href="http://lime-technology.com/contact" target="_blank">Contact Support</a>
 
 <?else:?>
-<?if (!strlen($var['regTm'])):?>
-*Unregistered*
-: <a href="http://lime-technology.com/v6regkey?TrialGUID=<?=$var['flashGUID'];?>" target="_blank">Purchase Registration Key</a>
-
-<?else:?>
-***<?=$var['regTy'];?>*** key registered to:
-: <?=$var['regTo'];?>&nbsp;
-
-Date Registered:
-: <?=my_time($var['regTm']);?>&nbsp;
-
-<?if ($var['regTm2']==0):?>
-Replaceable:
-: *Anytime*
-
-<?else:?>
-Replaceable:
-: <?=my_time($var['regTm2']);?>&nbsp;
-
-<?endif;?>
-<?if ($var['regTy']=="Basic"):?>
-&nbsp;
-: <a href="http://lime-technology.com/v6regkey?BasicGUID=<?=$var['flashGUID'];?>" target="_blank">Upgrade to ***Plus*** or go ***Pro!***</a>
-
-<?endif;?>
-<?if ($var['regTy']=="Plus"):?>
-&nbsp;
-: <a href="http://lime-technology.com/v6regkey?PlusGUID=<?=$var['flashGUID'];?>" target="_blank">Upgrade to ***Pro***</a>
-<?endif;?>
-<?endif;?>
-<?endif;?>
-<?endif;?>
-<form markdown="1" name="key_install" method="POST" target="progressFrame">
-<?if ($var['regTy']=="Pro"):?>
-&nbsp;
-: <input type="button" value="Done" onclick="done()">
-
-<?else:?>
-Key file URL:
-: <input type="text" name="file" id="key_file" maxlength="1024" value="" style="width:33%">
-
-> To install your Registration Key paste the key file URL from your purchase receipt email in the box
-and click **Install**
 
 &nbsp;
-: <input type="button" value="Install" onclick="installKey(this.form.file.value)">
-  <input type="button" value="Done" onclick="done()">
+: [Registration Key Manager](/Tools/Registration)
+
 <?endif;?>
-</form>
+

@@ -250,7 +250,7 @@ $('.tabs').append("<span class='status vhshift'><input type='button' value='Refr
 ?>  <tr>
     <td><img src="/webGui/images/<?=$var['mdColor']?>.png" class="icon"><strong>Stopped</strong>. Invalid configuration.</td>
     <td><input type="submit" name="cmdStart" value="Start" disabled></td>
-    <td>Too many assigned devices or too many attachd devices. Please consider upgrading your <a href="/Main/Flash?name=flash">registration key</a>.</td>
+    <td>Too many attached devices. Please consider upgrading your <a href="/Tools/Registration">registration key</a>.</td>
     </tr>
 <?else:
     switch ($var['mdState']):
