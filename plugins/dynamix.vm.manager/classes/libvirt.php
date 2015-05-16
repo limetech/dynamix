@@ -253,6 +253,7 @@
 			$uuid = (!empty($domain['uuid']) ? $domain['uuid'] : $this->domain_generate_uuid());
 			$machine = $domain['machine'];
 			$machine_type = (stripos($machine, 'q35') !== false ? 'q35' : 'pc');
+			$os_type = ((empty($template['os']) || stripos($template['os'], 'windows') === false) ? 'other' : 'windows');
 			$emulator = $this->get_default_emulator();
 			$arch = $domain['arch'];
 			$pae = '';
@@ -322,7 +323,7 @@
 					</clock>";
 
 			$hyperv = '';
-			if (!empty($domain['os']) && $domain['os'] == "windows" && $domain['hyperv']) {
+			if (!empty($domain['hyperv']) && $os_type == "windows") {
 				$hyperv = "<hyperv>
 							<relaxed state='on'/>
 							<vapic state='on'/>
@@ -369,7 +370,7 @@
 			}
 
 			$driverstr = '';
-			if (!empty($media['drivers']) && $domain['os'] == "windows") {
+			if (!empty($media['drivers']) && $os_type == "windows") {
 				unset($arrAvailableDevs['hdb']);
 				$driverstr = "<disk type='file' device='cdrom'>
 								<driver name='qemu'/>
@@ -499,7 +500,7 @@
 			}
 
 			$sharestr = '';
-			if (!empty($shares) && $domain['os'] != "windows") {
+			if (!empty($shares) && $os_type != "windows") {
 				foreach ($shares as $i => $share) {
 					if (empty($share['source']) || empty($share['target'])) {
 						continue;
