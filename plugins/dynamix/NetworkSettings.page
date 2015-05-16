@@ -37,8 +37,8 @@ function checkBondingSettings() {
 $(checkNetworkSettings);
 $(checkBondingSettings);
 </script>
-
 <form markdown="1" name="network_settings" method="POST" action="/update.htm" target="progressFrame">
+
 MAC address:
 : <?=$var['HWADDR'];?>
 
@@ -73,7 +73,7 @@ Setup bridge:
 
 > Bridging is a feature that combines all of your physical Ethernet interfaces into
 > a single logical network segment.  If **bonding** is also enabled, the bridge sits
-> on top of the bond; this is useful for Xen configurations.
+> on top of the bond; this is useful for VM configurations.
 >
 > **Caution:** if bonding is also not enabled, do not connect two or more
 > ethernet ports to the same switch unless you have STP enabled *and* the switch supports STP
@@ -87,7 +87,6 @@ Bridge name:
 : <input type="text" name="BRNAME" maxlength="80" value="<?=$var['BRNAME']?>" class="narrow">
 
 > This is the name of the bridge interface.  If left blank, the name of the bridge will be **br0**.
-> If running as a Xen dom0 we recommend setting this to **xenbr0**.
 
 Enable STP:
 : <select name="BRSTP" size="1" onchange="checkNetworkSettings()">
@@ -151,4 +150,5 @@ DNS Server 3:
 
 <input type="reset" value="Reset" onclick="setTimeout(checkNetworkSettings,0)">
 : <input type="submit" name="changeNetwork" value="Apply"><input type="button" value="Done" onclick="done()">
+
 </form>

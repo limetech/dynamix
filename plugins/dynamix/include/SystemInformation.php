@@ -105,25 +105,10 @@ foreach ($sPorts as $port):
 endforeach;
 ?>
 </div>
-<?if (file_exists("/proc/xen")):?>
-  <div><span style="width:90px;display:inline-block"><strong>Xen Version:</strong></span>
-<?exec("xl info", $output);
-  foreach ($output as $line):
-    list($key,$value) = array_map('trim', explode(":", $line, 2));
-    $info[$key] = $value;
-  endforeach;
-  echo "{$info['xen_major']}.{$info['xen_minor']}".$info['xen_extra'];
-?></div>
-  <div><span style="width:90px;display:inline-block"><strong>Dom0 Kernel:</strong></span>
+<div><span style="width:90px;display:inline-block"><strong>Kernel:</strong></span>
 <?$kernel = exec("uname -srm");
   echo $kernel;
 ?></div>
-<?else:?>
-  <div><span style="width:90px;display:inline-block"><strong>Kernel:</strong></span>
-<?$kernel = exec("uname -srm");
-  echo $kernel;
-?></div>
-<?endif;?>
 <div><span style="width:90px; display:inline-block"><strong>OpenSSL:</strong></span>
 <?$openssl_ver = exec("openssl version|cut -d' ' -f2");
   echo $openssl_ver;
