@@ -16,6 +16,8 @@ Cond="glob('/boot/config/plugins-stale/*.plg')"
 ?>
 
 <?
+require_once 'plugins/dynamix.plugin.manager/include/plugin_helpers.php';
+
 echo "<table class='tablesorter plugins shift' id='plugin_table'><thead>";
 echo "<tr><th></th><th>Plugin</th><th>Author</th><th>Version</th><th>Status</th><th></th></tr>";
 echo "</thead><tbody>";
@@ -34,15 +36,15 @@ foreach (glob("/boot/config/plugins-stale/*.plg", GLOB_NOSORT) as $plugin_file) 
     $desc = Markdown(file_get_contents($readme));
   else
     $desc = Markdown("**{$name}**");
-  
+
   // author
   $author = plugin("author", $plugin_file);
   if ($author === false) $author = "anonymous";
-  
+
   // version
   $version = plugin("version", $plugin_file);
   if ($version === false) $version = "unknown";
-  
+
   // version info
   $version_info = $version;
 

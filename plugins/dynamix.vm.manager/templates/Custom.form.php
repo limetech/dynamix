@@ -946,10 +946,20 @@ $(function() {
 		if (initComplete) {
 			if (os_casted == 'windows') {
 				$('#domain_clock').val('localtime');
-				$('#domain_machine').val('pc');
+				$("#domain_machine option").each(function(){
+					if ($(this).val().indexOf('i440fx') != -1) {
+						$('#domain_machine').val($(this).val());
+						return false;
+					}
+				});
 			} else {
 				$('#domain_clock').val('utc');
-				$('#domain_machine').val('q35');
+				$("#domain_machine option").each(function(){
+					if ($(this).val().indexOf('q35') != -1) {
+						$('#domain_machine').val($(this).val());
+						return false;
+					}
+				});
 			}
 		}
 	}).change(); // Fire now too!

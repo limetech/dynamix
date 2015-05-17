@@ -116,10 +116,12 @@ if ($action) {
    if ($libvirt_running == "yes")
 		$doms = $lv->get_domains();
 	if(!is_array($doms)){
-		if ($libvirt_running == "yes")
+		if ($libvirt_running == "yes") {
+      echo "<tr><td></td><td colspan=\"7\">No Virtual Machines Installed</td></tr>";
 			$msg = "No domains defined. Create from template or add XML.";
-		else
+		} else {
 			$msg = "Libvirt is not running. Goto Settings tab then click Start.";
+    }
 	} else {
 	sort($doms);
    $contextMenus = array();

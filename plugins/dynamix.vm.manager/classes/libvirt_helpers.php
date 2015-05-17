@@ -43,7 +43,7 @@
 	$libvirt_service = isset($domain_cfg['SERVICE']) ?	$domain_cfg['SERVICE'] : "disable";
 
 	if ($libvirt_running == "yes"){
-		$lv = new Libvirt((is_dir('/proc/xen') ? 'xen:///system' : 'qemu:///system'), null, null, false);
+		$lv = new Libvirt('qemu:///system', null, null, false);
 		$arrHostInfo = $lv->host_get_node_info();
 		$maxcpu = (int)$arrHostInfo['cpus'];
 		$maxmem = number_format(($arrHostInfo['memory'] / 1048576), 1, '.', ' ');
@@ -142,7 +142,7 @@
 
 		foreach ($arrAllPCIDevices as $strPCIDevice) {
 			// Example: 00:1f.0 "ISA bridge [0601]" "Intel Corporation [8086]" "Z77 Express Chipset LPC Controller [1e44]" -r04 "Micro-Star International Co., Ltd. [MSI] [1462]" "Device [7759]"
-			if (preg_match('/^(?P<id>\S+) \"(?P<type>.+) \[(?P<typeid>[a-f0-9]{4})\]\" \"(?P<vendorname>.+) \[(?P<vendorid>[a-f0-9]{4})\]\" \"(?P<productname>.+) \[(?P<productid>[a-f0-9]{4})\]\" (\-r.+).?/', $strPCIDevice, $arrMatch)) {
+			if (preg_match('/^(?P<id>\S+) \"(?P<type>[^"]+) \[(?P<typeid>[a-f0-9]{4})\]\" \"(?P<vendorname>[^"]+) \[(?P<vendorid>[a-f0-9]{4})\]\" \"(?P<productname>[^"]+) \[(?P<productid>[a-f0-9]{4})\]\"/', $strPCIDevice, $arrMatch)) {
 				if (in_array($arrMatch['id'], $arrBlacklistIDs) || preg_match($arrBlacklistClassIDregex, $arrMatch['typeid'])) {
 					// Device blacklisted, skip device
 					continue;
@@ -173,7 +173,14 @@
 					continue;
 				}
 
+				// Specialized vendor name cleanup
+				// e.g.: Advanced Micro Devices, Inc. [AMD/ATI] --> Advanced Micro Devices, Inc.
+				if (preg_match('/(?P<gpuvendor>.+) \[.+\]/', $arrMatch['vendorname'], $arrGPUMatch)) {
+					$arrMatch['vendorname'] = $arrGPUMatch['gpuvendor'];
+				}
+
 				// Clean up the vendor and product name
+				$arrMatch['vendorname'] = str_replace(['Advanced Micro Devices, Inc.'], 'AMD', $arrMatch['vendorname']);
 				$arrMatch['vendorname'] = str_replace([' Corporation', ' Semiconductor Co., Ltd.', ' Technology Group Ltd.', ' Electronics Systems Ltd.', ' Systems, Inc.'], '', $arrMatch['vendorname']);
 				$arrMatch['productname'] = str_replace([' PCI Express'], [' PCIe'], $arrMatch['productname']);
 
@@ -285,12 +292,12 @@
 		$arrQEMUInfo = $lv->get_connect_information();
 		$arrMachineTypes = $lv->get_machine_types('x86_64');
 
-		$strQEMUVersion = $arrQEMUInfo['hypervisor_major'] . '.' .  $arrQEMUInfo['hypervisor_minor'];
+		$strQEMUVersion = $arrQEMUInfo['hypervisor_major'] . '.' . $arrQEMUInfo['hypervisor_minor'];
 
 		foreach ($arrMachineTypes as $arrMachine) {
 			if ($arrMachine['name'] == 'q35') {
 				// Latest Q35
-				$arrValidMachineTypes[$arrMachine['name']] = 'Q35-' . $strQEMUVersion;
+				$arrValidMachineTypes['pc-q35-' . $strQEMUVersion] = 'Q35-' . $strQEMUVersion;
 			}
 			if (strpos($arrMachine['name'], 'q35-') !== false) {
 				// Prior releases of Q35
@@ -298,7 +305,7 @@
 			}
 			if ($arrMachine['name'] == 'pc') {
 				// Latest i440fx
-				$arrValidMachineTypes[$arrMachine['name']] = 'i440fx-' . $strQEMUVersion;
+				$arrValidMachineTypes['pc-i440fx-' . $strQEMUVersion] = 'i440fx-' . $strQEMUVersion;
 			}
 			if (strpos($arrMachine['name'], 'i440fx-') !== false) {
 				// Prior releases of i440fx

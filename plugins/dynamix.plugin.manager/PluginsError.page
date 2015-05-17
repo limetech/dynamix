@@ -16,6 +16,8 @@ Cond="glob('/boot/config/plugins-error/*.plg')"
 ?>
 
 <?
+require_once 'plugins/dynamix.plugin.manager/include/plugin_helpers.php';
+
 echo "<table class='tablesorter' id='plugin_table'><thead>";
 echo "<tr><th>Plugin File</th><th>Status</th></tr>";
 echo "</thead><tbody>";

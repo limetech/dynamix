@@ -105,11 +105,7 @@ case 'sys':
   echo "{$cpu}%#{$mem}%";
 break;
 case 'cpu':
-  if (file_exists("/proc/xen")) {
-    exec("xenpm get-cpufreq-states|awk '/^current frequency/ {print \$4\" \"\$5}'",$speeds);
-  } else {
-    exec("awk '/^cpu MHz/ {printf\"%4.0f MHz\\n\", $4}' /proc/cpuinfo",$speeds);
-  }
+  exec("awk '/^cpu MHz/ {printf\"%4.0f MHz\\n\", $4}' /proc/cpuinfo",$speeds);
   echo implode('#',$speeds);
 break;
 case 'fan':

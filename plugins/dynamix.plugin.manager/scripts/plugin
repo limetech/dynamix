@@ -113,9 +113,6 @@ system - OPTIONAL
   If present the plugin is considered a system plugin and is installed in '/boot/plugins'.
   User plugins get installed in '/boot/config/plugins', which is the default.
 
-configfile - MUST BE OMITTED for ordinary plugins and MANDATORY for virtual machine appliance plugins.
-  This is the absolute file name of where the Xen configuration file will end up in the unRAID server.
-
 More attributes may be defined in the future.
 
 Here is the set of directories and files used by the plugin system:
@@ -426,17 +423,11 @@ if ($method == "install") {
   }
 
   // register successful install
-  // absence of "configfile" attribute indicates normal plugin; presence indicates a VM plugin
-  $configfile = plugin("configfile", $plugin_file, $error);
-  if ($configfile === false) {
-    // Bergware change: add user or system plugin selection
-    $plugintype = plugin("plugintype", $plugin_file, $error);
-    $target = $plugintype != "system" ? "/boot/config/plugins/$plugin" : "/boot/plugins/$plugin";
-    if ($target != $plugin_file) copy($plugin_file, $target);
-    symlink($target, "/var/log/plugins/$plugin");
-  } else {
-    system("/usr/local/sbin/xenman register $configfile", $retval);
-  }
+  // Bergware change: add user or system plugin selection
+  $plugintype = plugin("plugintype", $plugin_file, $error);
+  $target = $plugintype != "system" ? "/boot/config/plugins/$plugin" : "/boot/plugins/$plugin";
+  if ($target != $plugin_file) copy($plugin_file, $target);
+  symlink($target, "/var/log/plugins/$plugin");
   echo "plugin: installed\n";
   exit(0);
 }

@@ -4,7 +4,7 @@ function getLibvirtSchema() {
 
 	root.domain = {
 		"!attrs": {
-			type: ["kvm", "xen"],
+			type: ["kvm"],
 			"xmlns:qemu": ["http://libvirt.org/schemas/domain/qemu/1.0"]
 		}
 	};
