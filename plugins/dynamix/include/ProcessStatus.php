@@ -19,8 +19,11 @@ case 'crontab':
 case 'preclear_disk':
   $pid = exec("ps -o pid,command --ppid 1 | awk -F/ '/$name .*{$_POST['device']}$/ {print $1}'");
   break;
-case '21':
-  $pid = exec("lsof -i:21 -n -P | awk '/\(LISTEN\)/ {print $2}'");
+case is_numeric($name):
+  $pid = exec("lsof -i:$name -n -P | awk '/\(LISTEN\)/ {print $2}'");
+  break;
+case 'pid':
+  $pid = file_exists("/var/run/{$_POST['plugin']}.pid");
   break;
 default:
   $pid = exec("pidof -s -x '$name'");
