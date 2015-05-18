@@ -120,7 +120,8 @@ foreach ($disks as $disk) {
   break;
   case 'yellow':
     if ($warn!=$last) {
-      exec("$notify -e \"unRAID $text error\" -s \"Warning [$server] - $text has invalid data\" -d \"$info\" -i \"warning\"");
+      $status = $name=='parity' ? "parity-sync in progress" : "drive not ready, content being reconstructed";
+      exec("$notify -e \"unRAID $text error\" -s \"Warning [$server] - $text, $status\" -d \"$info\" -i \"warning\"");
       $saved[$item][$name] = $warn;
     }
   break;

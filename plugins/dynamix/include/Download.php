@@ -10,13 +10,11 @@
  * all copies or substantial portions of the Software.
  */
 ?>
-
 <?
-$file = $_POST['file'];
-
 switch ($_POST['cmd']) {
 case 'save':
   $raw  = empty($_POST['raw']) ? false : $_POST['raw'];
+  $file = $_POST['file'];
   $root = $_POST['root'];
   $name = basename($file);
   if ($raw == false) {
@@ -35,6 +33,12 @@ case 'save':
   echo "/$name";
   break;
 case 'delete':
-  @unlink($file);
-  break;}
+  @unlink($_POST['file']);
+  break;
+case 'diag':
+  $zip = $_POST['file'];
+  exec("/usr/local/emhttp/plugins/dynamix/scripts/diagnostics $zip");
+  echo "/".basename($zip);
+  break;
+}
 ?>
