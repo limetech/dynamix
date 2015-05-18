@@ -24,19 +24,16 @@ require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt.php')
 require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt_helpers.php');
 
 
-$strLoadedModules = shell_exec("lsmod | grep '^kvm_\(amd\|intel\)'");
+// Check for Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support
+// Attempt to load either of the kvm modules to see if virtualzation hw is supported
+exec('modprobe -a kvm_intel kvm_amd 2>/dev/null');
 
 // If either kvm_intel or kvm_amd are loaded then Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support was found
+$strLoadedModules = shell_exec("lsmod | grep '^kvm_\(amd\|intel\)'");
+
 if (empty($strLoadedModules)) {
-	// Check for Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support
-	// Attempt to load either of the kvm modules to see if virtualzation hw is supported
-	// If there's no hardware support, we should see an error:
-	//    modprobe: ERROR: could not insert 'kvm_intel': Operation not supported
-	exec('modprobe -a kvm_intel kvm_amd 2>&1', $arrOut, $intReturn);
-	if ($intReturn !== 0) {
-		?><p class="notice">Your hardware does not have Intel VT-x or AMD-V capability.  This is required to create VMs in KVM. <a href="http://lime-technology.com/wiki/index.php/UnRAID_Manual_6#Hardware-Assisted_Virtualization_.28HVM.29" target="_blank">Click here to see the unRAID Wiki for more information</a></p><?php
-		exit;
-	}
+	?><p class="notice">Your hardware does not have Intel VT-x or AMD-V capability.  This is required to create VMs in KVM. <a href="http://lime-technology.com/wiki/index.php/UnRAID_Manual_6#Hardware-Assisted_Virtualization_.28HVM.29" target="_blank">Click here to see the unRAID Wiki for more information</a></p><?php
+	exit;
 }
 
 
@@ -88,7 +85,7 @@ if ($boolACSEnabled != $boolACSInSyslinux) {
 
 <form id="settingsForm" markdown="1" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#file" value="<?=$domain_cfgfile;?>" />
-<input type="hidden" id="command" name="#command" value="/etc/rc.d/rc.libvirt start" />
+<input type="hidden" id="command" name="#command" value="" />
 
 Enable VMs:
 : <select id="SERVICE" name="SERVICE" class="narrow">
@@ -156,7 +153,7 @@ PCIe ACS Override:
 <script>
 $(function(){
 	$("#applyBtn").click(function(){
-		$("#command").val("/etc/rc.d/rc.libvirt " + ($("#SERVICE").val()=="enable" ? "start" : "stop"));
+		$("#command").val("/usr/local/emhttp/plugins/dynamix.vm.manager/event/" + ($("#SERVICE").val()=="enable" ? "started" : "stopping_svcs"));
 
 		if ($('#pcie_acs_override').val() == '1') {
 			$.get("/plugins/dynamix.vm.manager/VMajax.php?action=acs-override-enable", function( data ) {

@@ -20,8 +20,11 @@ if grep -q 'mdState=STARTED' /proc/mdcmd; then
 		    fi
 		fi
 
+		#copy seed loopback image and qemu hook, if needed, to flash drive
 		if [ -d /usr/local/emhttp/plugins/dynamix.vm.manager/dynamix.kvm.manager ]; then
-			cp -nr /usr/local/emhttp/plugins/dynamix.vm.manager/dynamix.kvm.manager /boot/config/plugins
+			mkdir -p /boot/config/plugins/dynamix.kvm.manager
+			tar -xkf /usr/local/emhttp/plugins/dynamix.vm.manager/dynamix.kvm.manager/domain.tar.xz -C /boot/config/plugins/dynamix.kvm.manager/
+			cp -n /usr/local/emhttp/plugins/dynamix.vm.manager/dynamix.kvm.manager/qemu /boot/config/plugins/dynamix.kvm.manager/
 		fi
 
 		if [ "$SERVICE" = "enable" ]; then
@@ -30,11 +33,6 @@ if grep -q 'mdState=STARTED' /proc/mdcmd; then
 				mount -t ext4 /boot/config/plugins/dynamix.kvm.manager/domain.img /etc/libvirt
 				mkdir -p /etc/libvirt/hooks
 				cp /boot/config/plugins/dynamix.kvm.manager/qemu /etc/libvirt/hooks/
-			fi
-
-			# delete seed image, not needed anymore
-			if [ -d /usr/local/emhttp/plugins/dynamix.vm.manager/dynamix.kvm.manager ]; then
-				rm -r /usr/local/emhttp/plugins/dynamix.vm.manager/dynamix.kvm.manager
 			fi
 
 			# Start libvirt

@@ -338,7 +338,7 @@
 	<tr class="advanced">
 		<td>BIOS:</td>
 		<td>
-			<select name="domain[ovmf]" class="narrow" title="Select the BIOS.  SeaBIOS will work for most.  OVMF requires a UEFI-compatable OS (e.g. Windows 8/2012, newer Linux distros) and if using graphics device passthrough it too needs UEFI" <? if (!empty($arrConfig['domain']['state'])) echo 'disabled="disabled"'; ?>>
+			<select name="domain[ovmf]" id="domain_ovmf" class="narrow" title="Select the BIOS.  SeaBIOS will work for most.  OVMF requires a UEFI-compatable OS (e.g. Windows 8/2012, newer Linux distros) and if using graphics device passthrough it too needs UEFI" <? if (!empty($arrConfig['domain']['state'])) echo 'disabled="disabled"'; ?>>
 			<?php
 				echo mk_option($arrConfig['domain']['ovmf'], '0', 'SeaBIOS');
 
@@ -896,10 +896,12 @@ $(function() {
 
 	$("#form_content #btnSubmit").click(function frmSubmit() {
 		var $button = $(this);
+		var $form = $('#domain_template').closest('form');
 
 		//TODO: form validation
 
-		var $form = $('#domain_template').closest('form');
+		$form.find('input').prop('disabled', false); // enable all inputs otherwise they wont post
+
 		var postdata = $form.serialize().replace(/'/g,"%27");
 
 		$form.find('input').prop('disabled', true);
@@ -915,6 +917,8 @@ $(function() {
 			if (data.error) {
 				alert("Error creating VM: " + data.error);
 				$form.find('input').prop('disabled', false);
+				$("#form_content .domain_vcpu").change(); // restore the cpu checkbox disabled states
+				<? if (!empty($arrConfig['domain']['state'])) echo '$(\'#domain_ovmf\').prop(\'disabled\', true); // restore bios disabled state' . "\n"; ?>
 				$button.val($button.attr('readyvalue'));
 			}
 		}, "json");
