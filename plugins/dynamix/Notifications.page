@@ -303,13 +303,19 @@ SMART attribute notifications:
 : <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()"></td>
 </form>
 <script type="text/javascript" src="/webGui/scripts/jquery.switchButton.js"></script>
+
 <script type="text/javascript">
+var this_tab = $('input[name$="tabs"]').length;
 $(function() {
-  $('.tabs').append($('<span id="basicAdvanced" class="status" style="margin-top: 2px;"><input type="checkbox" class="advancedview"></span>'));
-<?if ($tabbed):?>
   var last = $('input[name$="tabs"]').length;
-  $('#tab1').bind({click:function(){$('#basicAdvanced').show();}});
-  for (var x=2; x<=last; x++) $('#tab'+x).bind({click:function(){$('#basicAdvanced').hide();}});
+  var elementId = "basicAdvanced";
+  $('.tabs').append($('<span id="'+elementId+'" class="status" style="margin-top: 2px;display: none;"><input type="checkbox" class="advancedview"></span>'));
+<?if ($tabbed):?>
+  if ($('#tab'+this_tab).is(':checked')) {
+    $('#'+elementId).show();
+  }
+  $('#tab'+this_tab).bind({click:function(){$('#'+elementId).show();}});
+  for (var x=1; x<=last; x++) if(x != this_tab) $('#tab'+x).bind({click:function(){$('#'+elementId).hide();}});
 <?endif;?>
   if ($.cookie('notifcations_view_mode') == 'advanced') {
     $('.advanced').show();
