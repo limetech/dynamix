@@ -1,6 +1,6 @@
 #!/bin/bash
 conf=/etc/apcupsd/apcupsd.conf
-cfg=/boot/config/plugins/apcupsd/apcupsd.cfg
+cfg=/boot/config/plugins/dynamix.apcupsd/dynamix.apcupsd.cfg
 
 # Daemon already running or no custom file?
 [[ -f /var/run/apcupsd.pid || ! -f $cfg ]] && exit
