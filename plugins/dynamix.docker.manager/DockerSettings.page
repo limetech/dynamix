@@ -74,7 +74,7 @@ if (file_exists($realfile)) {
 
 <form id="settingsForm" markdown="1" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#file" value="<?=$cfgfile;?>" />
-<input type="hidden" id="command" name="#command" value="/etc/rc.d/rc.docker stop" />
+<input type="hidden" id="command" name="#command" value="" />
 Enable Docker:
 : <select id="DOCKER_ENABLED" name="DOCKER_ENABLED" class="narrow">
 <?= mk_option($dockercfg['DOCKER_ENABLED'], 'no', 'No'); ?>
@@ -111,7 +111,7 @@ Docker image:
 
 <form id="settingsForm" markdown="1" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#file" value="<?=$cfgfile;?>" />
-<input type="hidden" id="command" name="#command" value="/etc/rc.d/rc.docker start" />
+<input type="hidden" id="command" name="#command" value="" />
 Enable Docker:
 : <select id="DOCKER_ENABLED" name="DOCKER_ENABLED" class="narrow">
 <?= mk_option($dockercfg['DOCKER_ENABLED'], 'no', 'No'); ?>
@@ -191,7 +191,7 @@ $(function() {
       return;
     }
 
-    $("#command").val("/etc/rc.d/rc.docker " + ($("#DOCKER_ENABLED").val()=="yes" ? "start" : "stop"));
+    $("#command").val("/usr/local/emhttp/plugins/dynamix.docker.manager/event/" + ($("#DOCKER_ENABLED").val()=="yes" ? "started" : "stopping_svcs"));
 
     if ($("#DOCKER_IMAGE_SIZE").length && $("#DOCKER_IMAGE_FILE").length) {
       var isError = false;
