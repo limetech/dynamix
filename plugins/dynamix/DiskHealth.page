@@ -20,7 +20,7 @@ $disk  = $disks[$name];
 $cname = my_disk($name);
 $dev   = $disk['device'];
 $path  = "/var/tmp";
-$file  = "$name-attributes";
+$file  = $name."-smart-".date('Ymd-Hi');;
 $refs  = array(); $n = 0;
 foreach ($disks as $ref) {
   if ($ref['name']=='flash') continue;
