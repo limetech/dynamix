@@ -27,4 +27,4 @@ else
 fi
 
 # Start daemon
-[[ $SERVICE == enable ]] && /etc/rc.d/rc.apcupsd start
+[[ $SERVICE == enable ]] && /etc/rc.d/rc.apcupsd start |& logger
