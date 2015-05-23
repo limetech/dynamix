@@ -62,8 +62,7 @@ function pullImage($image) {
   fwrite($fp, $out);
   $cid = "";
   $cstatus="";
-  $lastprogress=[];
-  $gtotal = 0;
+  $alltotals = [];
   while (!feof($fp)) {
     $cnt =  json_decode( fgets($fp, 5000), TRUE );
     $id = ( isset( $cnt['id'] )) ? $cnt['id'] : "";
@@ -75,23 +74,17 @@ function pullImage($image) {
     }
     $status = ( isset( $cnt['status'] )) ? $cnt['status'] : "";
     if ($status != $cstatus && strlen($status)) {
-      if ($status == "Download complete" &&
-          isset($cnt['id'], $lastprogress['id'], $lastprogress['progressDetail']['total']) &&
-          $cnt['id'] == $lastprogress['id'] &&
-          $lastprogress['progressDetail']['total'] == -1) {
-        // Docker didn't know the total from the last downloaded file so just
-        //  use the latest value of current bytes to add to the grand total
-        $gtotal += $lastprogress['progressDetail']['current'];
+      if ( isset($cnt['progressDetail']['total']) && $cnt['progressDetail']['total'] > 0 ) {
+        $alltotals[$cnt['id']] = $cnt['progressDetail']['total'];
       }
       $cstatus = $status;
-      if ( isset($cnt['progressDetail']['total']) && $cnt['progressDetail']['total'] > 0) $gtotal += $cnt['progressDetail']['total'];
       echo "<script>add_to_id('". $status ."<span class=\"progress\"></span>.');</script>";
       @flush();
     }
     if ($status == "Downloading") {
-      $lastprogress = $cnt;
       $total = $cnt['progressDetail']['total'];
       $current = $cnt['progressDetail']['current'];
+      $alltotals[$cnt['id']] = $cnt['progressDetail']['current'];
       if ($total > 0) {
         $percentage = round(($current/$total) * 100);
         echo "<script>show_Prog(' ". $percentage ."% of " . sizeToHuman($total) . "');</script>\n";
@@ -103,7 +96,7 @@ function pullImage($image) {
       @flush();
     }
   }
-  echo "<script>addLog('<br><b>TOTAL DATA PULLED:</b> " . sizeToHuman($gtotal) . "<span class=\"progress\"></span>');</script>\n";
+  echo "<script>addLog('<br><b>TOTAL DATA PULLED:</b> " . sizeToHuman(array_sum($alltotals)) . "<span class=\"progress\"></span>');</script>\n";
 }
 
 function sizeToHuman($size) {

@@ -271,11 +271,21 @@ function addVMContext(name, uuid, state, vncurl, log){
       ajaxVMDispatch(state, { action: "domain-pmwakeup", uuid: uuid });
     }});
 
+    opts.push({text: "Force Stop", icon: "fa-bomb", action: function(e) {
+      e.preventDefault();
+      ajaxVMDispatch(state, { action: "domain-destroy", uuid: uuid });
+    }});
+
   } else if (state == "paused" || state == "unknown") {
 
     opts.push({text: "Resume", icon: "fa-play", action: function(e) {
       e.preventDefault();
       ajaxVMDispatch(state, { action: "domain-resume", uuid: uuid });
+    }});
+
+    opts.push({text: "Force Stop", icon: "fa-bomb", action: function(e) {
+      e.preventDefault();
+      ajaxVMDispatch(state, { action: "domain-destroy", uuid: uuid });
     }});
 
   } else {
