@@ -90,7 +90,7 @@ Registration keys are bound to your USB Flash boot device GUID (serial number).
 Here you may obtain a **free** *Trial* registration key, which is valid for 30 days and supports up to 3 storage devices.
 To support more storage devices, you may purchase a *Basic*, *Plus*, or *Pro* registration key.
 
-**Note:** Please make sure your server [time-of-day](DateTime) is accurate to within 5 minutes.  
+**Note:** Please make sure your server [time](DateTime) is accurate to within 5 minutes.  
 
 Flash GUID:
 : <?=$var['flashGUID'];?>
