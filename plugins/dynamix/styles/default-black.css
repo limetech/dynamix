@@ -79,12 +79,9 @@ input.narrow{width:136px;}
 .green{color:#6FA239;padding-left:5px;padding-right:5px;}
 .red{color:#CC0000;padding-left:5px;padding-right:5px;}
 .orange{color:#FF9900;padding-left:5px;padding-right:5px;}
-.green-text{color:#6FA239;}
-.red-text{color:#CC0000;}
-.orange-text{color:#FF9900;}
-.passed{color:#6FA239;}
-.failed{color:#CC0000;}
-.warning{color:#FF9900;}
+.green-text,.passed{color:#6FA239;}
+.red-text,.failed{color:#CC0000;}
+.orange-text,.warning{color:#FF9900;}
 .usage-bar{float:left;height:16px;line-height:16px;width:130px;padding:1px 1px 1px 2px;margin:6px 12px;border-radius:3px;background-color:#585858;box-shadow:0 1px 0 #989898,inset 0 1px 0 #202020;}
 .usage-bar>span{display:block;height:100%;text-align:right;border-radius:2px;background-color:#808080;box-shadow:inset 0 1px 0 rgba(255,255,255,.5);}
 .usage-bar>span>span{padding:0 4px;font-size:10px;}
@@ -145,7 +142,6 @@ table.share_status tr>td+td{padding-left:0;}
 table.share_status tr.share_status_size>td{padding-left:40px;}
 table.share_status tr.share_status_size>td+td{padding-left:15px;}
 table.share_status tbody tr:nth-child(even){background-color:#0C0C0C;}
-table.share_status.shift{margin-top:-33px;}
 table.share_status.fixed{border:1px solid #202020;}
 table.share_status.fixed tr>td+td{width:45px;text-align:center;padding:0;}
 table.share_status.fixed tbody tr{border-bottom:1px #202020 dotted;}

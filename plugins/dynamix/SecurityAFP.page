@@ -1,4 +1,4 @@
-Menu="Cache Data Share"
+Menu="Disk Share"
 Title="AFP Security Settings"
 Cond="(($var['shareAFPEnabled']=='yes') && (isset($name)?array_key_exists($name,$sec_afp):0))"
 ---

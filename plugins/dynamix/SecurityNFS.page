@@ -1,4 +1,4 @@
-Menu="Cache Data Share"
+Menu="Disk Share"
 Title="NFS Security Settings"
 Cond="(($var['shareNFSEnabled']=='yes') && (isset($name)?array_key_exists($name,$sec_nfs):0))"
 ---
