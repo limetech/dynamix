@@ -43,8 +43,8 @@ $(function() {
 });
 </script>
 
-<table class="share_status <?=$display['view']?>">
-<thead><tr><td style="width:15%">Name</td><td style="width:33%">Comment</td><td>SMB</td><td>NFS</td><td>AFP</td><td>Size</td><td>Free</td><td style="width:5%">View</td></tr></thead>
+<table class="share_status share <?=$display['view']?>">
+<thead><tr><td style="width:15%">Name</td><td style="width:33%">Comment</td><td>SMB</td><td>NFS</td><td>AFP</td><td>Size</td><td>Free</td><td>View</td></tr></thead>
 <tbody>
 <?
 foreach ($shares as $name => $share):

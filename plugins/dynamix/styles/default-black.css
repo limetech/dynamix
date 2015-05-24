@@ -112,10 +112,15 @@ table.disk_status thead tr:last-child{border-bottom:1px solid #282828;}
 table.disk_status tr>td{width:8%;padding-left:12px;padding-right:0;white-space:nowrap;}
 table.disk_status tr>td+td{width:auto;}
 table.disk_status tr>td+td+td{width:6.5%;text-align:center;padding-left:4px;padding-right:8px;}
+table.disk_status tr td:last-child{width:4%;text-align:right;padding-right:10px;}
 table.disk_status.stats tr>td+td{text-align:left;padding-left:0;padding-right:12px;}
+table.disk_status.stats tr td:last-child{width:4%;text-align:right;padding-right:10px;}
 table.disk_status.left tr>td+td+td+td{text-align:left;padding-left:12px;padding-right:0;}
+table.disk_status.left tr td:last-child{width:4%;text-align:right;padding-right:10px;}
 table.disk_status.right tr>td+td+td+td{text-align:right;padding-left:0;padding-right:12px;}
+table.disk_status.right tr td:last-child{width:4%;padding-right:10px;}
 table.disk_status.center tr>td+td+td+td{text-align:center;padding-left:6px;padding-right:6px;}
+table.disk_status.center tr td:last-child{width:4%;text-align:right;padding-right:10px;}
 table.disk_status select{background:none;}
 table.disk_status tbody tr:nth-child(even){background-color:#0C0C0C;}
 table.array_status td{padding:12px 0;}
@@ -142,6 +147,7 @@ table.share_status tr>td+td{padding-left:0;}
 table.share_status tr.share_status_size>td{padding-left:40px;}
 table.share_status tr.share_status_size>td+td{padding-left:15px;}
 table.share_status tbody tr:nth-child(even){background-color:#0C0C0C;}
+table.share_status.share tr td:last-child{width:4%;text-align:right;padding-right:10px;}
 table.share_status.fixed{border:1px solid #202020;}
 table.share_status.fixed tr>td+td{width:45px;text-align:center;padding:0;}
 table.share_status.fixed tbody tr{border-bottom:1px #202020 dotted;}
