@@ -49,7 +49,7 @@ function saveSMART() {
   });
 }
 function testUpdate(init) {
-  $.post('/webGui/include/SmartInfo.php',{cmd:'update',port:'<?=$dev?>'},function(data) {
+  $.post('/webGui/include/SmartInfo.php',{cmd:'update',port:'<?=$dev?>',name:'<?=$disk['name']?>'},function(data) {
     $('#test_result').html(data);
     if (data.indexOf('%')>=0) {
       if (!init) timers.tester = setTimeout(testUpdate, 3000);

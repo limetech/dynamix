@@ -70,7 +70,7 @@ case "stop":
   break;
 case "update":
   if (!exec("hdparm -C /dev/$port|awk '/active/{print $4}'")) {
-    echo "<span class='orange-text'><big>Unavailable (disk must be spun up)</big></span>";
+    echo "<a href='/update.htm?cmdSpinup={$_POST['name']}' class='info' target='progressFrame'><input type='button' value='Spin Up'></a><span class='orange-text'><big>Unavailable - disk must be spun up</big></span>";
     break;
   }
   $progress = exec("smartctl -c /dev/$port|awk '/in progress/{getline;print $1*1}'");
