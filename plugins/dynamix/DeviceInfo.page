@@ -1,4 +1,4 @@
-Menu="Parity Data Cache"
+Menu="Parity:1 Data:1 Cache:1"
 Title="Device Settings"
 Cond="($disks[$name]['status']!='DISK_NP')"
 ---
@@ -15,7 +15,100 @@ Cond="($disks[$name]['status']!='DISK_NP')"
  */
 ?>
 
-<?$disk = $disks[$name]?>
+<?
+$disk = $disks[$name];
+$dev  = $disk['device'];
+$off  = exec("hdparm -C /dev/$dev|awk '/active/{print $4}'") ? "" : "disabled";
+$refs = array(); $n = 0;
+foreach ($disks as $ref) {
+  if ($ref['name']=='flash') continue;
+  $refs[] = $ref['name'];
+  if ($ref['name']==$name) $i = $n;
+  $n++;
+}
+$end = count($refs)-1;
+$prev = $i>0 ? $refs[$i-1] : $refs[$end];
+$next = $i<$end ? $refs[$i+1] : $refs[0];
+?>
+
+<script>
+function cleanUp() {
+  if (document.hasFocus()) {
+    $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?="$path/$file"?>'});
+    $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?="$docroot/$file.rtf"?>'});
+  } else {
+    setTimeout(cleanUp,4000);
+  }
+}
+function saveSMART() {
+  $.post('/webGui/include/SmartInfo.php',{cmd:'save',port:'<?=$dev?>',file:'<?="$path/$file"?>'}, function() {
+    $.post('/webGui/include/Download.php',{cmd:'save',raw:'windows',root:'<?=$docroot?>',file:'<?="$path/$file"?>'},function(data) {
+      location = data;
+      setTimeout(cleanUp,4000);
+    });
+  });
+}
+function testUpdate(init) {
+  $.post('/webGui/include/SmartInfo.php',{cmd:'update',port:'<?=$dev?>',name:'<?=$disk['name']?>'},function(data) {
+    $('#test_result').html(data);
+    if (data.indexOf('%')>=0) {
+      if (!init) timers.tester = setTimeout(testUpdate, 3000);
+    } else {
+      $('#short_test').val('Start');
+      $('#long_test').val('Start');
+<?if (!$off):?>
+      $('#short_test').removeAttr('disabled');
+      $('#long_test').removeAttr('disabled');
+<?endif;?>
+      $.removeCookie('tester.<?=$dev?>',{path:'/'});
+    }
+  });
+}
+function selftestLog() {
+  $('#testlog').toggle('slow');
+  var text = $('#toggle_log').val()=='Show' ? 'Hide' : 'Show';
+  $('#toggle_log').val(text);
+}
+function errorLog() {
+  $('#errorlog').toggle('slow');
+  var text = $('#toggle_error').val()=='Show' ? 'Hide' : 'Show';
+  $('#toggle_error').val(text);
+}
+function startShortTest() {
+  if ($('#short_test').val()=='Start') {
+    $('#short_test').val('Stop');
+    $('#long_test').attr('disabled','disabled');
+    $.cookie('tester.<?=$dev?>','short',{path:'/'});
+    $.post('/webGui/include/SmartInfo.php',{cmd:'short',port:'<?=$dev?>'},function() {timers.tester = setTimeout(testUpdate,0);});
+  } else {
+    clearTimeout(timers.tester);
+    $.removeCookie('tester.<?=$dev?>',{path:'/'});
+    $.post('/webGui/include/SmartInfo.php',{cmd:'stop',port:'<?=$dev?>'}, function() {setTimeout(testUpdate,0);});
+  }
+}
+function startLongTest() {
+  if ($('#long_test').val()=='Start') {
+    $('#long_test').val('Stop');
+    $('#short_test').attr('disabled','disabled');
+    $.cookie('tester.<?=$dev?>','long',{path:'/'});
+    $.post('/webGui/include/SmartInfo.php',{cmd:'long',port:'<?=$dev?>'},function(){timers.tester = setTimeout(testUpdate,0);});
+  } else {
+    clearTimeout(timers.tester);
+    $.removeCookie('tester.<?=$dev?>',{path:'/'});
+    $.post('/webGui/include/SmartInfo.php',{cmd:'stop',port:'<?=$dev?>'}, function() {setTimeout(testUpdate,0);});
+  }
+}
+$(function() {
+  $('.tabs').append("<span class='status vhshift'><input type='button' value='Download' title='Download SMART report of <?=my_disk($name)?>' onclick='saveSMART()'><a href='/Main/Data?name=<?=$prev?>' title='Previous'><button type='button' style='margin-right:2px'><i class='fa fa-chevron-left'></i></button></a><a href='/Main/Data?name=<?=$next?>' title='Next'><button type='button'><i class='fa fa-chevron-right'></i></button></a></span>");
+  var tester = $.cookie('tester.<?=$dev?>');
+  testUpdate(tester===undefined);
+  if (tester !== undefined) $('#'+tester+'_test').val('Stop').removeAttr('disabled');
+<?if (!$off):?>
+  $('#toggle_log').removeAttr('disabled');
+  $('#toggle_error').removeAttr('disabled');
+<?endif;?>
+});
+</script>
 
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 Name:
@@ -108,7 +201,7 @@ Balance status:
 <?if (strstr(implode($balance_status), "running")===FALSE):?>
 <input type="hidden" name="#command" value="/sbin/btrfs balance start">
 <input type="hidden" name="#arg[2]" value="/mnt/<?=$disk['name']?>">
-<input type="hidden" name="#arg[3]" value="&>/dev/null &"> 
+<input type="hidden" name="#arg[3]" value="&>/dev/null &">
 
 &nbsp;
 : <input type="submit" value="Balance"><input type="text" name="#arg[1]" maxlength="256" value="-dconvert=raid1 -mconvert=raid1"> Options (see Help)
@@ -151,7 +244,7 @@ Scrub status:
 <?if (exec("/usr/local/sbin/background status $scrub_cmd")==""):?>
 <input type="hidden" name="#command" value="<?=$scrub_cmd?>">
 <input type="hidden" name="#arg[2]" value="/mnt/<?=$disk['name']?>">
-<input type="hidden" name="#arg[3]" value="&>/dev/null &"> 
+<input type="hidden" name="#arg[3]" value="&>/dev/null &">
 
 &nbsp;
 : <input type="submit" value="Scrub"><input type="text" name="#arg[1]" maxlength="256" value="-r"> Options (see Help)
@@ -277,3 +370,29 @@ Check Filesystem status:
 <?endif;?>
 </form>
 <?endif;?>
+
+<div id="title"><span class="left"><img src="/plugins/dynamix/icons/self-test.png" class="icon">Self-Test</span></div>
+<div markdown="1">
+SMART self-test history:
+: <input type="button" value="Show" id="toggle_log" onclick="selftestLog()" disabled>
+
+<?if (!$off):?>
+<pre id="testlog" style="display:none"><?=shell_exec("smartctl -l selftest /dev/$dev|awk 'NR>5'");?></pre>
+<?endif;?>
+
+SMART error log:
+: <input type="button" value="Show" id="toggle_error" onclick="errorLog()" disabled>
+
+<?if (!$off):?>
+<pre id="errorlog" style="display:none"><?=shell_exec("smartctl -l error /dev/$dev|awk 'NR>5'");?></pre>
+<?endif;?>
+
+SMART short self-test:
+: <input type='button' value='Start' id='short_test' onclick="startShortTest()" disabled>
+
+SMART extended self-test:
+: <input type='button' value='Start' id='long_test' onclick="startLongTest()" disabled>
+
+Last SMART test result:
+: <span id="test_result"></span>
+</div>

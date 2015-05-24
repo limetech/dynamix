@@ -1,0 +1,28 @@
+Menu="Parity Data Cache"
+Title="Identity"
+Cond="(strstr($disks[$name]['status'],'_NP')===false)"
+---
+<?PHP
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+
+<script>
+$(function() {
+  $.post("/webGui/include/SmartInfo.php",{cmd:'identify',port:'<?=$disks[$name]['device']?>'}, function(data) {
+    $('#disk_identify').html(data);
+  });
+});
+</script>
+<table class='share_status small'>
+<thead><td style="width:33%"><?=my_disk($name)?></td><td>Information</td></thead>
+<tbody id="disk_identify"></tbody>
+</table>
