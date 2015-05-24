@@ -25,7 +25,8 @@ if ($name == "") {
                  "splitLevel" => "",
                  "include"    => "",
                  "exclude"    => "",
-                 "useCache"   => "no");
+                 "useCache"   => "no",
+                 "cow"        => "auto");
 } else if (array_key_exists($name, $shares)) {
   /* edit existing share */
   $share = $shares[$name];
@@ -55,9 +56,11 @@ if ($var['shareUserExclude']) {
   }
 }
 ?>
+
 > A *Share*, also called a *User Share*, is simply the name of a top-level directory that exists on one or more of your
 > storage devices (array and cache).  Each share can be exported for network access.  When browsing a share, we return the
 > composite view of all files and subdirectories for which that top-level directory exists on each storage device.
+
 <script>
 $(function() {
   $("#s1").dropdownchecklist({emptyText:'All', width:300, explicitClose:'...close'});
@@ -134,9 +137,9 @@ function prepareEdit(form) {
   return true;
 }
 </script>
-
 <form markdown="1" name="share_edit" method="POST" action="/update.htm" target="progressFrame" onsubmit="return prepareEdit(this)">
 <input type="hidden" name="shareNameOrig" value="<?=$share['nameOrig']?>">
+
 Name:
 : <input type="text" name="shareName" maxlength="40" value="<?=$share['name']?>">
 
@@ -236,13 +239,13 @@ Excluded disk(s):
 > Specify the disks which can *not* be used by the share. By default no disks are excluded.
 
 <?if ($var['cacheActive']=="yes"):?>
+
 Use cache disk:
 : <select name="shareUseCache" size="1" onchange="setDiskList(this.value)">
   <?=mk_option($share['useCache'], "no", "No")?>
   <?=mk_option($share['useCache'], "yes", "Yes")?>
   <?=mk_option($share['useCache'], "only", "Only")?>
   </select>
-<?endif;?>
 
 > Specify whether new files and subdirectories written on the share can be written onto the Cache disk/pool.
 >
@@ -255,6 +258,22 @@ Use cache disk:
 >
 > **Only** indicates that all new files and subdirectories must be writen to the Cache disk/pool.  If there
 > is insufficient free space on the Cache disk/pool, *create* operations will fail with *out of space* status.
+
+<?endif;?>
+
+Enable Copy-on-write:
+: <select name="shareCOW" size="1">
+  <?=mk_option($share['cow'], "no", "No")?>
+  <?=mk_option($share['cow'], "auto", "Auto")?>
+  </select>
+
+> Set to **No** to cause the btrfs NOCOW (No Copy-on-Write) attribute to be set on the share directory
+> when created on a device formatted with btrfs file system.  Once set, newly created files and
+> subdirectories on the device will inherit the NOCOW attribute.  We recommend this setting for shares
+> used to store vdisk images, including the Docker loopback image file.  This setting has no effect
+> on non-btrfs file systems.
+>
+> Set to **Auto** for normal operation.
 
 <?if ($share['name'] == ""):?>
 <input type="reset" value="Reset" onclick="setTimeout(prepareShareEdit,0)">
