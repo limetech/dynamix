@@ -142,7 +142,7 @@ File system type:
   <?=mk_option($disk['fsType'], "btrfs", "btrfs")?>
   <?=mk_option($disk['fsType'], "reiserfs", "reiserfs")?>
   <?=mk_option($disk['fsType'], "xfs", "xfs")?>
-  </select> Array must be stopped to change
+  </select> Array must be **Stopped** to change
 
 <?endif;?>
 <?elseif ($disk['type']=="Cache" && $var['SYS_CACHE_SLOTS']>1):?>
@@ -376,12 +376,18 @@ Check Filesystem status:
 SMART self-test history:
 : <input type="button" value="Show" id="toggle_log" onclick="selftestLog()" disabled>
 
+> Press **Show** to view the self-test history as is kept on the disk itself.
+> This feature is only available when the disk is in active mode.
+
 <?if (!$off):?>
 <pre id="testlog" style="display:none"><?=shell_exec("smartctl -l selftest /dev/$dev|awk 'NR>5'");?></pre>
 <?endif;?>
 
 SMART error log:
 : <input type="button" value="Show" id="toggle_error" onclick="errorLog()" disabled>
+
+> Press **Show** to view the error report as is kept on the disk itself.
+> This feature is only available when the disk is in active mode.
 
 <?if (!$off):?>
 <pre id="errorlog" style="display:none"><?=shell_exec("smartctl -l error /dev/$dev|awk 'NR>5'");?></pre>
@@ -390,9 +396,25 @@ SMART error log:
 SMART short self-test:
 : <input type='button' value='Start' id='short_test' onclick="startShortTest()" disabled>
 
+> Starts a *short* SMART self-test, the estimated duration can be viewed under the *Capabilities* section. This is usually a few minutes.
+>
+> When the disk is spun down, it will abort any running self-test.
+> This feature is only available when the disk is in active mode.
+
 SMART extended self-test:
 : <input type='button' value='Start' id='long_test' onclick="startLongTest()" disabled>
 
+> Starts an *extended* SMART self-test, the estimated duration can be viewed under the *Capabilities* section. This is usually several hours.
+>
+> When the disk is spun down, it will abort any running self-test. It is advised to disable the spin down timer of the disk
+> to avoid interruption of this self-test.
+>
+> This feature is only available when the disk is in active mode.
+
 Last SMART test result:
 : <span id="test_result"></span>
+
+> When no test is running it will show here the latest obtained self-test result (if available).
+> Otherwise a progress indicator (percentage value) is shown for a running test.
+
 </div>

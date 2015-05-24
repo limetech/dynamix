@@ -26,3 +26,9 @@ $(function() {
 <thead><td><?=my_disk($name)?></td><td>Attribute Name</td><td>Flag</td><td>Value</td><td>Worst</td><td>Threshold</td><td>Type</td><td>Updated</td><td>Failed</td><td>Raw Value</td></thead>
 <tbody id="disk_attributes"></tbody>
 </table>
+
+> This list shows the SMART attributes supported by this disk. For more information about each SMART attribute, it is recommended to search online.
+>
+> Attributes in *orange* may require your attention. They have a **raw value** greater than zero and may indicate a pending disk failure.
+>
+> Special attention is required when the particular attribute raw value starts to increase over time. When in doubt, consult the Limetech forum for advice.
