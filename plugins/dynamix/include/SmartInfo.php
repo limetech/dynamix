@@ -69,13 +69,13 @@ case "stop":
   exec("smartctl -X /dev/$port");
   break;
 case "update":
-  if (!exec("hdparm -C /dev/$port|awk '/active/{print $4}'")) {
+  if (!exec("hdparm -C /dev/$port|grep -o active")) {
     echo "<a href='/update.htm?cmdSpinup={$_POST['name']}' class='info' target='progressFrame'><input type='button' value='Spin Up'></a><span class='orange-text'><big>Unavailable - disk must be spun up</big></span>";
     break;
   }
-  $progress = exec("smartctl -c /dev/$port|awk '/in progress/{getline;print $1*1}'");
+  $progress = exec("smartctl -c /dev/$port|grep -Po '\d+%'");
   if ($progress) {
-    echo "<big><i class='fa fa-spinner fa-pulse'></i> ".(100-$progress)."% complete</big>";
+    echo "<big><i class='fa fa-spinner fa-pulse'></i> ".(100-substr($progress,0,-1))."% complete</big>";
     break;
   }
   $result = trim(exec("smartctl -l selftest /dev/$port|grep '^# 1'|cut -c26-55"));
