@@ -1,6 +1,5 @@
 Menu="Shares:1"
 Title="User Shares"
-Cond="count($shares)>0"
 ---
 <?PHP
 /* Copyright 2014, Lime Technology

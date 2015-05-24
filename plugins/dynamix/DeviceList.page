@@ -1,6 +1,5 @@
 Menu="Shares:2"
 Title="Device Shares"
-Cond="count($disks)>0"
 ---
 <?PHP
 /* Copyright 2015, Lime Technology
