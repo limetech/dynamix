@@ -61,7 +61,7 @@ foreach ($disks as $disk):
 ?><td><a href="#" class="info nohand" onclick="return false">
   <img src="/webGui/images/<?=$color?>.png" class="icon"><span class="disks">
   <img src="/webGui/images/green-on.png" class="icon">Normal operation<br>
-  <img src="/webGui/images/yellow-on.png" class="icon">Content being reconstructed<br>
+  <img src="/webGui/images/yellow-on.png" class="icon">Data in reconstruction<br>
   <img src="/webGui/images/red-off.png" class="icon">Device disabled<br>
   <img src="/webGui/images/blue-on.png" class="icon">New device not in array<br>
   <img src="/webGui/images/green-blink.png" class="icon">Device spun-down<br>
