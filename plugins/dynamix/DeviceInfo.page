@@ -192,7 +192,8 @@ Spinup group(s):
 </form>
 <?if ($name=="cache" && $var['SYS_CACHE_SLOTS']>1):?>
 
-Pool info:
+<div id="title" class="nocontrol"><span class="left"><img src="/plugins/dynamix/icons/poolinformation.png" class="icon">Pool Information</span></div>
+&nbsp;
 : <?echo "<pre>".shell_exec("/sbin/btrfs filesystem show {$disk['uuid']}")."</pre>";?>
 
 > This is the output of *btrfs filesystem show /mnt/cache*.
@@ -202,7 +203,8 @@ Pool info:
 <?if ($disk['fsStatus']=="Mounted"):?>
 <?exec("/sbin/btrfs balance status /mnt/{$disk['name']}", $balance_status, $retval);?>
 
-Balance status:
+<div id="title" class="nocontrol"><span class="left"><img src="/plugins/dynamix/icons/balancestatus.png" class="icon">Balance Status</span></div>
+&nbsp;
 : <?echo "<pre>" . implode("\n", $balance_status) . "</pre>";?>
 
 > This is the output of *btrfs balance status /mnt/cache*.
@@ -212,7 +214,7 @@ Balance status:
 <input type="hidden" name="#arg[2]" value="/mnt/<?=$disk['name']?>">
 <input type="hidden" name="#arg[3]" value="&>/dev/null &">
 
-&nbsp;
+<input type="reset" value="Reset">
 : <input type="submit" value="Balance"><input type="text" name="#arg[1]" maxlength="256" value="-dconvert=raid1 -mconvert=raid1"> Options (see Help)
 
 > **Balance** will run the *btrfs balance* program to restripe the extents across all pool devices.
@@ -245,7 +247,8 @@ Balance status:
 <?$scrub_cmd = "/sbin/btrfs scrub start -B";?>
 <?exec("/sbin/btrfs scrub status /mnt/{$disk['name']}", $scrub_status, $retval);?>
 
-Scrub status:
+<div id="title" class="nocontrol"><span class="left"><img src="/plugins/dynamix/icons/scrubstatus.png" class="icon">Scrub Status</span></div>
+&nbsp;
 : <?echo "<pre>" . implode("\n", $scrub_status) . "</pre>";?>
 
 > This is the output of *btrfs scrub status /mnt/cache*.
@@ -255,7 +258,7 @@ Scrub status:
 <input type="hidden" name="#arg[2]" value="/mnt/<?=$disk['name']?>">
 <input type="hidden" name="#arg[3]" value="&>/dev/null &">
 
-&nbsp;
+<input type="reset" value="Reset">
 : <input type="submit" value="Scrub"><input type="text" name="#arg[1]" maxlength="256" value="-r"> Options (see Help)
 
 > **Scrub** will open a window and run the *btrfs scrub* program to check file system integrity device.
@@ -290,7 +293,8 @@ Scrub status:
 <?$check_status = @file($status_file);?>
 <?if ($check_status === FALSE) $check_status = array("Not available");?>
 
-Check Filesystem status:
+<div id="title" class="nocontrol"><span class="left"><img src="/plugins/dynamix/icons/filesystemstatus.png" class="icon">Check Filesystem Status</span></div>
+&nbsp;
 : <?echo "<pre>" . implode("\n", $check_status) . "</pre>";?>
 
 > This is the latest *file system check* status.
@@ -298,7 +302,7 @@ Check Filesystem status:
 <?if (exec("/usr/local/sbin/background status $check_cmd")==""):?>
 <input type="hidden" name="#command" value="/usr/local/sbin/background start <?=$status_file?> <?=$check_cmd?>">
 
-&nbsp;
+<input type="reset" value="Reset">
 : <input type="submit" value="Check"><input type="text" name="#arg[1]" maxlength="256" value=""> Options (see Help)
 
 > **Check Filesystem** will run the *reiserfsck* program to check file system integrity on the device.
@@ -339,7 +343,8 @@ Check Filesystem status:
 <?$check_status = @file($status_file);?>
 <?if ($check_status === FALSE) $check_status = array("Not available");?>
 
-Check Filesystem status:
+<div id="title" class="nocontrol"><span class="left"><img src="/plugins/dynamix/icons/filesystemstatus.png" class="icon">Check Filesystem Status</span></div>
+&nbsp;
 : <?echo "<pre>" . implode("\n", $check_status) . "</pre>";?>
 
 > This is the latest *file system check* status.
@@ -347,7 +352,7 @@ Check Filesystem status:
 <?if (exec("/usr/local/sbin/background status $check_cmd")==""):?>
 <input type="hidden" name="#command" value="/usr/local/sbin/background start <?=$status_file?> <?=$check_cmd?>">
 
-&nbsp;
+<input type="reset" value="Reset">
 : <input type="submit" value="Check"><input type="text" name="#arg[1]" maxlength="256" value="-n"> Options (see Help)
 
 > **Check Filesystem** will run the *xfs_repair* program to check file system integrity on the device.
