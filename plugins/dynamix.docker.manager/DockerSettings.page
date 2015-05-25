@@ -44,7 +44,7 @@ if (!array_key_exists('DOCKER_ENABLED', $dockercfg)) {
 $realfile = $dockercfg['DOCKER_IMAGE_FILE'];
 if (file_exists($realfile)) {
   if (strpos($realfile, '/mnt/user/') === 0) {
-    $tmp = parse_ini_string(shell_exec("getfattr -n user.LOCATION " . $dockercfg['DOCKER_IMAGE_FILE'] . " | grep user.LOCATION"));
+    $tmp = parse_ini_string(shell_exec("getfattr --absolute-names -n user.LOCATION " . $dockercfg['DOCKER_IMAGE_FILE'] . " | grep user.LOCATION"));
     $realfile = str_replace('user', $tmp['user.LOCATION'], $realfile);  // replace 'user' with say 'cache' or 'disk1' etc
   }
 
@@ -204,9 +204,6 @@ $(function() {
         target.fadeOut();
       }
       var image = $("#DOCKER_IMAGE_FILE").val();
-      if (image.indexOf('/mnt/user/') === 0) {
-        return;
-      }
 
       target = $("#IMAGE_ERROR");
       $.getJSON( "/plugins/dynamix.docker.manager/update_cfg.php?is_dir=" + image).done(function( json ) {
@@ -227,13 +224,8 @@ $(function() {
 
   if ($("#DOCKER_IMAGE_FILE").length) {
     $("#DOCKER_IMAGE_FILE").on("change keyup", function(){
-      if ($(this).val().indexOf('/mnt/user/') === 0) {
-        $("#IMAGE_ERROR").fadeIn().html('Error: cannot specify user share (instead use cache, disk1, disk2, etc).');
-        $("#applyBtn").prop("disabled", true);
-      } else {
-        $("#IMAGE_ERROR").fadeOut();
-        $("#applyBtn").prop("disabled", false);
-      }
+      $("#IMAGE_ERROR").fadeOut();
+      $("#applyBtn").prop("disabled", false);
       <? if (file_exists($dockercfg['DOCKER_IMAGE_FILE'])) { ?>
       if ($(this).val() != "<?=$dockercfg['DOCKER_IMAGE_FILE']?>") {
         $("#deleteCheckbox").prop("disabled", true).attr("checked", false);
