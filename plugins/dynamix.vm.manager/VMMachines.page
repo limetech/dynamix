@@ -41,8 +41,9 @@ if ($action) {
 				'Error: '.$lv->get_last_error();
 		}
 		elseif ($subaction == 'disk-resize') {
-			$capacity = $_POST['cap'];
-			if (substr($_GET['oldcap'],0,-1) < substr($capacity,0,-1)){
+      $capacity = str_replace(array("KB","MB","GB","TB","PB", " ", ","), array("K","M","G","T","P", "", ""), strtoupper($_POST['cap']));
+      $oldcap = str_replace(array("KB","MB","GB","TB","PB", " ", ","), array("K","M","G","T","P", "", ""), strtoupper($_GET['oldcap']));
+			if (substr($oldcap,0,-1) < substr($capacity,0,-1)){
 				shell_exec("qemu-img resize -q {$_GET['disk']} $capacity");
 				$msg = $domName." disk capacity has been changed to $capacity";
 			}else {
@@ -258,7 +259,7 @@ if ($action) {
                $disk = (array_key_exists('file', $tmp[$ii])) ? $tmp[$ii]['file'] : $tmp[$ii]['partition'];
 					$type = $tmp[$ii]['type'];
 					$dev = $tmp[$ii]['device'];
-					echo "<tr style='background-color:".bcolor($ii,$theme)."'>
+					echo "<tr>
 						   <td>".basename($disk)."</td>
 							<td>$type</td>
            				<td title='Click to change Dev Name'><form method='post' action='?subaction=domain-diskdev&amp;uuid=$uuid&amp;olddev=$dev' /><span class='diskdev' style='width:30px'>
@@ -289,7 +290,7 @@ if ($action) {
 					$type = $tmp[$ii]['type'];
 					$dev = $tmp[$ii]['device'];
 					$bus = $tmp[$ii]['bus'];
-					echo "<tr style='background-color:".bcolor($ii,$theme)."'>
+					echo "<tr>
 							<td>
 						<form method='post' id='cdrom_form$i$ii' name='cdromform' action='?subaction=cdrom-change&amp;uuid=$uuid&amp;dev=$dev&amp;bus=$bus' />
 							<span>
