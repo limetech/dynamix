@@ -121,7 +121,7 @@ $(function() {
 
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 Name:
-: <?=my_disk($name)?>
+: <big><?=my_disk($name)?></big>
 
 Partition size:
 : <?=my_number($disk['size'])?> KB (K=1024)
