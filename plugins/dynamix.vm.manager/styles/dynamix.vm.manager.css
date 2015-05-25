@@ -631,20 +631,18 @@ table.tablesorter.dominfo{margin-top: 5px;}
 table.tablesorter.dominfo{margin-left:48px;}
 table.tablesorter.domdisk{margin-top: 5px;}
 table.tablesorter.domdisk{margin-left:72px;}
-table.tablesorter.domdisk tr:nth-child(odd){background:none;}
-table.tablesorter.domdisk tr:nth-child(even){background:none;}
 table.tablesorter.domdisk th:first-child{width:9%;text-align:left;}
 table.tablesorter.domdisk td:first-child{width:9%;text-align:left;}
 table.tablesorter.domdisk th:nth-child(2){width:9%;text-align:left;}
-table.tablesorter.domdisk td:nth-child(2){width:9%;text-align:left;vertical-align: top;}
+table.tablesorter.domdisk td:nth-child(2){width:9%;text-align:left;}
 table.tablesorter.domdisk th:nth-child(3){width:9%;text-align:left;}
-table.tablesorter.domdisk td:nth-child(3){width:9%;text-align:left;vertical-align: top;}
+table.tablesorter.domdisk td:nth-child(3){width:9%;text-align:left;}
 table.tablesorter.domdisk th:nth-child(4){width:9%;text-align:left;}
-table.tablesorter.domdisk td:nth-child(4){width:9%;text-align:left;vertical-align: top;}
+table.tablesorter.domdisk td:nth-child(4){width:9%;text-align:left;}
 table.tablesorter.domdisk th:nth-child(5){width:9%;text-align:left;}
-table.tablesorter.domdisk td:nth-child(5){width:9%;text-align:left;vertical-align: top;}
+table.tablesorter.domdisk td:nth-child(5){width:9%;text-align:left;}
 table.tablesorter.domdisk th:nth-child(6){width:9%;text-align:left;}
-table.tablesorter.domdisk td:nth-child(6){width:9%;text-align:left;vertical-align: top;}
+table.tablesorter.domdisk td:nth-child(6){width:9%;text-align:left;}
 table.tablesorter.domdisk tr>td+td+td{width:9%;white-space:nowrap;}
 table.tablesorter.domdisk td:last-child{width:96px;padding:0;}
 table.tablesorter.domsnap{margin-top: 5px;}
