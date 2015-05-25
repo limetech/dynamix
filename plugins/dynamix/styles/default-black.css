@@ -171,7 +171,7 @@ table.share_status.m0 tr>td+td+td{width:12%;text-align:center;}
 span.heat-text{font-size:10px;color:#CC0000;}
 span.cpu-speed{display:block;color:#3B5998;}
 span.status{float:right;font-size:14px;margin-top:0px;padding-right:8px;}
-span.status.vhshift{margin-top:-11px;margin-right:-22px;}
+span.status.vhshift{margin-top:-12px;margin-right:-22px;}
 span.diskinfo{float:left;clear:both;margin-top:5px;padding-left:10px;}
 span.bitstream{font-family:bitstream;font-size:10px;}
 span.p0{padding-left:0}

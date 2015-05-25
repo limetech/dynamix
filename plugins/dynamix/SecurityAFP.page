@@ -99,7 +99,7 @@ Security:
 <?if ($sec_afp[$name]['security'] == 'secure'):?>
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="shareName" value="<?=$name;?>">
-<div id="title"><dt>User Access</dt><em>Guests have <b>read-only</b> access.</em></div>
+<div id="title" class="nocontrol"><dt>User Access</dt><i>Guests have <b>read-only</b> access.</i></div>
 <?input_secure_users($sec_afp);?>
 
 <input type="reset" value="Reset">
@@ -109,7 +109,7 @@ Security:
 <?elseif ($sec_afp[$name]['security'] == 'private'):?>
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="shareName" value="<?=$name;?>">
-<div id="title"><dt>User Access</dt><em>Guests have <b>no</b> access.</em></div>
+<div id="title" class="nocontrol"><dt>User Access</dt><i>Guests have <b>no</b> access.</i></div>
 <?input_private_users($sec_afp);?>
 
 <input type="reset" value="Reset">

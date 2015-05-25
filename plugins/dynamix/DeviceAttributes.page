@@ -1,6 +1,5 @@
 Menu="Parity Data Cache"
 Title="Attributes"
-Cond="(strstr($disks[$name]['status'],'_NP')===false)"
 ---
 <?PHP
 /* Copyright 2015, Lime Technology
@@ -23,7 +22,7 @@ $(function() {
 });
 </script>
 <table class='share_status small'>
-<thead><td><?=my_disk($name)?></td><td>Attribute Name</td><td>Flag</td><td>Value</td><td>Worst</td><td>Threshold</td><td>Type</td><td>Updated</td><td>Failed</td><td>Raw Value</td></thead>
+<thead><td>#</td><td>Attribute Name</td><td>Flag</td><td>Value</td><td>Worst</td><td>Threshold</td><td>Type</td><td>Updated</td><td>Failed</td><td>Raw Value</td></thead>
 <tbody id="disk_attributes"></tbody>
 </table>
 

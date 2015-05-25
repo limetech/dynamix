@@ -145,7 +145,7 @@ function array_offline($disk) {
     echo "<td>-</td>";
     echo "<td>-</td>";
     echo "<td>{$disk['fsType']}</td>";
-    echo "<td></td>";
+    echo "<td>".($disk['name']!='parity' ? "<img src='/webGui/images/noview.png'>" : "")."</td>";
   break;
   case "DISK_OK_NP":
     echo "<td>".device_info($disk)."</td>";

@@ -1,10 +1,10 @@
 Menu="Parity:1 Data:1 Cache:1"
-Title="Device Settings"
-Cond="($disks[$name]['status']!='DISK_NP')"
+Title="$name Settings"
+Png="devicesettings.png"
 ---
 <?PHP
-/* Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -19,30 +19,35 @@ Cond="($disks[$name]['status']!='DISK_NP')"
 $disk = $disks[$name];
 $dev  = $disk['device'];
 $off  = exec("hdparm -C /dev/$dev|awk '/active/{print $4}'") ? "" : "disabled";
+$tmp  = "/var/tmp";
+$file = str_replace(' ','_',strtolower($var['NAME']))."-smart-".date('Ymd-Hi').".rtf";
 $refs = array(); $n = 0;
+
 foreach ($disks as $ref) {
-  if ($ref['name']=='flash') continue;
+  if ($ref['name']=='flash' or $ref['status']=='DISK_NP') continue;
   $refs[] = $ref['name'];
   if ($ref['name']==$name) $i = $n;
   $n++;
 }
-$end = count($refs)-1;
+$end  = count($refs)-1;
 $prev = $i>0 ? $refs[$i-1] : $refs[$end];
 $next = $i<$end ? $refs[$i+1] : $refs[0];
 ?>
 
 <script>
+var ctrl = "<span class='status vhshift'><a href='/Main/Data?name=<?=$prev?>' title='Previous'><button type='button' style='margin-right:4px'><i class='fa fa-chevron-left'></i></button></a><a href='/Main/Data?name=<?=$next?>' title='Next'><button type='button'><i class='fa fa-chevron-right'></i></button></a></span>";
+
 function cleanUp() {
   if (document.hasFocus()) {
-    $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?="$path/$file"?>'});
-    $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?="$docroot/$file.rtf"?>'});
+    $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?="$tmp/$file"?>'});
+    $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?="$docroot/$file"?>'});
   } else {
     setTimeout(cleanUp,4000);
   }
 }
 function saveSMART() {
-  $.post('/webGui/include/SmartInfo.php',{cmd:'save',port:'<?=$dev?>',file:'<?="$path/$file"?>'}, function() {
-    $.post('/webGui/include/Download.php',{cmd:'save',raw:'windows',root:'<?=$docroot?>',file:'<?="$path/$file"?>'},function(data) {
+  $.post('/webGui/include/SmartInfo.php',{cmd:'save',port:'<?=$dev?>',file:'<?="$tmp/$file"?>'}, function() {
+    $.post('/webGui/include/Download.php',{cmd:'save',os:'windows',root:'<?=$docroot?>',file:'<?="$tmp/$file"?>'},function(data) {
       location = data;
       setTimeout(cleanUp,4000);
     });
@@ -99,7 +104,11 @@ function startLongTest() {
   }
 }
 $(function() {
-  $('.tabs').append("<span class='status vhshift'><input type='button' value='Download' title='Download SMART report of <?=my_disk($name)?>' onclick='saveSMART()'><a href='/Main/Data?name=<?=$prev?>' title='Previous'><button type='button' style='margin-right:2px'><i class='fa fa-chevron-left'></i></button></a><a href='/Main/Data?name=<?=$next?>' title='Next'><button type='button'><i class='fa fa-chevron-right'></i></button></a></span>");
+<?if ($tabbed):?>
+  $('.tabs').append(ctrl);
+<?else:?>
+  $('div[id=title]:not(".nocontrol")').each(function(){$(this).append(ctrl);});
+<?endif;?>
   var tester = $.cookie('tester.<?=$dev?>');
   testUpdate(tester===undefined);
   if (tester !== undefined) $('#'+tester+'_test').val('Stop').removeAttr('disabled');
@@ -178,7 +187,7 @@ Spinup group(s):
 <?endif;?>
 
 &nbsp;
-: <input type="submit" name="changeDisk" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="changeDisk" value="Apply"><input type="button" value="Done" onclick="done()"><input type='button' value='Download' onclick='saveSMART()'>
 
 </form>
 <?if ($name=="cache" && $var['SYS_CACHE_SLOTS']>1):?>
@@ -371,7 +380,7 @@ Check Filesystem status:
 </form>
 <?endif;?>
 
-<div id="title"><span class="left"><img src="/plugins/dynamix/icons/self-test.png" class="icon">Self-Test</span></div>
+<div id="title" class="nocontrol"><span class="left"><img src="/plugins/dynamix/icons/self-test.png" class="icon">Self-Test</span></div>
 <div markdown="1">
 SMART self-test history:
 : <input type="button" value="Show" id="toggle_log" onclick="selftestLog()" disabled>

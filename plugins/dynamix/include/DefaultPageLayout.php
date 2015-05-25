@@ -247,13 +247,13 @@ foreach ($pages as $page) {
     eval("\$title=\"{$page['Title']}\";");
     if ($tabbed) {
       echo "<div class='tab'><input type='radio' id='tab{$tab}' name='tabs' onclick='settab(this.id)'><label for='tab{$tab}'>";
-      echo tab_title($title,$page['root']);
+      echo tab_title($title,$page['root'],isset($page['Png'])?$page['Png']:false);
       echo "</label><div class='content'>";
       $close = true;
     } else {
       if ($tab==1) echo "<div class='tab'><input type='radio' id='tab{$tab}' name='tabs'><div class='content shift'>";
       echo "<div id='title'><span class='left'>";
-      echo tab_title($title,$page['root']);
+      echo tab_title($title,$page['root'],isset($page['Png'])?$page['Png']:false);
       echo "</span></div>";
     }
     $tab++;
