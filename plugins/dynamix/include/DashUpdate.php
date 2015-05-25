@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2014, Bergware International.
- * Copyright 2014, Lime Technology
+/* Copyright 2015, Bergware International.
+ * Copyright 2015, Lime Technology
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -22,7 +22,7 @@ function my_smart(&$source,$name) {
   $last = isset($saved["smart"]["$name.5"]) ? $saved["smart"]["$name.5"] : 0;
   $smart = exec("grep -Po '^  5.+ \K\d+$' /var/local/emhttp/smart/$name");
   $thumb = $smart>$last ? 'bad' : 'good';
-  my_insert($source, "<a href=\"/Main/Data?name=$name\" onclick=\"$.cookie('one','tab2',{path:'/'})\" title=\"$smart reallocated sectors\"><img src=\"$path/$thumb.png\"></a>");
+  my_insert($source, "<a href=\"/Main/Device?name=$name\" onclick=\"$.cookie('one','tab2',{path:'/'})\" title=\"$smart reallocated sectors\"><img src=\"$path/$thumb.png\"></a>");
 }
 function my_usage(&$source,$used) {
   my_insert($source, $used ? "<div class='usage-disk all'><span style='width:$used'>$used</span></div>" : "-");

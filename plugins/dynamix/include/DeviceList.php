@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -29,12 +29,7 @@ function device_info($disk) {
   $href = $disk['name'];
   if ($href != 'preclear') {
     $name = my_disk($href);
-    $type = $name;
-    if (strpos($href,'disk') === 0) {
-      $type = "Data";
-    } else if (strpos($href,'cache') === 0) {
-      $type = "Cache";
-    }
+    $type = $disk['type'];
   } else {
     $name = $disk['device'];
     $type = 'Preclear';
@@ -62,6 +57,7 @@ function device_info($disk) {
     <img src='/webGui/images/green-blink.png' class='icon'>Device spun-down<br>
     <img src='/webGui/images/grey-off.png' class='icon'>No device present<br>
     </span></a>";
+    $device = "Device";
   } else if ($type=='Cache') {
     $status = "$arrow{$a}
     <img src='$ball' title='$title' class='icon' onclick=\"$.removeCookie('one',{path:'/'});\"><span{$left}>
@@ -70,10 +66,12 @@ function device_info($disk) {
     <img src='/webGui/images/green-blink.png' class='icon'>Device spun-down<br>
     <img src='/webGui/images/grey-off.png' class='icon'>No device present<br>
     </span></a>";
+    $device = "Device";
   } else {
     $status = "<img src='$ball' class='icon'>";
+    $device = "Flash";
   }
-  $link = strpos($disk['status'], 'DISK_NP')===false ? "<a href='$path/$type?name=$href'>$name</a>" : $name;
+  $link = strpos($disk['status'], 'DISK_NP')===false ? "<a href='$path/$device?name=$href'>$name</a>" : $name;
   return $status.$link;
 }
 function device_browse($disk) {

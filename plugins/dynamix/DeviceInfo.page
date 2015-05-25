@@ -1,4 +1,4 @@
-Menu="Parity:1 Data:1 Cache:1"
+Menu="Device:1"
 Title="$name Settings"
 Png="devicesettings.png"
 ---
@@ -35,7 +35,7 @@ $next = $i<$end ? $refs[$i+1] : $refs[0];
 ?>
 
 <script>
-var ctrl = "<span class='status vhshift'><a href='/Main/Data?name=<?=$prev?>' title='Previous'><button type='button' style='margin-right:4px'><i class='fa fa-chevron-left'></i></button></a><a href='/Main/Data?name=<?=$next?>' title='Next'><button type='button'><i class='fa fa-chevron-right'></i></button></a></span>";
+var ctrl = "<span class='status vhshift'><a href='/Main/Device?name=<?=$prev?>' title='Previous'><button type='button' style='margin-right:4px'><i class='fa fa-chevron-left'></i></button></a><a href='/Main/Device?name=<?=$next?>' title='Next'><button type='button'><i class='fa fa-chevron-right'></i></button></a></span>";
 
 function cleanUp() {
   if (document.hasFocus()) {
