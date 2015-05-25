@@ -27,7 +27,7 @@
 <style>
 .inline_help {display:none;}
 <?if (!$display['icons']):?>
-.tab [type=radio]+label img.icon {display:none;} #title img.icon {display:none;}
+.tab [type=radio]+label img.icon, #title img.icon {display:none;}
 <?endif;?>
 </style>
 
@@ -184,7 +184,7 @@ $(function() {
   Shadowbox.setup('a.sb-enable', {modal:true});
 <?if ($confirm['warn']):?>
   $('input[value="Apply"]').attr('disabled','disabled');
-  $('form').find('select,input[type=text],input[type=password],input[type=checkbox],textarea').each(function(){$(this).change(function(){$(this).parentsUntil('form').parent().find('input[value="Apply"]').removeAttr('disabled');});});
+  $('form').find('select,input[type=text],input[type=number],input[type=password],input[type=checkbox],textarea').each(function(){$(this).change(function(){$(this).parentsUntil('form').parent().find('input[value="Apply"]').removeAttr('disabled');});});
 <?endif;?>
   timers.watchdog = setTimeout(watchdog,50);
 });
