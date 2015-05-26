@@ -187,7 +187,7 @@ Spinup group(s):
 <?endif;?>
 
 &nbsp;
-: <input type="submit" name="changeDisk" value="Apply"><input type="button" value="Done" onclick="done()"><input type='button' value='Download' onclick='saveSMART()'>
+: <input type="submit" name="changeDisk" value="Apply"><input type="button" value="Done" onclick="done()"><input type='button' value='Download' onclick='saveSMART()' title="download SMART report">
 
 </form>
 <?if ($name=="cache" && $var['SYS_CACHE_SLOTS']>1):?>
