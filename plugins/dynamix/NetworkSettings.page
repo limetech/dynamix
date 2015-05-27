@@ -37,6 +37,7 @@ function checkBondingSettings() {
 $(checkNetworkSettings);
 $(checkBondingSettings);
 </script>
+<? $disabled = $var['fsState']!='Stopped' ? 'disabled' : ''; ?>
 <form markdown="1" name="network_settings" method="POST" action="/update.htm" target="progressFrame">
 
 MAC address:
@@ -148,7 +149,7 @@ DNS Server 3:
 
 > This is the DNS server to use if DNS Servers 1 and 2 are both down.
 
-<input type="reset" value="Reset" onclick="setTimeout(checkNetworkSettings,0)">
-: <input type="submit" name="changeNetwork" value="Apply"><input type="button" value="Done" onclick="done()">
+<?if ($disabled):?>&nbsp;<?else:?><input type="reset" value="Reset"><?endif;?>
+: <input type="submit" name="changeNetwork" value="Apply"><input type="button" value="Done" onclick="done()"><?=$disabled ? "Array must be <strong>Stopped</strong> to change" : ""?>
 
 </form>
