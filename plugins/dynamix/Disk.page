@@ -18,7 +18,7 @@ $refs = array(); $n = 0;
 
 foreach ($disks as $ref) {
   $dname = $ref['name'];
-  if ($dname=='parity' or preg_match('/cache[0-9]+/',$dname) or $ref['status']=='DISK_NP') continue;
+  if ($dname=='parity' || $dname=='flash' || preg_match('/cache[0-9]+/',$dname) || $disk['status']=='DISK_NP') continue;
   $refs[] = $dname;
   if ($dname==$name) $i = $n;
   $n++;

@@ -1,5 +1,6 @@
 Menu="Shares:1"
 Title="User Shares"
+Cond="$var['fsState']=="Started" && $var['shareUser']=='e'"
 ---
 <?PHP
 /* Copyright 2015, Lime Technology
@@ -15,11 +16,6 @@ Title="User Shares"
 ?>
 
 <?
-// User share data exists only if array is Started
-if ($var['fsState']!="Started") {
-  echo "<p class='notice'>Array must be <strong><big>started</big></strong> to view User Shares.</p>";
-  return;
-}
 // Display export settings
 function user_share_settings($protocol,$share) {
   if (empty($share)) return;

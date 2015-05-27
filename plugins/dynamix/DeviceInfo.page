@@ -24,7 +24,7 @@ $file = str_replace(' ','_',strtolower($var['NAME']))."-smart-".date('Ymd-Hi')."
 $refs = array(); $n = 0;
 
 foreach ($disks as $ref) {
-  if ($ref['name']=='flash' or $ref['status']=='DISK_NP') continue;
+  if ($ref['name']=='flash' || strpos($ref['status'],'_NP')) continue;
   $refs[] = $ref['name'];
   if ($ref['name']==$name) $i = $n;
   $n++;
@@ -70,7 +70,7 @@ function testUpdate(init) {
   });
 }
 function selftestLog() {
-  $('#testlog').toggle('slow');
+  $('#selftest').toggle('slow');
   var text = $('#toggle_log').val()=='Show' ? 'Hide' : 'Show';
   $('#toggle_log').val(text);
 }
@@ -115,6 +115,8 @@ $(function() {
 <?if (!$off):?>
   $('#toggle_log').removeAttr('disabled');
   $('#toggle_error').removeAttr('disabled');
+  $.post('/webGui/include/SmartInfo.php',{cmd:'selftest',port:'<?=$dev?>'},function(data) { $('#selftest').html(data); });
+  $.post('/webGui/include/SmartInfo.php',{cmd:'errorlog',port:'<?=$dev?>'},function(data) { $('#errorlog').html(data); });
 <?endif;?>
 });
 </script>
@@ -393,9 +395,7 @@ SMART self-test history:
 > Press **Show** to view the self-test history as is kept on the disk itself.
 > This feature is only available when the disk is in active mode.
 
-<?if (!$off):?>
-<pre id="testlog" style="display:none"><?=shell_exec("smartctl -l selftest /dev/$dev|awk 'NR>5'");?></pre>
-<?endif;?>
+<pre id="selftest" style="display:none"></pre>
 
 SMART error log:
 : <input type="button" value="Show" id="toggle_error" onclick="errorLog()" disabled>
@@ -403,9 +403,7 @@ SMART error log:
 > Press **Show** to view the error report as is kept on the disk itself.
 > This feature is only available when the disk is in active mode.
 
-<?if (!$off):?>
-<pre id="errorlog" style="display:none"><?=shell_exec("smartctl -l error /dev/$dev|awk 'NR>5'");?></pre>
-<?endif;?>
+<pre id="errorlog" style="display:none"></pre>
 
 SMART short self-test:
 : <input type='button' value='Start' id='short_test' onclick="startShortTest()" disabled>

@@ -93,5 +93,11 @@ case "update":
   }
   echo "<span class='red-text'><big>Errors occurred - Check SMART report</big></span>";
   break;
+case "selftest":
+  echo shell_exec("smartctl -l selftest /dev/$port|awk 'NR>5'");
+  break;
+case "errorlog":
+  echo shell_exec("smartctl -l error /dev/$port|awk 'NR>5'");
+  break;
 }
 ?>

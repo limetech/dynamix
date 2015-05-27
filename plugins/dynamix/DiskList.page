@@ -1,5 +1,6 @@
 Menu="Shares:2"
 Title="Disk Shares"
+Cond="$var['fsState']=="Started""
 ---
 <?PHP
 /* Copyright 2015, Lime Technology
@@ -15,11 +16,6 @@ Title="Disk Shares"
 ?>
 
 <?
-// User share data exists only if array is Started
-if ($var['fsState']!="Started") {
-  echo "<p class='notice'>Array must be <strong><big>started</big></strong> to view Disk Shares.</p>";
-  return;
-}
 // Display export settings
 function disk_share_settings($protocol,$share) {
   if (empty($share)) return;
@@ -50,7 +46,7 @@ $(function() {
 <?
 foreach ($disks as $disk):
   $name = $disk['name'];
-  if ($name=='parity' or preg_match('/cache[0-9]+/',$name) or $disk['status']=='DISK_NP') continue;
+  if ($name=='parity' || $name=='flash' || preg_match('/cache[0-9]+/',$name) || $disk['status']=='DISK_NP') continue;
   $device = my_disk($name);
   $color = $disk['color'];
   $id = $disk['id'];
@@ -73,10 +69,6 @@ foreach ($disks as $disk):
   <img src="/webGui/images/blue-on.png" class="icon">New device not in pool<br>
   <img src="/webGui/images/green-blink.png" class="icon">Device spun-down<br>
   </span></a><a href="<?=$path?>/Disk?name=<?=$name?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$device?></a></td>
-<?break;
-  case 'Flash':
-?><td><img src="/webGui/images/green-on.png" class="icon">
-  <a href="<?=$path?>/Disk?name=<?=$name?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$device?></a></td>
 <?break;
   endswitch;
 ?><td><?=$id?></td>
