@@ -15,11 +15,11 @@ Title="SMB Settings"
 ?>
 <form markdown="1" name="SMBEnable" method="POST" action="/update.htm" target="progressFrame">
 Enable SMB:
-: <select name="shareSMBEnabled" size="1">
+: <select name="shareSMBEnabled" size="1" <?if ($var['fsState']=="Started"):?>disabled<?endif;?>>
   <?=mk_option($var['shareSMBEnabled'], "no", "No")?>
   <?=mk_option($var['shareSMBEnabled'], "yes", "Yes (Workgroup)")?>
   <?=mk_option($var['shareSMBEnabled'], "ads", "Yes (Active Directory)")?>
-  </select><?if ($var['fsState']=="Started"):?>Array must be **Stopped** to change.<?endif;?>
+  </select>
 
 > Select 'Yes (Workgroup)' to enable SMB (Windows Networking) protocol support. This
 > also enables Windows host discovery.
@@ -30,7 +30,7 @@ Enable SMB:
 
 <?if ($var['fsState']=="Started"):?>
 <input type="reset" value="Reset">
-: <input type="submit" name="changeShare" value="Apply" disabled><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="changeShare" value="Apply" disabled><input type="button" value="Done" onclick="done()">Array must be **Stopped** to change
 <?else:?>
 <input type="reset" value="Reset">
 : <input type="submit" name="changeShare" value="Apply"><input type="button" value="Done" onclick="done()">

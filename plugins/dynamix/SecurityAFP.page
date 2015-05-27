@@ -1,10 +1,10 @@
-Menu="Cache Data Share"
+Menu="Disk Share"
 Title="AFP Security Settings"
-Cond="(($var['shareAFPEnabled']=='yes') && (isset($name)?array_key_exists($name,$sec_afp):0))"
+Cond="(($var['shareAFPEnabled']!='no') && (isset($name)?array_key_exists($name,$sec_afp):0))"
 ---
 <?PHP
-/* Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -28,7 +28,7 @@ $(checkShareSettingsAFP);
 <form markdown="1" name="afp_security_form" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="shareName" value="<?=$name;?>">
 Name:
-: <?=preg_match('/^(disk[0-9]|cache[0-9]?)/',$name) ? my_disk($name) : $name?>
+: <big><?=preg_match('/^(disk[0-9]|cache[0-9]?)/',$name) ? my_disk($name) : $name?></big>
 
 Export:
 : <select name="shareExportAFP" size="1" onchange="checkShareSettingsAFP()">
@@ -99,7 +99,7 @@ Security:
 <?if ($sec_afp[$name]['security'] == 'secure'):?>
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="shareName" value="<?=$name;?>">
-<div id="title"><dt>User Access</dt><em>Guests have <b>read-only</b> access.</em></div>
+<div id="title" class="nocontrol"><dt>User Access</dt><i>Guests have <b>read-only</b> access.</i></div>
 <?input_secure_users($sec_afp);?>
 
 <input type="reset" value="Reset">
@@ -109,7 +109,7 @@ Security:
 <?elseif ($sec_afp[$name]['security'] == 'private'):?>
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="shareName" value="<?=$name;?>">
-<div id="title"><dt>User Access</dt><em>Guests have <b>no</b> access.</em></div>
+<div id="title" class="nocontrol"><dt>User Access</dt><i>Guests have <b>no</b> access.</i></div>
 <?input_private_users($sec_afp);?>
 
 <input type="reset" value="Reset">
