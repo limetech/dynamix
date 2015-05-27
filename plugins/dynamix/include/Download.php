@@ -13,21 +13,19 @@
 <?
 switch ($_POST['cmd']) {
 case 'save':
-  $raw  = empty($_POST['raw']) ? false : $_POST['raw'];
+  $os  = empty($_POST['os']) ? false : $_POST['os'];
   $file = $_POST['file'];
   $root = $_POST['root'];
   $name = basename($file);
-  if ($raw == false) {
+  if ($os == false) {
     $tmp = "/var/tmp/$name.txt";
     $name .= '.zip';
     exec("todos <$file >$tmp");
     exec("zip -qj $root/$name $tmp");
     unlink($tmp);
-  } elseif ($raw == 'windows') {
-    $name .= '.rtf';
+  } elseif ($os == 'windows') {
     exec("todos <$file >$root/$name");
-  } elseif ($raw == 'unix') {
-    $name .= '.rtf';
+  } elseif ($os == 'unix') {
     exec("cp -f $file $root/$name");
   }
   echo "/$name";

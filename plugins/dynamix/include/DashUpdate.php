@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2014, Bergware International.
- * Copyright 2014, Lime Technology
+/* Copyright 2015, Bergware International.
+ * Copyright 2015, Lime Technology
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -20,9 +20,9 @@ function my_smart(&$source,$name) {
   global $path;
   $saved = @parse_ini_file("/var/local/emhttp/monitor.ini",true);
   $last = isset($saved["smart"]["$name.5"]) ? $saved["smart"]["$name.5"] : 0;
-  $smart = exec("awk '$1==5 {print $10}' /var/local/emhttp/smart/$name");
+  $smart = exec("grep -Po '^  5.+ \K\d+$' /var/local/emhttp/smart/$name");
   $thumb = $smart>$last ? 'bad' : 'good';
-  my_insert($source, "<a href=\"/Main/Data?name=$name\" onclick=\"$.cookie('one','tab2',{path:'/'})\" title=\"$smart reallocated sectors\"><img src=\"$path/$thumb.png\"></a>");
+  my_insert($source, "<a href=\"/Main/Device?name=$name\" onclick=\"$.cookie('one','tab2',{path:'/'})\" title=\"$smart reallocated sectors\"><img src=\"$path/$thumb.png\"></a>");
 }
 function my_usage(&$source,$used) {
   my_insert($source, $used ? "<div class='usage-disk all'><span style='width:$used'>$used</span></div>" : "-");
@@ -39,6 +39,12 @@ function my_clock($time) {
 }
 function plus($val,$word,$last) {
   return $val>0?(($val||$last)?($val.' '.$word.($val!=1?'s':'').($last ?'':', ')):''):'';
+}
+function mhz($speed) {
+  return "$speed MHz";
+}
+function rpm($speed) {
+  return "$speed RPM";
 }
 switch ($_POST['cmd']) {
 case 'disk':
@@ -99,18 +105,18 @@ case 'disk':
   echo "<tr>".implode('',$row7)."</tr>";
 break;
 case 'sys':
-  exec("awk '/^Mem(Total|Available)/ {print $2}' /proc/meminfo",$memory);
+  exec("grep -Po '^Mem(Total|Available):\s+\K\d+' /proc/meminfo",$memory);
   $cpu = min(@file_get_contents('state/cpuload.ini'),100);
   $mem = max(round((1-$memory[1]/$memory[0])*100),0);
   echo "{$cpu}%#{$mem}%";
 break;
 case 'cpu':
-  exec("awk '/^cpu MHz/ {printf\"%4.0f MHz\\n\", $4}' /proc/cpuinfo",$speeds);
-  echo implode('#',$speeds);
+  exec("grep -Po '^cpu MHz\s+: \K\d+' /proc/cpuinfo",$speeds);
+  echo implode('#',array_map('mhz',$speeds));
 break;
 case 'fan':
-  exec("sensors -uA 2>/dev/null|awk '/fan[0-9]_input/{print $2+0\" RPM\"}'",$rpms);
-  echo implode('#',$rpms);
+  exec("sensors -uA 2>/dev/null|grep -Po 'fan\d_input: \K\d+'",$rpms);
+  echo implode('#',array_map('rpm',$rpms));
 break;
 case 'port':
   switch ($_POST['view']) {
@@ -119,12 +125,12 @@ case 'port':
     foreach ($ports as $port) {
       unset($info);
       if ($port=='bond0') {
-        $ports[$i++] = exec("awk '/^Bonding Mode/' /proc/net/bonding/$port|cut -d: -f2");
+        $ports[$i++] = exec("grep -Po '^Bonding Mode: \K.+' /proc/net/bonding/bond0");
       } else if ($port=='lo') {
-        $ports[$i++] = str_replace('yes','loopback',exec("ethtool $port|awk '/Link detected/{print $3}'"));
+        $ports[$i++] = str_replace('yes','loopback',exec("ethtool lo|grep -Po '^\s+Link detected: \K.+'"));
       } else {
-        exec("ethtool $port|awk '/Speed:|Duplex:/{print $2}'",$info);
-        $ports[$i++] = $info[0][0]!='U' ? "{$info[0]} - ".strtolower($info[1])." duplex" : "not connected";
+        exec("ethtool $port|grep -Po '^\s+(Speed|Duplex): \K[^U]+'",$info);
+        $ports[$i++] = $info[0] ? "{$info[0]} - ".strtolower($info[1])." duplex" : "not connected";
       }
     }
   break;
@@ -142,7 +148,7 @@ case 'shares':
    $names = explode(',',$_POST['names']);
    switch ($_POST['com']) {
    case 'smb':
-     exec("lsof /mnt/user /mnt/disk* 2>/dev/null | awk '/^smbd/ && $0!~/\.AppleD(B|ouble)/ && $5==\"REG\"'|awk -F/ '{print $4}'",$lsof);
+     exec("lsof /mnt/user /mnt/disk* 2>/dev/null|awk '/^smbd/ && $0!~/\.AppleD(B|ouble)/ && $5==\"REG\"'|awk -F/ '{print $4}'",$lsof);
      $counts = array_count_values($lsof); $count = array();
      foreach ($names as $name) $count[] =  isset($counts[$name]) ? $counts[$name] : 0;
      echo implode('#',$count);

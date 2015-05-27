@@ -103,5 +103,5 @@ Excluded disk(s):
 > a subset of the Included/Excluded disks defined here.
 
 <?if ($disabled):?>&nbsp;<?else:?><input type="reset" value="Reset" onclick="setTimeout(check_cache_settings,0)"><?endif;?>
-: <input type="submit" name="changeShare" value="Apply" <?=$disabled?>><input type="button" value="Done" onclick="done()"> <?=$disabled ? "Array must be <strong>Stopped</strong> to change" : ""?>
+: <input type="submit" name="changeShare" value="Apply" <?=$disabled?>><input type="button" value="Done" onclick="done()"><?if ($disabled):?>Array must be **Stopped** to change<?endif;?>
 </form>

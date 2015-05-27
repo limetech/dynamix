@@ -981,6 +981,19 @@
 				$tmp = libvirt_domain_get_block_info($dom, $disks[$i]);
 				if ($tmp) {
 					$tmp['bus'] = $buses[$i];
+
+					// Libvirt reports 0 bytes for raw disk images that haven't been
+					// written to yet so we just report the raw disk size for now
+					if ( !empty($tmp['file']) &&
+						 $tmp['type'] == 'raw' &&
+						 empty($tmp['physical']) &&
+						 is_file($tmp['file']) ) {
+
+						$intSize = filesize($tmp['file']);
+						$tmp['physical'] = $intSize;
+						$tmp['capacity'] = $intSize;
+					}
+
 					$ret[] = $tmp;
 				}
 				else {
@@ -1076,16 +1089,16 @@
 			/* Autodetect unit that's appropriate */
 			if ($unit == '?') {
 				/* (1 << 40) is not working correctly on i386 systems */
-				if ($value > 1099511627776)
+				if ($value >= 1099511627776)
 					$unit = 'T';
 				else
-				if ($value > (1 << 30))
+				if ($value >= (1 << 30))
 					$unit = 'G';
 				else
-				if ($value > (1 << 20))
+				if ($value >= (1 << 20))
 					$unit = 'M';
 				else
-				if ($value > (1 << 10))
+				if ($value >= (1 << 10))
 					$unit = 'K';
 				else
 					$unit = 'B';
@@ -1094,10 +1107,10 @@
 			$unit = strtoupper($unit);
 
 			switch ($unit) {
-				case 'T': return number_format($value / (float)1099511627776, $decimals, '.', ' ').'T';
-				case 'G': return number_format($value / (float)(1 << 30), $decimals, '.', ' ').'G';
-				case 'M': return number_format($value / (float)(1 << 20), $decimals, '.', ' ').'M';
-				case 'K': return number_format($value / (float)(1 << 10), $decimals, '.', ' ').'k';
+				case 'T': return number_format($value / (float)1099511627776, $decimals).' TB';
+				case 'G': return number_format($value / (float)(1 << 30), $decimals).' GB';
+				case 'M': return number_format($value / (float)(1 << 20), $decimals).' MB';
+				case 'K': return number_format($value / (float)(1 << 10), $decimals).' KB';
 				case 'B': return $value.' B';
 			}
 

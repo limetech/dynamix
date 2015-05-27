@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -29,12 +29,7 @@ function device_info($disk) {
   $href = $disk['name'];
   if ($href != 'preclear') {
     $name = my_disk($href);
-    $type = $name;
-    if (strpos($href,'disk') === 0) {
-      $type = "Data";
-    } else if (strpos($href,'cache') === 0) {
-      $type = "Cache";
-    }
+    $type = $disk['type'];
   } else {
     $name = $disk['device'];
     $type = 'Preclear';
@@ -56,12 +51,13 @@ function device_info($disk) {
     $status = "$arrow{$a}
     <img src='$ball' title='$title' class='icon' onclick=\"$.removeCookie('one',{path:'/'});\"><span{$left}>
     <img src='/webGui/images/green-on.png' class='icon'>Normal operation<br>
-    <img src='/webGui/images/yellow-on.png' class='icon'>Content being reconstructed<br>
+    <img src='/webGui/images/yellow-on.png' class='icon'>Data in reconstruction<br>
     <img src='/webGui/images/red-off.png' class='icon'>Device disabled<br>
     <img src='/webGui/images/blue-on.png' class='icon'>New device not in array<br>
     <img src='/webGui/images/green-blink.png' class='icon'>Device spun-down<br>
     <img src='/webGui/images/grey-off.png' class='icon'>No device present<br>
     </span></a>";
+    $device = "Device";
   } else if ($type=='Cache') {
     $status = "$arrow{$a}
     <img src='$ball' title='$title' class='icon' onclick=\"$.removeCookie('one',{path:'/'});\"><span{$left}>
@@ -70,10 +66,12 @@ function device_info($disk) {
     <img src='/webGui/images/green-blink.png' class='icon'>Device spun-down<br>
     <img src='/webGui/images/grey-off.png' class='icon'>No device present<br>
     </span></a>";
+    $device = "Device";
   } else {
     $status = "<img src='$ball' class='icon'>";
+    $device = "Flash";
   }
-  $link = strpos($disk['status'], 'DISK_NP')===false ? "<a href='$path/$type?name=$href'>$name</a>" : $name;
+  $link = strpos($disk['status'], 'DISK_NP')===false ? "<a href='$path/$device?name=$href'>$name</a>" : $name;
   return $status.$link;
 }
 function device_browse($disk) {
@@ -132,7 +130,8 @@ function array_offline($disk) {
   switch ($disk['status']) {
   case "DISK_NP":
     echo "<td>".device_info($disk)."</td>";
-    echo "<td colspan='10'>".assignment($disk)."</td>";
+    echo "<td colspan='9'>".assignment($disk)."</td>";
+    echo "<td></td>";
   break;
   case "DISK_OK":
     echo "<td>".device_info($disk)."</td>";
@@ -145,7 +144,7 @@ function array_offline($disk) {
     echo "<td>-</td>";
     echo "<td>-</td>";
     echo "<td>{$disk['fsType']}</td>";
-    echo "<td></td>";
+    echo "<td>".($disk['name']!='parity' ? "<img src='/webGui/images/noview.png'>" : "")."</td>";
   break;
   case "DISK_OK_NP":
     echo "<td>".device_info($disk)."</td>";
@@ -189,7 +188,8 @@ function array_offline($disk) {
   case "DISK_NP_DSBL":
   if ($disk['name']=="parity") {
     echo "<td>".device_info($disk)."</td>";
-    echo "<td colspan='9'>".assignment($disk)."</td>";
+    echo "<td colspan='8'>".assignment($disk)."</td>";
+    echo "<td></td>";
   } else {
     echo "<td>".device_info($disk)."<span class='diskinfo'><em>Not installed</em></span></td>";
     echo "<td>".assignment($disk)."<em>{$disk['idSb']}</em></td>";
@@ -279,7 +279,8 @@ function array_online($disk) {
   case "DISK_NP":
 // Suppress empty slots to keep device list short
 //    echo "<td>".device_info($disk)."</td>";
-//    echo "<td colspan='10'>Not installed</td>";
+//    echo "<td colspan='9'>Not installed</td>";
+//    echo "<td></td>";
   break;
   case "DISK_OK_NP":
     echo "<td>".device_info($disk)."</td>";
@@ -296,7 +297,8 @@ function array_online($disk) {
   case "DISK_NP_DSBL":
     echo "<td>".device_info($disk)."</td>";
   if ($disk['name']=="parity") {
-    echo "<td colspan='10'>Not installed</td>";
+    echo "<td colspan='9'>Not installed</td>";
+    echo "<td></td>";
   } else {
     echo "<td><em>Not installed</em></td>";
     echo "<td>-</td>";
@@ -405,7 +407,7 @@ switch ($_POST['device']) {
 case 'array':
   if ($var['fsState']=='Stopped') {
     foreach ($disks as $disk) {if ($disk['type']=='Parity' || $disk['type']=='Data') array_offline($disk);}
-    echo "<tr class='tr_last'><td><img src='/webGui/images/sum.png' class='icon'>Slots:</td><td colspan='10'>".array_slots()."</td></tr>";
+    echo "<tr class='tr_last'><td><img src='/webGui/images/sum.png' class='icon'>Slots:</td><td colspan='9'>".array_slots()."</td><td></td></tr>";
   } else {
     foreach ($disks as $disk) {if ($disk['type']=='Parity' || $disk['type']=='Data') array_online($disk);}
     if ($display['total'] && $var['mdNumProtected']>1) show_totals("Array of ".my_word($var['mdNumDisks'])." devices");
@@ -438,8 +440,8 @@ break;
 case 'cache':
   if ($var['fsState']=='Stopped') {
     foreach ($disks as $disk) {if ($disk['type']=='Cache') array_offline($disk);}
-    echo "<tr class='tr_last'><td><img src='/webGui/images/sum.png' class='icon'>Slots:</td><td colspan='10'>".cache_slots()."</td></tr>";
-    echo "<tr><td colspan='11'></td></tr>";
+    echo "<tr class='tr_last'><td><img src='/webGui/images/sum.png' class='icon'>Slots:</td><td colspan='9'>".cache_slots()."</td><td></td></tr>";
+    echo "<tr><td colspan='10'></td><td></td></tr>";
   } else {
     foreach ($disks as $disk) {if ($disk['type']=='Cache') array_online($disk);}
     if ($display['total'] && $var['cacheSbNumDisks']>1) show_totals("Pool of ".my_word($var['cacheNumDevices'])." devices");
@@ -460,9 +462,9 @@ case 'open':
     if (file_exists("/tmp/preclear_stat_{$dev['device']}")) {
       $text = exec("cut -d'|' -f3 /tmp/preclear_stat_{$dev['device']} | sed 's:\^n:\<br\>:g'");
       if (strpos($text,'Total time')===false) $text = 'Preclear in progress... '.$text;
-      echo "<td colspan='7' style='text-align:right'><em>$text</em></td>";
+      echo "<td colspan='6' style='text-align:right'><em>$text</em></td><td></td>";
     } else
-      echo "<td colspan='7'></td>";
+      echo "<td colspan='6'></td><td></td>";
     echo "</tr>";
   }
 break;

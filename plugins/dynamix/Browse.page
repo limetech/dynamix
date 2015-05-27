@@ -1,4 +1,5 @@
 Title="Index of $dir"
+Png="dirindex.png"
 ---
 <?PHP
 /* Copyright 2014, Lime Technology

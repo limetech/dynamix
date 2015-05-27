@@ -27,7 +27,7 @@
 <style>
 .inline_help {display:none;}
 <?if (!$display['icons']):?>
-.tab [type=radio]+label img.icon {display:none;} #title img.icon {display:none;}
+.tab [type=radio]+label img.icon, #title img.icon {display:none;}
 <?endif;?>
 </style>
 
@@ -184,7 +184,7 @@ $(function() {
   Shadowbox.setup('a.sb-enable', {modal:true});
 <?if ($confirm['warn']):?>
   $('input[value="Apply"]').attr('disabled','disabled');
-  $('form').find('select,input[type=text],input[type=password],input[type=checkbox],textarea').each(function(){$(this).change(function(){$(this).parentsUntil('form').parent().find('input[value="Apply"]').removeAttr('disabled');});});
+  $('form').find('select,input[type=text],input[type=number],input[type=password],input[type=checkbox],textarea').each(function(){$(this).change(function(){$(this).parentsUntil('form').parent().find('input[value="Apply"]').removeAttr('disabled');});});
 <?endif;?>
   timers.watchdog = setTimeout(watchdog,50);
 });
@@ -247,13 +247,13 @@ foreach ($pages as $page) {
     eval("\$title=\"{$page['Title']}\";");
     if ($tabbed) {
       echo "<div class='tab'><input type='radio' id='tab{$tab}' name='tabs' onclick='settab(this.id)'><label for='tab{$tab}'>";
-      echo tab_title($title,$page['root']);
+      echo tab_title($title,$page['root'],isset($page['Png'])?$page['Png']:false);
       echo "</label><div class='content'>";
       $close = true;
     } else {
       if ($tab==1) echo "<div class='tab'><input type='radio' id='tab{$tab}' name='tabs'><div class='content shift'>";
       echo "<div id='title'><span class='left'>";
-      echo tab_title($title,$page['root']);
+      echo tab_title($title,$page['root'],isset($page['Png'])?$page['Png']:false);
       echo "</span></div>";
     }
     $tab++;
