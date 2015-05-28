@@ -43,7 +43,7 @@ and configuration files are collected:
 + */config*
   <br>copy all '*.cfg' files, 'go' file and the 'super.dat' file. These are configuration files.
 + */config/shares*
-  <br>copy all '*.cfg' files. These are the share definition files.
+  <br>copy all '*.cfg' files. These are the user share settings files.
 + *Syslog file*
   <br>copy the current 'syslog' file and copy any previous existing syslog files.
 + *Array*
@@ -53,6 +53,9 @@ and configuration files are collected:
 </pre>
 
 Clicking **Collect** will start the collection and may open a new window to allow local saving of the zip file.
+
+*No personal information such as user names, passwords, or any other file contents not specified above is included.  Note
+that your server name, IP address, and user share names* **will** *be included.*
 
 <input type="button" value="Collect" onclick="diagnostics()"><input type="button" value="Done" onclick="done()">
 
