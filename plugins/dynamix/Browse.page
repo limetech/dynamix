@@ -27,7 +27,7 @@ function sort_by($field, $opt, $show_disk) {
   $i = 0;
   exec("stat -L -c'%F|%n|%s|%Y' $path", $file);
   if ($show_disk)
-    exec("getfattr --absolute-names -n user.LOCATION $path | awk -F'\"' '/^user.LOCATION/ {print $2}'", $disk);
+    exec("getfattr --absolute-names -n user.LOCATIONS $path | awk -F'\"' '/^user.LOCATIONS/ {print $2}'", $disk);
   else
     $disk = array_fill(0, max(count($file),1), '');
   foreach ($file as $entry) {
