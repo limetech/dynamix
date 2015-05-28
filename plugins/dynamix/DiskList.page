@@ -96,7 +96,7 @@ foreach ($disks as $disk):
   endforeach;
   else:
   $cmd="$docroot/webGui/scripts/disk_size $name /var/local/emhttp/$name.ssz2";
-?><td><a href="/update.htm?cmd=<?=$cmd?>&runCmd=Start" target="progressFrame">Compute...</a></td>
+?><td><a href="/update.htm?cmd=<?=$cmd?>&runCmd=Start" target="progressFrame" onclick="$(this).text('Please wait...')">Compute...</a></td>
   <td><?=my_scale($disk['fsFree']*1024, $unit).' '.$unit?></td>
   <td><a href="<?=$path?>/Browse?dir=/mnt/<?=$name?>"><img src="/webGui/images/explore.png" title="Browse /mnt/<?=$name?>"></a></td>
   </tr>

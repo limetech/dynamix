@@ -77,7 +77,7 @@ foreach ($shares as $name => $share):
   endforeach;
   else:
   $cmd="$docroot/webGui/scripts/share_size '$name' /var/local/emhttp/'$name.ssz1'";
-?><td><a href="/update.htm?cmd=<?=$cmd?>&runCmd=Start" target="progressFrame">Compute...</a></td>
+?><td><a href="/update.htm?cmd=<?=$cmd?>&runCmd=Start" target="progressFrame" onclick="$(this).text('Please wait...')">Compute...</a></td>
   <td><?=my_scale($share['free']*1024, $unit).' '.$unit?></td>
   <td><a href="<?=$path?>/Browse?dir=/mnt/user/<?=urlencode($share['name'])?>"><img src="/webGui/images/explore.png" title="Browse /mnt/user/<?=urlencode($share['name'])?>"></a></td>
   </tr>
