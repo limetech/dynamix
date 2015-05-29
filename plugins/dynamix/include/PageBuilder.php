@@ -30,6 +30,7 @@ function find_pages($item) {
   global $site,$var,$disks,$devs,$users,$shares,$sec,$sec_nfs,$sec_afp,$name,$display;
   $pages = array();
   foreach ($site as $page) {
+    if (empty($page['Menu'])) continue;
     $menu = strtok($page['Menu'], ' ');
     while ($menu !== false) {
       $add = explode(':', $menu);
@@ -47,9 +48,9 @@ function find_pages($item) {
   return $pages;
 }
 
-function tab_title($text,$path) {
+function tab_title($text,$path,$png) {
   global $docroot;
-  $file = "$path/icons/".strtolower(str_replace(' ','',$text)).".png";
+  $file = "$path/icons/".($png ? $png : strtolower(str_replace(' ','',$text)).".png");
   if (!file_exists("$docroot/$file")) $file = "webGui/icons/default.png";
   return "<img src='/$file' class='icon'>".my_disk($text);
 }

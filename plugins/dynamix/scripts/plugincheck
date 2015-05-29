@@ -17,7 +17,7 @@ require_once "/usr/local/emhttp/webGui/include/Wrappers.php";
 $plugin = "/usr/local/sbin/plugin";
 $notify = "/usr/local/sbin/notify";
 
-exec("wget -qO /dev/null 127.0.0.1$(lsof -lbnPi4 -sTCP:LISTEN|awk '$1==\"emhttp\"{print substr($9,index($9,\":\"))}')/update.htm?cmdStatus=apply");
+exec("wget -qO /dev/null 127.0.0.1:$(lsof -lbnPi4 -sTCP:LISTEN|grep -Po '^emhttp .*TCP[^\d]+\K\d+')/update.htm?cmdStatus=apply");
 
 $var    = parse_ini_file("/var/local/emhttp/var.ini");
 $unraid = parse_plugin_cfg("dynamix",true);

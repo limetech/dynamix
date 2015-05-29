@@ -1,7 +1,7 @@
 <?PHP
 /* Copyright 2012, Andrew Hamer-Adams, http://www.pixeleyes.co.nz.
- * Copyright 2014, Bergware International.
- * Copyright 2014, Lime Technology
+ * Copyright 2015, Bergware International.
+ * Copyright 2015, Lime Technology
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -43,7 +43,7 @@ echo empty($var['SYS_MODEL']) ? 'N/A' : "{$var['SYS_MODEL']}";
 </div>
 <div><span style="width:90px;display:inline-block"><strong>M/B:</strong></span>
 <?
-echo exec("dmidecode -q -t 2|awk -F: '{if(/^\tManufacturer:/) m=$2; else if(/^\tProduct Name:/) p=$2} END{print m\" -\"p}'");
+echo exec("dmidecode -q -t 2|awk -F: '/^\tManufacturer:/{m=$2;}; /^\tProduct Name:/{p=$2;} END{print m\" -\"p}'");
 ?>
 </div>
 <div><span style="width:90px; display:inline-block"><strong>CPU:</strong></span>
@@ -52,57 +52,56 @@ function write($number) {
   $words = array('zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty');
   return $number<=count($words) ? $words[$number] : $number;
 }
-$cpu = explode('#',exec("dmidecode -q -t 4|awk -F: '{if(/^\tVersion:/) v=$2; else if(/^\tCurrent Speed:/) s=$2} END{print v\"#\"s}'"));
+$cpu = explode('#',exec("dmidecode -q -t 4|awk -F: '/^\tVersion:/{v=$2;}; /^\tCurrent Speed:/{s=$2;} END{print v\"#\"s}'"));
 $cpumodel = str_replace(array("Processor","(C)","(R)","(TM)"),array("","&#169;","&#174;","&#8482;"),$cpu[0]);
-if (strpos($cpumodel,'@')===false):
+if (strpos($cpumodel,'@')===false) {
   $cpuspeed = explode(' ',$cpu[1]);
-  if ($cpuspeed[0]>=1000 && $cpuspeed[1]=='MHz'):
+  if ($cpuspeed[0]>=1000 && $cpuspeed[1]=='MHz') {
     $cpuspeed[0] /= 1000;
     $cpuspeed[1] = 'GHz';
-  endif;
-  echo "$cpumodel @ {$cpuspeed[0]} {$cpuspeed[1]}";
-else:
+  }
+  echo "$cpumodel @ {$cpuspeed[0]}{$cpuspeed[1]}";
+} else {
   echo $cpumodel;
-endif;
+}
 ?>
 </div>
 <div><span style="width:90px; display:inline-block"><strong>Cache:</strong></span>
 <?
-$cache = explode('#',exec("dmidecode -q -t 7|awk -F: '{if(/^\tSocket Designation:/) c=c$2\";\"; else if(/^\tInstalled Size:/) s=s$2\";\"} END{print c\"#\"s}'"));
+$cache = explode('#',exec("dmidecode -q -t 7|awk -F: '/^\tSocket Designation:/{c=c$2\";\";}; /^\tInstalled Size:/{s=s$2\";\";} END{print c\"#\"s}'"));
 $socket = array_map('trim',explode(';',$cache[0]));
 $volume = array_map('trim',explode(';',$cache[1]));
 $name = array();
 $size = "";
-for ($i=0; $i<count($socket); $i++):
-  if ($volume[$i] && $volume[$i]!='0 kB' && !in_array($socket[$i],$name)):
+for ($i=0; $i<count($socket); $i++) {
+  if ($volume[$i] && $volume[$i]!='0 kB' && !in_array($socket[$i],$name)) {
     if ($size) $size .= ', ';
     $size .= $volume[$i];
     $name[] = $socket[$i];
-  endif;
-endfor;
+  }
+}
 echo $size;
 ?>
 </div>
 <div><span style="width:90px; display:inline-block"><strong>Memory:</strong></span>
 <?
-echo exec("dmidecode -q -t memory|awk '{if(/^\tMaximum Capacity:/){m=$3;u1=$4} else if(/^\tSize:/){t+=$2;if(length($3)==2){u2=$3}}} END{print t,u2\" (max. installable capacity \"m,u1\")\"}'");
+echo exec("dmidecode -q -t memory|awk '/^\tMaximum Capacity:/{m=$3;u1=$4;}; /^\tSize:/{t+=$2;if(length($3)==2){u2=$3};} END{print t,u2\" (max. installable capacity \"m,u1\")\"}'");
 ?>
 </div>
 <div><span style="width:90px; display:inline-block"><strong>Network:</strong></span>
 <?
-exec("ifconfig -s|awk '/^(bond|eth)/{print $1}'",$sPorts);
+exec("ifconfig -s|grep -Po '^(bond|eth)\d+'",$sPorts);
 $i = 0;
-foreach ($sPorts as $port):
-  unset($info);
+foreach ($sPorts as $port) {
   if ($i++) echo "<br><span style='width:94px; display:inline-block'>&nbsp;</span>";
-  if ($port=='bond0'):
-    $mode = exec("awk '/^Bonding Mode/' /proc/net/bonding/$port|cut -d: -f2");
-    echo "$port: {$mode}";
-  else:
-    exec("ethtool $port|awk '/Speed:|Duplex:/{print $2}'",$info);
-    echo $info[0][0]!='U' ? "$port: {$info[0]} - {$info[1]} Duplex" : "$port: not connected";
-  endif;
-endforeach;
+  if ($port=='bond0') {
+    echo "$port: ".exec("grep -Po '^Bonding Mode: \K.+' /proc/net/bonding/bond0");
+  } else {
+    unset($info);
+    exec("ethtool $port|grep -Po '^\s+(Speed|Duplex): \K[^U]+'",$info);
+    echo $info[0] ? "$port: {$info[0]} - {$info[1]} Duplex" : "$port: not connected";
+  }
+}
 ?>
 </div>
 <div><span style="width:90px;display:inline-block"><strong>Kernel:</strong></span>
@@ -114,9 +113,10 @@ endforeach;
   echo $openssl_ver;
 ?></div>
 <div><span style="width:94px; display:inline-block"><strong>Uptime:</strong></span><span id="uptime"></span></div>
-<center>
+<center><br>
+<input type="button" value="Close" onclick="top.Shadowbox.close()">
 <?if ($_GET['more']):?>
-<a href="<?=$_GET['more']?>" class="button" target="_parent" style="margin-top:10px">More Info</a>
+<a href="<?=$_GET['more']?>" class="button" target="_parent">More</a>
 <?endif;?>
 </center>
 </body>
