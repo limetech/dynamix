@@ -44,7 +44,7 @@ if ($action) {
       $capacity = str_replace(array("KB","MB","GB","TB","PB", " ", ","), array("K","M","G","T","P", "", ""), strtoupper($_POST['cap']));
       $oldcap = str_replace(array("KB","MB","GB","TB","PB", " ", ","), array("K","M","G","T","P", "", ""), strtoupper($_GET['oldcap']));
 			if (substr($oldcap,0,-1) < substr($capacity,0,-1)){
-				shell_exec("qemu-img resize -q {$_GET['disk']} $capacity");
+				shell_exec("qemu-img resize -q " . escapeshellarg($_GET['disk']) . " $capacity");
 				$msg = $domName." disk capacity has been changed to $capacity";
 			}else {
 				$msg = "Error: disk capacity has to be greater than {$_GET['oldcap']}";
