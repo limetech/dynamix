@@ -26,7 +26,7 @@
 $root = '/';
 if( !$root ) exit("ERROR: Root filesystem directory not set in jqueryFileTree.php");
 
-$postDir = rawurldecode($root.(isset($_POST['dir']) ? $_POST['dir'] : null ));
+$postDir = $root.(isset($_POST['dir']) ? $_POST['dir'] : '' );
 if (substr($postDir, -1) != '/') {
 	$postDir .= '/';
 }
@@ -48,14 +48,14 @@ if( file_exists($postDir) ) {
 		echo "<ul class='jqueryFileTree'>";
 
 		// All dirs
-		if ($_POST['show_parent'] == "true" ) echo "<li class='directory collapsed'>{$checkbox}<a href='#' rel='" .dirname($returnDir). "/'>..</a></li>";
+		if ($_POST['show_parent'] == "true" ) echo "<li class='directory collapsed'>{$checkbox}<a href='#' rel='" . htmlentities(dirname($returnDir), ENT_QUOTES) . "/'>..</a></li>";
 		foreach( $files as $file ) {
 			if( file_exists($postDir . $file) && $file != '.' && $file != '..' ) {
 				if( is_dir($postDir . $file) ) {
-					$htmlRel	= htmlentities($returnDir . $file);
+					$htmlRel	= htmlentities($returnDir . $file, ENT_QUOTES);
 					$htmlName	= htmlentities((strlen($file) > 33) ? substr($file,0,33).'...' : $file);
 
-					echo "<li class='directory collapsed'>{$checkbox}<a href='#' rel='" .$htmlRel. "/'>" . $htmlName . "</a></li>";
+					echo "<li class='directory collapsed'>{$checkbox}<a href='#' rel='" . $htmlRel . "/'>" . $htmlName . "</a></li>";
 				}
 			}
 		}
@@ -64,7 +64,7 @@ if( file_exists($postDir) ) {
 		foreach( $files as $file ) {
 			if( file_exists($postDir . $file) && $file != '.' && $file != '..' ) {
 				if( !is_dir($postDir . $file) ) {
-					$htmlRel	= htmlentities($returnDir . $file);
+					$htmlRel	= htmlentities($returnDir . $file, ENT_QUOTES);
 					$htmlName	= htmlentities($file);
 					$ext		= strtolower(preg_replace('/^.*\./', '', $file));
 

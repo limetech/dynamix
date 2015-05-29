@@ -270,7 +270,7 @@
 			if (!empty($template)) {
 				$template_options = '';
 				foreach ($template as $key => $value) {
-					$template_options .= $key . "='" . htmlspecialchars($value) . "' ";
+					$template_options .= $key . "='" . htmlspecialchars($value, ENT_QUOTES | ENT_XML1) . "' ";
 				}
 				$metadata = "<metadata><vmtemplate " . $template_options . "/></metadata>";
 			}
@@ -362,7 +362,7 @@
 				$arrUsedBootOrders[] = 2;
 				$mediastr = "<disk type='file' device='cdrom'>
 								<driver name='qemu'/>
-								<source file='{$media['cdrom']}'/>
+								<source file='" . htmlspecialchars($media['cdrom'], ENT_QUOTES | ENT_XML1) . "'/>
 								<target dev='hda' bus='$bus'/>
 								<readonly/>
 								<boot order='2'/>
@@ -374,7 +374,7 @@
 				unset($arrAvailableDevs['hdb']);
 				$driverstr = "<disk type='file' device='cdrom'>
 								<driver name='qemu'/>
-								<source file='{$media['drivers']}'/>
+								<source file='" . htmlspecialchars($media['drivers'], ENT_QUOTES | ENT_XML1) . "'/>
 								<target dev='hdb' bus='$bus'/>
 								<readonly/>
 							</disk>";
@@ -474,8 +474,8 @@
 							$strSourceType = ($strDevType == 'file' ? 'file' : 'dev');
 
 							$diskstr .= "<disk type='" . $strDevType . "' device='disk'>
-											<driver name='qemu' type='" . $disk['driver'] . "' cache='none' io='native'/>
-											<source " . $strSourceType . "='" . $disk['image'] . "'/>
+											<driver name='qemu' type='" . $disk['driver'] . "' cache='writeback'/>
+											<source " . $strSourceType . "='" . htmlspecialchars($disk['image'], ENT_QUOTES | ENT_XML1) . "'/>
 											<target bus='" . $disk['bus'] . "' dev='" . $disk['dev'] . "'/>
 											$bootorder
 										</disk>";
@@ -493,7 +493,7 @@
 
 					$netstr .= "<interface type='bridge'>
 									<mac address='{$nic['mac']}'/>
-									<source bridge='{$nic['network']}'/>
+									<source bridge='" . htmlspecialchars($nic['network'], ENT_QUOTES | ENT_XML1) . "'/>
 									<model type='virtio'/>
 								</interface>";
 				}
@@ -507,15 +507,15 @@
 					}
 
 					$sharestr .= "<filesystem type='mount' accessmode='passthrough'>
-										<source dir='".$share['source']."'/>
-										<target dir='".$share['target']."'/>
+										<source dir='" . htmlspecialchars($share['source'], ENT_QUOTES | ENT_XML1) . "'/>
+										<target dir='" . htmlspecialchars($share['target'], ENT_QUOTES | ENT_XML1) . "'/>
 									</filesystem>";
 				}
 			}
 
 			$passwdstr = '';
 			if (!empty($domain['password'])){
-				$passwdstr = "passwd='" . $domain['password'] . "'";
+				$passwdstr = "passwd='" . htmlspecialchars($domain['password'], ENT_QUOTES | ENT_XML1) . "'";
 			}
 
 			$pcidevs='';
@@ -682,7 +682,7 @@
 			return "<domain type='$type' xmlns:qemu='http://libvirt.org/schemas/domain/qemu/1.0'>
 						<uuid>$uuid</uuid>
 						<name>$name</name>
-						<description>{$domain['desc']}</description>
+						<description>" . htmlspecialchars($domain['desc'], ENT_QUOTES | ENT_XML1) . "</description>
 						$metadata
 						<currentMemory>$mem</currentMemory>
 						<memory>$maxmem</memory>
