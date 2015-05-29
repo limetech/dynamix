@@ -474,7 +474,7 @@
 							$strSourceType = ($strDevType == 'file' ? 'file' : 'dev');
 
 							$diskstr .= "<disk type='" . $strDevType . "' device='disk'>
-											<driver name='qemu' type='" . $disk['driver'] . "' cache='none' io='native'/>
+											<driver name='qemu' type='" . $disk['driver'] . "' cache='writeback'/>
 											<source " . $strSourceType . "='" . htmlspecialchars($disk['image'], ENT_QUOTES | ENT_XML1) . "'/>
 											<target bus='" . $disk['bus'] . "' dev='" . $disk['dev'] . "'/>
 											$bootorder
