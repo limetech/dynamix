@@ -86,7 +86,7 @@ if(jQuery) (function($){
 							options.root = data.rel;
 							root = $(this).closest('ul.jqueryFileTree');
 							root.html('<ul class="jqueryFileTree start"><li class="wait">' + options.loadMessage + '<li></ul>');
-							showTree( $(root), escape(options.root), options.allowBrowsing );
+							showTree( $(root), options.root, options.allowBrowsing );
 						} else if( $(this).parent().hasClass('directory') ) {
 							if( $(this).parent().hasClass('collapsed') ) {
 								// Expand
@@ -99,7 +99,7 @@ if(jQuery) (function($){
 
 								$(this).parent().removeClass('collapsed').addClass('expanded');
 								$(this).parent().find('UL').remove(); // cleanup
-								showTree( $(this).parent(), encodeURIComponent($(this).attr('rel').match( /.*\// )), false );
+								showTree( $(this).parent(), $(this).attr('rel').match( /.*\// )[0], false );
 							} else {
 								// Collapse
 								_trigger($(this), 'filetreecollapse', data);
@@ -130,7 +130,7 @@ if(jQuery) (function($){
 				$(this).html('<ul class="jqueryFileTree start"><li class="wait">' + options.loadMessage + '<li></ul>');
 
 				// Get the initial file list
-				showTree( $(this), escape(options.root), options.allowBrowsing );
+				showTree( $(this), options.root, options.allowBrowsing );
 
 				// wrapper to append trigger type to data
 				function _trigger(element, eventType, data) {

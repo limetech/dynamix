@@ -201,14 +201,14 @@ if (!empty($arrTemplates) && !in_array($strSelectedTemplate, $arrTemplates)) {
 	<table>
 		<tr>
 			<td>Icon:</td>
-			<td><input type="hidden" name="template[icon]" id="template_icon" value="<?=$arrLoad['icon']?>" /><img id="template_img" src="<?=$strIconURL?>" width="48" height="48" /></td>
+			<td><input type="hidden" name="template[icon]" id="template_icon" value="<?=$arrLoad['icon']?>" /><img id="template_img" src="<?=htmlentities($strIconURL)?>" width="48" height="48" /></td>
 		</tr>
 	</table>
 
 	<table>
 		<tr class="non_expert_xml">
 			<td>Name:</td>
-			<td><input type="text" name="domain[name]" class="textTemplate" title="Name of virtual machine" placeholder="e.g. My Workstation" value="<?=$arrLoad['name']?>" /></td>
+			<td><input type="text" name="domain[name]" class="textTemplate" title="Name of virtual machine" placeholder="e.g. My Workstation" value="<?=htmlentities($arrLoad['name'])?>" /></td>
 		</tr>
 	</table>
 	<div class="non_expert_xml">
@@ -220,7 +220,7 @@ if (!empty($arrTemplates) && !in_array($strSelectedTemplate, $arrTemplates)) {
 	<table>
 		<tr class="non_expert_xml">
 			<td>Description:</td>
-			<td><input type="text" name="domain[desc]" title="description of virtual machine" placeholder="description of virtual machine (optional)" value="<?=$arrLoad['desc']?>" /></td>
+			<td><input type="text" name="domain[desc]" title="description of virtual machine" placeholder="description of virtual machine (optional)" value="<?=htmlentities($arrLoad['desc'])?>" /></td>
 		</tr>
 	</table>
 	<div class="non_expert_xml">
