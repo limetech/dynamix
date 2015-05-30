@@ -34,14 +34,17 @@ foreach (glob("state/*.ssz2", GLOB_NOSORT) as $entry) {
   }
 }
 ?>
-<script>
-$(function() {
-  if (window.innerWidth>1590) $('span.disks').addClass('left');
-});
-</script>
-
 <table class="share_status share <?=$display['view']?>">
-<thead><tr><td style="width:15%">Name</td><td style="width:33%">Identity</td><td>SMB</td><td>NFS</td><td>AFP</td><td>Size</td><td>Free</td><td>View</td></tr></thead>
+<thead><tr><td style="width:15%"><a href="#" class="info nohand none" onclick="return false">Name*<span>
+ <center><b>Device Status Legend</b></center><hr>
+ <img src='/webGui/images/green-on.png' class='icon'>Normal operation<br>
+ <img src='/webGui/images/grey-off.png' class='icon'>No device present<br>
+ <img src='/webGui/images/yellow-on.png' class='icon'>Data in reconstruction<br>
+ <img src='/webGui/images/red-on.png' class='icon'>Device in error (emulated)<br>
+ <img src='/webGui/images/red-off.png' class='icon'>Device disabled<br>
+ <img src='/webGui/images/blue-on.png' class='icon'>New device not in array<br>
+ <img src='/webGui/images/green-blink.png' class='icon'>Device spun-down<br>
+</span></a></td><td style="width:33%">Identity</td><td>SMB</td><td>NFS</td><td>AFP</td><td>Size</td><td>Free</td><td>View</td></tr></thead>
 <tbody>
 <?
 foreach ($disks as $disk):
@@ -53,22 +56,10 @@ foreach ($disks as $disk):
 ?><tr>
 <?switch ($disk['type']):
   case 'Data':
-?><td><a href="#" class="info nohand" onclick="return false">
-  <img src="/webGui/images/<?=$color?>.png" class="icon"><span class="disks">
-  <img src="/webGui/images/green-on.png" class="icon">Normal operation<br>
-  <img src="/webGui/images/yellow-on.png" class="icon">Data in reconstruction<br>
-  <img src="/webGui/images/red-off.png" class="icon">Device disabled<br>
-  <img src="/webGui/images/blue-on.png" class="icon">New device not in array<br>
-  <img src="/webGui/images/green-blink.png" class="icon">Device spun-down<br>
-  </span></a><a href="<?=$path?>/Disk?name=<?=$name?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$device?></a></td>
+?><td><img src="/webGui/images/<?=$color?>.png" class="icon"><a href="<?=$path?>/Disk?name=<?=$name?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$device?></a></td>
 <?break;
   case 'Cache':
-?><td><a href="#" class="info nohand" onclick="return false">
-  <img src="/webGui/images/<?=$color?>.png" class="icon"><span class="disks">
-  <img src="/webGui/images/green-on.png" class="icon">Normal operation<br>
-  <img src="/webGui/images/blue-on.png" class="icon">New device not in pool<br>
-  <img src="/webGui/images/green-blink.png" class="icon">Device spun-down<br>
-  </span></a><a href="<?=$path?>/Disk?name=<?=$name?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$device?></a></td>
+?><td><img src="/webGui/images/<?=$color?>.png" class="icon"><a href="<?=$path?>/Disk?name=<?=$name?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$device?></a></td>
 <?break;
   endswitch;
 ?><td><?=$id?></td>

@@ -36,40 +36,20 @@ function device_info($disk) {
     $href = "{$disk['device']}&file=$screen";
   }
   $action = strpos($disk['color'],'blink')===false ? "down" : "up";
-  $a = "<a href='#' class='info nohand' onclick='return false'>";
-  $title = "";
-  $arrow = "";
-  if ($display['spin'] && $disk['rotational']==1 && $var['fsState']=='Started') {
-    $a = "<a href='update.htm?cmdSpin{$action}={$href}' class='info' target='progressFrame'>";
-    $title = "Spin $action";
-    $arrow = "<i class='fa fa-sort-$action spacing'></i>";
-  }
+  if ($display['spin'] && $disk['rotational']==1 && $var['fsState']=='Started')
+    $a = "<a href='update.htm?cmdSpin{$action}={$href}' title='Click to spin $action device' class='none' target='progressFrame' onclick=\"$.removeCookie('one',{path:'/'});\"><i class='fa fa-sort-$action spacing'></i></a>";
+  else
+    $a = "";
   $ball = "/webGui/images/{$disk['color']}.png";
-  $left = $width>1590 ? " class='left'" : "";
-
-  if ($type=='Parity' || $type=='Data' || $type=='Preclear') {
-    $status = "$arrow{$a}
-    <img src='$ball' title='$title' class='icon' onclick=\"$.removeCookie('one',{path:'/'});\"><span{$left}>
-    <img src='/webGui/images/green-on.png' class='icon'>Normal operation<br>
-    <img src='/webGui/images/yellow-on.png' class='icon'>Data in reconstruction<br>
-    <img src='/webGui/images/red-off.png' class='icon'>Device disabled<br>
-    <img src='/webGui/images/blue-on.png' class='icon'>New device not in array<br>
-    <img src='/webGui/images/green-blink.png' class='icon'>Device spun-down<br>
-    <img src='/webGui/images/grey-off.png' class='icon'>No device present<br>
-    </span></a>";
+  switch ($type) {
+  case 'Parity': case 'Data': case 'Cache': case 'Preclear':
+    $status = "${a}<img src='$ball' class='icon'>";
     $device = "Device";
-  } else if ($type=='Cache') {
-    $status = "$arrow{$a}
-    <img src='$ball' title='$title' class='icon' onclick=\"$.removeCookie('one',{path:'/'});\"><span{$left}>
-    <img src='/webGui/images/green-on.png' class='icon'>Normal operation<br>
-    <img src='/webGui/images/blue-on.png' class='icon'>New device, not in pool<br>
-    <img src='/webGui/images/green-blink.png' class='icon'>Device spun-down<br>
-    <img src='/webGui/images/grey-off.png' class='icon'>No device present<br>
-    </span></a>";
-    $device = "Device";
-  } else {
+    break;
+  default:
     $status = "<img src='$ball' class='icon'>";
     $device = "Flash";
+    break;
   }
   $link = strpos($disk['status'], 'DISK_NP')===false ? "<a href='$path/$device?name=$href'>$name</a>" : $name;
   return $status.$link;

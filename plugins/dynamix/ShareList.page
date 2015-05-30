@@ -34,24 +34,18 @@ foreach (glob("state/*.ssz1", GLOB_NOSORT) as $entry) {
   }
 }
 ?>
-<script>
-$(function() {
-  if (window.innerWidth>1590) $('span.shares').addClass('left');
-});
-</script>
-
 <table class="share_status share <?=$display['view']?>">
-<thead><tr><td style="width:15%">Name</td><td style="width:33%">Comment</td><td>SMB</td><td>NFS</td><td>AFP</td><td>Size</td><td>Free</td><td>View</td></tr></thead>
+<thead><tr><td style="width:15%"><a href="#" class="info nohand none" onclick="return false">Name*<span>
+ <center><b>Share Status Legend</b></center><hr>
+ <img src="/webGui/images/green-on.png" class="icon">All files on array<br>
+ <img src="/webGui/images/yellow-on.png" class="icon">Cache contains files<br>
+ <img src="/webGui/images/red-on.png" class="icon">All files remain on cache<br>
+</span></a></td><td style="width:33%">Comment</td><td>SMB</td><td>NFS</td><td>AFP</td><td>Size</td><td>Free</td><td>View</td></tr></thead>
 <tbody>
 <?
 foreach ($shares as $name => $share):
 ?><tr>
-  <td><a href="#" class="info nohand" onclick="return false">
-  <img src="/webGui/images/<?=$share['color']?>.png" class="icon"><span class="shares">
-  <img src="/webGui/images/green-on.png" class="icon">All files on array<br>
-  <img src="/webGui/images/yellow-on.png" class="icon">Cache contains files<br>
-  <img src="/webGui/images/red-on.png" class="icon">All files remain on cache<br>
-  </span></a><a href="<?=$path?>/Share?name=<?=urlencode($name)?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$share['name']?></a></td>
+  <td><img src="/webGui/images/<?=$share['color']?>.png" class="icon"><a href="<?=$path?>/Share?name=<?=urlencode($name)?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$share['name']?></a></td>
   <td><?=$share['comment']?></td>
   <td><?=user_share_settings($var['shareSMBEnabled'], $sec[$name])?></td>
   <td><?=user_share_settings($var['shareNFSEnabled'], $sec_nfs[$name])?></td>
