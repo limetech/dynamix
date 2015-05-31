@@ -94,11 +94,9 @@ endforeach;
 >
 > <img src='/webGui/images/green-blink.png' class='icon'>Device is spun-down.
 >
-> <img src='/webGui/images/yellow-on.png' class='icon'>Data contents of the device are invalid. The parity disk has this status when Parity-Sync is taking place. A data disk has this status during data reconstruction.
+> <img src='/webGui/images/yellow-on.png' class='icon'>Data contents of the device are invalid and are being reconstructed.
 >
-> <img src='/webGui/images/red-on.png' class='icon'>Device is in error, contents are being emulated, the corresponding hard disk is still present but no I/O is taking place.
->
-> <img src='/webGui/images/red-off.png' class='icon'>Device is disabled, the corresponding hard disk is not present.
+> <img src='/webGui/images/red-on.png' class='icon'>Device is in error or disabled, contents are being emulated.
 >
 > <img src='/webGui/images/blue-on.png' class='icon'>New device not part of the array, it can be formatted to make it a member.
 >
