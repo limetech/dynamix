@@ -20,7 +20,7 @@ $devs    = parse_ini_file("state/devs.ini",true);
 $disks   = parse_ini_file("state/disks.ini",true);
 $screen  = '/tmp/screen_buffer';
 
-$temps=0; $counts=0; $fsSize=0; $fsUsed=0; $fsFree=0; $reads=0; $writes=0; $errors=0;
+$temps=0; $counts=0; $tot_size=0; $tot_used=0; $tot_free=0; $reads=0; $writes=0; $errors=0;
 
 extract(parse_plugin_cfg("dynamix",true));
 
@@ -105,12 +105,12 @@ function render_used_and_free($disk) {
     echo "<td>-</td><td>-</td>";
   } else if ($disk['fsStatus']=='Mounted') {
     if (!$display['text']) {
-      echo "<td>".my_scale($disk['fsUsed']*1024, $unit)." $unit</td>";
+      echo "<td>".my_scale($disk['used']*1024, $unit)." $unit</td>";
       echo "<td>".my_scale($disk['fsFree']*1024, $unit)." $unit</td>";
     } else {
-      $free = round(100*$disk['fsFree']/$disk['fsSize']);
+      $free = round(100*$disk['fsFree']/$disk['size']);
       $used = 100-$free;
-      echo "<td><div class='usage-disk'><span style='margin:0;width:{$used}%' class='".usage_color($used,false)."'><span>".my_scale($disk['fsUsed']*1024, $unit)." $unit</span></span></div></td>";
+      echo "<td><div class='usage-disk'><span style='margin:0;width:{$used}%' class='".usage_color($used,false)."'><span>".my_scale($disk['used']*1024, $unit)." $unit</span></span></div></td>";
       echo "<td><div class='usage-disk'><span style='margin:0;width:{$free}%' class='".usage_color($free,true)."'><span>".my_scale($disk['fsFree']*1024, $unit)." $unit</span></span></div></td>";
     }
   } else {
@@ -252,7 +252,7 @@ function array_offline($disk) {
   echo "</tr>";
 }
 function array_online($disk) {
-  global $display, $temps, $counts, $fsSize, $fsUsed, $fsFree, $reads, $writes, $errors;
+  global $display, $temps, $counts, $tot_size, $tot_used, $tot_free, $reads, $writes, $errors;
   if (is_numeric($disk['temp'])) {
     $temps += $disk['temp'];
     $counts++;
@@ -261,10 +261,10 @@ function array_online($disk) {
   $writes += $disk['numWrites'];
   $errors += $disk['numErrors'];
   if (isset($disk['fsFree']) && $disk['name']!='parity') {
-    $disk['fsUsed'] = $disk['fsSize'] - $disk['fsFree'];
-    $fsSize += $disk['size'];
-    $fsFree += $disk['fsFree'];
-    $fsUsed += $disk['fsUsed'];
+    $disk['used'] = $disk['size'] - $disk['fsFree'];
+    $tot_size += $disk['size'];
+    $tot_free += $disk['fsFree'];
+    $tot_used += $disk['used'];
   }
   echo "<tr>";
   switch ($disk['status']) {
@@ -336,21 +336,21 @@ function read_disk($device, $item) {
   }
 }
 function show_totals($text) {
-  global $var, $display, $temps, $counts, $fsSize, $fsUsed, $fsFree, $reads, $writes, $errors;
+  global $var, $display, $temps, $counts, $tot_size, $tot_used, $tot_free, $reads, $writes, $errors;
   echo "<tr class='tr_last'>";
   echo "<td><img src='/webGui/images/sum.png' class='icon'>Total</td>";
   echo "<td>$text</td>";
   echo "<td>".($counts>0?my_temp(round($temps/$counts, 1)):'*')."</td>";
   if ($var['startMode'] == "Normal") {
-    echo "<td>".my_scale($fsSize*1024, $unit)." $unit</td>";
+    echo "<td>".my_scale($tot_size*1024, $unit)." $unit</td>";
     if (!$display['text']) {
-      echo "<td>".my_scale($fsUsed*1024, $unit)." $unit</td>";
-      echo "<td>".my_scale($fsFree*1024, $unit)." $unit</td>";
+      echo "<td>".my_scale($tot_used*1024, $unit)." $unit</td>";
+      echo "<td>".my_scale($tot_free*1024, $unit)." $unit</td>";
     } else {
-      $free = round(100*$fsFree/$fsSize);
+      $free = round(100*$tot_free/$tot_size);
       $used = 100-$free;
-      echo "<td><div class='usage-disk'><span style='margin:0;width:{$used}%' class='".usage_color($used,false)."'><span>".my_scale($fsUsed*1024, $unit)." $unit</span></span></div></td>";
-      echo "<td><div class='usage-disk'><span style='margin:0;width:{$free}%' class='".usage_color($free,true)."'><span>".my_scale($fsFree*1024, $unit)." $unit</span></span></div></td>";
+      echo "<td><div class='usage-disk'><span style='margin:0;width:{$used}%' class='".usage_color($used,false)."'><span>".my_scale($tot_used*1024, $unit)." $unit</span></span></div></td>";
+      echo "<td><div class='usage-disk'><span style='margin:0;width:{$free}%' class='".usage_color($free,true)."'><span>".my_scale($tot_free*1024, $unit)." $unit</span></span></div></td>";
     }
   } else {
     echo "<td>-</td>";
@@ -407,19 +407,19 @@ case 'array':
 break;
 case 'flash':
   $disk = &$disks['flash'];
-  $disk['fsUsed'] = $disk['size'] - $disk['fsFree'];
+  $disk['used'] = $disk['size'] - $disk['fsFree'];
   echo "<tr>";
   echo "<td>".device_info($disk)."</td>";
   echo "<td>".device_desc($disk)."</td>";
   echo "<td>*</td>";
   echo "<td>".my_scale($disk['size']*1024, $unit)." $unit</td>";
   if (!$display['text']) {
-    echo "<td>".my_scale($disk['fsUsed']*1024, $unit)." $unit</td>";
+    echo "<td>".my_scale($disk['used']*1024, $unit)." $unit</td>";
     echo "<td>".my_scale($disk['fsFree']*1024, $unit)." $unit</td>";
   } else {
     $free = round(100*$disk['fsFree']/$disk['size']);
     $used = 100-$free;
-    echo "<td><div class='usage-disk'><span style='margin:0;width:{$used}%' class='".usage_color($used,false)."'><span>".my_scale($disk['fsUsed']*1024, $unit)." $unit</span></span></div></td>";
+    echo "<td><div class='usage-disk'><span style='margin:0;width:{$used}%' class='".usage_color($used,false)."'><span>".my_scale($disk['used']*1024, $unit)." $unit</span></span></div></td>";
     echo "<td><div class='usage-disk'><span style='margin:0;width:{$free}%' class='".usage_color($free,true)."'><span>".my_scale($disk['fsFree']*1024, $unit)." $unit</span></span></div></td>";
   }
   echo "<td>".$disk['numReads']."</td>";
