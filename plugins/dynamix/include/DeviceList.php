@@ -262,7 +262,7 @@ function array_online($disk) {
   $errors += $disk['numErrors'];
   if (isset($disk['fsFree']) && $disk['name']!='parity') {
     $disk['fsUsed'] = $disk['fsSize'] - $disk['fsFree'];
-    $fsSize += $disk['fsSize'];
+    $fsSize += $disk['size'];
     $fsFree += $disk['fsFree'];
     $fsUsed += $disk['fsUsed'];
   }
