@@ -46,7 +46,7 @@ function device_info($disk) {
     case 'green-blink': $help = 'Device spun-down'; break;
     case 'blue-on': $help = 'New device, not in array/pool'; break;
     case 'blue-blink': $help = 'Device spun-down'; break;
-    case 'yellow-on': $help = 'Device content under reconstruction'; break;
+    case 'yellow-on': $help = ($href=='parity' ? 'Parity-Sync in progress' : 'Device content under reconstruction'); break;
     case 'yellow-blink': $help = 'Device spun-down'; break;
     case 'red-on': $help = 'Device in error (emulated)'; break;
     case 'red-off': $help = 'Device is disabled'; break;
