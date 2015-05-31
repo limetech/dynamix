@@ -262,18 +262,19 @@ Use cache disk:
 <?endif;?>
 
 Enable Copy-on-write:
-: <select name="shareCOW" size="1">
+: <select name="shareCOW" size="1" <?=$name?"disabled":""?>>
   <?=mk_option($share['cow'], "no", "No")?>
   <?=mk_option($share['cow'], "auto", "Auto")?>
   </select>
+  Set when adding new share only.
 
-> Set to **No** to cause the btrfs NOCOW (No Copy-on-Write) attribute to be set on the share directory
-> when created on a device formatted with btrfs file system.  Once set, newly created files and
+> Set to **No** to cause the *btrfs* NOCOW (No Copy-on-Write) attribute to be set on the share directory
+> when created on a device formatted with *btrfs* file system.  Once set, newly created files and
 > subdirectories on the device will inherit the NOCOW attribute.  We recommend this setting for shares
 > used to store vdisk images, including the Docker loopback image file.  This setting has no effect
 > on non-btrfs file systems.
 >
-> Set to **Auto** for normal operation.
+> Set to **Auto** for normal operation, meaning COW will be in effect on devices formatted with *btrfs*.
 
 <?if ($share['name'] == ""):?>
 <input type="reset" value="Reset" onclick="setTimeout(prepareShareEdit,0)">
