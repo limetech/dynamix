@@ -46,7 +46,7 @@ $command = isset($_POST['#command']) ? $_POST['#command'] : false;
 
 if ($file) {
 // prepend with boot (flash) if path is relative
-  if ($file[0]!='/') $file = "boot/config/plugins/$file";
+  if ($file[0]!='/') $file = "/boot/config/plugins/$file";
   $section = isset($_POST['#section']) ? $_POST['#section'] : false;
   $cleanup = isset($_POST['#cleanup']);
 
