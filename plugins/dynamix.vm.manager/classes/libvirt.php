@@ -75,7 +75,7 @@
 				$folder = str_replace('/mnt/user', '/mnt/' . $tmp['user.LOCATION'], $folder);  // replace 'user' with say 'cache' or 'disk1' etc
 			}
 
-			@shell_exec("chattr +C -R " . escapeshellarg($folder) . " >/dev/null");
+			@shell_exec("chattr +C -R " . escapeshellarg($folder) . " &>/dev/null");
 
 			return true;
 		}
