@@ -45,6 +45,16 @@ endforeach;
 </tbody>
 </table>
 
+> **Colored Status Indicator** the significance of the color indicator at the beginning of each line in *Cache Devices* is as follows:
+>
+> <img src='/webGui/images/green-on.png' class='icon'>Normal operation, device is active.
+>
+> <img src='/webGui/images/green-blink.png' class='icon'>Device is spun-down.
+>
+> <img src='/webGui/images/blue-on.png' class='icon'>New device not in pool, it can be formatted to make it a member.
+>
+> <img src='/webGui/images/grey-off.png' class='icon'>No device present, position is empty.
+>
 > **Cache** is a device, or device pool, *outside* the unRAID array.  It may be exported for network access just
 > like an Array device.  Being outside the unRAID array results in significantly faster write access.
 >

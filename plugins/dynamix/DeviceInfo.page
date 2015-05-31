@@ -20,7 +20,7 @@ $disk = $disks[$name];
 $dev  = $disk['device'];
 $off  = exec("hdparm -C /dev/$dev|awk '/active/{print $4}'") ? "" : "disabled";
 $tmp  = "/var/tmp";
-$file = str_replace(' ','_',strtolower($var['NAME']))."-smart-".date('Ymd-Hi').".rtf";
+$file = str_replace(' ','_',strtolower($var['NAME']))."-smart-report-".$disk['name']."-".date('Ymd-Hi').".rtf";
 $refs = array(); $n = 0;
 
 foreach ($disks as $ref) {
@@ -47,7 +47,7 @@ function cleanUp() {
 }
 function saveSMART() {
   $.post('/webGui/include/SmartInfo.php',{cmd:'save',port:'<?=$dev?>',file:'<?="$tmp/$file"?>'}, function() {
-    $.post('/webGui/include/Download.php',{cmd:'save',os:'windows',root:'<?=$docroot?>',file:'<?="$tmp/$file"?>'},function(data) {
+    $.post('/webGui/include/Download.php',{cmd:'save',os:'windows',source:'<?="$tmp/$file"?>',file:'<?="$docroot/$file"?>'},function(data) {
       location = data;
       setTimeout(cleanUp,4000);
     });
@@ -193,7 +193,7 @@ Spinup group(s):
 <?endif;?>
 
 &nbsp;
-: <input type="submit" name="changeDisk" value="Apply"><input type="button" value="Done" onclick="done()"><input type='button' value='Download' onclick='saveSMART()' title="download SMART report">
+: <input type="submit" name="changeDisk" value="Apply"><input type="button" value="Done" onclick="done()">
 
 </form>
 <?if ($name=="cache" && $var['SYS_CACHE_SLOTS']>1):?>
@@ -393,6 +393,9 @@ Spinup group(s):
 
 <div id="title" class="nocontrol"><span class="left"><img src="/plugins/dynamix/icons/self-test.png" class="icon">Self-Test</span></div>
 <div markdown="1">
+Download SMART report:
+: <input type='button' value='Download' onclick='saveSMART()'>
+
 SMART self-test history:
 : <input type="button" value="Show" id="toggle_log" onclick="selftestLog()" disabled>
 

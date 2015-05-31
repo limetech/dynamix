@@ -13,30 +13,29 @@
 <?
 switch ($_POST['cmd']) {
 case 'save':
-  $os  = empty($_POST['os']) ? false : $_POST['os'];
+  $os = empty($_POST['os']) ? false : $_POST['os'];
   $file = $_POST['file'];
-  $root = $_POST['root'];
-  $name = basename($file);
+  $source = $_POST['source'];
   if ($os == false) {
-    $tmp = "/var/tmp/$name.txt";
-    $name .= '.zip';
-    exec("todos <$file >$tmp");
-    exec("zip -qj $root/$name $tmp");
-    unlink($tmp);
+    $tmp = '/var/tmp/'.basename($source).'.txt';
+    copy($source, $tmp);
+    exec("zip -qlj $file $tmp");
+    @unlink($tmp);
   } elseif ($os == 'windows') {
-    exec("todos <$file >$root/$name");
+    exec("todos <$source >$file");
   } elseif ($os == 'unix') {
-    exec("cp -f $file $root/$name");
+    exec("cp -f $source $file");
   }
-  echo "/$name";
+  echo "/".basename($file);
   break;
 case 'delete':
-  @unlink($_POST['file']);
+  $file = $_POST['file'];
+  @unlink($file);
   break;
 case 'diag':
-  $zip = $_POST['file'];
-  exec("/usr/local/emhttp/plugins/dynamix/scripts/diagnostics $zip");
-  echo "/".basename($zip);
+  $file = $_POST['file'];
+  exec("/usr/local/emhttp/plugins/dynamix/scripts/diagnostics $file");
+  echo "/".basename($file);
   break;
 }
 ?>
