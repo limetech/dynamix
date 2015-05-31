@@ -48,6 +48,20 @@ if ($display['total']) echo "<tr class='tr_last'><td colspan='10'>&nbsp;</td></t
 </tbody>
 </table>
 
+> **Colored Status Indicator** the significance of the color indicator at the beginning of each line in *Array Devices* is as follows:
+>
+> <img src='/webGui/images/green-on.png' class='icon'>Normal operation, device is active.
+>
+> <img src='/webGui/images/green-blink.png' class='icon'>Device is spun-down.
+>
+> <img src='/webGui/images/yellow-on.png' class='icon'>Data contents of the device are invalid and are being reconstructed.
+>
+> <img src='/webGui/images/red-on.png' class='icon'>Device is in error or disabled, contents are being emulated.
+>
+> <img src='/webGui/images/blue-on.png' class='icon'>New device not part of the array, it can be formatted to make it a member.
+>
+> <img src='/webGui/images/grey-off.png' class='icon'>No device present, position is empty.
+>
 > **Identification** is the *signature* that uniquely identifies a storage device. The signature
 > includes the device model number, serial number, linux device id, and the device size.
 >
@@ -84,7 +98,7 @@ if ($display['total']) echo "<tr class='tr_last'><td colspan='10'>&nbsp;</td></t
 >
 > An unRAID array consists of a single Parity disk and a number of Data disks. The Data
 > disks are exclusively used to store user data, and the Parity disk provides the redundancy necessary
-> to recover from any singe disk failure.  
+> to recover from any singe disk failure.
 >
 > Since data is not striped across the array, the Parity disk must be as large, or larger than the largest Data
 > disk.  Parity should also be your highest performance drive.
