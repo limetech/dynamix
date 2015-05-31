@@ -22,6 +22,7 @@ $off  = exec("hdparm -C /dev/$dev|awk '/active/{print $4}'") ? "" : "disabled";
 $tmp  = "/var/tmp";
 $file = str_replace(' ','_',strtolower($var['NAME']))."-smart-report-".$disk['name']."-".date('Ymd-Hi').".rtf";
 $refs = array(); $n = 0;
+$slot = strpos($disk['status'],'_NP')===false;
 
 foreach ($disks as $ref) {
   if ($ref['name']=='flash' || strpos($ref['status'],'_NP')) continue;
@@ -109,6 +110,7 @@ $(function() {
 <?else:?>
   $('div[id=title]:not(".nocontrol")').each(function(){$(this).append(ctrl);});
 <?endif;?>
+<?if ($slot):?>
   var tester = $.cookie('tester.<?=$dev?>');
   testUpdate(tester===undefined);
   if (tester !== undefined) $('#'+tester+'_test').val('Stop').removeAttr('disabled');
@@ -117,6 +119,7 @@ $(function() {
   $('#toggle_error').removeAttr('disabled');
   $.post('/webGui/include/SmartInfo.php',{cmd:'selftest',port:'<?=$dev?>'},function(data) { $('#selftest').html(data); });
   $.post('/webGui/include/SmartInfo.php',{cmd:'errorlog',port:'<?=$dev?>'},function(data) { $('#errorlog').html(data); });
+<?endif;?>
 <?endif;?>
 });
 </script>
@@ -390,7 +393,7 @@ Spinup group(s):
 <div id="title" class="nocontrol"><span class="left"><img src="/plugins/dynamix/icons/self-test.png" class="icon">Self-Test</span></div>
 <div markdown="1">
 Download SMART report:
-: <input type='button' value='Download' onclick='saveSMART()'>
+: <input type='button' value='Download' onclick='saveSMART()'<?if (!$slot):?> disabled<?endif;?>>
 
 SMART self-test history:
 : <input type="button" value="Show" id="toggle_log" onclick="selftestLog()" disabled>
@@ -427,7 +430,11 @@ SMART extended self-test:
 > This feature is only available when the disk is in active mode.
 
 Last SMART test result:
+<?if ($slot):?>
 : <span id="test_result"></span>
+<?else:?>
+: ---
+<?endif;?>
 
 > When no test is running it will show here the latest obtained self-test result (if available).
 > Otherwise a progress indicator (percentage value) is shown for a running test.
