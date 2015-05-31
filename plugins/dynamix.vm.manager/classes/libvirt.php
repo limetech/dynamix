@@ -75,7 +75,7 @@
 				$folder = str_replace('/mnt/user', '/mnt/' . $tmp['user.LOCATION'], $folder);  // replace 'user' with say 'cache' or 'disk1' etc
 			}
 
-			@shell_exec("chattr +C -R " . escapeshellarg($folder) . " >/dev/null");
+			@shell_exec("chattr +C -R " . escapeshellarg($folder) . " &>/dev/null");
 
 			return true;
 		}
@@ -171,7 +171,7 @@
 
 					// create folder if needed
 					if (!is_dir($strImgFolder)) {
-						mkdir($strImgFolder);
+						mkdir($strImgFolder, 0777, true);
 					}
 
 					$this->set_folder_nodatacow($strImgFolder);
@@ -185,7 +185,7 @@
 
 					// create parent folder if needed
 					if (!is_dir($path_parts['dirname'])) {
-						mkdir($path_parts['dirname']);
+						mkdir($path_parts['dirname'], 0777, true);
 					}
 
 					$this->set_folder_nodatacow($path_parts['dirname']);
