@@ -140,7 +140,7 @@ function prepareEdit(form) {
 <form markdown="1" name="share_edit" method="POST" action="/update.htm" target="progressFrame" onsubmit="return prepareEdit(this)">
 <input type="hidden" name="shareNameOrig" value="<?=$share['nameOrig']?>">
 
-Name:
+Share name:
 : <input type="text" name="shareName" maxlength="40" value="<?=$share['name']?>">
 
 > The share name can be up to 40 characters, and is case-sensitive. While almost all characters can be used,

@@ -16,8 +16,9 @@ Cond="(($var['shareNFSEnabled']!='no') && (isset($name)?array_key_exists($name,$
 ?>
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="shareName" value="<?=$name;?>">
-Name:
-: <big><?=preg_match('/^(disk[0-9]|cache[0-9]?)/',$name) ? my_disk($name) : $name?></big>
+
+Share name:
+: <big><?=$name?></big>
 
 Export:
 : <select name="shareExportNFS" size="1">
