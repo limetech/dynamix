@@ -39,21 +39,11 @@ foreach (glob("state/*.ssz2", GLOB_NOSORT) as $entry) {
 <tbody>
 <?
 foreach ($disks as $disk):
+  if ($disk['fsColor']=='grey-off') continue;
   $name = $disk['name'];
-  if ($name=='parity' || $name=='flash' || preg_match('/cache[0-9]+/',$name) || $disk['status']=='DISK_NP') continue;
-  $device = my_disk($name);
-  $color = $disk['color'];
-  $id = $disk['id'];
 ?><tr>
-<?switch ($disk['type']):
-  case 'Data':
-?><td><img src="/webGui/images/<?=$color?>.png" class="icon"><a href="<?=$path?>/Disk?name=<?=$name?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$device?></a></td>
-<?break;
-  case 'Cache':
-?><td><img src="/webGui/images/<?=$color?>.png" class="icon"><a href="<?=$path?>/Disk?name=<?=$name?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$device?></a></td>
-<?break;
-  endswitch;
-?><td><?=$id?></td>
+  <td><img src="/webGui/images/<?=$disk['fsColor']?>.png" class="icon"><a href="<?=$path?>/Disk?name=<?=$name?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$name?></a></td>
+  <td><?=$disk['id']?></td>
   <td><?=disk_share_settings($var['shareSMBEnabled'], $sec[$name])?></td>
   <td><?=disk_share_settings($var['shareNFSEnabled'], $sec_nfs[$name])?></td>
   <td><?=disk_share_settings($var['shareAFPEnabled'], $sec_afp[$name])?></td>
@@ -90,16 +80,8 @@ endforeach;
 
 > **Colored Status Indicator** the significance of the color indicator at the beginning of each line in *Disk Shares* is as follows:
 >
-> <img src='/webGui/images/green-on.png' class='icon'>Normal operation, device is active.
+> <img src='/webGui/images/green-on.png' class='icon'>Mounted, underlying device has redundancy/protection.
 >
-> <img src='/webGui/images/green-blink.png' class='icon'>Device is spun-down.
->
-> <img src='/webGui/images/yellow-on.png' class='icon'>Data contents of the device are invalid and are being reconstructed.
->
-> <img src='/webGui/images/red-on.png' class='icon'>Device is in error or disabled, contents are being emulated.
->
-> <img src='/webGui/images/blue-on.png' class='icon'>New device not part of the array, it can be formatted to make it a member.
->
-> <img src='/webGui/images/grey-off.png' class='icon'>No device present, position is empty.
+> <img src='/webGui/images/yellow-on.png' class='icon'>Mounted, underlying device does not have redundancy/protection.
 >
 > Shares displayed in *italic* are exported as hidden shares.

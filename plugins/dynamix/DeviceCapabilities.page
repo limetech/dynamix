@@ -1,5 +1,6 @@
 Menu="Device"
 Title="Capabilities"
+Cond="strpos($disks[$name]['status'],'_NP')===false"
 ---
 <?PHP
 /* Copyright 2015, Lime Technology
