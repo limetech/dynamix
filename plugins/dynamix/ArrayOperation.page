@@ -548,48 +548,57 @@ if (isset($display['sleep'])) @include $display['sleep'];
 $confirm['warn'] = false
 ?>
 
+> **Colored Status Indicator** the significance of the color indicator of the *Array* is as follows:
+>
+> <img src='/webGui/images/green-on.png' class='icon'>Normal operation, array is active.
+>
+> <img src='/webGui/images/yellow-on.png' class='icon'>Parity-Sync is taking place, array is operational.
+>
+> <img src='/webGui/images/red-on.png' class='icon'>Array is in error, array is non-operational.
+>
+
 <?if ($var['fsState'] == "Stopped"):?>
 > #### Assigning Devices
 >
 > An unRAID disk array consists of a single parity disk and a number of data disks. The data
 > disks are exclusively used to store user data, and the parity disk provides the redundancy necessary
 > to recover from any singe disk failure.
-> 
+>
 > Note that we are careful to use the term *disk* when referring to an array storage device.  We
 > use the term *hard drive* (or sometimes just *drive*) when referring to an actual hard disk drive (HDD)
 > device. This is because in a RAID system it is possible to read/write an array disk whose corresponding
 > hard drive is disabled or even missing! In addition, it is useful to be able to ask, "which device is
 > assigned to be the parity disk?"; or, "which device corresponds to disk2?".
-> 
+>
 > We therefore need a way to assign hard drives to array disks. This is accomplished here on the
 > Main page when the array is stopped. There is a drop-down box for each array disk which lists all the
 > unassigned devices. To assign a device simply select it from the list. Each time a device
 > assignment is made, the system updates a configuration file to record the assignment.
-> 
+>
 > #### Requirements
-> 
+>
 > Unlike traditional RAID systems which stripe data across all the array devices, an unRAID server
 > stores files on individual hard drives. Consequently, all file write operations will involve both the
 > data disk the file is being written to, and the parity disk. For these reasons,
-> 
+>
 > * the parity disk size must be as large or larger than any of the data disks,
-> 
+>
 > and
-> 
+>
 > * given a choice, the parity disk should be the fastest disk in your collection.
-> 
+>
 > #### Guidelines
-> 
+>
 > Here are the steps you should follow when designing your unRAID disk array:
-> 
+>
 > 1. Decide which hard drive you will use for parity, and which hard drives you will use for
 > data disk1, disk2, etc., and label them in some fashion. Also, find the serial number of each hard
 > drive and jot it down somewhere; you will need this information later.
-> 
+>
 > 2. Install your hard drive devices, boot unRAID Server and bring up the webGui. If this is a fresh system
 > build, then the Main page will show no disks installed. This doesn't mean the system can't detect your
 > hard drives; it just means that none have been assigned yet.
-> 
+>
 > 3. Remember the serial numbers you recored back in step 1? For parity and each data disk, select the
 > proper hard drive based on its serial number from the drop down list.
 >
@@ -599,7 +608,7 @@ $confirm['warn'] = false
 > if you are using hard drive cages, you may simply plug them into your server while powered on and
 > with array Stopped. Refresh the Main page to have new unassigned devices appear in the assignment
 > dropdown lists.
-> 
+>
 > #### Next Steps
 >
 > Once you have assigned all of your hard drives, refer to the Array Status section below

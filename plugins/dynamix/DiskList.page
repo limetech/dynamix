@@ -35,16 +35,7 @@ foreach (glob("state/*.ssz2", GLOB_NOSORT) as $entry) {
 }
 ?>
 <table class="share_status share <?=$display['view']?>">
-<thead><tr><td style="width:15%"><a href="#" class="info nohand none" onclick="return false">Name*<span>
- <center><b>Device Status Legend</b></center><hr>
- <img src='/webGui/images/green-on.png' class='icon'>Normal operation<br>
- <img src='/webGui/images/grey-off.png' class='icon'>No device present<br>
- <img src='/webGui/images/yellow-on.png' class='icon'>Data in reconstruction<br>
- <img src='/webGui/images/red-on.png' class='icon'>Device in error (emulated)<br>
- <img src='/webGui/images/red-off.png' class='icon'>Device disabled<br>
- <img src='/webGui/images/blue-on.png' class='icon'>New device not in array<br>
- <img src='/webGui/images/green-blink.png' class='icon'>Device spun-down<br>
-</span></a></td><td style="width:33%">Identity</td><td>SMB</td><td>NFS</td><td>AFP</td><td>Size</td><td>Free</td><td>View</td></tr></thead>
+<thead><tr><td style="width:15%">Name</td><td style="width:33%">Identity</td><td>SMB</td><td>NFS</td><td>AFP</td><td>Size</td><td>Free</td><td>View</td></tr></thead>
 <tbody>
 <?
 foreach ($disks as $disk):
@@ -97,4 +88,20 @@ endforeach;
 </tbody>
 </table>
 
+> **Colored Status Indicator** the significance of the color indicator at the beginning of each line in *Disk Shares* is as follows:
+>
+> <img src='/webGui/images/green-on.png' class='icon'>Normal operation, device is active.
+>
+> <img src='/webGui/images/green-blink.png' class='icon'>Device is spun-down.
+>
+> <img src='/webGui/images/yellow-on.png' class='icon'>Data contents of the device are invalid. The parity disk has this status when Parity-Sync is taking place. A data disk has this status during data reconstruction.
+>
+> <img src='/webGui/images/red-on.png' class='icon'>Device is in error, contents are being emulated, the corresponding hard disk is still present but no I/O is taking place.
+>
+> <img src='/webGui/images/red-off.png' class='icon'>Device is disabled, the corresponding hard disk is not present.
+>
+> <img src='/webGui/images/blue-on.png' class='icon'>New device not part of the array, it can be formatted to make it a member.
+>
+> <img src='/webGui/images/grey-off.png' class='icon'>No device present, position is empty.
+>
 > Shares displayed in *italic* are exported as hidden shares.

@@ -35,12 +35,7 @@ foreach (glob("state/*.ssz1", GLOB_NOSORT) as $entry) {
 }
 ?>
 <table class="share_status share <?=$display['view']?>">
-<thead><tr><td style="width:15%"><a href="#" class="info nohand none" onclick="return false">Name*<span>
- <center><b>Share Status Legend</b></center><hr>
- <img src="/webGui/images/green-on.png" class="icon">All files on array<br>
- <img src="/webGui/images/yellow-on.png" class="icon">Cache contains files<br>
- <img src="/webGui/images/red-on.png" class="icon">All files remain on cache<br>
-</span></a></td><td style="width:33%">Comment</td><td>SMB</td><td>NFS</td><td>AFP</td><td>Size</td><td>Free</td><td>View</td></tr></thead>
+<thead><tr><td style="width:15%">Name</td><td style="width:33%">Comment</td><td>SMB</td><td>NFS</td><td>AFP</td><td>Size</td><td>Free</td><td>View</td></tr></thead>
 <tbody>
 <?
 foreach ($shares as $name => $share):
@@ -89,4 +84,12 @@ endforeach;
 <?endif;?>
 </form>
 
+> **Colored Status Indicator** the significance of the color indicator at the beginning of each line in *User Shares* is as follows:
+>
+> <img src="/webGui/images/green-on.png" class="icon">All files of the user share are stored on the protected array.
+>
+> <img src="/webGui/images/yellow-on.png" class="icon">Cache device contains unprotected files of the user share.
+>
+> <img src="/webGui/images/red-on.png" class="icon">All files of the user share remain on the cache device.
+>
 > Shares displayed in *italic* are exported as hidden shares.

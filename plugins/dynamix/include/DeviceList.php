@@ -37,13 +37,25 @@ function device_info($disk) {
   }
   $action = strpos($disk['color'],'blink')===false ? "down" : "up";
   if ($display['spin'] && $disk['rotational']==1 && $var['fsState']=='Started')
-    $a = "<a href='update.htm?cmdSpin{$action}={$href}' title='Click to spin $action device' class='none' target='progressFrame' onclick=\"$.removeCookie('one',{path:'/'});\"><i class='fa fa-sort-$action spacing'></i></a>";
+    $ctrl = "<a href='update.htm?cmdSpin{$action}={$href}' title='Click to spin $action device' class='none' target='progressFrame' onclick=\"$.removeCookie('one',{path:'/'});\"><i class='fa fa-sort-$action spacing'></i></a>";
   else
-    $a = "";
+    $ctrl = "";
   $ball = "/webGui/images/{$disk['color']}.png";
+  switch ($disk['color']) {
+    case 'green-on': $help = 'Normal operation'; break;
+    case 'green-blink': $help = 'Device spun-down'; break;
+    case 'blue-on': $help = 'New device, not in array/pool'; break;
+    case 'blue-blink': $help = 'Device spun-down'; break;
+    case 'yellow-on': $help = 'Device content under reconstruction'; break;
+    case 'yellow-blink': $help = 'Device spun-down'; break;
+    case 'red-on': $help = 'Device in error (emulated)'; break;
+    case 'red-off': $help = 'Device is disabled'; break;
+    case 'red-blink': $help = 'Device spun-down'; break;
+    case 'grey-off': $help = 'Device not present'; break;
+  }
   switch ($type) {
   case 'Parity': case 'Data': case 'Cache': case 'Preclear':
-    $status = "${a}<img src='$ball' class='icon'>";
+    $status = "${ctrl}<a class='info nohand' onclick='return false'><img src='$ball' class='icon'><span>${help}</span></a>";
     $device = "Device";
     break;
   default:

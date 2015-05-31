@@ -35,13 +35,7 @@ cache_status();
 </script>
 
 <table class="disk_status <?=($var['fsState']=='Stopped'?'small':$display['view']).' '.$display['align']?>">
-<thead><tr><td><a href="#" class="info nohand none" onclick="return false">Device*<span>
- <center><b>Device Status Legend</b></center><hr>
- <img src='/webGui/images/green-on.png' class='icon'>Normal operation<br>
- <img src='/webGui/images/green-blink.png' class='icon'>Device spun-down<br>
- <img src='/webGui/images/blue-on.png' class='icon'>New device, not in pool<br>
- <img src='/webGui/images/grey-off.png' class='icon'>No device present<br>
-</span></a></td><td>Identification</td><td>Temp.</td><td>Size</td><td>Used</td><td>Free</td><td>Reads</td><td>Writes</td><td>Errors</td><td>FS</td><td>View</td></tr></thead>
+<thead><tr><td>Device</td><td>Identification</td><td>Temp.</td><td>Size</td><td>Used</td><td>Free</td><td>Reads</td><td>Writes</td><td>Errors</td><td>FS</td><td>View</td></tr></thead>
 <tbody id="cache_device">
 <?
 foreach ($disks as $disk):
@@ -51,6 +45,16 @@ endforeach;
 </tbody>
 </table>
 
+> **Colored Status Indicator** the significance of the color indicator at the beginning of each line in *Cache Devices* is as follows:
+>
+> <img src='/webGui/images/green-on.png' class='icon'>Normal operation, device is active.
+>
+> <img src='/webGui/images/green-blink.png' class='icon'>Device is spun-down.
+>
+> <img src='/webGui/images/blue-on.png' class='icon'>New device not in pool, it can be formatted to make it a member.
+>
+> <img src='/webGui/images/grey-off.png' class='icon'>No device present, position is empty.
+>
 > **Cache** is a device, or device pool, *outside* the unRAID array.  It may be exported for network access just
 > like an Array device.  Being outside the unRAID array results in significantly faster write access.
 >
