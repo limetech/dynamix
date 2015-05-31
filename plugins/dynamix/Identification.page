@@ -37,5 +37,5 @@ Model:
 > This is the server model number.
 
 <?if ($disabled):?>&nbsp;<?else:?><input type="reset" value="Reset"><?endif;?>
-: <input type="submit" name="changeNames" value="Apply"><input type="button" value="Done" onclick="done()"><?if ($disabled):?>Array must be **Stopped** to change<?endif;?>
+: <input type="submit" name="changeNames" value="Apply" <?=$disabled?>><input type="button" value="Done" onclick="done()"><?if ($disabled):?>Array must be **Stopped** to change<?endif;?>
 </form>
