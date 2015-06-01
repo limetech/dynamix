@@ -84,4 +84,6 @@ endforeach;
 >
 > <img src='/webGui/images/yellow-on.png' class='icon'>Mounted, underlying device does not have redundancy/protection.
 >
-> Shares displayed in *italic* are exported as hidden shares.
+> SMB security mode displayed in *italics* indicates exported hidden shares.
+>
+> AFP security mode displayed in *italics* indicates exported time-machine shares.

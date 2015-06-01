@@ -550,11 +550,13 @@ $confirm['warn'] = false
 
 > **Colored Status Indicator** the significance of the color indicator of the *Array* is as follows:
 >
-> <img src='/webGui/images/green-on.png' class='icon'>Normal operation, array is active.
+> <img src='/webGui/images/green-on.png' class='icon'>Array is Started and Parity is valid.
 >
-> <img src='/webGui/images/yellow-on.png' class='icon'>Parity-Sync is taking place, array is operational.
+> <img src='/webGui/images/green-blink.png' class='icon'>Array is Stopped, Parity is valid.
 >
-> <img src='/webGui/images/red-on.png' class='icon'>Array is in error, array is non-operational.
+> <img src='/webGui/images/yellow-on.png' class='icon'>Array is Started, but Parity is invalid.
+>
+> <img src='/webGui/images/yellow-blink.png' class='icon'>Array is Stopped, Parity is invalid.
 >
 
 <?if ($var['fsState'] == "Stopped"):?>

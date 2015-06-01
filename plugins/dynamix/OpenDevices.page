@@ -49,5 +49,5 @@ endforeach;
 </tbody>
 </table>
 
-> Unassigned disks, indicated by **+++**, are devices installed in your server but not assigned any role,
-> and are not managed in any way by unRAID OS.
+> Thse are devices installed in your server but not assigned to either the parity-proteced
+> array or the cache disk/pool.

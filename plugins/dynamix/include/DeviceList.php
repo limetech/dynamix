@@ -42,27 +42,26 @@ function device_info($disk) {
     $ctrl = "";
   $ball = "/webGui/images/{$disk['color']}.png";
   switch ($disk['color']) {
-    case 'green-on': $help = 'Normal operation'; break;
-    case 'green-blink': $help = 'Device spun-down'; break;
-    case 'blue-on': $help = 'New device, not in array/pool'; break;
-    case 'blue-blink': $help = 'Device spun-down'; break;
-    case 'yellow-on': $help = ($href=='parity' ? 'Parity-Sync in progress' : 'Device content under reconstruction'); break;
-    case 'yellow-blink': $help = 'Device spun-down'; break;
-    case 'red-on': $help = 'Device in error (emulated)'; break;
-    case 'red-off': $help = 'Device is disabled'; break;
-    case 'red-blink': $help = 'Device spun-down'; break;
+    case 'green-on': $help = 'Normal operation, device is active'; break;
+    case 'green-blink': $help = 'Device is in standby mode (spun-down)'; break;
+    case 'blue-on': $help = ($disk['name']=='preclear' ? 'Unassigned device' : 'New device'); break;
+    case 'blue-blink': $help = ($disk['name']=='preclear' ? 'Unassigned device, in standby mode' : 'New device, in stadby mode (spun-down)'); break;
+    case 'yellow-on': $help = ($href=='parity' ? 'Parity is invalid' : 'Device contents emulated'); break;
+    case 'yellow-blink': $help = 'Device contents emulated, in standby mode (spun-down)'; break;
+    case 'red-on':
+    case 'red-blink': $help = ($href=='parity' ? 'Parity device is disabled' : 'Device is disabled, contents emulated'); break;
+    case 'red-off': $help = ($href=='parity' ? 'Parity device missing' : 'Device is missing (disabled), contents emulated'); break;
     case 'grey-off': $help = 'Device not present'; break;
   }
   switch ($type) {
   case 'Parity': case 'Data': case 'Cache': case 'Preclear':
-    $status = "${ctrl}<a class='info nohand' onclick='return false'><img src='$ball' class='icon'><span>${help}</span></a>";
     $device = "Device";
     break;
   default:
-    $status = "<img src='$ball' class='icon'>";
     $device = "Flash";
     break;
   }
+  $status = "${ctrl}<a class='info nohand' onclick='return false'><img src='$ball' class='icon'><span>${help}</span></a>";
   $link = strpos($disk['status'], 'DISK_NP')===false ? "<a href='$path/$device?name=$href'>$name</a>" : $name;
   return $status.$link;
 }

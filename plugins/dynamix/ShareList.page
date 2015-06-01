@@ -86,10 +86,10 @@ endforeach;
 
 > **Colored Status Indicator** the significance of the color indicator at the beginning of each line in *User Shares* is as follows:
 >
-> <img src="/webGui/images/green-on.png" class="icon">All files of the user share are stored on the protected array.
+> <img src="/webGui/images/green-on.png" class="icon">All files are on protected storage.
 >
-> <img src="/webGui/images/yellow-on.png" class="icon">Cache device contains unprotected files of the user share.
+> <img src="/webGui/images/yellow-on.png" class="icon">Some or all files are on unprotected storage.
 >
-> <img src="/webGui/images/red-on.png" class="icon">All files of the user share remain on the cache device.
+> SMB security mode displayed in *italics* indicates exported hidden shares.
 >
-> Shares displayed in *italic* are exported as hidden shares.
+> AFP security mode displayed in *italics* indicates exported time-machine shares.
