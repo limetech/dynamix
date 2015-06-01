@@ -17,10 +17,9 @@ Type="xmenu"
 $refs = array(); $n = 0;
 
 foreach ($disks as $ref) {
-  $dname = $ref['name'];
-  if ($dname=='parity' || $dname=='flash' || preg_match('/cache[0-9]+/',$dname) || $disk['status']=='DISK_NP') continue;
-  $refs[] = $dname;
-  if ($dname==$name) $i = $n;
+  if ($ref['fsColor']=='grey-off') continue;
+  $refs[] = $ref['name'];
+  if ($ref['name']==$name) $i = $n;
   $n++;
 }
 $end  = count($refs)-1;
