@@ -35,7 +35,7 @@ foreach (glob("state/*.ssz2", GLOB_NOSORT) as $entry) {
 }
 ?>
 <table class="share_status share <?=$display['view']?>">
-<thead><tr><td style="width:15%">Name</td><td style="width:33%">Identity</td><td>SMB</td><td>NFS</td><td>AFP</td><td>Size</td><td>Free</td><td>View</td></tr></thead>
+<thead><tr><td style="width:15%">Name</td><td style="width:33%">Comment</td><td>SMB</td><td>NFS</td><td>AFP</td><td>Size</td><td>Free</td><td>View</td></tr></thead>
 <tbody>
 <?
 foreach ($disks as $disk):
@@ -43,7 +43,7 @@ foreach ($disks as $disk):
   $name = $disk['name'];
 ?><tr>
   <td><img src="/webGui/images/<?=$disk['fsColor']?>.png" class="icon"><a href="<?=$path?>/Disk?name=<?=$name?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$name?></a></td>
-  <td><?=$disk['id']?></td>
+  <td><?=$disk['comment']?></td>
   <td><?=disk_share_settings($var['shareSMBEnabled'], $sec[$name])?></td>
   <td><?=disk_share_settings($var['shareNFSEnabled'], $sec_nfs[$name])?></td>
   <td><?=disk_share_settings($var['shareAFPEnabled'], $sec_afp[$name])?></td>

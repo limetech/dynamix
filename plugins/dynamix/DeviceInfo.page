@@ -136,6 +136,14 @@ Partition format:
 : <?=$disk['format']?>
 
 <?if ($disk['type']!="Parity"):?>
+<?if ($disk['type']=="Data" || $disk['name']=="cache"):?>
+
+Comments:
+: <input type="text" name="diskComment.<?=$disk['idx'];?>" maxlength="256" value="<?=$disk['comment']?>">
+
+> Anything you like, up to 256 characters.
+
+<?endif;?>
 
 File system status:
 : <?=$disk['fsStatus']?><?if ($disk['fsError']) echo " - {$disk['fsError']}";?>&nbsp;
