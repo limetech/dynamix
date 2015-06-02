@@ -143,8 +143,12 @@ function prepareEdit(form) {
 Share name:
 : <input type="text" name="shareName" maxlength="40" value="<?=$share['name']?>">
 
-> The share name can be up to 40 characters, and is case-sensitive. While almost all characters can be used,
-> make your life easier and avoid special characters such as apostrophes and quotes.
+> The share name can be up to 40 characters, and is case-sensitive with these restrictions:
+>
+> * cannot contain a double-quote character (")
+> * cannot be one of the reserved share names: flash, cache, cach2, .., disk1, disk2, ..
+>
+> We highly recommend to make your life easier and avoid special characters.
 
 Comments:
 : <input type="text" name="shareComment" maxlength="256" value="<?=$share['comment']?>">
