@@ -148,22 +148,27 @@ EOF;
 //
 function download($URL, $name, &$error) {
   if ($file = popen("wget --progress=dot -O $name $URL 2>&1", 'r')) {
-    echo "plugin: downloading: $name ...\r";
+    echo "plugin: downloading: $URL ...\r";
     $level = -1;
     while (!feof($file)) {
       if (preg_match("/\d+%/", fgets($file), $matches)) {
         $percentage = substr($matches[0],0,-1);
         if ($percentage > $level) {
-          echo "plugin: downloading: $name ... $percentage%\r";
+          echo "plugin: downloading: $URL ... $percentage%\r";
           $level = $percentage;
         }
       }
     }
-    echo "plugin: downloading: $name ... done\n";
-    pclose($file);
-    return true;
+    if (pclose($file) != -1) {
+      echo "plugin: downloading: $URL ... done\n";
+      return true;
+    } else {
+      echo "plugin: downloading: $URL ... failed\n";
+      $error = "wget: $URL download failure";
+      return false;
+    }
   } else {
-    $error = "wget: $URL failed";
+    $error = "wget: $URL failed to open";
     return false;
   }
 }
