@@ -30,7 +30,7 @@ foreach ($shares as $share) {
   if (!file_exists($file)) file_put_contents($file,"# This share has default settings.\n");
 }
 foreach (glob("/var/log/syslog*") as $file) {
-  exec("todos <$file >/$diag/log/".basename($file).".txt");
+  exec("sed -r 's/\S+@\S+\.\S+/xxx@xxx.xxx/;s/(username|password)([=:])\S+/\\1\\2xxx/' $file|todos >/$diag/log/".basename($file).".txt");
 }
 exec("ls -l /dev/disk/by-id/[au]*|awk '$0!~/-part/{split($11,a,\"/\");print a[3],substr($9,21)}'", $devices);
 foreach ($devices as $device) {
