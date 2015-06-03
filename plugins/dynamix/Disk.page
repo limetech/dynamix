@@ -13,6 +13,8 @@ Type="xmenu"
  */
 ?>
 
+<?if (count($pages)==2) $tabbed = false;?>
+<?if ($name != 'flash'):?>
 <?
 $refs = array(); $n = 0;
 
@@ -37,3 +39,4 @@ $(function() {
 <?endif;?>
 });
 </script>
+<?endif;?>
