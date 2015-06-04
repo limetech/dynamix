@@ -39,15 +39,16 @@ foreach (glob("state/*.ssz2", GLOB_NOSORT) as $entry) {
 <tbody>
 <?
 foreach ($disks as $disk):
+  if ($disk['type']=='Flash') continue;
   if ($disk['fsColor']=='grey-off') continue;
   $name = $disk['name'];
-  $ball = "/webGui/images/{$disk['color']}.png";
-  switch ($disk['color']) {
+  $ball = "/webGui/images/{$disk['fsColor']}.png";
+  switch ($disk['fsColor']) {
     case 'green-on': $help = 'All files protected'; break;
-    case 'yellow-on': $help = 'Some or all files unprotected'; break;
+    case 'yellow-on': $help = 'All files unprotected'; break;
   }
 ?><tr>
-  <td><a class='info nohand' onclick='return false'><img src='<?=$ball?>' class='icon'><span><?=$help?></span></a><a href="<?=$path?>/Disk?name=<?=$name?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$name?></a></td>
+  <td><a class='info nohand' onclick='return false'><img src='<?=$ball?>' class='icon'><span style="left:18px"><?=$help?></span></a><a href="<?=$path?>/Disk?name=<?=$name?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$name?></a></td>
   <td><?=$disk['comment']?></td>
   <td><?=disk_share_settings($var['shareSMBEnabled'], $sec[$name])?></td>
   <td><?=disk_share_settings($var['shareNFSEnabled'], $sec_nfs[$name])?></td>

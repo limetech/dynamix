@@ -45,7 +45,7 @@ foreach ($shares as $name => $share):
     case 'yellow-on': $help = 'Some or all files unprotected'; break;
   }
 ?><tr>
-  <td><a class='info nohand' onclick='return false'><img src='<?=$ball?>' class='icon'><span><?=$help?></span></a><a href="<?=$path?>/Share?name=<?=urlencode($name)?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$share['name']?></a></td>
+  <td><a class='info nohand' onclick='return false'><img src='<?=$ball?>' class='icon'><span style="left:18px"><?=$help?></span></a><a href="<?=$path?>/Share?name=<?=urlencode($name)?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$share['name']?></a></td>
   <td><?=$share['comment']?></td>
   <td><?=user_share_settings($var['shareSMBEnabled'], $sec[$name])?></td>
   <td><?=user_share_settings($var['shareNFSEnabled'], $sec_nfs[$name])?></td>
