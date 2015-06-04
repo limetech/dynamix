@@ -40,12 +40,11 @@ function device_info($disk) {
     $ctrl = "<a href='update.htm?cmdSpin{$action}={$href}' title='Click to spin $action device' class='none' target='progressFrame' onclick=\"$.removeCookie('one',{path:'/'});\"><i class='fa fa-sort-$action spacing'></i></a>";
   else
     $ctrl = "";
-  $ball = "/webGui/images/{$disk['color']}.png";
   switch ($disk['color']) {
     case 'green-on': $help = 'Normal operation, device is active'; break;
     case 'green-blink': $help = 'Device is in standby mode (spun-down)'; break;
     case 'blue-on': $help = ($disk['name']=='preclear' ? 'Unassigned device' : 'New device'); break;
-    case 'blue-blink': $help = ($disk['name']=='preclear' ? 'Unassigned device, in standby mode' : 'New device, in stadby mode (spun-down)'); break;
+    case 'blue-blink': $help = ($disk['name']=='preclear' ? 'Unassigned device, in standby mode' : 'New device, in standby mode (spun-down)'); break;
     case 'yellow-on': $help = ($href=='parity' ? 'Parity is invalid' : 'Device contents emulated'); break;
     case 'yellow-blink': $help = 'Device contents emulated, in standby mode (spun-down)'; break;
     case 'red-on':
@@ -53,15 +52,8 @@ function device_info($disk) {
     case 'red-off': $help = ($href=='parity' ? 'Parity device missing' : 'Device is missing (disabled), contents emulated'); break;
     case 'grey-off': $help = 'Device not present'; break;
   }
-  switch ($type) {
-  case 'Parity': case 'Data': case 'Cache': case 'Preclear':
-    $device = "Device";
-    break;
-  default:
-    $device = "Flash";
-    break;
-  }
-  $status = "${ctrl}<a class='info nohand' onclick='return false'><img src='$ball' class='icon'><span>${help}</span></a>";
+  $device = ($type=='Flash' ? 'Flash' : 'Device');
+  $status = "${ctrl}<a class='info nohand' onclick='return false'><img src='/webGui/images/{$disk['color']}.png' class='icon'><span>${help}</span></a>";
   $link = strpos($disk['status'], 'DISK_NP')===false ? "<a href='$path/$device?name=$href'>$name</a>" : $name;
   return $status.$link;
 }

@@ -3,8 +3,8 @@ Title="Cache Devices"
 Cond="($var['fsState']=='Stopped' || $var['cacheSbNumDisks'])"
 ---
 <?PHP
-/* Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -49,9 +49,9 @@ endforeach;
 >
 > <img src='/webGui/images/green-on.png' class='icon'>Normal operation, device is active.
 >
-> <img src='/webGui/images/green-blink.png' class='icon'>Device is spun-down.
+> <img src='/webGui/images/green-blink.png' class='icon'>Device is in standby mode (spun-down).
 >
-> <img src='/webGui/images/blue-on.png' class='icon'>New device not in pool, it can be formatted to make it a member.
+> <img src='/webGui/images/blue-on.png' class='icon'>New device.
 >
 > <img src='/webGui/images/grey-off.png' class='icon'>No device present, position is empty.
 >
