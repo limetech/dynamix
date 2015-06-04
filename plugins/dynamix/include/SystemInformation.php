@@ -66,6 +66,47 @@ if (strpos($cpumodel,'@')===false) {
 }
 ?>
 </div>
+<div><span style="width:90px; display:inline-block"><strong>HVM:</strong></span>
+<?
+  // Check for Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support
+  // Attempt to load either of the kvm modules to see if virtualzation hw is supported
+  exec('modprobe -a kvm_intel kvm_amd 2>/dev/null');
+
+  // If either kvm_intel or kvm_amd are loaded then Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support was found
+  $strLoadedModules = shell_exec("lsmod | grep '^kvm_\(amd\|intel\)'");
+
+  // Check for Intel VT-x (vmx) or AMD-V (svm) cpu virtualzation support
+  $strCPUInfo = file_get_contents('/proc/cpuinfo');
+
+  if (!empty($strLoadedModules)) {
+    // Yah! CPU and motherboard supported and enabled in BIOS
+    ?>Enabled<?
+  } else if (strpos($strCPUInfo, 'vmx') === false && strpos($strCPUInfo, 'svm') === false) {
+    // CPU doesn't support virtualzation
+    ?>Not Available<?
+  } else {
+    // Motherboard either doesn't support virtualzation or BIOS has it disabled
+    ?>Disabled<?
+  }
+?>
+</div>
+<div><span style="width:90px; display:inline-block"><strong>IOMMU:</strong></span>
+<?
+  // Check for any IOMMU Groups
+  $iommu_groups = shell_exec("find /sys/kernel/iommu_groups/ -type l");
+
+  if (!empty($iommu_groups)) {
+    // Yah! CPU and motherboard supported and enabled in BIOS
+    ?>Enabled<?
+  } else if (strpos($strCPUInfo, 'vmx') === false && strpos($strCPUInfo, 'svm') === false) {
+    // CPU doesn't support virtualzation so iommu would be impossible
+    ?>Not Available<?
+  } else {
+    // Motherboard either doesn't support iommu or BIOS has it disabled
+    ?>Disabled<?
+  }
+?>
+</div>
 <div><span style="width:90px; display:inline-block"><strong>Cache:</strong></span>
 <?
 $cache = explode('#',exec("dmidecode -q -t 7|awk -F: '/^\tSocket Designation:/{c=c$2\";\";}; /^\tInstalled Size:/{s=s$2\";\";} END{print c\"#\"s}'"));
