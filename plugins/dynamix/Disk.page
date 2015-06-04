@@ -13,9 +13,8 @@ Type="xmenu"
  */
 ?>
 
-<?if (count($pages)==2) $tabbed = false;?>
-<?if ($name != 'flash'):?>
 <?
+if (count($pages)==2) $tabbed = false;
 $refs = array(); $n = 0;
 
 foreach ($disks as $ref) {
@@ -39,4 +38,3 @@ $(function() {
 <?endif;?>
 });
 </script>
-<?endif;?>
