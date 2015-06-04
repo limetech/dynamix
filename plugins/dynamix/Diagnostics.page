@@ -54,8 +54,10 @@ and configuration files are collected:
 
 Clicking **Collect** will start the collection and may open a new window to allow local saving of the zip file.
 
-*No personal information such as user names, passwords, or any other file contents not specified above is included.  Note
-that your server name, IP address, and user share names* **will** *be included.*
+*No personal information such as user names, passwords, or any other file contents not specified above is included
+by unRAID Server OS; however, your server name, IP address, and user share names* **will** *be included.*  
+*Note that 3rd-party plugins **may** or may not store personal information in plugin-specific configuration files and/or output
+to the system log.*
 
 <input type="button" value="Collect" onclick="diagnostics()"><input type="button" value="Done" onclick="done()">
 
