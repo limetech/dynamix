@@ -21,13 +21,18 @@ function flash_share_settings($protocol,$share) {
   if ($share['export']=='e') return ucfirst($share['security']);
   return '<em>'.ucfirst($share['security']).'</em>';
 }
+$ball = "/webGui/images/{$disks['flash']['fsColor']}.png";
+switch ($disks['flash']['fsColor']) {
+ case 'green-on': $help = 'All files protected'; break;
+ case 'yellow-on': $help = 'Unprotected'; break;
+}
 ?>
 
 <table class="share_status share <?=$display['view']?>">
 <thead><tr><td style="width:15%">Name</td><td style="width:33%">Comment</td><td>SMB</td><td>NFS</td><td>AFP</td><td>Size</td><td>Free</td><td>View</td></tr></thead>
 <tbody>
 <tr>
-<td><img src="/webGui/images/<?=$disks['flash']['color']?>.png" class="icon"><a href="<?=$path?>/Disk?name=flash" onclick="$.cookie('one','tab1',{path:'/'})">flash</a></td>
+<td><a class='info nohand' onclick='return false'><img src="<?=$ball?>" class='icon'><span><?=$help?></span></a><a href="<?=$path?>/Disk?name=flash" onclick="$.cookie('one','tab1',{path:'/'})">flash</a></td>
 <td><?=$disks['flash']['comment']?></td>
 <td><?=flash_share_settings($var['shareSMBEnabled'], $sec['flash'])?></td>
 <td>-</td>

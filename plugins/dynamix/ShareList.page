@@ -39,8 +39,13 @@ foreach (glob("state/*.ssz1", GLOB_NOSORT) as $entry) {
 <tbody>
 <?
 foreach ($shares as $name => $share):
+  $ball = "/webGui/images/{$share['color']}.png";
+  switch ($share['color']) {
+    case 'green-on': $help = 'All files protected'; break;
+    case 'yellow-on': $help = 'Some or all files unprotected'; break;
+  }
 ?><tr>
-  <td><img src="/webGui/images/<?=$share['color']?>.png" class="icon"><a href="<?=$path?>/Share?name=<?=urlencode($name)?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$share['name']?></a></td>
+  <td><a class='info nohand' onclick='return false'><img src='<?=$ball?>' class='icon'><span><?=$help?></span></a><a href="<?=$path?>/Share?name=<?=urlencode($name)?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$share['name']?></a></td>
   <td><?=$share['comment']?></td>
   <td><?=user_share_settings($var['shareSMBEnabled'], $sec[$name])?></td>
   <td><?=user_share_settings($var['shareNFSEnabled'], $sec_nfs[$name])?></td>
