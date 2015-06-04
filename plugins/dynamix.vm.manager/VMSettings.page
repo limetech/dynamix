@@ -106,13 +106,25 @@ QEMU Version:
 <? } ?>
 
 ISO Library Share <span style="font-weight: normal">(optional)</span>:
-: <input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="<?= (is_dir('/mnt/user/') ? '/mnt/user/' : '/mnt/') ?>" name="MEDIADIR" maxlength="60" value="<?=$domain_cfg['MEDIADIR']?>" placeholder="Click to Select">
+: <input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="<?= (is_dir('/mnt/user/') ? '/mnt/user/' : '/mnt/') ?>" name="MEDIADIR" value="<?=$domain_cfg['MEDIADIR']?>" placeholder="Click to Select">
 
 > Specify a user share that contains all your installation media for operating systems
 
+VirtIO Windows Drivers ISO <span style="font-weight: normal">(optional)</span>:
+: <input type="text" data-pickfilter="iso" data-pickcloseonfile="true" data-pickroot="<?= (is_dir('/mnt/user/') ? '/mnt/user/' : '/mnt/') ?>" name="VIRTIOISO" value="<?=$domain_cfg['VIRTIOISO']?>" placeholder="Click to Select">
+
+> Specify the virtual CD-ROM (ISO) that contains the VirtIO Windows drivers as provided by the Fedora Project.
+> Download the latest ISO from here: <a href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers#Direct_download" target="_blank">https://fedoraproject.org/wiki/Windows_Virtio_Drivers#Direct_download</a>
+>
+> When installing Windows, you will reach a step where no disk devices will be found.
+> There is an option to browse for drivers on that screen.  Click browse and locate the additional CD-ROM in the menu.
+> Inside there will be various folders for the different versions of Windows.  Open the folder for the version of Windows
+> you are installing and then select the AMD64 subfolder inside (even if you are on an Intel system, select AMD64).
+> Three drivers will be found.  Select them all, click next, and the vDisks you have assigned will appear.
+
 <!--
 vDisk Share <span style="font-weight: normal">(optional)</span>:
-: <input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/" name="DISKDIR" maxlength="60" value="<?=$domain_cfg['DISKDIR']?>" placeholder="Click to Select (ie. /mnt/cache/images)" title="Click to Select (ie. /mnt/cache/images)">
+: <input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/" name="DISKDIR" value="<?=$domain_cfg['DISKDIR']?>" placeholder="Click to Select (ie. /mnt/cache/images)" title="Click to Select (ie. /mnt/cache/images)">
 -->
 
 Default Network Bridge:

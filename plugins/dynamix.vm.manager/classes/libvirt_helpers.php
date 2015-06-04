@@ -25,13 +25,17 @@
 	// Create domain config if needed
 	$domain_cfgfile = "/boot/config/domain.cfg";
 	if (!file_exists($domain_cfgfile)) {
-		file_put_contents($domain_cfgfile, 'SERVICE="disable"'."\n".'DEBUG="no"'."\n".'MEDIADIR="/mnt/"'."\n".'DISKDIR="/mnt/"'."\n".'BRNAME=""'."\n");
+		file_put_contents($domain_cfgfile, 'SERVICE="disable"'."\n".'DEBUG="no"'."\n".'MEDIADIR="/mnt/"'."\n".'VIRTIOISO=""'."\n".'DISKDIR="/mnt/"'."\n".'BRNAME=""'."\n");
 	} else {
 		// This will clean any ^M characters (\r) caused by windows from the config file
 		shell_exec("sed -i 's!\r!!g' '$domain_cfgfile'");
 	}
 
 	$domain_cfg = parse_ini_file($domain_cfgfile);
+
+	if (!isset($domain_cfg['VIRTIOISO'])) {
+		$domain_cfg['VIRTIOISO'] = "";
+	}
 
 	$domain_debug = isset($domain_cfg['DEBUG']) ? $domain_cfg['DEBUG'] : "no";
 	if ($domain_debug != "yes") {
