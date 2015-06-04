@@ -42,7 +42,11 @@ foreach ($disks as $disk):
   if ($disk['fsColor']=='grey-off') continue;
   $name = $disk['name'];
 ?><tr>
-  <td><img src="/webGui/images/<?=$disk['fsColor']?>.png" class="icon"><a href="<?=$path?>/Disk?name=<?=$name?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$name?></a></td>
+<?switch ($disk['fsColor']):
+    case 'green-on': $help = 'Mounted, device has redundancy/protection'; break;
+    case 'yellow-on': $help = 'Mounted, device does not have redundancy/protection'; break;
+  endswitch;
+?><td><a class="info nohand" onclick="return false"><img src="/webGui/images/<?=$disk['fsColor']?>.png" class="icon"><span style="left:18px"><?=$help?></span></a><a href="<?=$path?>/Disk?name=<?=$name?>" onclick="$.cookie('one','tab1',{path:'/'})"><?=$name?></a></td>
   <td><?=$disk['comment']?></td>
   <td><?=disk_share_settings($var['shareSMBEnabled'], $sec[$name])?></td>
   <td><?=disk_share_settings($var['shareNFSEnabled'], $sec_nfs[$name])?></td>
