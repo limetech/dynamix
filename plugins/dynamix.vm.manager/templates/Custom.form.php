@@ -68,7 +68,7 @@
 		],
 		'media' => [
 			'cdrom' => '',
-			'drivers' => ''
+			'drivers' => $domain_cfg['VIRTIOISO']
 		],
 		'disk' => [
 			[
@@ -402,7 +402,7 @@
 </blockquote>
 
 <table class="domain_os windows">
-	<tr>
+	<tr class="advanced">
 		<td><a href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers#Direct_download" target="_blank">VirtIO Drivers ISO:</a></td>
 		<td>
 			<input type="text" data-pickcloseonfile="true" data-pickfilter="iso" data-pickroot="<?=$domain_cfg['MEDIADIR']?>" name="media[drivers]" value="<?=$arrConfig['media']['drivers']?>" placeholder="Download, Click and Select virtio drivers image">
@@ -410,10 +410,12 @@
 	</tr>
 </table>
 <div class="domain_os windows">
-	<blockquote class="inline_help">
-		<p>Specify the virtual CD-ROM (ISO) that contains the VirtIO Windows drivers as provided by the Fedora Project.  Download the latest ISO from here: <a href="http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/" target="_blank">http://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/</a></p>
-		<p>When installing Windows, you will reach a step where no disk devices will be found.  There is an option to browse for drivers on that screen.  Click browse and locate the additional CD-ROM in the menu.  Inside there will be various folders for the different versions of Windows.  Open the folder for the version of Windows you are installing and then select the AMD64 subfolder inside (even if you are on an Intel system, select AMD64).  Three drivers will be found.  Select them all, click next, and the vDisks you have assigned will appear.</p>
-	</blockquote>
+	<div class="advanced">
+		<blockquote class="inline_help">
+			<p>Specify the virtual CD-ROM (ISO) that contains the VirtIO Windows drivers as provided by the Fedora Project.  Download the latest ISO from here: <a href="https://fedoraproject.org/wiki/Windows_Virtio_Drivers#Direct_download" target="_blank">https://fedoraproject.org/wiki/Windows_Virtio_Drivers#Direct_download</a></p>
+			<p>When installing Windows, you will reach a step where no disk devices will be found.  There is an option to browse for drivers on that screen.  Click browse and locate the additional CD-ROM in the menu.  Inside there will be various folders for the different versions of Windows.  Open the folder for the version of Windows you are installing and then select the AMD64 subfolder inside (even if you are on an Intel system, select AMD64).  Three drivers will be found.  Select them all, click next, and the vDisks you have assigned will appear.</p>
+		</blockquote>
+	</div>
 </div>
 
 
