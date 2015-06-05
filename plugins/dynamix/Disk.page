@@ -18,6 +18,7 @@ if (count($pages)==2) $tabbed = false;
 $refs = array(); $n = 0;
 
 foreach ($disks as $ref) {
+  if ($ref['type']=='Flash') continue;
   if ($ref['fsColor']=='grey-off') continue;
   $refs[] = $ref['name'];
   if ($ref['name']==$name) $i = $n;
