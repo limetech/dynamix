@@ -49,9 +49,9 @@ endforeach;
 >
 > <img src='/webGui/images/green-on.png' class='icon'>Normal operation, device is active.
 >
-> <img src='/webGui/images/green-blink.png' class='icon'>Device is spun-down.
+> <img src='/webGui/images/green-blink.png' class='icon'>Device is in standby mode (spun-down).
 >
-> <img src='/webGui/images/blue-on.png' class='icon'>New device not in pool, it can be formatted to make it a member.
+> <img src='/webGui/images/blue-on.png' class='icon'>New device.
 >
 > <img src='/webGui/images/grey-off.png' class='icon'>No device present, position is empty.
 >
