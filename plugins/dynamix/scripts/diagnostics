@@ -50,7 +50,7 @@ $libvirtd = "/var/log/libvirt/libvirtd.log";
 if (file_exists($libvirtd)) exec("todos <$libvirtd >/$diag/logs/libvirtd.log");
 $qemu = glob("/var/log/libvirt/qemu/*.log*");
 if ($qemu)
-  foreach ($qemu as $file) exec("todos <$file >/$diag/qemu/".basename($file));
+  foreach ($qemu as $file) exec("todos <".escapeshellarg($file)." >/$diag/qemu/".escapeshellarg(basename($file)));
 else
   file_put_contents("/$diag/qemu/no qemu log files","");
 exec("ls -l /dev/disk/by-id/[au]*|awk '$0!~/-part/{split($11,a,\"/\");print a[3],substr($9,21)}'", $devices);
