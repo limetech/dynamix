@@ -26,6 +26,7 @@ $(function() {
 <thead><td>#</td><td>Attribute Name</td><td>Flag</td><td>Value</td><td>Worst</td><td>Threshold</td><td>Type</td><td>Updated</td><td>Failed</td><td>Raw Value</td></thead>
 <tbody id="disk_attributes"></tbody>
 </table>
+<input type="button" value="Done" onclick="done()">
 
 > This list shows the SMART attributes supported by this disk. For more information about each SMART attribute, it is recommended to search online.
 >
