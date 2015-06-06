@@ -17,6 +17,7 @@ Type="xmenu"
 <style>
 .thanks{padding-left:10px;color:#6FA239;font-weight:bold;}
 .thanks.red{color:#CC0000;}
+.remark{padding:0 10px;text-align:justify;}
 </style>
 
 <?if (strstr($var['regTy'], "error")):?>
@@ -86,12 +87,17 @@ Replaceable:
 
 <span class="thanks">Thank you for trying unRAID Server OS!</span>
 
+<div markdown="1" class="remark">
 Your server will not be usable until you download a *registration key*.
 Registration keys are bound to your USB Flash boot device GUID (serial number).
 Here you may obtain a **free** *Trial* registration key, which is valid for 30 days and supports up to 3 storage devices.
 To support more storage devices, you may purchase a *Basic*, *Plus*, or *Pro* registration key.
 
-**Note:** <span class='thanks red'>Please make sure your [server time](DateTime) is accurate to within 5 minutes.</span>
+<span class="red-text">Important:</span>
+
++ Please make sure your <u>[server time](DateTime)</u> is accurate to within 5 minutes.
++ Please make sure there is a <u>[DNS server](NetworkSettings)</u> specified.
+</div>
 
 Flash GUID:
 : <?=$var['flashGUID'];?>
@@ -108,11 +114,14 @@ Flash GUID:
 
 <span class="thanks">Thank you for trying unRAID Server OS!</span>
 
-<span class='thanks red'>Your *Trial* key has expired.</span> To continue using unRAID Server OS and expand your
-server to support more devices, you may purchase a *Basic*, *Plus*, or *Pro* registration key.
+<div markdown="1" class="remark">
+<span class='red-text'>Your *Trial* key has expired.</span>
+
+To continue using unRAID Server OS and expand your server to support more devices, you may purchase a *Basic*, *Plus*, or *Pro* registration key.
 Alternately, you may request a 30-day *Trial* extension key.
 
 **Note:** most *Trial* extension requests are processed immediately but please allow up to one business day to receive your *Trial* extension key.
+</div>
 
 Flash GUID:
 : <?=$var['flashGUID'];?>
@@ -129,8 +138,10 @@ Flash GUID:
 
 <span class="thanks">Thank you for trying unRAID Server OS!</span>
 
+<div markdown="1" class="remark">
 Your *Trial* key allows you to attach up to 3 storage devices. One device *must* be assigned to a *Data* disk slot, whereas
 the remaining two devices may be assigned any way you choose.
+</div>
 
 ***Trial*** key expires on:
 : <?=my_time($var['regTm2']);?>&nbsp;

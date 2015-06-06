@@ -26,6 +26,7 @@ $(function() {
 <thead><td style="width:33%">Feature</td><td>Value</td><td>Information</td></thead>
 <tbody id="disk_capabilities"></tbody>
 </table>
+<input type="button" value="Done" onclick="done()">
 
 > This list shows the SMART capabilities supported by this disk.
 >
