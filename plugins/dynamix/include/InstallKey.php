@@ -21,10 +21,10 @@ if ($parsed_url['host']=="keys.lime-technology.com") {
   $key_file = basename($_GET['url']);
   exec("/usr/bin/wget -q -O /boot/config/$key_file {$_GET['url']}", $output, $return_var);
   if ($return_var === 0) {
-    if ($var['mdState'] == "STOPPED")
-      addLog("<br>Installing ...<br>");
-    else
+    if ($var['mdState'] == "STARTED")
       addLog("<br>Installing ... Please Stop array to complete key installation.<br>");
+    else
+      addLog("<br>Installed ...<br>");
   }
   else {
     addLog("ERROR ($return_var)<br>");
