@@ -16,6 +16,8 @@ Title="Diagnostics"
 <?
 $zip = $docroot."/".str_replace(' ','_',strtolower($var['NAME']))."-diagnostics-".date('Ymd-Hi').".zip";
 ?>
+<style>ul,li{margin:0;padding-top:0;padding-bottom:0;}</style>
+
 <script>
 function cleanUp() {
   if (document.hasFocus()) {
@@ -41,15 +43,22 @@ and configuration files are collected:
 
 <pre markdown="1">
 + */config*
-  <br>copy all '*.cfg' files, 'go' file and the 'super.dat' file. These are configuration files.
+  <br>copy all *\*.cfg files*, *go* file and the *super.dat* file. These are configuration files.
 + */config/shares*
-  <br>copy all '*.cfg' files. These are the user share settings files.
-+ *Syslog file*
-  <br>copy the current 'syslog' file and copy any previous existing syslog files.
+  <br>copy all *\*.cfg* files. These are user share settings files.
++ *Syslog file(s)*
+  <br>copy the current *syslog* file and any previous existing *syslog* files.
++ *System*
+  <br>save output of the following commands:
+  + lsscsi
+  + lspci
+  + free
+  + ethtool
+  + ifconfig
 + *Array*
-  <br>Create disk status information about disks present in the unRAID array.
+  <br>save disk status information about disks present in the unRAID array.
 + *SMART reports*
-  <br>Create a SMART report of each individual disk present in your system, regardless of unRAID array usage.
+  <br>save a SMART report of each individual disk present in your system.
 </pre>
 
 Clicking **Collect** will start the collection and may open a new window to allow local saving of the zip file.
