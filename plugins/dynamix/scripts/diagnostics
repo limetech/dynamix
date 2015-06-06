@@ -20,7 +20,7 @@ if ($argv[1]) {
   $zip = "/boot/logs/".str_replace(' ','_',strtolower($var['NAME']))."-diagnostics-".date('Ymd-Hi').".zip";
 }
 $diag = basename($zip, '.zip');
-exec("mkdir -p /$diag/array /$diag/system /$diag/config /$diag/syslog /$diag/shares /$diag/smart");
+exec("mkdir -p /$diag/array /$diag/system /$diag/config /$diag/logs /$diag/shares /$diag/smart /$diag/qemu");
 file_put_contents("/$diag/array/array.txt", str_replace("\n","\r\n",print_r(parse_ini_file('/var/local/emhttp/disks.ini',true),true)));
 exec("lsscsi|todos >/$diag/system/lsscsi.txt");
 exec("lspci|todos >/$diag/system/lspci.txt");
@@ -42,8 +42,17 @@ foreach ($shares as $share) {
   if (!file_exists($file)) file_put_contents($file,"# This share has default settings.\n");
 }
 foreach (glob("/var/log/syslog*") as $file) {
-  exec("todos <$file >/$diag/syslog/".basename($file).".txt");
+  exec("todos <$file >/$diag/logs/".basename($file).".txt");
 }
+$docker = "/var/log/docker.log";
+if (file_exists($docker)) exec("todos <$docker >/$diag/logs/docker.log");
+$libvirtd = "/var/log/libvirt/libvirtd.log";
+if (file_exists($libvirtd)) exec("todos <$libvirtd >/$diag/logs/libvirtd.log");
+$qemu = glob("/var/log/libvirt/qemu/*.log*");
+if ($qemu)
+  foreach ($qemu as $file) exec("todos <$file >/$diag/qemu/".basename($file));
+else
+  file_put_contents("/$diag/qemu/no qemu log files","");
 exec("ls -l /dev/disk/by-id/[au]*|awk '$0!~/-part/{split($11,a,\"/\");print a[3],substr($9,21)}'", $devices);
 foreach ($devices as $device) {
   $disk = explode(' ',$device);

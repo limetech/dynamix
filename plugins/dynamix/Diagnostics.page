@@ -50,15 +50,13 @@ and configuration files are collected:
   <br>copy the current *syslog* file and any previous existing *syslog* files.
 + *System*
   <br>save output of the following commands:
-  + lsscsi
-  + lspci
-  + free
-  + ethtool
-  + ifconfig
+  <br>lsscsi, lspci, free, ethtool & ifconfig
 + *Array*
   <br>save disk status information about disks present in the unRAID array.
 + *SMART reports*
   <br>save a SMART report of each individual disk present in your system.
++ *Docker*
+  <br>save files *docker.log*, *libvirtd.log* and *libvirt/qemu/\*.log*
 </pre>
 
 Clicking **Collect** will start the collection and may open a new window to allow local saving of the zip file.
