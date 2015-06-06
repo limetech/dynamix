@@ -70,10 +70,10 @@ function sort_by($field, $opt, $show_disk) {
 function parent_link($text) {
   global $dir, $path;
   if (($dir == "/boot") || (dirname($dir) == "/mnt") || (dirname($dir) == "/mnt/user"))
-    echo $text;
+    return $text;
   else {
     $parent = urlencode_path(dirname($dir));
-    echo "<a href='/$path?dir=$parent'>$text</a>";
+    return "<a href='/$path?dir=$parent'>$text</a>";
   }
 }
 
@@ -104,7 +104,7 @@ $disk_order=($column=='disk'?$order:'A');
 <?if ($dir):?>
   <tr>
   <td><div class="icon-dirup"></div></td>
-  <td><?parent_link("Parent Directory")?></td>
+  <td><?=parent_link("Parent Directory")?></td>
   <td></td>
   <td></td>
 <?if ($show_disk):?>
