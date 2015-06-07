@@ -18,7 +18,7 @@ $var = parse_ini_file('state/var.ini');
 <script>
 function registerTrial(email, guid) {
   if (email.length) {
-    var timestamp = Math.floor(Date.now/1000);
+    var timestamp = <?=time()?>;
     $('#status_panel').slideUp('fast');
     $('#trial_form').find('input').prop('disabled', true);
     // Nerds love spinners, Maybe place a spinner image next to the submit button; we'll show it now:
