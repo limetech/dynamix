@@ -185,7 +185,7 @@ $(function() {
   //$.ajaxSetup({ async: false });
   $("#applyBtn").click(function(){
     if ($("#deleteCheckbox").length && $("#deleteCheckbox").is(":checked")) {
-      $("#command").val("rm \"" + $("#DOCKER_IMAGE_FILE").val() + "\"");
+      $("#command").val("/usr/bin/rm \"" + $("#DOCKER_IMAGE_FILE").val() + "\"");
       $("#DOCKER_IMAGE_FILE").val("");
       $("#settingsForm").submit();
       return;
