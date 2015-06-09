@@ -27,8 +27,10 @@ foreach ($shares as $share) {
 }
 
 exec("awk '/^MemTotal/{print $2*1024/1.048576}' /proc/meminfo",$total);
-exec("dmidecode -q -t memory|awk '/Maximum Capacity:/{print $3,$4};/Size:/{total+=$2;unit=$3} END{print total,unit}'",$memory);
 exec("ifconfig -s|awk '/^(bond|eth|lo)/{print $1}'",$ports);
+
+$memory_installed = exec("dmidecode -t 17 | awk -F: '/^\tSize: [0-9]+ MB$/{t+=$2} END{print t}'");
+$memory_maximum = exec("dmidecode -t 16 | awk -F: '/^\tMaximum Capacity: [0-9]+ GB$/{t+=$2} END{print t}'");
 
 function init_row($label) {
   echo "<tr><td>$label</td>".str_repeat("<td></td>",25)."</tr>";
@@ -226,7 +228,7 @@ $display['scale'] = 2;
 ?>
 <tr class='wide'><td>Memory usage</td><td colspan='3'><div class='usage-disk sys'><span id='sys1' style='width:0'></span></div></td></tr>
 <tr><td rowspan='2'>Memory size</td><td>allocated</td><td colspan='2' class='blue'><?=my_scale($total[0],$unit,0)." $unit"?></td></tr>
-<tr><td>installed</td><td colspan='2' class='blue'><?="{$memory[1]} (max. {$memory[0]})"?></td></tr>
+<tr><td>installed</td><td colspan='2' class='blue'><?=my_scale($memory_installed*1000*1000,$unit,0)." $unit (max. ".$memory_maximum." GB)"?></td></tr>
 <?if (count($ports)>1):?><tr class='view1'><td rowspan='<?=count($ports)?>'><?else:?><tr class='view1 wide'><td><?endif;?>Network</td>
 <?
 $display['scale'] = $scale;
