@@ -126,7 +126,14 @@ echo $size;
 </div>
 <div><span style="width:90px; display:inline-block"><strong>Memory:</strong></span>
 <?
-echo exec("dmidecode -q -t memory|awk '/^\tMaximum Capacity:/{m=$3;u1=$4;}; /^\tSize:/{t+=$2;if(length($3)==2){u2=$3};} END{print t,u2\" (max. installable capacity \"m,u1\")\"}'");
+// Memory Device (16) will get us each ram chip. By matching on MB it'll filter out Flash/Bios chips
+// Sum up all the Memory Devices to get the amount of system memory installed
+$memory_installed = exec("dmidecode -t 17 | awk -F: '/^\tSize: [0-9]+ MB$/{t+=$2} END{print t}'");
+// Physical Memory Array (16) usually one of these for a desktop-class motherboard but higher-end xeon motherboards
+// might have two or more of these.  The trick is to filter out any Flash/Bios types by matching on GB
+// Sum up all the Physical Memory Arrays to get the motherboard's total memory capacity
+$memory_maximum = exec("dmidecode -t 16 | awk -F: '/^\tMaximum Capacity: [0-9]+ GB$/{t+=$2} END{print t}'");
+echo $memory_installed . " MB (max. installable capacity ".$memory_maximum." GB)";
 ?>
 </div>
 <div><span style="width:90px; display:inline-block"><strong>Network:</strong></span>
