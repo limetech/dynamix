@@ -173,7 +173,7 @@ $DockerTemplates = new DockerTemplates();
 				}
 				?>
 			</td>
-			<td style="word-break:break-all;"><?= implode("<br>", $ports); ?></td>
+			<td style="white-space:nowrap;"><?= implode("<br>", $ports); ?></td>
 			<td style="word-break:break-all;"><?= implode("<br>", $paths); ?></td>
 			<td data-sort-value="<?=$is_autostart?>"><input type="checkbox" class="autostart" container="<?=htmlspecialchars($ct['Name']);?>" <?=$info[$ct['Name']]['autostart'] ? "checked" : ""?>></td>
 			<td><a class="log" onclick="containerLogs('<?=addslashes($ct['Name']);?>','Log for <?=addslashes($ct['Name']);?>', false, false)"><img class="basic" src="/plugins/dynamix/icons/log.png"/><div class="advanced" style="width: 124px;"><?=htmlspecialchars($ct['Status'])?></div><div class="advanced" style="color:#888;">Created <?=htmlspecialchars($ct['Created'])?></div></a></td>
