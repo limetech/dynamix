@@ -10,6 +10,7 @@ function addDockerContainerContext(container, image, template, started, update, 
   }
   if (started){
     opts.push({text: 'Stop', icon:'fa-stop', action: function(e){ e.preventDefault(); containerControl(container, 'stop'); }});
+    opts.push({text: 'Restart', icon:'fa-refresh', action: function(e){ e.preventDefault(); containerControl(container, 'restart'); }});
   } else {
     opts.push({text: 'Start', icon:'fa-play', action: function(e){ e.preventDefault(); containerControl(container, 'start'); }});
   }

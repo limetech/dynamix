@@ -81,12 +81,16 @@ if (strpos($cpumodel,'@')===false) {
   if (!empty($strLoadedModules)) {
     // Yah! CPU and motherboard supported and enabled in BIOS
     ?>Enabled<?
-  } else if (strpos($strCPUInfo, 'vmx') === false && strpos($strCPUInfo, 'svm') === false) {
-    // CPU doesn't support virtualzation
-    ?>Not Available<?
   } else {
-    // Motherboard either doesn't support virtualzation or BIOS has it disabled
-    ?>Disabled<?
+    echo '<a href="http://lime-technology.com/wiki/index.php/UnRAID_Manual_6#Determining_HVM.2FIOMMU_Hardware_Support" target="_blank">';
+    if (strpos($strCPUInfo, 'vmx') === false && strpos($strCPUInfo, 'svm') === false) {
+      // CPU doesn't support virtualzation
+      ?>Not Available<?
+    } else {
+      // Motherboard either doesn't support virtualzation or BIOS has it disabled
+      ?>Disabled<?
+    }
+    echo '</a>';
   }
 ?>
 </div>
@@ -98,12 +102,16 @@ if (strpos($cpumodel,'@')===false) {
   if (!empty($iommu_groups)) {
     // Yah! CPU and motherboard supported and enabled in BIOS
     ?>Enabled<?
-  } else if (strpos($strCPUInfo, 'vmx') === false && strpos($strCPUInfo, 'svm') === false) {
-    // CPU doesn't support virtualzation so iommu would be impossible
-    ?>Not Available<?
   } else {
-    // Motherboard either doesn't support iommu or BIOS has it disabled
-    ?>Disabled<?
+    echo '<a href="http://lime-technology.com/wiki/index.php/UnRAID_Manual_6#Determining_HVM.2FIOMMU_Hardware_Support" target="_blank">';
+    if (strpos($strCPUInfo, 'vmx') === false && strpos($strCPUInfo, 'svm') === false) {
+      // CPU doesn't support virtualzation so iommu would be impossible
+      ?>Not Available<?
+    } else {
+      // Motherboard either doesn't support iommu or BIOS has it disabled
+      ?>Disabled<?
+    }
+    echo '</a>';
   }
 ?>
 </div>
