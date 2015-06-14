@@ -70,7 +70,7 @@ function my_error($code) {
   }
 }
 
-exec("wget -qO /dev/null 127.0.0.1$(lsof -lbnPi4 -sTCP:LISTEN|awk '$1==\"emhttp\"{print substr($9,index($9,\":\"))}')/update.htm?cmdStatus=apply");
+exec("wget -qO /dev/null 127.0.0.1:$(lsof -lbnPi4 -sTCP:LISTEN|grep -Po '^emhttp.*:\K[\d]+')/update.htm?cmdStatus=apply");
 
 $disks  = parse_ini_file("/var/local/emhttp/disks.ini",true);
 $var    = parse_ini_file("/var/local/emhttp/var.ini");
@@ -204,7 +204,7 @@ if ($var['mdResync']>0) {
 // check read-write status of USB flash drive
 $name = 'flash';
 $last = isset($saved[$item][$name]) ? $saved[$item][$name] : '';
-$warn = exec("awk '/boot/{print $4}' /proc/mounts|cut -d, -f1");
+$warn = exec("grep -Po '/boot \S+ \K\S{2}' /proc/mounts");
 $info = "{$disks['flash']['id']} ({$disks['flash']['device']})";
 
 if ($warn!="rw") {
