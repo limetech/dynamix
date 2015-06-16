@@ -19,12 +19,19 @@ switch ($_POST['cmd']) {
 case "attributes":
   $unraid = parse_plugin_cfg("dynamix",true);
   $events = explode('|', $unraid['notify']['events']);
+  $temps = array(190,194);
+  $max = $unraid['display']['max'];
+  $hot = $unraid['display']['hot'];
   exec("smartctl -A /dev/$port|awk 'NR>7'",$output);
   foreach ($output as $line) {
     if (!$line) continue;
     $info = explode(' ', trim(preg_replace('/\s+/',' ',$line)), 10);
-    $color = array_search($info[0], $events)!==false && $info[9]>0 ? "class='orange-text'" : "";
-    echo "<tr {$color}>";
+    $color = "";
+    if (array_search($info[0], $events)!==false && $info[9]>0) $color = " class='orange-text'";
+    else if (array_search($info[0], $temps)!==false) {
+      if ($info[9]>=$max) $color = " class='red-text'"; else if ($info[9]>=$hot) $color = " class='orange-text'";
+    }
+    echo "<tr{$color}>";
     foreach ($info as $field) echo "<td>".str_replace('_',' ',$field)."</td>";
     echo "</tr>";
   }
