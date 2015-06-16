@@ -133,7 +133,10 @@ class DockerTemplates {
 		$repotemplates = array();
 		$output = "";
 		$tmp_dir = "/tmp/tmp-".mt_rand();
-		
+                if (!file_exists($dockerManPaths['template-repos'])) {
+                        @mkdir(dirname($dockerManPaths['template-repos']), 0777, true);
+                        @file_put_contents($dockerManPaths['template-repos'], "https://github.com/limetech/docker-templates");
+                }
 		$urls = @file($Urls, FILE_IGNORE_NEW_LINES);
 		if ( ! is_array($urls)) return false;
 		$this->debug("\nURLs:\n   " . implode("\n   ", $urls));

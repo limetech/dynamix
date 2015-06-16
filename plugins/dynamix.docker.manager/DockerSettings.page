@@ -191,7 +191,7 @@ $(function() {
       return;
     }
 
-    $("#command").val("/usr/local/emhttp/plugins/dynamix.docker.manager/event/" + ($("#DOCKER_ENABLED").val()=="yes" ? "started" : "stopping_svcs"));
+    $("#command").val("/usr/local/emhttp/plugins/dynamix.docker.manager/event/" + ($("#DOCKER_ENABLED").val()=="yes" ? "started;/usr/local/emhttp/plugins/dynamix.docker.manager/dockerupdate.php" : "stopping_svcs"));
 
     if ($("#DOCKER_IMAGE_SIZE").length && $("#DOCKER_IMAGE_FILE").length) {
       var isError = false;
