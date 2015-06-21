@@ -3,8 +3,8 @@ Title="Display Settings"
 Icon="display-settings.png"
 ---
 <?PHP
-/* Copyright 2014, Bergware International.
- * Copyright 2014, Lime Technology
+/* Copyright 2015, Bergware International.
+ * Copyright 2015, Lime Technology
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -62,32 +62,6 @@ function presetPassive(index) {
 }
 function checkTemp(form,what) {
   if (form.hot.value>=form.max.value) alert(what ? 'Warning temperature must be lower than Critical temperature' : 'Critical temperature must be higher than Warning temperature');
-}
-function resetDisplay(form) {
-  form.date.selectedIndex = 0;
-  presetTime(form);
-  form.number.selectedIndex = 0;
-  form.unit.selectedIndex = 0;
-  presetTemp(form);
-  form.hot.value = 45;
-  form.max.value = 55;
-  form.scale.selectedIndex = 0;
-  form.align.selectedIndex = 2;
-  form.tabs.selectedIndex = 0;
-  form.text.value = 1;
-  form.critical.value = 90;
-  form.warning.value = 70;
-  form.view.value = '';
-  form.total.value = 1;
-  form.spin.value = 1;
-  form.usage.value = 0;
-  form.icons.value = 1;
-  form.banner.value = '';
-  form.theme.selectedIndex = 0;
-  form.refresh.selectedIndex = 1;
-  document.getElementsByName('#passive')[0].checked = false;
-  $('#passive').show();
-  $('input[name="#apply"]').removeAttr('disabled');
 }
 </script>
 
@@ -159,22 +133,10 @@ Display array totals:
   <?=mk_option($display['total'], "1", "Yes")?>
   </select>
 
-Allow individual disk spin up/down:
-: <select name="spin" size="1">
-  <?=mk_option($display['spin'], "0", "No")?>
-  <?=mk_option($display['spin'], "1", "Yes")?>
-  </select>
-
 Show array utilization indicator:
 : <select name="usage" size="1">
   <?=mk_option($display['usage'], "0", "No")?>
   <?=mk_option($display['usage'], "1", "Yes")?>
-  </select>
-
-Show section icons:
-: <select name="icons" size="1">
-  <?=mk_option($display['icons'], "", "No")?>
-  <?=mk_option($display['icons'], "1", "Yes")?>
   </select>
 
 Show banner image:
@@ -251,6 +213,6 @@ Page update frequency:
 >
 > A special option exists to disable screen updates while a parity operation is in progress. Use this option when degradation of the parity operation is observed.
 
-<input type="button" value="Default" onclick="resetDisplay(this.form);"><input type="reset" value="Reset" onclick="setTimeout('presetTime(document.display_settings)',0)">
+<input type="submit" name="#default" value="Default">
 : <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>

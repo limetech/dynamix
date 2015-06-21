@@ -46,21 +46,6 @@ function presetMover(form) {
   form.dotm.value = form.dotm.disabled ? '*' : '1';
   if (mode==0) {$('#H1').hide(); $('#H2').show();} else {$('#H2').hide(); $('#H1').show();}
 }
-function resetMover(form) {
-  form.shareMoverSchedule.selectedIndex = 1;
-  form.min.disabled = false;
-  form.hour1.disabled = false;
-  form.day.disabled = true;
-  form.dotm.disabled = true;
-  form.min.selectedIndex = 8;
-  form.hour1.selectedIndex = 3;
-  form.day.value = '*';
-  form.dotm.value = '*';
-  form.shareMoverLogging.selectedIndex = 1;
-  $('#H1').show();
-  $('#H2').hide();
-  $('input[name="changeMover"]').removeAttr('disabled');
-}
 </script>
 <form markdown="1" name="mover_schedule" method="POST" action="/update.htm" target="progressFrame" onsubmit="prepareMover(this)">
 Mover schedule:
@@ -126,7 +111,7 @@ Mover logging:
 
 > Write mover messages to the syslog file.
 
-<input type="button" value="Default" onclick="resetMover(this.form)"><input type="reset" value="Reset" onclick="setTimeout('presetMover(document.mover_schedule)',0)">
+&nbsp;
 : <input type="submit" name="changeMover" value="Apply"><input type="button" value="Done" onclick="done()">
 
 &nbsp;

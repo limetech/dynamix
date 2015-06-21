@@ -217,9 +217,9 @@ if ($action) {
 
       // Log file
       if (!empty($log)) {
-         echo "<td><a class='log' href='#' onclick=\"openWindow('/usr/bin/tail -n 42 -f " . addslashes(escapeshellarg($log)) . "', '" . addslashes($name) . " QEMU Log', 600, 900); return false;\"><img class='basic' src='/plugins/dynamix/icons/log.png'/></a></td>";
+         echo "<td><a class='log' href='#' onclick=\"openWindow('/usr/bin/tail -n 42 -f " . addslashes(escapeshellarg($log)) . "', '" . addslashes($name) . " QEMU Log', 600, 900); return false;\"><img class='basic' src='/webGui/icons/log.png'/></a></td>";
       } else {
-         echo "<td><img class='basic' src='/plugins/dynamix/icons/log.png' style='opacity: 0.3' title='Log not available'/></a></td>";
+         echo "<td><img class='basic' src='/webGui/icons/log.png' style='opacity: 0.3' title='Log not available'/></a></td>";
       }
 
       echo "</tr>
@@ -465,7 +465,7 @@ if($msg){
 
 <input type="button" id="btnAddVM" value="Add VM"/>
 
-<script type="text/javascript">
+<script>
 function vncOpen() {
   $.post('/plugins/dynamix.vm.manager/classes/vnc.php',{cmd:'open',root:'<?=$docroot?>',file:'/usr/local/emhttp/plugins/dynamix.vm.manager/vncconnect.vnc'},function(data) {
     window.location.href = data;

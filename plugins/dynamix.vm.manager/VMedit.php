@@ -11,7 +11,7 @@
  */
 ?>
 <?
-require_once('/usr/local/emhttp/plugins/dynamix/include/Helpers.php');
+require_once('/usr/local/emhttp/webGui/include/Helpers.php');
 require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt.php');
 require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt_helpers.php');
 
@@ -81,8 +81,8 @@ if (!empty($arrTemplates) && !in_array($strSelectedTemplate, $arrTemplates)) {
 
 ?>
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.filetree.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
 <style type="text/css">
 	body { -webkit-overflow-scrolling: touch;}
 	.fileTree {
@@ -249,10 +249,10 @@ if (!empty($arrTemplates) && !in_array($strSelectedTemplate, $arrTemplates)) {
 	</form>
 </div>
 
-<script type="text/javascript" src="/webGui/scripts/jqueryFileTree.js"></script>
-<script type="text/javascript" src="/webGui/scripts/jquery.switchButton.js"></script>
-<script type="text/javascript" src="/plugins/dynamix.vm.manager/scripts/dynamix.vm.manager.js"></script>
-<script type="text/javascript">
+<script src="/webGui/javascript/jquery.filetree.js"></script>
+<script src="/webGui/javascript/jquery.switchbutton.js"></script>
+<script src="/plugins/dynamix.vm.manager/scripts/dynamix.vm.manager.js"></script>
+<script>
 function isVMAdvancedMode() {
 	return ($.cookie('vmmanager_listview_mode') == 'advanced');
 }

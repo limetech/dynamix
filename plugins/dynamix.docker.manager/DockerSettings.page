@@ -21,7 +21,7 @@ if ($var['fsState'] != "Started") {
 }
 
 // Add the Docker JSON client
-require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerClient.php");
+require_once('/usr/local/emhttp/plugins/dynamix.docker.manager/include/dockerClient.php');
 $docker          = new DockerClient();
 $DockerUpdate    = new DockerUpdate();
 $DockerTemplates = new DockerTemplates();
@@ -55,20 +55,10 @@ if (file_exists($realfile)) {
   }
 }
 ?>
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css">
-<style type="text/css">
-  .errortext {
-    color: #EF3D47;
-    display: none;
-  }
-  .fileTree {
-    width: 305px;
-    max-height: 150px;
-    overflow: scroll;
-    position: absolute;
-    z-index: 100;
-    display: none;
-  }
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.filetree.css">
+<style>
+.errortext{color:#EF3D47;display:none;}
+.fileTree{width:305px;max-height:150px;overflow:scroll;position:absolute;z-index:100;display:none;}
 </style>
 <?if (pgrep('docker') === false):?>
 
@@ -101,7 +91,7 @@ Docker image:
 > create this file when the Docker service is first started.  If you do not want Docker
 > to run at all, set this field blank and click **Start**.
 
-<input type="reset" value="Reset">
+&nbsp;
 : <input id="applyBtn" type="button" value="Apply"/><input type="button" value="Done" onclick="done()">
 </form>
 
@@ -158,7 +148,7 @@ Docker image:
 <?else:?>
 
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
-<input type="reset" value="Reset">
+&nbsp;
 : <input type="button" value="Scrub" onclick="openBox('<?=$cmd;?> '+document.getElementById('scrub_options').value,'Scrub',490,430)">
   <input type="text" id="scrub_options" maxlength="256" value="-B -R -d -r"> Options (see Help)
 
@@ -175,12 +165,11 @@ Docker image:
 
 </form>
 
-
 <?endif;?>
 <?endif;?>
 
-<script type="text/javascript" src="/webGui/scripts/jqueryFileTree.js"></script>
-<script type="text/javascript">
+<script src="/webGui/javascript/jquery.filetree.js"></script>
+<script>
 $(function() {
   //$.ajaxSetup({ async: false });
   $("#applyBtn").click(function(){
@@ -191,7 +180,7 @@ $(function() {
       return;
     }
 
-    $("#command").val("/usr/local/emhttp/plugins/dynamix.docker.manager/event/" + ($("#DOCKER_ENABLED").val()=="yes" ? "started;/usr/local/emhttp/plugins/dynamix.docker.manager/dockerupdate.php" : "stopping_svcs"));
+    $("#command").val("/usr/local/emhttp/plugins/dynamix.docker.manager/event/" + ($("#DOCKER_ENABLED").val()=="yes" ? "started;/usr/local/emhttp/plugins/dynamix.docker.manager/include/dockerupdate.php" : "stopping_svcs"));
 
     if ($("#DOCKER_IMAGE_SIZE").length && $("#DOCKER_IMAGE_FILE").length) {
       var isError = false;
@@ -206,7 +195,7 @@ $(function() {
       var image = $("#DOCKER_IMAGE_FILE").val();
 
       target = $("#IMAGE_ERROR");
-      $.getJSON( "/plugins/dynamix.docker.manager/update_cfg.php?is_dir=" + image).done(function( json ) {
+      $.getJSON( "/plugins/dynamix.docker.manager/include/update_cfg.php?is_dir=" + image).done(function( json ) {
         if (json.is_dir === true){
           target.fadeIn().html('Error: must be a file; directory provided.');
           isError = true;

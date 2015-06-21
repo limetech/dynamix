@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2010-2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -19,19 +19,16 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="robots" content="noindex">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/default-fonts.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.min.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/default-<?=$display['theme']?>.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/dynamix-<?=$display['theme']?>.css">
 <link type="image/png" rel="shortcut icon" href="/webGui/images/<?=$var['mdColor']?>.png">
 
 <style>
-.inline_help {display:none;}
-<?if (!$display['icons']):?>
-.tab [type=radio]+label img.icon, #title img.icon {display:none;}
-<?endif;?>
+.inline_help{display:none;}
 </style>
 
-<script type="text/javascript" src="/webGui/scripts/dynamix.js"></script>
+<script src="/webGui/javascript/dynamix.js"></script>
 <script>
 Shadowbox.init({skipSetup:true});
 
@@ -57,7 +54,6 @@ function resumeEvents(){
     startDelay += 50;
   });
 }
-
 function plus(value, label, last) {
   return value>0 ? (value+' '+label+(value!=1?'s':'')+(last?'':', ')) : '';
 }
@@ -69,10 +65,15 @@ function updateTime() {
   uptime++;
   setTimeout(updateTime,1000);
 }
-function refresh() {
-  for (var i=0,element; element=document.querySelectorAll('input,button,select')[i]; i++) { element.disabled = true; }
-  for (var i=0,link; link=document.getElementsByTagName('a')[i]; i++) { link.style.color = "gray"; } //fake disable
-  location = location;
+function refresh(top) {
+  if (typeof top === 'undefined') {
+    for (var i=0,element; element=document.querySelectorAll('input,button,select')[i]; i++) { element.disabled = true; }
+    for (var i=0,link; link=document.getElementsByTagName('a')[i]; i++) { link.style.color = "gray"; } //fake disable
+    location = location;
+  } else {
+    $.cookie('top',top,{path:'/'});
+    location = location;
+  }
 }
 function initab() {
   $.removeCookie('one',{path:'/'});
@@ -90,7 +91,7 @@ function settab(tab) {
   $.cookie('one',tab,{path:'/'});
 <?break;?>
 <?default:?>
-  $.cookie($.cookie('one')==null?'tab':'one',tab,{path:'/'});
+  $.cookie(($.cookie('one')==null?'tab':'one'),tab,{path:'/'});
 <?endswitch;?>
 }
 function done() {
@@ -178,17 +179,8 @@ $(function() {
 <?endif;?>
   updateTime();
   $.jGrowl.defaults.closer = false;
-<?if ($notify['entity'] & 1 == 1):?>
-  $.post('/webGui/include/Notify.php',{cmd:'init'},function(x){timers.notifier = setTimeout(notifier,0);});
-<?endif;?>
   Shadowbox.setup('a.sb-enable', {modal:true});
-<?if ($confirm['warn']):?>
-  $('input[value="Apply"]').attr('disabled','disabled');
-  $('form').find('select,input[type=text],input[type=number],input[type=password],input[type=checkbox],textarea').each(function(){$(this).change(function(){$(this).parentsUntil('form').parent().find('input[value="Apply"]').removeAttr('disabled');});});
-<?endif;?>
-  timers.watchdog = setTimeout(watchdog,50);
 });
-
 var mobiles=['ipad','iphone','ipod','android'];
 var device=navigator.platform.toLowerCase();
 for (var i=0,mobile; mobile=mobiles[i]; i++) {
@@ -301,5 +293,22 @@ if (isset($myPage['Author'])) {
 }
 echo "</span></div>";
 ?>
+<script>
+$(function() {
+<?if ($notify['entity'] & 1 == 1):?>
+  $.post('/webGui/include/Notify.php',{cmd:'init'},function(x){timers.notifier = setTimeout(notifier,0);});
+<?endif;?>
+  $('input[value="Apply"],input[name="cmdEditShare"],input[name="cmdUserEdit"]').attr('disabled','disabled');
+  $('form').find('select,input[type=text],input[type=number],input[type=password],input[type=checkbox],textarea').each(function(){$(this).change(function() {
+    var form = $(this).parentsUntil('form').parent();
+    form.find('input[value="Apply"],input[name="cmdEditShare"],input[name="cmdUserEdit"]').removeAttr('disabled');
+    form.find('input[value="Done"]').val('Reset').prop('onclick',null).click(function(){refresh(form.offset().top)});
+  });});
+  timers.watchdog = setTimeout(watchdog,50);
+  var top = ($.cookie('top')||0) - $('.tabs').offset().top - 75;
+  if (top>0) {$('html,body').scrollTop(top);}
+  $.removeCookie('top',{path:'/'});
+});
+</script>
 </body>
 </html>

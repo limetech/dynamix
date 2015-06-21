@@ -4,8 +4,8 @@ Title="Global Share Settings"
 Icon="share-settings.png"
 ---
 <?PHP
-/* Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -24,12 +24,6 @@ $(function() {
   $("#s2").dropdownchecklist({emptyText:'None', width:300, explicitClose:'...close'});
   presetShare(document.share_settings);
 });
-function prepareShareSettings() {
-  $("#s1").dropdownchecklist('destroy');
-  $("#s1").dropdownchecklist({emptyText:'All', width:300, explicitClose:'...close'});
-  $("#s2").dropdownchecklist('destroy');
-  $("#s2").dropdownchecklist({emptyText:'None', width:300, explicitClose:'...close'});
-}  
 // Simulate the original input field
 function prepareShare(form) {
   var include = '';
@@ -102,6 +96,6 @@ Excluded disk(s):
 > **Note:** Each separate User Share also includes its own set of Included and Excluded disks which represent
 > a subset of the Included/Excluded disks defined here.
 
-<?if ($disabled):?>&nbsp;<?else:?><input type="reset" value="Reset" onclick="setTimeout(check_cache_settings,0)"><?endif;?>
+&nbsp;
 : <input type="submit" name="changeShare" value="Apply" <?=$disabled?>><input type="button" value="Done" onclick="done()"><?if ($disabled):?>Array must be **Stopped** to change<?endif;?>
 </form>

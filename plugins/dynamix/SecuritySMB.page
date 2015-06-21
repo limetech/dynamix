@@ -47,7 +47,7 @@ Security:
 > **Private** No guest access at all, you select which of your users have read/write or 
 > read-only access.
 
-<input type="reset" value="Reset">
+&nbsp;
 : <input type="submit" name="changeShareSecurity" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
 
@@ -57,7 +57,7 @@ Security:
 <div id="title" class="nocontrol"><dt>User Access</dt><i>Guests have <b>read-only</b> access.</i></div>
 <?input_secure_users($sec);?>
 
-<input type="reset" value="Reset">
+&nbsp;
 : <input type="submit" name="changeShareAccess" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
 
@@ -67,7 +67,7 @@ Security:
 <div id="title" class="nocontrol"><dt>User Access</dt><i>Guests have <b>no</b> access.</i></div>
 <?input_private_users($sec);?>
 
-<input type="reset" value="Reset">
+&nbsp;
 : <input type="submit" name="changeShareAccess" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
 <?endif;?>

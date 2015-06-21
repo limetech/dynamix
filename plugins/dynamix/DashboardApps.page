@@ -3,79 +3,30 @@ Title="Apps"
 Cond="(((pgrep('docker')!==false) || (pgrep('libvirtd')!==false)) && ($display['dashapps']!='none'))"
 Markdown="false"
 ---
-<link type="text/css" rel="stylesheet" href="/plugins/dynamix.docker.manager/assets/gh-buttons.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery-ui.min.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
+<link type="text/css" rel="stylesheet" href="/plugins/dynamix.docker.manager/styles/gh-buttons.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.ui.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/context.standalone.css">
 <style>
-	body {
-		-webkit-overflow-scrolling: touch;
-	}
-	label {
-		display: inline;
-	}
-	iframe {
-		overflow: scroll;
-		-webkit-overflow-scrolling: touch;
-	}
-	h2 {
-		color: #625D5D;
-		letter-spacing: 0;
-		font-family: "Raleway",sans-serif;
-		font-size: 32px;
-		line-height: 1.2em;
-		font-weight: 300;
-		padding: 0 0 20px;
-		margin: 0;
-	}
-	.iconstatus {
-		position: absolute;
-		z-index: 2;
-		bottom: -4px;
-		right: -4px;
-		font-size: 1.2em;
-		text-shadow: 0 0 2px #FFF;
-	}
-	.iconstatus.started {
-		font-size: 1.3em;
-	}
-	img.started{opacity: 1.0;}
-	img.stopped{opacity: 0.3;}
-	img.paused{opacity: 1.0;}
-	.started{color: #009900;}
-	.paused{color: #F0DD33;}
-	.stopped{color: #EF3D47;}
-	.update{color: #3300FF;}
-	.show {
-		display: block;
-	}
-	div.Panel {
-		float: none;
-		display: inline-block;
-		margin: 0 18px 15px 0;
-		height: 90px;
-		overflow: hidden;
-		vertical-align: top;
-		width: 94px;
-		word-wrap: break-word;
-	}
-	div.Panel:hover {
-		overflow: visible;
-		z-index: 10;
-	}
-	#noapps {
-		display: none;
-		font-style: italic;
-		font-size: 16px;
-		opacity: 0.5;
-		padding: 5px;
-	}
-	.switch-button-label.off {
-		color: inherit;
-	}
-	.switch-button-label.on {
-		color: #009900;
-	}
+body{-webkit-overflow-scrolling: touch;}
+label{display:inline;}
+iframe{overflow:scroll;-webkit-overflow-scrolling:touch;}
+h2{color:#625D5D;letter-spacing:0;font-family:arimo;font-size:32px;line-height: 1.2em;font-weight:300;padding:0 0 20px;margin:0;}
+.iconstatus{position:absolute;z-index:2;bottom:-4px;right:-4px;font-size:1.2em;text-shadow:0 0 2px #FFF;}
+.iconstatus.started{font-size:1.3em;}
+img.started{opacity:1.0;}
+img.stopped{opacity:0.3;}
+img.paused{opacity:1.0;}
+.started{color:#009900;}
+.paused{color:#F0DD33;}
+.stopped{color:#EF3D47;}
+.update{color:#3300FF;}
+.show{display:block;}
+div.Panel{float:none;display:inline-block;margin:0 18px 15px 0;height:90px;overflow:hidden;vertical-align:top;width:94px;word-wrap:break-word;}
+div.Panel:hover{overflow:visible;z-index:10;}
+#noapps{display:none;font-style:italic;font-size:16px;opacity:0.5;padding:5px;}
+.switch-button-label.off{color:inherit;}
+.switch-button-label.on{color:#009900;}
 </style>
 <form method="POST" id="formStartStop" action="/update.php" target="progressFrame">
 <input type="hidden" id="cmdStartStop" name="#command" value="" />
@@ -86,12 +37,12 @@ Markdown="false"
 </form>
 <div id="dialog-confirm" style="display:none;" title="Dialog Title"></div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
-<span class="status" style="margin-top: -44px; margin-right: <?= ($display['refresh']==0 || ($display['refresh']<0 && $var['mdResync']>0)) ? '60' : '0' ?>px"><input type="checkbox" class="appview"></span>
-<div id="apps_icons" style="display: none">
+<span class="status" style="margin-top:-44px; margin-right:<?= ($display['refresh']==0 || ($display['refresh']<0 && $var['mdResync']>0)) ? '60' : '0' ?>px"><input type="checkbox" class="appview"></span>
+<div id="apps_icons" style="display:none">
 <?
 $allContainers = array();
 if ((pgrep('docker')!==false) && (empty($display['dashapps']) || $display['dashapps'] == 'icons' || $display['dashapps'] == 'docker')) {
-	require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerClient.php");
+	require_once('/usr/local/emhttp/plugins/dynamix.docker.manager/include/dockerClient.php');
 	$DockerClient    = new DockerClient();
 	$DockerUpdate    = new DockerUpdate();
 	$DockerTemplates = new DockerTemplates();
@@ -137,8 +88,8 @@ foreach ($allContainers as $ct) {
 	print "
 		<div class=\"Panel $status\">
 			<div id='context-" . htmlspecialchars($name) . "' style='display:block; cursor:pointer'>
-				<div style=\"position: relative; width: 48px; height: 48px; margin: 0px auto;\">
-					<img src=\"" . $Icon . "\" class=\"$status\" style=\"position: absolute; z-index: 1; top: 0; bottom: 0; left: 0; right: 0; width: 48px; height: 48px;\"/>
+				<div style=\"position:relative; width:48px; height:48px; margin:0px auto;\">
+					<img src=\"" . $Icon . "\" class=\"$status\" style=\"position:absolute; z-index:1; top:0; bottom:0; left:0; right:0; width:48px; height:48px;\"/>
 					<i class=\"fa iconstatus fa-$shape $status\" title='$status'></i>
 				</div>
 				<div class=\"PanelText\">
@@ -200,8 +151,8 @@ foreach ($allVMs as $name) {
 	print "
 		<div class=\"Panel $status\">
 			<div id='vm-" . htmlspecialchars($uuid) . "' style='display:block; cursor:pointer'>
-				<div style=\"position: relative; width: 48px; height: 48px; margin: 0px auto;\">
-					<img src=\"" . $vmicon . "\" class=\"$status\" style=\"position: absolute; z-index: 1; top: 0; bottom: 0; left: 0; right: 0; width: 48px; height: 48px;\"/>
+				<div style=\"position:relative; width:48px; height:48px; margin:0px auto;\">
+					<img src=\"" . $vmicon . "\" class=\"$status\" style=\"position:absolute; z-index:1; top:0; bottom:0; left:0; right:0; width:48px; height:48px;\"/>
 					<i class=\"fa iconstatus fa-$shape $status\" title='$status'></i>
 				</div>
 				<div class=\"PanelText\">
@@ -214,10 +165,10 @@ foreach ($allVMs as $name) {
 ?>
 <div id="noapps">No apps available to show</div>
 </div>
-<script type="text/javascript" src="/webGui/scripts/jquery.switchButton.js"></script>
-<script type="text/javascript" src="/webGui/scripts/context.js"></script>
-<script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/docker.js"></script>
-<script type="text/javascript">
+<script src="/webGui/javascript/jquery.switchbutton.js"></script>
+<script src="/webGui/javascript/context.js"></script>
+<script src="/plugins/dynamix.docker.manager/javascript/docker.js"></script>
+<script>
 function ajaxVMDispatch(currentstate, params){
   $.post("/plugins/dynamix.vm.manager/VMajax.php", params, function( data ) {
     if (data.error) {

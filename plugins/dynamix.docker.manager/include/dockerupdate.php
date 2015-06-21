@@ -12,7 +12,7 @@
  */
 ?>
 <?
-require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerClient.php");
+require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/include/dockerClient.php");
 
 $docker = new DockerTemplates();
 

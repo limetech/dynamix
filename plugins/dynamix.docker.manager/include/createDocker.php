@@ -12,7 +12,7 @@
 ?>
 <?
 ignore_user_abort(true);
-require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerClient.php");
+require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/include/dockerClient.php");
 $DockerClient = new DockerClient();
 $DockerUpdate = new DockerUpdate();
 $DockerTemplates = new DockerTemplates();
@@ -279,19 +279,19 @@ if ($_POST){
   // Remove existing container
   if (ContainerExist($Name)){
     $_GET['cmd'] = "/usr/bin/docker rm -f $Name";
-    include($dockerManPaths['plugin'] . "/exec.php");
+    include($dockerManPaths['plugin'] . "/include/exec.php");
   }
 
   // Remove old container if renamed
   $existing = isset($_POST['existingContainer']) ? $_POST['existingContainer'] : FALSE;
   if ($existing && ContainerExist($existing)){
     $_GET['cmd'] = "/usr/bin/docker rm -f $existing";
-    include($dockerManPaths['plugin'] . "/exec.php");
+    include($dockerManPaths['plugin'] . "/include/exec.php");
   }
 
   // Injecting the command in $_GET variable and executing.
   $_GET['cmd'] = $cmd;
-  include($dockerManPaths['plugin'] . "/exec.php");
+  include($dockerManPaths['plugin'] . "/include/exec.php");
 
   $DockerTemplates->removeInfo($Name);
   $DockerUpdate->syncVersions($Name);
@@ -345,16 +345,16 @@ if ($_GET['updateContainer']){
     pullImage($Repository);
 
     $_GET['cmd'] = "/usr/bin/docker rm -f $Name";
-    include($dockerManPaths['plugin'] . "/exec.php");
+    include($dockerManPaths['plugin'] . "/include/exec.php");
 
     $_GET['cmd'] = $cmd;
-    include($dockerManPaths['plugin'] . "/exec.php");
+    include($dockerManPaths['plugin'] . "/include/exec.php");
 
     $DockerTemplates->removeInfo($Name);
     $newContainerID = $DockerClient->getImageID($Repository);
     if ( $oldContainerID and $oldContainerID != $newContainerID){
       $_GET['cmd'] = sprintf("/usr/bin/docker rmi %s", $oldContainerID);
-      include($dockerManPaths['plugin'] . "/exec.php");
+      include($dockerManPaths['plugin'] . "/include/exec.php");
     }
 
     $DockerTemplates->removeInfo($Name);
@@ -523,94 +523,29 @@ if($_GET['xmlTemplate']){
 $showAdditionalInfo = true;
 ?>
 
-<link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.min.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css" media="screen">
-<style type="text/css">
-  body { -webkit-overflow-scrolling: touch;}
-  .fileTree {
-    width: 240px;
-    height: 150px;
-    overflow: scroll;
-    position: absolute;
-    z-index: 100;
-    display: none;
-  }
-  #TemplateSelect {
-    width: 255px;
-  }
-  option.list{
-    padding: 0 0 0 7px;
-    font-size: 11px;
-  }
-  optgroup.bold{
-    font-weight:bold;
-    font-size: 12px;
-    margin-top: 5px;
-  }
-  optgroup.title{
-    background-color: #625D5D;
-    color:#FFFFFF;
-    text-align: center;
-    margin-top: 10px;
-  }
-  input.textPath{
-    width: 240px;
-  }
-  input.textTemplate,textarea.textTemplate{
-    width: 555px;
-  }
-  input.textEnv{
-    width: 230px;
-  }
-  input.textPort{
-    width: 100px;
-  }
-  table.pathTab{
-    width: 700px;
-  }
-  table.portRows{
-    width: 400px;
-  }
-  table.envTab{
-    width: 620px;
-  }
-  table.Preferences{
-    width: 100%;
-  }
-  .show {
-    display: block;
-  }
-  table td {
-    font-size: 14px;
-    vertical-align: bottom;
-    text-align: left;
-  }
-  .inline_help {
-    font-size: 12px;
-  }
-  .desc {
-    padding: 6px;
-    line-height: 15px;
-    width: inherit;
-  }
-  .toggleMode {
-    cursor: pointer;
-    color: #a3a3a3;
-    letter-spacing: 0;
-    padding: 0;
-    padding-right: 10px;
-    font-family: "Raleway",sans-serif;
-    font-size: 12px;
-    line-height: 1.3em;
-    font-weight: bold;
-    margin: 0;
-  }
-  .toggleMode:hover,
-  .toggleMode:focus,
-  .toggleMode:active,
-  .toggleMode .active {
-    color: #625D5D;
-  }
+<link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.filetree.css" media="screen">
+<style>
+body{-webkit-overflow-scrolling:touch;}
+.fileTree{width:240px;height:150px;overflow:scroll;position:absolute;z-index:100;display:none;}
+#TemplateSelect{width:255px;}
+option.list{padding:0 0 0 7px;font-size:11px;}
+optgroup.bold{font-weight:bold;font-size:12px;margin-top:5px;}
+optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-top:10px;}
+input.textPath{width:240px;}
+input.textTemplate,textarea.textTemplate{width:555px;}
+input.textEnv{width:230px;}
+input.textPort{width:100px;}
+table.pathTab{width:700px;}
+table.portRows{width:400px;}
+table.envTab{width:620px;}
+table.Preferences{width:100%;}
+.show{display:block;}
+table td{font-size:14px;vertical-align:bottom;text-align:left;}
+.inline_help{font-size:12px;}
+.desc{padding:6px;line-height:15px;width:inherit;}
+.toggleMode{cursor:pointer;color:#a3a3a3;letter-spacing:0;padding:0;padding-right:10px;font-family:arimo;font-size:12px;line-height:1.3em;font-weight:bold;margin:0;}
+.toggleMode:hover,.toggleMode:focus,.toggleMode:active,.toggleMode .active{color:#625D5D;}
 </style>
 <form method="GET" id="formTemplate">
   <input type="hidden" id="xmlTemplate" name="xmlTemplate" value="" />
@@ -657,7 +592,7 @@ $showAdditionalInfo = true;
             ?>
           </select>
           <? if (!empty($rmadd)) {
-            echo "<a onclick=\"rmTemplate('" . addslashes($rmadd) . "');\" style=\"cursor:pointer;\"><img src=\"/plugins/dynamix.docker.manager/assets/images/remove.png\" title=\"" . htmlspecialchars($rmadd) . "\" width=\"30px\"></a>";
+            echo "<a onclick=\"rmTemplate('" . addslashes($rmadd) . "');\" style=\"cursor:pointer;\"><img src=\"/plugins/dynamix.docker.manager/images/remove.png\" title=\"" . htmlspecialchars($rmadd) . "\" width=\"30px\"></a>";
           }?>
 
         </td>
@@ -969,9 +904,9 @@ $showAdditionalInfo = true;
   </form>
 </div>
 
-<script type="text/javascript" src="/webGui/scripts/jqueryFileTree.js"></script>
-<script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/addDocker.js"></script>
-<script type="text/javascript">
+<script src="/webGui/javascript/jquery.filetree.js"></script>
+<script src="/plugins/dynamix.docker.manager/javascript/addDocker.js"></script>
+<script>
 $(function() {
   $(document).mouseup(function (e) {
     var container = $(".fileTree");

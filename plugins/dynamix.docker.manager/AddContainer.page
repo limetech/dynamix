@@ -18,5 +18,5 @@ Markdown="false"
 	<span class="toggleMode" onclick="toggleMode();"><i id="toggleMode" class="fa fa-lg"></i> Advanced View</span>
 </div>
 <?PHP
-require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/createDocker.php");
+require_once('/usr/local/emhttp/plugins/dynamix.docker.manager/include/createDocker.php');
 ?>

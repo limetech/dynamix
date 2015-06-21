@@ -2,8 +2,8 @@ Menu="UserList"
 Title="Edit User"
 ---
 <?PHP
-/* Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -22,6 +22,55 @@ Title="Edit User"
 
 <?$user = &$users[$name]?>
 
+<style>
+<?if ($display['theme'] == 'black'):?>
+span#dropbox{border:1px solid #202020;border-radius:5px;background:-webkit-radial-gradient(#303030,#101010);background:linear-gradient(#303030,#101010);padding:28px 12px;line-height:72px;margin-right:16px;}
+<?else:?>
+span#dropbox{border:1px solid #D0D0D0;border-radius:5px;background:-webkit-radial-gradient(#B0B0B0,#F0F0F0);background:linear-gradient(#B0B0B0,#F0F0F0);padding:28px 12px;line-height:72px;margin-right:16px;}
+<?endif;?>
+i.top{position:absolute;padding-top:4px;cursor:pointer;}
+</style>
+
+<script src="/webGui/javascript/jquery.filedrop.js"></script>
+<script>
+function restore(view) {
+  if (view) $('#dropbox').html("<img src='/webGui/images/user.png'>");
+  $.get("/webGui/include/DeleteLogFile.php",{log:"/boot/config/plugins/dynamix/users/<?=$user['name']?>.png"});
+}
+
+$(function(){
+  var dropbox = $('#dropbox');
+  dropbox.filedrop({
+    maxfiles:1,
+    maxfilesize:20, // KB
+    data:{user:'<?=$user['name']?>'},
+    url:'/webGui/include/FileUpload.php',
+    beforeEach:function(file) {
+      if (!file.type.match(/^image\/png/)) {
+        alert('Only PNG images are allowed!');
+        return false;
+      }
+    },
+    uploadStarted:function(i,file,count) {
+      var image = $('img', $(dropbox));
+      var reader = new FileReader();
+      image.width = 48;
+      image.height = 48;
+      reader.onload = function(e){image.attr('src',e.target.result);};
+      reader.readAsDataURL(file);
+      $.data(file,dropbox);
+    },
+    uploadFinished:function(i,file,response) {
+      if (response == '200 OK') {
+        $(dropbox).append("<i class='fa fa-trash top' title='Restore default image' onclick='restore(true)'></i>");
+      } else {
+        alert(response);
+      }
+    }
+  });
+});
+</script>
+
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="userName" value="<?=$user['name'];?>">
 User name:
@@ -30,12 +79,21 @@ User name:
 Description:
 : <input type="text" name="userDesc" maxlength="64" value="<?=$user['desc'];?>">
 
+Custom image:
+: <span id="dropbox">
+<?if (file_exists("/boot/config/plugins/dynamix/users/{$user['name']}.png")):?>
+  <img src="/boot/config/plugins/dynamix/users/<?=$user['name']?>.png" width="48" height="48"><i class="fa fa-trash top" title="Restore default image" onclick="restore(true)"></i>
+<?else:?>
+  <img src="/webGui/images/user.png">
+<?endif;?>
+  </span><em>Drag-and-drop a PNG file onto the image at the left.</em>
+
 <?if ($user['name']=="root"):?>
 &nbsp;
 <?else:?>
 Delete<input type="checkbox" name="confirmDelete" onChange="chkDelete(this.form, this.form.cmdUserEdit)">
 <?endif;?>
-: <input type="submit" name="cmdUserEdit" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="cmdUserEdit" value="Apply" onclick="restore(false)"><input type="button" value="Done" onclick="done()">
 </form>
 
 <br><br>

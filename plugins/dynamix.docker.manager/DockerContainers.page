@@ -17,47 +17,31 @@ Markdown="false"
 ?>
 <?
 // Add the Docker JSON client
-require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerClient.php");
+require_once('/usr/local/emhttp/plugins/dynamix.docker.manager/include/dockerClient.php');
 $docker          = new DockerClient();
 $DockerUpdate    = new DockerUpdate();
 $DockerTemplates = new DockerTemplates();
 ?>
-<link type="text/css" rel="stylesheet" href="/plugins/dynamix.docker.manager/assets/gh-buttons.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery-ui.min.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
+<link type="text/css" rel="stylesheet" href="/plugins/dynamix.docker.manager/styles/gh-buttons.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.ui.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/context.standalone.css">
 <style>
-	body { -webkit-overflow-scrolling: touch;}
-	.log{cursor:zoom-in;}
-	.exec{cursor:pointer;}
-	.fa-custom{font-size: 1.3em;}
-	.basic {
-		display: block;
-	}
-	.advanced {
-		display: none;
-		white-space: nowrap;
-	}
-	.iconstatus {
-		position: absolute;
-		z-index: 2;
-		bottom: -4px;
-		right: -4px;
-		font-size: 1.2em;
-		text-shadow: 0 0 2px #FFF;
-	}
-	.iconstatus.started {
-		font-size: 1.3em;
-	}
-	.iconstatus.stopped {
-		font-size: 1.2em;
-	}
-	img.started{opacity:1.0;}
-	img.stopped{opacity:0.3;}
-	.started{color:#009900;}
-	.stopped{color:#EF3D47;}
+body {-webkit-overflow-scrolling: touch;}
+img.started{opacity:1.0;}
+img.stopped{opacity:0.3;}
+.log{cursor:zoom-in;}
+.exec{cursor:pointer;}
+.fa-custom{font-size: 1.3em;}
+.basic{display: block;}
+.advanced{display:none;white-space: nowrap;}
+.iconstatus{position:absolute;z-index:2;bottom:-4px;right:-4px;font-size:1.2em;text-shadow:0 0 2px #FFF;}
+.iconstatus.started{font-size:1.3em;}
+.iconstatus.stopped{font-size:1.2em;}
+.started{color:#009900;}
+.stopped{color:#EF3D47;}
 </style>
-<form id="formAutostart" method="POST" action="/plugins/dynamix.docker.manager/update_cfg.php" target="progressFrame">
+<form id="formAutostart" method="POST" action="/plugins/dynamix.docker.manager/include/update_cfg.php" target="progressFrame">
   <input type="hidden" name="action" value="autostart" />
   <input type="hidden" name="container" value="none" />
 </form>
@@ -104,7 +88,7 @@ $DockerTemplates = new DockerTemplates();
 
 			$Icon           = $info[$name]['icon'];
 			if ( $Icon == "#" ){
-				$Icon = "/plugins/dynamix.docker.manager/assets/images/question.png";
+				$Icon = "/plugins/dynamix.docker.manager/images/question.png";
 			}
 
 			$ports = array();
@@ -221,10 +205,10 @@ $DockerTemplates = new DockerTemplates();
 <input type="button" onclick="addContainer()" value="Add Container"/>
 <input type="button" onclick="reloadUpdate()" value="Check for Updates"/>
 
-<script type="text/javascript" src="/webGui/scripts/jquery.switchButton.js"></script>
-<script type="text/javascript" src="/webGui/scripts/context.js"></script>
-<script type="text/javascript" src="/plugins/dynamix.docker.manager/assets/docker.js"></script>
-<script type="text/javascript">
+<script src="/webGui/javascript/jquery.switchbutton.js"></script>
+<script src="/webGui/javascript/context.js"></script>
+<script src="/plugins/dynamix.docker.manager/javascript/docker.js"></script>
+<script>
 $(function() {
 	if ($.cookie('docker_listview_mode') == 'advanced') {
 		$('.advanced').show();
@@ -235,7 +219,7 @@ $(function() {
 		labels_placement: "right"
 	});
 	$('.autostart').change(function () {
-		$.post( "/plugins/dynamix.docker.manager/update_cfg.php", { action: "autostart", container: $(this).attr('container'), response: "json" }, function( data ) {
+		$.post( "/plugins/dynamix.docker.manager/include/update_cfg.php", { action: "autostart", container: $(this).attr('container'), response: "json" }, function( data ) {
 			$(this).prop('checked', data.autostart );
 		}, "json");
 	});

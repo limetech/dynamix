@@ -2,8 +2,8 @@ Menu="UserList"
 Title="Add User"
 ---
 <?PHP
-/* Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -13,27 +13,84 @@ Title="Add User"
  * all copies or substantial portions of the Software.
  */
 ?>
+<style>
+<?if ($display['theme'] == 'black'):?>
+span#dropbox{border:1px solid #202020;border-radius:5px;background:-webkit-radial-gradient(#303030,#101010);background:linear-gradient(#303030,#101010);padding:28px 12px;line-height:72px;margin-right:16px;}
+<?else:?>
+span#dropbox{border:1px solid #D0D0D0;border-radius:5px;background:-webkit-radial-gradient(#B0B0B0,#F0F0F0);background:linear-gradient(#B0B0B0,#F0F0F0);padding:28px 12px;line-height:72px;margin-right:16px;}
+<?endif;?>
+i.top{position:absolute;padding-top:4px;cursor:pointer;}
+</style>
+
+<script src="/webGui/javascript/jquery.filedrop.js"></script>
 <script>
-function checkUsername(userName) {
-  if (!userName) {
-    alert('Please enter a user name');
+function checkUsername(form) {
+  var username = form.userName.value.trim();
+  if (username.length==0) {
+    alert('Please enter a user name.');
     return false;
   }
-  if (userName.match('[A-Z]| ')) {
-    alert('Invalid user name specified\nDo not use uppercase or space characters.');
+  if (username.match('[A-Z]| ')) {
+    alert('Invalid user name "'+username+'" specified\n\nDo not use uppercase or space characters.');
     return false;
   }
-  if (userName.match('^disk[0-9]+$')) {
-    alert('Invalid user name specified\nDo not use reserved names.');
+  if (username.match('^(disk[0-9]+|cache[0-9]*|flash)$')) {
+    alert('Invalid user name "'+username+'" specified\n\nDo not use reserved names.');
     return false;
   }
   return true;
 }
+
+function restore() {
+  $('#dropbox').html("<img src='/webGui/images/user.png'>");
+  $.get("/webGui/include/DeleteLogFile.php",{log:"/boot/config/plugins/dynamix/users/"+document.user_edit.userName.value+".png"});
+}
+
+function showPicture(user) {
+  if (user != '') {
+    $('.picture').show();
+    setDropbox(user);
+  } else {
+    $('.picture').hide();
+  }
+}
+
+function setDropbox(user) {
+  var dropbox = $('#dropbox');
+  dropbox.filedrop({
+    maxfiles:1,
+    maxfilesize:20, // KB
+    data:{user:user},
+    url:'/webGui/include/FileUpload.php',
+    beforeEach:function(file) {
+      if (!file.type.match(/^image\/png/)) {
+        alert('Only PNG images are allowed!');
+        return false;
+      }
+    },
+    uploadStarted:function(i,file,count) {
+      var image = $('img', $(dropbox));
+      var reader = new FileReader();
+      image.width = 48;
+      image.height = 48;
+      reader.onload = function(e){image.attr('src',e.target.result);};
+      reader.readAsDataURL(file);
+      $.data(file,dropbox);
+    },
+    uploadFinished:function(i,file,response) {
+      if (response == '200 OK') {
+        $(dropbox).append("<i class='fa fa-trash top' title='Restore default image' onclick='restore()'></i>");
+      } else {
+        alert(response);
+      }
+    }
+  });
+}
 </script>
 
-<form markdown="1" method="POST" action="/update.htm" target="progressFrame" onsubmit="return checkUsername(this.userName.value)">
+<form markdown="1" name="user_edit" method="POST" action="/update.htm" target="progressFrame" onsubmit="return checkUsername(this)">
 User name:
-: <input type="text" name="userName" maxlength="32">
+: <input type="text" name="userName" maxlength="32" onchange="showPicture(this.value)">
 
 > Usernames may be up to 32 characters long and must start with a **lower case letter** or an underscore,
 > followed by **lower case letters**, digits, underscores, or dashes. They can end with a dollar sign.
@@ -44,14 +101,19 @@ Description:
 
 > Up to 64 characters.
 
+<div class="picture" style="display:none" markdown="1">
+Custom image:
+: <span id="dropbox"><img src="/webGui/images/user.png"></span><em>Drag-and-drop a PNG file onto the image at the left.</em>
+</div>
+
 Password:
-: <input type="password" name="userPassword" maxlength="40" onKeyUp="this.form.cmdUserEdit.disabled = (this.form.userPassword.value != this.form.userPasswordConf.value);">
+: <input type="password" name="userPassword" maxlength="40" onKeyUp="this.form.cmdUserEdit.disabled=(this.form.userPassword.value!=this.form.userPasswordConf.value);">
 
 > Up to 40 characters.
 
 Retype password:
-: <input type="password" name="userPasswordConf" maxlength="40" onKeyUp="this.form.cmdUserEdit.disabled = (this.form.userPassword.value != this.form.userPasswordConf.value);">
+: <input type="password" name="userPasswordConf" maxlength="40" onKeyUp="this.form.cmdUserEdit.disabled=(this.form.userPassword.value!=this.form.userPasswordConf.value);">
 
-<input type="reset" value="Reset">
+&nbsp;
 : <input type="submit" name="cmdUserEdit" value="Add"><input type="button" value="Done" onclick="done()">
 </form>

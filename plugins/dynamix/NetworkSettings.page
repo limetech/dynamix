@@ -3,8 +3,8 @@ Title="Network Settings"
 Icon="network-settings.png"
 ---
 <?PHP
-/* Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -153,7 +153,7 @@ DNS Server 3:
 
 > This is the DNS server to use if DNS Servers 1 and 2 are both down.
 
-<?if ($disabled):?>&nbsp;<?else:?><input type="reset" value="Reset"><?endif;?>
+&nbsp;
 : <input type="submit" name="changeNetwork" value="Apply" <?=$disabled?>><input type="button" value="Done" onclick="done()"><?=$disabled ? "Array must be <strong>Stopped</strong> to change" : ""?>
 
 </form>

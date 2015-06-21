@@ -16,8 +16,8 @@ Cond="(pgrep('libvirtd')!==false)"
  */
 ?>
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.filetree.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/context.standalone.css">
 <style type="text/css">
   body { -webkit-overflow-scrolling: touch;}
@@ -30,10 +30,10 @@ Cond="(pgrep('libvirtd')!==false)"
     display: none;
   }
 </style>
-<script type="text/javascript" src="/webGui/scripts/jqueryFileTree.js"></script>
-<script type="text/javascript" src="/webGui/scripts/jquery.switchButton.js"></script>
-<script type="text/javascript" src="/webGui/scripts/context.js"></script>
-<script type="text/javascript" src="/plugins/dynamix.vm.manager/scripts/dynamix.vm.manager.js"></script>
+<script src="/webGui/javascript/jquery.filetree.js"></script>
+<script src="/webGui/javascript/jquery.switchbutton.js"></script>
+<script src="/webGui/javascript/context.js"></script>
+<script src="/plugins/dynamix.vm.manager/scripts/dynamix.vm.manager.js"></script>
 
 <?php
 if ($var['fsState'] != "Started") {
