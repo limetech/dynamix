@@ -14,7 +14,7 @@
  *   http://www.github.com/weixiyen/jquery-filedrop
  *
  * Version:  0.1.0
- * Modified by Bergware for use in unRAID OS6 (June 2015)
+ * Modified by Bergware Int'l for unRAID OS 6 (June 2015)
  *
  * Features:
  *      Allows sending of extra parameters with file.
@@ -25,48 +25,19 @@
  *  See README at project homepage
  *
  */
-function base64(data) {
-  var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-  var size = data.length;
-  var tail = size % 3;
-  var output = '';
-  var i, temp, length;
-
-  function encode(index) {
-    return lookup.charAt(index & 0x3F);
-  }
-  function quad(num) {
-    return encode(num >> 18) + encode(num >> 12) + encode(num >> 6) + encode(num);
-  }
-  for (i = 0, length = size-tail; i<length; i+=3) {
-    output += quad((data.charCodeAt(i) << 16) + (data.charCodeAt(i+1) << 8) + (data.charCodeAt(i+2)));
-  }
-  switch (tail) {
-  case 1:
-    temp = data.charCodeAt(size-1);
-    output += encode(temp >> 2);
-    output += encode(temp << 4);
-    output += '==';
-    break;
-  case 2:
-    temp = (data.charCodeAt(size-2) << 8) + (data.charCodeAt(size-1));
-    output += encode(temp >> 10);
-    output += encode(temp >> 4);
-    output += encode(temp << 2);
-    output += '=';
-    break;
-  }
-  return output;
-}
-
 (function($) {
-  jQuery.event.props.push('dataTransfer');
+  var hook = jQuery.event.fixHooks.drop;
+  if (!hook) {
+    jQuery.event.fixHooks.drop = {props:['dataTransfer']};
+  } else {
+    if (hook.props) hook.props.push('dataTransfer'); else hook.props = ['dataTransfer'];
+  }
   var opts = {}, defaults = {
     url: '',
     refresh: 1000,
     paramname: 'userfile',
     maxfiles: 25,
-    maxfilesize: 1024, // 1MB
+    maxfilesize: 1024, // 1MB (changed unit)
     data: {},
     drop: empty,
     dragEnter: empty,
@@ -116,7 +87,7 @@ function base64(data) {
       builder.push(key + '=' + encodeURI(val));
     });
     builder.push('filename=' + encodeURI(filename));
-    builder.push('filedata=' + base64(filedata));
+    builder.push('filedata=' + filedata);
     return builder.join('&');
   }
 
@@ -164,7 +135,7 @@ function base64(data) {
             continue;
           }
           reader.onloadend = send;
-          reader.readAsBinaryString(files[i]);
+          reader.readAsDataURL(files[i]);
         } else {
           filesRejected++;
         }

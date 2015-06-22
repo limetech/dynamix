@@ -20,7 +20,11 @@ Title="Edit User"
 <?return;?>
 <?endif;?>
 
-<?$user = &$users[$name]?>
+<?
+$user = &$users[$name];
+$file = "/boot/config/plugins/dynamix/users/{$user['name']}.png";
+$icon = '<i class="fa fa-trash top" title="Restore default image" onclick="restore(true)"></i>';
+?>
 
 <style>
 <?if ($display['theme'] == 'black'):?>
@@ -34,7 +38,7 @@ i.top{position:absolute;padding-top:4px;cursor:pointer;}
 <script src="/webGui/javascript/jquery.filedrop.js"></script>
 <script>
 function restore(view) {
-  if (view) $('#dropbox').html("<img src='/webGui/images/user.png'>");
+  if (view) $('#dropbox').html("<img src='/webGui/images/user.png' onclick='$(\"#drop\").click()' style='cursor:pointer' title='Click to select PNG file'>");
   $.get("/webGui/include/DeleteLogFile.php",{log:"/boot/config/plugins/dynamix/users/<?=$user['name']?>.png"});
 }
 
@@ -62,11 +66,15 @@ $(function(){
     },
     uploadFinished:function(i,file,response) {
       if (response == '200 OK') {
-        $(dropbox).append("<i class='fa fa-trash top' title='Restore default image' onclick='restore(true)'></i>");
+        $(dropbox).append('<?=$icon?>');
       } else {
         alert(response);
       }
     }
+  });
+  $('#drop').bind('change', function(e) {
+    var files = e.target.files;
+    $('#dropbox').trigger({type:'drop',dataTransfer:{files:files}});
   });
 });
 </script>
@@ -81,12 +89,12 @@ Description:
 
 Custom image:
 : <span id="dropbox">
-<?if (file_exists("/boot/config/plugins/dynamix/users/{$user['name']}.png")):?>
-  <img src="/boot/config/plugins/dynamix/users/<?=$user['name']?>.png" width="48" height="48"><i class="fa fa-trash top" title="Restore default image" onclick="restore(true)"></i>
+<?if (file_exists($file)):?>
+  <img src="<?=$file?>" width="48" height="48" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><?=$icon?>
 <?else:?>
-  <img src="/webGui/images/user.png">
+  <img src="/webGui/images/user.png" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file">
 <?endif;?>
-  </span><em>Drag-and-drop a PNG file onto the image at the left.</em>
+  </span><em>Drag-n-drop a PNG file or click the image at the left.</em><input type="file" id="drop" style="display:none">
 
 <?if ($user['name']=="root"):?>
 &nbsp;
@@ -95,9 +103,7 @@ Delete<input type="checkbox" name="confirmDelete" onChange="chkDelete(this.form,
 <?endif;?>
 : <input type="submit" name="cmdUserEdit" value="Apply" onclick="restore(false)"><input type="button" value="Done" onclick="done()">
 </form>
-
 <br><br>
-
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 <input type="hidden" name="userName" value="<?=$user['name'];?>">
 Password:
