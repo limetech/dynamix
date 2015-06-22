@@ -15,7 +15,7 @@ Title="Add User"
 ?>
 
 <?
-$file = "<img src='/webGui/images/user.png' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
+$file = "<img src='/webGui/images/user.png' width='48' height='48' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
 $icon = "<i class='fa fa-trash top' title='Restore default image' onclick='restore(true)'></i>";
 ?>
 
