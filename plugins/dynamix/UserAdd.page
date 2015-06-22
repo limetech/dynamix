@@ -13,6 +13,12 @@ Title="Add User"
  * all copies or substantial portions of the Software.
  */
 ?>
+
+<?
+$file = "<img src='/webGui/images/user.png' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
+$icon = "<i class='fa fa-trash top' title='Restore default image' onclick='restore(true)'></i>";
+?>
+
 <style>
 <?if ($display['theme'] == 'black'):?>
 span#dropbox{border:1px solid #202020;border-radius:5px;background:-webkit-radial-gradient(#303030,#101010);background:linear-gradient(#303030,#101010);padding:28px 12px;line-height:72px;margin-right:16px;}
@@ -42,7 +48,7 @@ function checkUsername(form) {
 }
 
 function restore() {
-  $('#dropbox').html("<img src='/webGui/images/user.png'>");
+  $('#dropbox').html("<?=$file?>");
   $.get("/webGui/include/DeleteLogFile.php",{log:"/boot/config/plugins/dynamix/users/"+document.user_edit.userName.value+".png"});
 }
 
@@ -79,11 +85,15 @@ function setDropbox(user) {
     },
     uploadFinished:function(i,file,response) {
       if (response == '200 OK') {
-        $(dropbox).append("<i class='fa fa-trash top' title='Restore default image' onclick='restore()'></i>");
+        $(dropbox).append("<?=$icon?>");
       } else {
         alert(response);
       }
     }
+  });
+  $('#drop').bind('change', function(e) {
+    var files = e.target.files;
+    $('#dropbox').trigger({type:'drop',dataTransfer:{files:files}});
   });
 }
 </script>
@@ -103,7 +113,7 @@ Description:
 
 <div class="picture" style="display:none" markdown="1">
 Custom image:
-: <span id="dropbox"><img src="/webGui/images/user.png"></span><em>Drag-and-drop a PNG file onto the image at the left.</em>
+: <span id="dropbox"><?=$file?></span><em>Drag-n-drop a PNG file or click the image at the left.</em><input type="file" id="drop" style="display:none">
 </div>
 
 Password:
