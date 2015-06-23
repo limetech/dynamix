@@ -16,7 +16,7 @@ Title="Edit User"
 
 <?if (!array_key_exists($name, $users)):?>
   <p class="notice">User <?=$name?> has been deleted.</p><br>
-  <input type="button" value="OK" onClick="done()">
+  <input type="button" value="Done" onClick="done()">
 <?return;?>
 <?endif;?>
 

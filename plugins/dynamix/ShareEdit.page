@@ -32,7 +32,7 @@ if ($name == "") {
   $share = $shares[$name];
 } else {
   /* handle share deleted case */
-  echo "<p class='notice'>Share $name has been deleted.</p><input type='button' value='OK' onclick='done()'>";
+  echo "<p class='notice'>Share $name has been deleted.</p><input type='button' value='Done' onclick='done()'>";
   return;
 }
 
