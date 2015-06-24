@@ -84,7 +84,7 @@
     var builder = [];
     $.each(opts.data, function(key, val) {
       if (typeof val === 'function') val = val();
-      builder.push(key + '=' + encodeURI(val));
+      builder.push(key + '=' + val);
     });
     builder.push('filename=' + encodeURI(filename));
     builder.push('filedata=' + filedata);

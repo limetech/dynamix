@@ -1,12 +1,25 @@
 <?PHP
-$path = '/boot/config/plugins/dynamix/users';
-$user = isset($_POST['user']) ? rawurldecode($_POST['user']).'.png' : rawurldecode($_POST['filename']);
+$cmd  = isset($_POST['cmd']) ? $_POST['cmd'] : 'load';
+$file = rawurldecode($_POST['filename']);
+$path = "/boot/config/plugins/dynamix/users";
+$temp = "/var/tmp";
 
-if (isset($_POST['filedata']) && $user) {
+switch ($cmd) {
+case 'load':
+  if (isset($_POST['filedata'])) {
+    exec("rm -f $temp/*.png");
+    $result = file_put_contents("$temp/$file", base64_decode(str_replace(array('data:image/png;base64,',' '),array('','+'),$_POST['filedata'])));
+  }
+  break;
+case 'save':
   exec("mkdir -p $path");
-  file_put_contents("$path/$user", base64_decode(str_replace(array('data:image/png;base64,',' '),array('','+'),$_POST['filedata'])));
-  echo '200 OK';
-} else {
-  echo '204 No Content';
+  $result = @rename("$temp/$file", "$path/{$_POST['user']}.png");
+  break;
+case 'delete':
+  @unlink("$temp/$file");
+  @unlink("$path/{$_POST['user']}.png");
+  $result = true;
+  break;
 }
+echo ($result ? '200 OK' : '500 Internal Error');
 ?>

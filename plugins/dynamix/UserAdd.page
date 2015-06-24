@@ -29,6 +29,18 @@ i.top{position:absolute;padding-top:4px;cursor:pointer;}
 
 <script src="/webGui/javascript/jquery.filedrop.js"></script>
 <script>
+var reset = true;
+var filename = '';
+
+function restore() {
+  $('#dropbox').html("<?=$user?>");
+  reset = true;
+}
+
+function upload() {
+  $.post("/webGui/include/FileUpload.php",{cmd:'save',user:document.user_edit.userName.value,filename:filename});
+}
+
 function checkUsername(form) {
   var username = form.userName.value.trim();
   if (username.length==0) {
@@ -46,26 +58,11 @@ function checkUsername(form) {
   return true;
 }
 
-function restore() {
-  $('#dropbox').html("<?=$user?>");
-  $.get("/webGui/include/DeleteLogFile.php",{log:"/boot/config/plugins/dynamix/users/"+document.user_edit.userName.value+".png"});
-}
-
-function showPicture(user) {
-  if (user != '') {
-    $('.picture').show();
-    setDropbox(user);
-  } else {
-    $('.picture').hide();
-  }
-}
-
-function setDropbox(user) {
+$(function(){
   var dropbox = $('#dropbox');
   dropbox.filedrop({
     maxfiles:1,
     maxfilesize:20, // KB
-    data:{user:user},
     url:'/webGui/include/FileUpload.php',
     beforeEach:function(file) {
       if (!file.type.match(/^image\/png/)) {
@@ -84,7 +81,9 @@ function setDropbox(user) {
     },
     uploadFinished:function(i,file,response) {
       if (response == '200 OK') {
-        $(dropbox).append("<i class='fa fa-trash top' title='Restore default image' onclick='restore()'></i>");
+        if (reset) $(dropbox).append("<i class='fa fa-trash top' title='Restore default image' onclick='restore()'></i>");
+        filename = file.name;
+        reset = false;
       } else {
         alert(response);
       }
@@ -94,12 +93,12 @@ function setDropbox(user) {
     var files = e.target.files;
     $('#dropbox').trigger({type:'drop',dataTransfer:{files:files}});
   });
-}
+});
 </script>
 
 <form markdown="1" name="user_edit" method="POST" action="/update.htm" target="progressFrame" onsubmit="return checkUsername(this)">
 User name:
-: <input type="text" name="userName" maxlength="32" onchange="showPicture(this.value)">
+: <input type="text" name="userName" maxlength="32">
 
 > Usernames may be up to 32 characters long and must start with a **lower case letter** or an underscore,
 > followed by **lower case letters**, digits, underscores, or dashes. They can end with a dollar sign.
@@ -110,10 +109,8 @@ Description:
 
 > Up to 64 characters.
 
-<div class="picture" style="display:none" markdown="1">
 Custom image:
 : <span id="dropbox"><?=$user?></span><em>Drag-n-drop a PNG file or click the image at the left.</em><input type="file" id="drop" style="display:none">
-</div>
 
 Password:
 : <input type="password" name="userPassword" maxlength="40" onKeyUp="this.form.cmdUserEdit.disabled=(this.form.userPassword.value!=this.form.userPasswordConf.value);">
@@ -124,5 +121,5 @@ Retype password:
 : <input type="password" name="userPasswordConf" maxlength="40" onKeyUp="this.form.cmdUserEdit.disabled=(this.form.userPassword.value!=this.form.userPasswordConf.value);">
 
 &nbsp;
-: <input type="submit" name="cmdUserEdit" value="Add"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="cmdUserEdit" value="Add" onclick="upload()"><input type="button" value="Done" onclick="done()">
 </form>

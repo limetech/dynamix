@@ -36,10 +36,21 @@ i.top{position:absolute;padding-top:4px;cursor:pointer;}
 
 <script src="/webGui/javascript/jquery.filedrop.js"></script>
 <script>
-function restore(remove,view) {
-  if (remove) {
-    if (view) $('#dropbox').html("<?=$user?>");
-    $.get("/webGui/include/DeleteLogFile.php",{log:"<?=$file?>"});
+var reset = <?=file_exists($file) ? 'false' : 'true'?>;
+var filename = '';
+
+function restore(change) {
+  $('#dropbox').html("<?=$user?>");
+  if (change) $('#drop').trigger('change');
+  reset = true;
+}
+
+function upload(remove) {
+  if (reset||remove) {
+    $.post("/webGui/include/FileUpload.php",{cmd:'delete',user:"<?=$name?>",filename:filename});
+  } else {
+    $.post("/webGui/include/FileUpload.php",{cmd:'save',user:"<?=$name?>",filename:filename});
+    location.reload(true);
   }
 }
 
@@ -48,7 +59,6 @@ $(function(){
   dropbox.filedrop({
     maxfiles:1,
     maxfilesize:20, // KB
-    data:{user:'<?=$name?>'},
     url:'/webGui/include/FileUpload.php',
     beforeEach:function(file) {
       if (!file.type.match(/^image\/png/)) {
@@ -66,7 +76,9 @@ $(function(){
     },
     uploadFinished:function(i,file,response) {
       if (response == '200 OK') {
-        location.reload(true);
+        if (reset) $(dropbox).append("<i class='fa fa-trash top' title='Restore default image' onclick='restore(false)'></i>");
+        filename = file.name;
+        reset = false;
       } else {
         alert(response);
       }
@@ -90,7 +102,7 @@ Description:
 Custom image:
 : <span id="dropbox">
 <?if (file_exists($file)):?>
-  <img src="<?=$file?>" width="48" height="48" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><i class='fa fa-trash top' title='Restore default image' onclick='restore(true,true)'></i>
+  <img src="<?=$file?>" width="48" height="48" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><i class='fa fa-trash top' title='Restore default image' onclick='restore(true)'></i>
 <?else:?>
   <?=$user?>
 <?endif;?>
@@ -101,7 +113,7 @@ Custom image:
 <?else:?>
 Delete<input type="checkbox" name="confirmDelete" onChange="chkDelete(this.form, this.form.cmdUserEdit)">
 <?endif;?>
-: <input type="submit" name="cmdUserEdit" value="Apply" onclick="restore(this.form.confirmDelete.checked,false)"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="cmdUserEdit" value="Apply" onclick="upload(<?=$name=="root" ? 'false' : 'this.form.confirmDelete.checked'?>)"><input type="button" value="Done" onclick="done()">
 </form>
 <br><br>
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
