@@ -23,6 +23,7 @@ Title="Edit User"
 <?
 $file = "/boot/config/plugins/dynamix/users/$name.png";
 $user = "<img src='/webGui/images/user.png' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
+$icon = "<i class='fa fa-trash top' title='Restore default image' onclick='restore()'></i>";
 ?>
 
 <style>
@@ -39,9 +40,9 @@ i.top{position:absolute;padding-top:4px;cursor:pointer;}
 var reset = <?=file_exists($file) ? 'false' : 'true'?>;
 var filename = '';
 
-function restore(change) {
+function restore() {
   $('#dropbox').html("<?=$user?>");
-  if (change) $('#drop').trigger('change');
+  $('input[name="userDesc"]').trigger('change');
   reset = true;
 }
 
@@ -76,7 +77,8 @@ $(function(){
     },
     uploadFinished:function(i,file,response) {
       if (response == '200 OK') {
-        if (reset) $(dropbox).append("<i class='fa fa-trash top' title='Restore default image' onclick='restore(false)'></i>");
+        if (reset) $(dropbox).append("<?=$icon?>");
+        $('input[name="userDesc"]').trigger('change');
         filename = file.name;
         reset = false;
       } else {
@@ -102,7 +104,7 @@ Description:
 Custom image:
 : <span id="dropbox">
 <?if (file_exists($file)):?>
-  <img src="<?=$file?>" width="48" height="48" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><i class='fa fa-trash top' title='Restore default image' onclick='restore(true)'></i>
+  <img src="<?=$file?>" width="48" height="48" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><?=$icon?>
 <?else:?>
   <?=$user?>
 <?endif;?>

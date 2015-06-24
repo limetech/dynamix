@@ -16,6 +16,7 @@ Title="Add User"
 
 <?
 $user = "<img src='/webGui/images/user.png' width='48' height='48' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
+$icon = "<i class='fa fa-trash top' title='Restore default image' onclick='restore()'></i>";
 ?>
 
 <style>
@@ -77,11 +78,11 @@ $(function(){
       image.height = 48;
       reader.onload = function(e){image.attr('src',e.target.result);};
       reader.readAsDataURL(file);
-      $.data(file,dropbox);
     },
     uploadFinished:function(i,file,response) {
       if (response == '200 OK') {
-        if (reset) $(dropbox).append("<i class='fa fa-trash top' title='Restore default image' onclick='restore()'></i>");
+        if (reset) $(dropbox).append("<?=$icon?>");
+        $('input[name="userDesc"]').trigger('change');
         filename = file.name;
         reset = false;
       } else {
