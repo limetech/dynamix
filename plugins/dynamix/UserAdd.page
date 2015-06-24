@@ -84,7 +84,7 @@ function setDropbox(user) {
     },
     uploadFinished:function(i,file,response) {
       if (response == '200 OK') {
-        $(dropbox).append("<i class='fa fa-trash top' title='Restore default image' onclick='restore(true)'></i>");
+        $(dropbox).append("<i class='fa fa-trash top' title='Restore default image' onclick='restore()'></i>");
       } else {
         alert(response);
       }
