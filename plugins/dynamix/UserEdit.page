@@ -21,9 +21,8 @@ Title="Edit User"
 <?endif;?>
 
 <?
-$user = &$users[$name];
-$file = "/boot/config/plugins/dynamix/users/{$user['name']}.png";
-$icon = '<i class="fa fa-trash top" title="Restore default image" onclick="restore(true)"></i>';
+$file = "/boot/config/plugins/dynamix/users/$name.png";
+$user = "<img src='/webGui/images/user.png' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
 ?>
 
 <style>
@@ -37,9 +36,11 @@ i.top{position:absolute;padding-top:4px;cursor:pointer;}
 
 <script src="/webGui/javascript/jquery.filedrop.js"></script>
 <script>
-function restore(view) {
-  if (view) $('#dropbox').html("<img src='/webGui/images/user.png' onclick='$(\"#drop\").click()' style='cursor:pointer' title='Click to select PNG file'>");
-  $.get("/webGui/include/DeleteLogFile.php",{log:"/boot/config/plugins/dynamix/users/<?=$user['name']?>.png"});
+function restore(remove,view) {
+  if (remove) {
+    if (view) $('#dropbox').html("<?=$user?>");
+    $.get("/webGui/include/DeleteLogFile.php",{log:"<?=$file?>"});
+  }
 }
 
 $(function(){
@@ -47,7 +48,7 @@ $(function(){
   dropbox.filedrop({
     maxfiles:1,
     maxfilesize:20, // KB
-    data:{user:'<?=$user['name']?>'},
+    data:{user:'<?=$name?>'},
     url:'/webGui/include/FileUpload.php',
     beforeEach:function(file) {
       if (!file.type.match(/^image\/png/)) {
@@ -62,11 +63,10 @@ $(function(){
       image.height = 48;
       reader.onload = function(e){image.attr('src',e.target.result);};
       reader.readAsDataURL(file);
-      $.data(file,dropbox);
     },
     uploadFinished:function(i,file,response) {
       if (response == '200 OK') {
-        $(dropbox).append('<?=$icon?>');
+        location.reload(true);
       } else {
         alert(response);
       }
@@ -80,32 +80,32 @@ $(function(){
 </script>
 
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
-<input type="hidden" name="userName" value="<?=$user['name'];?>">
+<input type="hidden" name="userName" value="<?=$name?>">
 User name:
-: <?=$user['name']?>
+: <?=$name?>
 
 Description:
-: <input type="text" name="userDesc" maxlength="64" value="<?=$user['desc'];?>">
+: <input type="text" name="userDesc" maxlength="64" value="<?=$users[$name]['desc'];?>">
 
 Custom image:
 : <span id="dropbox">
 <?if (file_exists($file)):?>
-  <img src="<?=$file?>" width="48" height="48" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><?=$icon?>
+  <img src="<?=$file?>" width="48" height="48" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><i class='fa fa-trash top' title='Restore default image' onclick='restore(true,true)'></i>
 <?else:?>
-  <img src="/webGui/images/user.png" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file">
+  <?=$user?>
 <?endif;?>
   </span><em>Drag-n-drop a PNG file or click the image at the left.</em><input type="file" id="drop" style="display:none">
 
-<?if ($user['name']=="root"):?>
+<?if ($name=="root"):?>
 &nbsp;
 <?else:?>
 Delete<input type="checkbox" name="confirmDelete" onChange="chkDelete(this.form, this.form.cmdUserEdit)">
 <?endif;?>
-: <input type="submit" name="cmdUserEdit" value="Apply" onclick="restore(false)"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="cmdUserEdit" value="Apply" onclick="restore(this.form.confirmDelete.checked,false)"><input type="button" value="Done" onclick="done()">
 </form>
 <br><br>
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
-<input type="hidden" name="userName" value="<?=$user['name'];?>">
+<input type="hidden" name="userName" value="<?=$name?>">
 Password:
 : <input type="password" name="userPassword" maxlength="40" onKeyUp="this.form.cmdUserEdit.disabled = (this.form.userPassword.value != this.form.userPasswordConf.value);">
 

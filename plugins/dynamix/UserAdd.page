@@ -15,8 +15,7 @@ Title="Add User"
 ?>
 
 <?
-$file = "<img src='/webGui/images/user.png' width='48' height='48' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
-$icon = "<i class='fa fa-trash top' title='Restore default image' onclick='restore(true)'></i>";
+$user = "<img src='/webGui/images/user.png' width='48' height='48' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
 ?>
 
 <style>
@@ -48,7 +47,7 @@ function checkUsername(form) {
 }
 
 function restore() {
-  $('#dropbox').html("<?=$file?>");
+  $('#dropbox').html("<?=$user?>");
   $.get("/webGui/include/DeleteLogFile.php",{log:"/boot/config/plugins/dynamix/users/"+document.user_edit.userName.value+".png"});
 }
 
@@ -85,7 +84,7 @@ function setDropbox(user) {
     },
     uploadFinished:function(i,file,response) {
       if (response == '200 OK') {
-        $(dropbox).append("<?=$icon?>");
+        $(dropbox).append("<i class='fa fa-trash top' title='Restore default image' onclick='restore(true)'></i>");
       } else {
         alert(response);
       }
@@ -113,7 +112,7 @@ Description:
 
 <div class="picture" style="display:none" markdown="1">
 Custom image:
-: <span id="dropbox"><?=$file?></span><em>Drag-n-drop a PNG file or click the image at the left.</em><input type="file" id="drop" style="display:none">
+: <span id="dropbox"><?=$user?></span><em>Drag-n-drop a PNG file or click the image at the left.</em><input type="file" id="drop" style="display:none">
 </div>
 
 Password:
