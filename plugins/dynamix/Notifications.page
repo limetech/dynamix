@@ -95,6 +95,8 @@ $(function(){
   if ($('#tab'+this_tab).is(':checked')) $('#'+elementId).show();
   $('#tab'+this_tab).bind({click:function(){$('#'+elementId).show();}});
   for (var x=1; x<=last; x++) if(x != this_tab) $('#tab'+x).bind({click:function(){$('#'+elementId).hide();}});
+<?else:?>
+  $('#'+elementId).show();
 <?endif;?>
   if ($.cookie('notifcations_view_mode') == 'advanced') $('.advanced').show();
   $('.advancedview').switchButton({
