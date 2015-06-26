@@ -48,7 +48,15 @@ function restore() {
 
 function upload(remove) {
   if (remove || filename=='reset') {$.post("/webGui/include/FileUpload.php",{cmd:'delete',filename:filename,path:path,output:"<?=$name?>"}); return;}
-  if (filename) $.post("/webGui/include/FileUpload.php",{cmd:'save',filename:filename,path:path,output:"<?=$name?>"});
+  if (filename) {
+    $.post("/webGui/include/FileUpload.php",{cmd:'save',filename:filename,path:path,output:"<?=$name?>"});
+    $.cookie('refresh','1',{path:'/'});
+  }
+}
+
+function done_plus() {
+  if ($.cookie('refresh')=='1') $.cookie('refresh','init',{path:'/'});
+  done();
 }
 
 $(function(){
@@ -111,7 +119,7 @@ Custom image:
 <?else:?>
 Delete<input type="checkbox" name="confirmDelete" onChange="chkDelete(this.form, this.form.cmdUserEdit)">
 <?endif;?>
-: <input type="submit" name="cmdUserEdit" value="Apply" onclick="upload(<?=$name=="root" ? 'false' : 'this.form.confirmDelete.checked'?>)"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="cmdUserEdit" value="Apply" onclick="upload(<?=$name=="root" ? 'false' : 'this.form.confirmDelete.checked'?>)"><input type="button" value="Done" onclick="done_plus()">
 </form>
 <br><br>
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
@@ -123,5 +131,5 @@ Retype password:
 : <input type="password" name="userPasswordConf" maxlength="40" onKeyUp="this.form.cmdUserEdit.disabled = (this.form.userPassword.value != this.form.userPasswordConf.value);">
 
 &nbsp;
-: <input type="submit" name="cmdUserEdit" value="Change"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="cmdUserEdit" value="Change"><input type="button" value="Done" onclick="done_plus()">
 </form>

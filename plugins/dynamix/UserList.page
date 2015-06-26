@@ -16,7 +16,10 @@ Title="Users"
 
 <script>
 $(function() {
-  $('.picture').each(function(){$(this).attr('src', $(this).attr('src')+'?t='+new Date().getTime());});
+  if ($.cookie('refresh')=='init') {
+    $.removeCookie('refresh',{path:'/'});
+    location.reload(true);
+  }
 });
 </script>
 
@@ -27,3 +30,5 @@ $(function() {
 <form method="GET" action="<?=$path?>/UserAdd">
 <input type="submit" value="Add User">
 </form>
+
+
