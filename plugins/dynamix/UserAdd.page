@@ -79,10 +79,10 @@ $(function(){
         alert('Your browser does not support HTML5 file uploads!');
         break;
       case 'TooManyFiles':
-        alert('Too many files! Please select one file only!');
+        alert('Too many files!\n\nPlease select one file only!');
         break;
       case 'FileTooLarge':
-        alert(file.name+' is too large! Please upload files up to 20 kB.');
+        alert('File "'+file.name+'" is too large!\n\nPlease upload files up to 20 kB.');
         break;
       }
     },
