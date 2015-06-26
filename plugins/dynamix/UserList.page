@@ -30,5 +30,3 @@ $(function() {
 <form method="GET" action="<?=$path?>/UserAdd">
 <input type="submit" value="Add User">
 </form>
-
-
