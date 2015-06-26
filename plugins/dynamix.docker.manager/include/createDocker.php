@@ -173,7 +173,7 @@ function xmlToCommand($xmlFile){
 
 function addElement($doc, $el, $elName, $elVal){
   $node = $el->appendChild($doc->createElement($elName));
-  $node->appendChild($doc->createTextNode(addslashes($elVal)));
+  $node->appendChild($doc->createTextNode($elVal));
   return $node;
 }
 
@@ -206,8 +206,8 @@ function postToXML($post, $setOwnership = FALSE){
 
   if ( isset( $post[ 'ExtraParams' ] ))   addElement($doc, $root, 'ExtraParams', $post[ 'ExtraParams' ]);
 
-  $docName->appendChild($doc->createTextNode(addslashes($Name)));
-  $docRepository->appendChild($doc->createTextNode(addslashes($post["Repository"])));
+  $docName->appendChild($doc->createTextNode($Name));
+  $docRepository->appendChild($doc->createTextNode($post["Repository"]));
   $BindTime->appendChild($doc->createTextNode((strtolower($post["BindTime"])     == 'on') ? 'true' : 'false'));
   $Privileged->appendChild($doc->createTextNode((strtolower($post["Privileged"]) == 'on') ? 'true' : 'false'));
   $Mode->appendChild($doc->createTextNode(strtolower($post["NetworkType"])));
@@ -229,8 +229,8 @@ function postToXML($post, $setOwnership = FALSE){
     $Variable      = $Environment->appendChild($doc->createElement('Variable'));
     $VariableName  = $Variable->appendChild($doc->createElement('Name'));
     $VariableValue = $Variable->appendChild($doc->createElement('Value'));
-    $VariableName->appendChild($doc->createTextNode(addslashes(trim($post["VariableName"][$i]))));
-    $VariableValue->appendChild($doc->createTextNode(addslashes(trim($post["VariableValue"][$i]))));
+    $VariableName->appendChild($doc->createTextNode(trim($post["VariableName"][$i])));
+    $VariableValue->appendChild($doc->createTextNode(trim($post["VariableValue"][$i])));
   }
 
   for ($i = 0; $i < count($post["hostPath"]); $i++){
@@ -244,8 +244,8 @@ function postToXML($post, $setOwnership = FALSE){
     $HostDir      = $Volume->appendChild($doc->createElement('HostDir'));
     $ContainerDir = $Volume->appendChild($doc->createElement('ContainerDir'));
     $DirMode      = $Volume->appendChild($doc->createElement('Mode'));
-    $HostDir->appendChild($doc->createTextNode(addslashes($post["hostPath"][$i])));
-    $ContainerDir->appendChild($doc->createTextNode(addslashes($post["containerPath"][$i])));
+    $HostDir->appendChild($doc->createTextNode($post["hostPath"][$i]));
+    $ContainerDir->appendChild($doc->createTextNode($post["containerPath"][$i]));
     $DirMode->appendChild($doc->createTextNode($tmpMode));
   }
 

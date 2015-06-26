@@ -24,12 +24,13 @@ function registerTrial(email, guid) {
     // Nerds love spinners, Maybe place a spinner image next to the submit button; we'll show it now:
     $('#spinner_image').fadeIn('fast');
 
-    $.post('https://keys.lime-technology.com/account/trial',{email:email,guid:guid,timestamp:timestamp},function(data) {
+    $.post('https://keys.lime-technology.com/account/trial',{timestamp:timestamp,guid:guid,email:email},function(data) {
         $('#spinner_image').fadeOut('fast');
         var msg = "<p>Thank you for registering USB Flash GUID <strong>"+guid+"</strong></p>" +
                   "<p>An email has been sent to <strong>"+email+"</strong> containing your key file URL." +
                   " When received, please paste the URL into the <i>Key file URL</i> box and" +
-                  " click <i>Install Key</i>.</p>";
+                  " click <i>Install Key</i>.</p>" +
+	          "<p>If you do not receive an email, please check your spam or junk-email folder.</p>";
 
         $('#status_panel').hide().html(msg).slideDown('fast');
         $('#trial_form').fadeOut('fast');

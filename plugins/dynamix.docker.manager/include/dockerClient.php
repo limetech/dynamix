@@ -68,13 +68,13 @@ class DockerTemplates {
 	}
 
   public function download_url($url, $path = "", $bg = FALSE){
-    exec("curl --max-time 60 --silent --insecure --location --fail ".($path ? " -o '$path' " : "")." $url ".($bg ? ">/dev/null 2>&1 &" : "2>/dev/null"), $out, $exit_code );
+    exec("curl --max-time 60 --silent --insecure --location --fail ".($path ? " -o " . escapeshellarg($path) : "")." " . escapeshellarg($url) . " ".($bg ? ">/dev/null 2>&1 &" : "2>/dev/null"), $out, $exit_code );
     return ($exit_code === 0 ) ? implode("\n", $out) : FALSE;
   }
 
 	public function listDir($root, $ext=NULL) {
 		$iter = new RecursiveIteratorIterator(
-						new RecursiveDirectoryIterator($root, 
+						new RecursiveDirectoryIterator($root,
 						RecursiveDirectoryIterator::SKIP_DOTS),
 						RecursiveIteratorIterator::SELF_FIRST,
 						RecursiveIteratorIterator::CATCH_GET_CHILD);
@@ -406,7 +406,7 @@ class DockerTemplates {
 class DockerUpdate{
 
   public function download_url($url, $path = "", $bg = FALSE){
-    exec("curl --max-time 30 --silent --insecure --location --fail ".($path ? " -o '$path' " : "")." $url ".($bg ? ">/dev/null 2>&1 &" : "2>/dev/null"), $out, $exit_code );
+    exec("curl --max-time 30 --silent --insecure --location --fail ".($path ? " -o " . escapeshellarg($path) : "")." " . escapeshellarg($url) . " ".($bg ? ">/dev/null 2>&1 &" : "2>/dev/null"), $out, $exit_code );
     return ($exit_code === 0 ) ? implode("\n", $out) : FALSE;
   }
 

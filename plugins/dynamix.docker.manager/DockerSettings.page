@@ -44,12 +44,12 @@ if (!array_key_exists('DOCKER_ENABLED', $dockercfg)) {
 $realfile = $dockercfg['DOCKER_IMAGE_FILE'];
 if (file_exists($realfile)) {
   if (strpos($realfile, '/mnt/user/') === 0) {
-    $tmp = parse_ini_string(shell_exec("getfattr --absolute-names -n user.LOCATION " . $dockercfg['DOCKER_IMAGE_FILE'] . " | grep user.LOCATION"));
+    $tmp = parse_ini_string(shell_exec("getfattr --absolute-names -n user.LOCATION " . escapeshellarg($dockercfg['DOCKER_IMAGE_FILE']) . " | grep user.LOCATION"));
     $realfile = str_replace('user', $tmp['user.LOCATION'], $realfile);  // replace 'user' with say 'cache' or 'disk1' etc
   }
 
-  if (exec("stat -c %T -f " . $realfile) == "btrfs") {
-    if (shell_exec("lsattr " . $realfile . " | grep \"\\-C\"") == "") {
+  if (exec("stat -c %T -f " . escapeshellarg($realfile)) == "btrfs") {
+    if (shell_exec("lsattr " . escapeshellarg($realfile) . " | grep \"\\-C\"") == "") {
       echo '<p class="notice">Your existing Docker image file needs to be recreated due to an issue from an earlier beta of unRAID 6.  Failure to do so may result in your docker image suffering corruption at a later time.  Please do this NOW!</p>';
     }
   }

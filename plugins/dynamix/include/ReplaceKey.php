@@ -19,18 +19,19 @@ $keyfile = base64_encode(file_get_contents($var['regFILE']));
 <script>
 function replaceKey(email, guid, keyfile) {
   if (email.length) {
-    var timestamp = Math.floor(Date.now/1000);
+    var timestamp = <?=time()?>;
     $('#status_panel').slideUp('fast');
     $('#input_form').find('input').prop('disabled', true);
     // Nerds love spinners, Maybe place a spinner image next to the submit button; we'll show it now:
     $('#spinner_image').fadeIn('fast');
 
-    $.post('https://keys.lime-technology.com/account/license/transfer',{email:email,guid:guid,keyfile:keyfile},function(data) {
+    $.post('https://keys.lime-technology.com/account/license/transfer',{timestamp:timestamp,guid:guid,email:email,keyfile:keyfile},function(data) {
         $('#spinner_image').fadeOut('fast');
         var msg = "<p>A registration replacement key has been created for USB Flash GUID <strong>"+guid+"</strong></p>" +
                   "<p>An email has been sent to <strong>"+email+"</strong> containing your key file URL." +
                   " When received, please paste the URL into the <i>Key file URL</i> box and" +
-                  " click <i>Install Key</i>.</p>";
+                  " click <i>Install Key</i>.</p>" +
+                  "<p>If you do not receive an email, please check your spam or junk-email folder.</p>";
 
         $('#status_panel').hide().html(msg).slideDown('fast');
         $('#input_form').fadeOut('fast');
