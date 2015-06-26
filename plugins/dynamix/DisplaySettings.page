@@ -77,7 +77,7 @@ $(function() {
     uploadStarted:function(i,file,count) {
       var image = $('img', $(dropbox));
       var reader = new FileReader();
-      image.width = 320;
+      image.width = 330;
       image.height = 30;
       reader.onload = function(e){image.attr('src',e.target.result);};
       reader.readAsDataURL(file);
