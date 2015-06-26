@@ -22,7 +22,7 @@ Title="Edit User"
 
 <?
 $file = "/boot/config/plugins/dynamix/users/$name.png";
-$user = "<img src='/webGui/images/user.png' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
+$void = "<img src='/webGui/images/user.png' id='image' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
 $icon = "<i class='fa fa-trash top' title='Restore default image' onclick='restore()'></i>";
 ?>
 
@@ -37,25 +37,22 @@ i.top{position:absolute;padding-top:4px;cursor:pointer;}
 
 <script src="/webGui/javascript/jquery.filedrop.js"></script>
 <script>
-var reset = <?=file_exists($file) ? 'false' : 'true'?>;
+var path = '/boot/config/plugins/dynamix/users';
 var filename = '';
 
 function restore() {
-  $('#dropbox').html("<?=$user?>");
+  $('#dropbox').html("<?=$void?>");
   $('input[name="userDesc"]').trigger('change');
-  reset = true;
+  filename = 'reset';
 }
 
 function upload(remove) {
-  if (reset||remove) {
-    $.post("/webGui/include/FileUpload.php",{cmd:'delete',user:"<?=$name?>",filename:filename});
-  } else {
-    $.post("/webGui/include/FileUpload.php",{cmd:'save',user:"<?=$name?>",filename:filename});
-    location.reload(true);
-  }
+  if (remove || filename=='reset') {$.post("/webGui/include/FileUpload.php",{cmd:'delete',filename:filename,path:path,output:"<?=$name?>"}); return;}
+  if (filename) $.post("/webGui/include/FileUpload.php",{cmd:'save',filename:filename,path:path,output:"<?=$name?>"});
 }
 
 $(function(){
+  $('#image').attr('src', $('#image').attr('src')+'?t='+new Date().getTime());
   var dropbox = $('#dropbox');
   dropbox.filedrop({
     maxfiles:1,
@@ -77,10 +74,9 @@ $(function(){
     },
     uploadFinished:function(i,file,response) {
       if (response == '200 OK') {
-        if (reset) $(dropbox).append("<?=$icon?>");
+        if (!filename || filename=='reset') $(dropbox).append("<?=$icon?>");
         $('input[name="userDesc"]').trigger('change');
         filename = file.name;
-        reset = false;
       } else {
         alert(response);
       }
@@ -104,9 +100,9 @@ Description:
 Custom image:
 : <span id="dropbox">
 <?if (file_exists($file)):?>
-  <img src="<?=$file?>" width="48" height="48" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><?=$icon?>
+  <img src="<?=$file?>" id="image" width="48" height="48" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><?=$icon?>
 <?else:?>
-  <?=$user?>
+  <?=$void?>
 <?endif;?>
   </span><em>Drag-n-drop a PNG file or click the image at the left.</em><input type="file" id="drop" style="display:none">
 

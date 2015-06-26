@@ -14,10 +14,79 @@ Icon="display-settings.png"
  * all copies or substantial portions of the Software.
  */
 ?>
+
+<?
+$file = "/boot/config/plugins/dynamix/banner.png";
+$void = "<img src='/webGui/images/banner.unraid.png' id='image' width='330' height='30' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
+$icon = "<i class='fa fa-trash top' title='Restore default image' onclick='restore()'></i>";
+?>
+
+<style>
+span#dropbox{margin-right:20px;}
+i.top{position:absolute;padding-left:4px;cursor:pointer;}
+</style>
+
+<script src="/webGui/javascript/jquery.filedrop.js"></script>
 <script>
+var path  = '/usr/local/emhttp/webGui/images';
+var file = '/boot/config/plugins/dynamix/banner.png';
+var filename = '';
+
+function restore() {
+  $('#dropbox').html("<?=$void?>");
+  $('select[name="banner"]').trigger('change');
+  filename = 'reset';
+}
+
+function upload() {
+  if (!filename) return;
+  if (filename=='reset') {
+    $.post("/webGui/include/FileUpload.php",{cmd:'reset',filename:'banner.unraid.png',path:path,output:'banner',flash:file});
+  } else {
+    $.post("/webGui/include/FileUpload.php",{cmd:'save',filename:filename,path:path,output:'banner',flash:file});
+  }
+  $.cookie('refresh','init',{path:'/'});
+}
+
 $(function() {
+  var dropbox = $('#dropbox');
+  dropbox.filedrop({
+    maxfiles:1,
+    maxfilesize:100, // KB
+    url:'/webGui/include/FileUpload.php',
+    data:{path:path},
+    beforeEach:function(file) {
+      if (!file.type.match(/^image\/png/)) {
+        alert('Only PNG images are allowed!');
+        return false;
+      }
+    },
+    uploadStarted:function(i,file,count) {
+      var image = $('img', $(dropbox));
+      var reader = new FileReader();
+      image.width = 320;
+      image.height = 30;
+      reader.onload = function(e){image.attr('src',e.target.result);};
+      reader.readAsDataURL(file);
+    },
+    uploadFinished:function(i,file,response) {
+      if (response == '200 OK') {
+        if (!filename || filename=='reset') $(dropbox).append("<?=$icon?>");
+        $('select[name="banner"]').trigger('change');
+        filename = file.name;
+      } else {
+        alert(response);
+      }
+    }
+  });
+  $('#drop').bind('change', function(e) {
+    var files = e.target.files;
+    $('#dropbox').trigger({type:'drop',dataTransfer:{files:files}});
+  });
   presetTime(document.display_settings);
+  presetBanner(document.display_settings);
 });
+
 function prepareDisplay(form) {
   if (!form.critical.value | !form.warning.value) {
     alert('An empty percentage value is not allowed!');
@@ -34,11 +103,17 @@ function prepareDisplay(form) {
   }
   return true;
 }
+
 function presetTime(form) {
   var system = form.date.selectedIndex==0;
   if (system) form.time.selectedIndex = 0;
   form.time.disabled = system;
 }
+
+function presetBanner(form) {
+  if (form.banner.selectedIndex == 0) $('#custom').hide(); else $('#custom').show();
+}
+
 function presetTemp(form) {
   var hot = $('#hot').html();
   var max = $('#max').html();
@@ -54,12 +129,15 @@ function presetTemp(form) {
 	$('#max').html(max.replace('C)','F)'));
   }
 }
+
 function presetRefresh(form) {
   for (var i=0,item; item=form.refresh.options[i]; i++) item.value *= -1;
 }
+
 function presetPassive(index) {
   if (index==0) $('#passive').hide(); else $('#passive').show();
 }
+
 function checkTemp(form,what) {
   if (form.hot.value>=form.max.value) alert(what ? 'Warning temperature must be lower than Critical temperature' : 'Critical temperature must be higher than Warning temperature');
 }
@@ -139,11 +217,23 @@ Show array utilization indicator:
   <?=mk_option($display['usage'], "1", "Yes")?>
   </select>
 
-Show banner image:
-: <select name="banner" size="1">
+Show banner:
+: <select name="banner" size="1" onchange="presetBanner(this.form)">
   <?=mk_option($display['banner'], "", "No")?>
   <?=mk_option($display['banner'], "image", "Yes")?>
   </select>
+
+<div id="custom" markdown="1" style="display:none">
+Custom banner:
+<input type="hidden" name="custom" value="custom">
+: <span id="dropbox">
+<?if (file_exists($file)):?>
+  <img src="<?=$file?>" width="320" height="30" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><?=$icon?>
+<?else:?>
+  <?=$void?>
+<?endif;?>
+  </span><em>Drag-n-drop a PNG file or click the image at the left.</em><input type="file" id="drop" style="display:none">
+</div>
 
 Show Dashboard apps:
 : <select name="dashapps" size="1">
@@ -214,5 +304,12 @@ Page update frequency:
 > A special option exists to disable screen updates while a parity operation is in progress. Use this option when degradation of the parity operation is observed.
 
 <input type="submit" name="#default" value="Default">
-: <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
+: <input type="submit" name="#apply" value="Apply" onclick="upload()"><input type="button" value="Done" onclick="done()">
 </form>
+
+<script>
+if ($.cookie('refresh')=='init') {
+  $.removeCookie('refresh',{path:'/'});
+  location.reload(true);
+}
+</script>

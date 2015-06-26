@@ -15,7 +15,7 @@ Title="Add User"
 ?>
 
 <?
-$user = "<img src='/webGui/images/user.png' width='48' height='48' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
+$void = "<img src='/webGui/images/user.png' width='48' height='48' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
 $icon = "<i class='fa fa-trash top' title='Restore default image' onclick='restore()'></i>";
 ?>
 
@@ -30,16 +30,17 @@ i.top{position:absolute;padding-top:4px;cursor:pointer;}
 
 <script src="/webGui/javascript/jquery.filedrop.js"></script>
 <script>
-var reset = true;
+var path = '/boot/config/plugins/dynamix/users';
 var filename = '';
 
 function restore() {
-  $('#dropbox').html("<?=$user?>");
-  reset = true;
+  $('#dropbox').html("<?=$void?>");
+  filename = '';
 }
 
 function upload() {
-  $.post("/webGui/include/FileUpload.php",{cmd:'save',user:document.user_edit.userName.value,filename:filename});
+  var username = document.user_edit.userName.value.trim();
+  if (username && filename) $.post("/webGui/include/FileUpload.php",{cmd:'save',filename:filename,path:path,output:username});
 }
 
 function checkUsername(form) {
@@ -65,6 +66,7 @@ $(function(){
     maxfiles:1,
     maxfilesize:20, // KB
     url:'/webGui/include/FileUpload.php',
+    data:{path:path},
     beforeEach:function(file) {
       if (!file.type.match(/^image\/png/)) {
         alert('Only PNG images are allowed!');
@@ -81,10 +83,9 @@ $(function(){
     },
     uploadFinished:function(i,file,response) {
       if (response == '200 OK') {
-        if (reset) $(dropbox).append("<?=$icon?>");
+        if (!filename) $(dropbox).append("<?=$icon?>");
         $('input[name="userDesc"]').trigger('change');
         filename = file.name;
-        reset = false;
       } else {
         alert(response);
       }
@@ -111,7 +112,7 @@ Description:
 > Up to 64 characters.
 
 Custom image:
-: <span id="dropbox"><?=$user?></span><em>Drag-n-drop a PNG file or click the image at the left.</em><input type="file" id="drop" style="display:none">
+: <span id="dropbox"><?=$void?></span><em>Drag-n-drop a PNG file or click the image at the left.</em><input type="file" id="drop" style="display:none">
 
 Password:
 : <input type="password" name="userPassword" maxlength="40" onKeyUp="this.form.cmdUserEdit.disabled=(this.form.userPassword.value!=this.form.userPasswordConf.value);">
