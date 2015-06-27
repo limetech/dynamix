@@ -34,11 +34,13 @@ var path = '/boot/config/plugins/dynamix/users';
 var filename = '';
 
 function restore() {
+  // restore original image
   $('#dropbox').html("<?=$void?>");
   filename = '';
 }
 
 function upload() {
+  // gets invoked when the user clicks APPLY, at this point image will be saved
   var username = document.user_edit.userName.value.trim();
   if (username && filename) $.post("/webGui/include/FileUpload.php",{cmd:'save',filename:filename,path:path,output:username});
 }
@@ -62,6 +64,7 @@ function checkUsername(form) {
 
 $(function(){
   var dropbox = $('#dropbox');
+  // attach the drag-n-drop feature to the 'dropbox' element
   dropbox.filedrop({
     maxfiles:1,
     maxfilesize:20, // KB
@@ -104,6 +107,7 @@ $(function(){
       }
     }
   });
+  // simulate a drop action when manual file selection is done
   $('#drop').bind('change', function(e) {
     var files = e.target.files;
     $('#dropbox').trigger({type:'drop',dataTransfer:{files:files}});

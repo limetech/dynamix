@@ -16,6 +16,7 @@ Title="Users"
 
 <script>
 $(function() {
+  // do a page reload to get new image on screen (forced update browser cache)
   if ($.cookie('refresh')=='init') {
     $.removeCookie('refresh',{path:'/'});
     location.reload(true);

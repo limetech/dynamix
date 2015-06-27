@@ -41,12 +41,14 @@ var path = '/boot/config/plugins/dynamix/users';
 var filename = '';
 
 function restore() {
+  // restore original image and activate APPLY button
   $('#dropbox').html("<?=$void?>");
   $('input[name="userDesc"]').trigger('change');
   filename = 'reset';
 }
 
 function upload(remove) {
+  // gets invoked when the user clicks APPLY, at this point image will be saved or deleted
   if (remove || filename=='reset') {$.post("/webGui/include/FileUpload.php",{cmd:'delete',filename:filename,path:path,output:"<?=$name?>"}); return;}
   if (filename) {
     $.post("/webGui/include/FileUpload.php",{cmd:'save',filename:filename,path:path,output:"<?=$name?>"});
@@ -55,13 +57,18 @@ function upload(remove) {
 }
 
 function done_plus() {
+  // this is a two step approach...
+  // first, the current screen is updated when user clicks APPLY (browser is instructed to reload the image).
+  // second, user has to click DONE to propagate the new image onto other pages (browser is forced to reload the page).
   if ($.cookie('refresh')=='1') $.cookie('refresh','init',{path:'/'});
   done();
 }
 
 $(function(){
+  // appending a time dummy will make the browser think/realize the image has changed
   $('#image').attr('src', $('#image').attr('src')+'?t='+new Date().getTime());
   var dropbox = $('#dropbox');
+  // attach the drag-n-drop feature to the 'dropbox' element
   dropbox.filedrop({
     maxfiles:1,
     maxfilesize:20, // KB
@@ -103,6 +110,7 @@ $(function(){
       }
     }
   });
+  // simulate a drop action when manual file selection is done
   $('#drop').bind('change', function(e) {
     var files = e.target.files;
     $('#dropbox').trigger({type:'drop',dataTransfer:{files:files}});
