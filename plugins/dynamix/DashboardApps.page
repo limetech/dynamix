@@ -31,7 +31,7 @@ div.Panel:hover{overflow:visible;z-index:10;}
 <form method="POST" id="formStartStop" action="/update.php" target="progressFrame">
 <input type="hidden" id="cmdStartStop" name="#command" value="" />
 </form>
-<form markdown="1" id="formAutostart" method="POST" action="/plugins/dynamix.docker.manager/update_cfg.php" target="progressFrame">
+<form markdown="1" id="formAutostart" method="POST" action="/plugins/dynamix.docker.manager/UpdateConfig.php" target="progressFrame">
 <input type="hidden" name="action" value="autostart" />
 <input type="hidden" name="container" value="none" />
 </form>
@@ -42,7 +42,7 @@ div.Panel:hover{overflow:visible;z-index:10;}
 <?
 $allContainers = array();
 if ((pgrep('docker')!==false) && (empty($display['dashapps']) || $display['dashapps'] == 'icons' || $display['dashapps'] == 'docker')) {
-	require_once('/usr/local/emhttp/plugins/dynamix.docker.manager/include/dockerClient.php');
+	require_once('/usr/local/emhttp/plugins/dynamix.docker.manager/include/DockerClient.php');
 	$DockerClient    = new DockerClient();
 	$DockerUpdate    = new DockerUpdate();
 	$DockerTemplates = new DockerTemplates();

@@ -17,7 +17,7 @@ Markdown="false"
 ?>
 <?
 // Add the Docker JSON client
-require_once('/usr/local/emhttp/plugins/dynamix.docker.manager/include/dockerClient.php');
+require_once('/usr/local/emhttp/plugins/dynamix.docker.manager/include/DockerClient.php');
 $docker          = new DockerClient();
 $DockerUpdate    = new DockerUpdate();
 $DockerTemplates = new DockerTemplates();
@@ -41,7 +41,7 @@ img.stopped{opacity:0.3;}
 .started{color:#009900;}
 .stopped{color:#EF3D47;}
 </style>
-<form id="formAutostart" method="POST" action="/plugins/dynamix.docker.manager/include/update_cfg.php" target="progressFrame">
+<form id="formAutostart" method="POST" action="/plugins/dynamix.docker.manager/include/UpdateConfig.php" target="progressFrame">
   <input type="hidden" name="action" value="autostart" />
   <input type="hidden" name="container" value="none" />
 </form>
@@ -219,7 +219,7 @@ $(function() {
 		labels_placement: "right"
 	});
 	$('.autostart').change(function () {
-		$.post( "/plugins/dynamix.docker.manager/include/update_cfg.php", { action: "autostart", container: $(this).attr('container'), response: "json" }, function( data ) {
+		$.post( "/plugins/dynamix.docker.manager/include/UpdateConfig.php", { action: "autostart", container: $(this).attr('container'), response: "json" }, function( data ) {
 			$(this).prop('checked', data.autostart );
 		}, "json");
 	});

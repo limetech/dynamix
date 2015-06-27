@@ -16,7 +16,7 @@ Cond="(pgrep('docker')!==false)"
 ?>
 <?
 // Add the Docker JSON client
-require_once('/usr/local/emhttp/plugins/dynamix.docker.manager/include/dockerClient.php');
+require_once('/usr/local/emhttp/plugins/dynamix.docker.manager/include/DockerClient.php');
 $docker          = new DockerClient();
 $DockerUpdate    = new DockerUpdate();
 $DockerTemplates = new DockerTemplates();
@@ -24,7 +24,7 @@ $DockerTemplates = new DockerTemplates();
 // Repos file
 $template_repos = $dockerManPaths['template-repos'];
 ?>
-<form markdown="1" method="POST" action="/plugins/dynamix.docker.manager/include/update_cfg.php" target="progressFrame">
+<form markdown="1" method="POST" action="/plugins/dynamix.docker.manager/include/UpdateConfig.php" target="progressFrame">
 <input type="hidden" name="#action" value="templates" />
 Template repositories:
 : <textarea name="template_repos" rows="5" cols="100" style="width:550px"><?=@file_get_contents($template_repos);?></textarea>

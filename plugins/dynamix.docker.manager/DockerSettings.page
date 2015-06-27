@@ -21,7 +21,7 @@ if ($var['fsState'] != "Started") {
 }
 
 // Add the Docker JSON client
-require_once('/usr/local/emhttp/plugins/dynamix.docker.manager/include/dockerClient.php');
+require_once('/usr/local/emhttp/plugins/dynamix.docker.manager/include/DockerClient.php');
 $docker          = new DockerClient();
 $DockerUpdate    = new DockerUpdate();
 $DockerTemplates = new DockerTemplates();
@@ -180,7 +180,7 @@ $(function() {
       return;
     }
 
-    $("#command").val("/usr/local/emhttp/plugins/dynamix.docker.manager/event/" + ($("#DOCKER_ENABLED").val()=="yes" ? "started;/usr/local/emhttp/plugins/dynamix.docker.manager/include/dockerupdate.php" : "stopping_svcs"));
+    $("#command").val("/usr/local/emhttp/plugins/dynamix.docker.manager/event/" + ($("#DOCKER_ENABLED").val()=="yes" ? "started;/usr/local/emhttp/plugins/dynamix.docker.manager/include/DockerUpdate.php" : "stopping_svcs"));
 
     if ($("#DOCKER_IMAGE_SIZE").length && $("#DOCKER_IMAGE_FILE").length) {
       var isError = false;
@@ -195,7 +195,7 @@ $(function() {
       var image = $("#DOCKER_IMAGE_FILE").val();
 
       target = $("#IMAGE_ERROR");
-      $.getJSON( "/plugins/dynamix.docker.manager/include/update_cfg.php?is_dir=" + image).done(function( json ) {
+      $.getJSON( "/plugins/dynamix.docker.manager/include/UpdateConfig.php?is_dir=" + image).done(function( json ) {
         if (json.is_dir === true){
           target.fadeIn().html('Error: must be a file; directory provided.');
           isError = true;

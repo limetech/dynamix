@@ -12,7 +12,7 @@
 ?>
 <?
 ignore_user_abort(true);
-require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/include/dockerClient.php");
+require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/include/DockerClient.php");
 $DockerClient = new DockerClient();
 $DockerUpdate = new DockerUpdate();
 $DockerTemplates = new DockerTemplates();
@@ -279,19 +279,19 @@ if ($_POST){
   // Remove existing container
   if (ContainerExist($Name)){
     $_GET['cmd'] = "/usr/bin/docker rm -f $Name";
-    include($dockerManPaths['plugin'] . "/include/exec.php");
+    include($dockerManPaths['plugin'] . "/include/Exec.php");
   }
 
   // Remove old container if renamed
   $existing = isset($_POST['existingContainer']) ? $_POST['existingContainer'] : FALSE;
   if ($existing && ContainerExist($existing)){
     $_GET['cmd'] = "/usr/bin/docker rm -f $existing";
-    include($dockerManPaths['plugin'] . "/include/exec.php");
+    include($dockerManPaths['plugin'] . "/include/Exec.php");
   }
 
   // Injecting the command in $_GET variable and executing.
   $_GET['cmd'] = $cmd;
-  include($dockerManPaths['plugin'] . "/include/exec.php");
+  include($dockerManPaths['plugin'] . "/include/Exec.php");
 
   $DockerTemplates->removeInfo($Name);
   $DockerUpdate->syncVersions($Name);
@@ -345,16 +345,16 @@ if ($_GET['updateContainer']){
     pullImage($Repository);
 
     $_GET['cmd'] = "/usr/bin/docker rm -f $Name";
-    include($dockerManPaths['plugin'] . "/include/exec.php");
+    include($dockerManPaths['plugin'] . "/include/Exec.php");
 
     $_GET['cmd'] = $cmd;
-    include($dockerManPaths['plugin'] . "/include/exec.php");
+    include($dockerManPaths['plugin'] . "/include/Exec.php");
 
     $DockerTemplates->removeInfo($Name);
     $newContainerID = $DockerClient->getImageID($Repository);
     if ( $oldContainerID and $oldContainerID != $newContainerID){
       $_GET['cmd'] = sprintf("/usr/bin/docker rmi %s", $oldContainerID);
-      include($dockerManPaths['plugin'] . "/include/exec.php");
+      include($dockerManPaths['plugin'] . "/include/Exec.php");
     }
 
     $DockerTemplates->removeInfo($Name);
