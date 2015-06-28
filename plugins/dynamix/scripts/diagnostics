@@ -59,4 +59,5 @@ foreach ($devices as $device) {
   exec("smartctl -a /dev/${disk[0]}|todos >/$diag/smart/${disk[1]}.txt");
 }
 exec("zip -qmr $zip /$diag");
+if (!$argv[1]) echo "ZIP file '$zip' created!\n";
 ?>
