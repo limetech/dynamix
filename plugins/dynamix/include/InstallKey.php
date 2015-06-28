@@ -16,7 +16,7 @@ readfile("/usr/local/emhttp/logging.htm");
 $var = parse_ini_file('state/var.ini');
 
 $parsed_url = parse_url($_GET['url']);
-if ($parsed_url['host']=="keys.lime-technology.com") {
+if (($parsed_url['host']=="keys.lime-technology.com")||($parsed_url['host']=="lime-technology.com")) {
   addLog("Downloading {$_GET['url']} ... ");
   $key_file = basename($_GET['url']);
   exec("/usr/bin/wget -q -O /boot/config/$key_file {$_GET['url']}", $output, $return_var);
@@ -31,5 +31,5 @@ if ($parsed_url['host']=="keys.lime-technology.com") {
   }
 }
 else
-  addLog("ERROR, bad or missing key file URL: {$_GET['url']})<br>");
+  addLog("ERROR, bad or missing key file URL: {$_GET['url']}<br>");
 ?>
