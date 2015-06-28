@@ -33,8 +33,8 @@ foreach ($ports as $port) {
   file_put_contents("/$diag/system/ethtool.txt", "--------------------------------\r\n", FILE_APPEND);
 }
 exec("ifconfig|todos >/$diag/system/ifconfig.txt");
-exec("cp /boot/config/*.{cfg,conf,dat} /boot/config/go /$diag/config");
-if (is_dir("/boot/config/shares")) exec("cp /boot/config/shares/*.cfg /$diag/shares");
+exec("cp /boot/config/*.{cfg,conf,dat} /boot/config/go /$diag/config 2>/dev/null");
+if (is_dir("/boot/config/shares")) exec("cp /boot/config/shares/*.cfg /$diag/shares 2>/dev/null");
 $ini = "/var/local/emhttp/shares.ini";
 $shares = file_exists($ini) ? parse_ini_file($ini, true) : array();
 foreach ($shares as $share) {
@@ -53,7 +53,7 @@ if ($qemu)
   foreach ($qemu as $file) exec("todos <".escapeshellarg($file)." >/$diag/qemu/".escapeshellarg(basename($file)));
 else
   file_put_contents("/$diag/qemu/no qemu log files","");
-exec("ls -l /dev/disk/by-id/[au]*|awk '$0!~/-part/{split($11,a,\"/\");print a[3],substr($9,21)}'", $devices);
+exec("ls -l /dev/disk/by-id/[au]* 2>/dev/null|awk '$0!~/-part/{split($11,a,\"/\");print a[3],substr($9,21)}'", $devices);
 foreach ($devices as $device) {
   $disk = explode(' ',$device);
   exec("smartctl -a /dev/${disk[0]}|todos >/$diag/smart/${disk[1]}.txt");
