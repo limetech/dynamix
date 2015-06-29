@@ -11,7 +11,7 @@
  */
 ?>
 <?
-	require_once('/usr/local/emhttp/plugins/dynamix/include/Helpers.php');
+	require_once('/usr/local/emhttp/webGui/include/Helpers.php');
 	require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt.php');
 	require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt_helpers.php');
 

@@ -18,10 +18,12 @@ function my_insert(&$source,$string) {
 }
 function my_smart(&$source,$name) {
   global $path;
+  $thumb = 'good';
   $saved = @parse_ini_file("/var/local/emhttp/monitor.ini",true);
   $last = isset($saved["smart"]["$name.5"]) ? $saved["smart"]["$name.5"] : 0;
   $smart = exec("grep -Po '^  5.+ \K\d+$' /var/local/emhttp/smart/$name");
-  $thumb = $smart>$last ? 'bad' : 'good';
+  if (!$smart) $smart = 0;
+  if (($last == 0 && $smart > 0) || ($last > 0 && $smart > $last)) $thumb = 'bad';
   my_insert($source, "<a href=\"/Main/Device?name=$name\" onclick=\"$.cookie('one','tab2',{path:'/'})\" title=\"$smart reallocated sectors\"><img src=\"$path/$thumb.png\"></a>");
 }
 function my_usage(&$source,$used) {

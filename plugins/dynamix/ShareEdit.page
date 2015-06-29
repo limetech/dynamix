@@ -2,8 +2,8 @@ Menu="Share:1"
 Title="Share Settings"
 ---
 <?PHP
-/* Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -32,7 +32,7 @@ if ($name == "") {
   $share = $shares[$name];
 } else {
   /* handle share deleted case */
-  echo "<p class='notice'>Share $name has been deleted.</p><input type='button' value='OK' onclick='done()'>";
+  echo "<p class='notice'>Share $name has been deleted.</p><input type='button' value='Done' onclick='done()'>";
   return;
 }
 
@@ -68,22 +68,11 @@ $(function() {
   setDiskList(document.share_edit.shareUseCache);
   presetSpace(document.share_edit.shareFloor);
 });
-
-function prepareShareEdit() {
-  $("#s1").dropdownchecklist('destroy');
-  $("#s1").dropdownchecklist({emptyText:'All', width:300, explicitClose:'...close'});
-  $("#s2").dropdownchecklist('destroy');
-  $("#s2").dropdownchecklist({emptyText:'None', width:300, explicitClose:'...close'});
-  setDiskList(document.share_edit.shareUseCache);
-  presetSpace(document.share_edit.shareFloor);
-}
-
 function setDiskList(cache) {
   var onOff = cache=='only' ? 'disable' : 'enable';
   $("#s1").dropdownchecklist(onOff);
   $("#s2").dropdownchecklist(onOff);
 }
-
 function presetSpace(shareFloor) {
   var unit = ['KB','MB','GB','TB','PB'];
   var scale = shareFloor.value;
@@ -92,19 +81,15 @@ function presetSpace(shareFloor) {
   if (base>=unit.length) base = unit.length-1;
   shareFloor.value = (scale/Math.pow(1000, base))+unit[base];
 }
-
 // Compose input fields
 function prepareEdit(form) {
 // Test share name validity
-  var share = form.shareName.value;
-  if (!share) {
-    alert('Please enter a share name');
+  var share = form.shareName.value.trim();
+  if (share.match('^(disk[0-9]+|cache[0-9]*|flash)$')) {
+    alert('Invalid share name "'+share+'" specified\n\nDo not use reserved names.');
     return false;
   }
-  if (share.match('^disk[0-9]+$')) {
-    alert('Invalid share name specified\nDo not use reserved names.');
-    return false;
-  }
+  form.shareName.value = share;
 // Adjust minimum free space value to selected unit
   var unit = 'KB,MB,GB,TB,PB';
   var scale = form.shareFloor.value;
@@ -137,7 +122,7 @@ function prepareEdit(form) {
   return true;
 }
 </script>
-<form markdown="1" name="share_edit" method="POST" action="/update.htm" target="progressFrame" onsubmit="return prepareEdit(this)">
+<form markdown="1" name="share_edit" method="POST" action="/update.htm" target="progressFrame" onchange="this.cmdEditShare.disabled=this.shareName.value.trim()==''" onsubmit="return prepareEdit(this)">
 <input type="hidden" name="shareNameOrig" value="<?=$share['nameOrig']?>">
 
 Share name:
@@ -266,11 +251,10 @@ Use cache disk:
 <?endif;?>
 
 Enable Copy-on-write:
-: <select name="shareCOW" size="1" <?=$name?"disabled":""?>>
+: <select name="shareCOW" size="1"<?if ($name):?> disabled<?endif;?>>
   <?=mk_option($share['cow'], "no", "No")?>
   <?=mk_option($share['cow'], "auto", "Auto")?>
-  </select>
-  Set when adding new share only.
+  </select><?if ($name):?>Set when adding new share only.<?endif;?>
 
 > Set to **No** to cause the *btrfs* NOCOW (No Copy-on-Write) attribute to be set on the share directory
 > when created on a device formatted with *btrfs* file system.  Once set, newly created files and
@@ -281,8 +265,8 @@ Enable Copy-on-write:
 > Set to **Auto** for normal operation, meaning COW will be in effect on devices formatted with *btrfs*.
 
 <?if ($share['name'] == ""):?>
-<input type="reset" value="Reset" onclick="setTimeout(prepareShareEdit,0)">
-: <input type="submit" name="cmdEditShare" value="Add Share"><input type="button" value="Cancel" onclick="done()">
+&nbsp;
+: <input type="submit" name="cmdEditShare" value="Add Share"><input type="button" value="Done" onclick="done()">
 <?elseif (shareEmpty($share['name'])):?>
 Share empty?
 : Yes
@@ -293,7 +277,7 @@ Delete<input type="checkbox" name="confirmDelete" onchange="chkDelete(this.form,
 Share empty?
 : No
 
-<input type="reset" value="Reset" onclick="setTimeout(prepareShareEdit,0)">
+&nbsp;
 : <input type="submit" name="cmdEditShare" value="Apply"><input type="button" value="Done" onclick="done()">
 <?endif;?>
 </form>

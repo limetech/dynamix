@@ -24,7 +24,7 @@ $(function() {
 </script>
 <table class='share_status small'>
 <thead><td style="width:33%">Feature</td><td>Value</td><td>Information</td></thead>
-<tbody id="disk_capabilities"></tbody>
+<tbody id="disk_capabilities"><tr><td colspan='3'><br><center><i class='fa fa-spinner fa-spin'></i>&nbsp;<em>Please wait... retrieving S.M.A.R.T. information!</em></center></td></tr></tbody>
 </table>
 <input type="button" value="Done" onclick="done()">
 

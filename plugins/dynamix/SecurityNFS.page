@@ -33,7 +33,7 @@ Security:
   <?=mk_option($sec_nfs[$name]['security'], "private", "Private");?>
   </select>
     
-<input type="reset" value="Reset">
+&nbsp;
 : <input type="submit" name="changeShareSecurityNFS" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
    
@@ -43,7 +43,7 @@ Security:
 Rule:
 : <input type="text" name="shareHostListNFS" maxlength="256" value="<?=$sec_nfs[$name]['hostList'];?>">
 
-<input type="reset" value="Reset">
+&nbsp;
 : <input type="submit" name="changeShareAccessNFS" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
 <?endif;?>

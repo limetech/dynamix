@@ -3,8 +3,8 @@ Title="Identification"
 Icon="ident.png"
 ---
 <?PHP
-/* Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -36,6 +36,6 @@ Model:
 
 > This is the server model number.
 
-<?if ($disabled):?>&nbsp;<?else:?><input type="reset" value="Reset"><?endif;?>
+&nbsp;
 : <input type="submit" name="changeNames" value="Apply" <?=$disabled?>><input type="button" value="Done" onclick="done()"><?if ($disabled):?>Array must be **Stopped** to change<?endif;?>
 </form>

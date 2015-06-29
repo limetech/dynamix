@@ -3,8 +3,8 @@ Title="Date and Time"
 Icon="date-time.png"
 ---
 <?PHP
-/* Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -167,6 +167,6 @@ New date and time:
 
 > Enter the current time-of-day.  Use format YYYY-MM-DD HH:MM:SS. Greyed out when using NTP.
 
-<input type="reset" value="Reset" onclick="setTimeout(checkDateTimeSettings,0)">
+&nbsp;
 : <input type="submit" name="setDateTime" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>

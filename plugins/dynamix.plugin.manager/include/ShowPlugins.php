@@ -11,8 +11,8 @@
  */
 ?>
 <?
-require_once 'webGui/include/Markdown.php';
-require_once 'plugins/dynamix.plugin.manager/include/plugin_helpers.php';
+require_once('webGui/include/Markdown.php');
+require_once('plugins/dynamix.plugin.manager/include/PluginHelpers.php');
 
 foreach (glob("/var/log/plugins/*.plg", GLOB_NOSORT) as $plugin_link) {
 // only consider symlinks

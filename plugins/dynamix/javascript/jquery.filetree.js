@@ -9,7 +9,7 @@
  *
  * Options:  root           - root folder to display; default = /
  *           filter         - filter on file extension; default = none
- *           script         - location of the serverside AJAX file to use; default = jqueryFileTree.php
+ *           script         - location of the serverside AJAX file to use; default = FileTree.php
  *           folderEvent    - event to trigger expand/collapse; default = click
  *           expandSpeed    - default = 500 (ms); use -1 for no animation
  *           collapseSpeed  - default = 500 (ms); use -1 for no animation
@@ -33,7 +33,7 @@ if(jQuery) (function($){
 			// Default options
 			if( options.root			=== undefined ) options.root			= '/mnt/';
 			if( options.filter			=== undefined ) options.filter			= '';
-			if( options.script			=== undefined ) options.script			= '/webGui/scripts/jqueryFileTree.php';
+			if( options.script			=== undefined ) options.script			= '/webGui/include/FileTree.php';
 			if( options.folderEvent		=== undefined ) options.folderEvent		= 'click';
 			if( options.expandSpeed		=== undefined ) options.expandSpeed		= 300;
 			if( options.collapseSpeed	=== undefined ) options.collapseSpeed	= 300;

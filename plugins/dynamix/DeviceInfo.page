@@ -231,7 +231,7 @@ Spinup group(s):
 <input type="hidden" name="#arg[2]" value="/mnt/<?=$disk['name']?>">
 <input type="hidden" name="#arg[3]" value="&>/dev/null &">
 
-<input type="reset" value="Reset">
+&nbsp;
 : <input type="submit" value="Balance"><input type="text" name="#arg[1]" maxlength="256" value="-dconvert=raid1 -mconvert=raid1"> Options (see Help)
 
 > **Balance** will run the *btrfs balance* program to restripe the extents across all pool devices.
@@ -275,7 +275,7 @@ Spinup group(s):
 <input type="hidden" name="#arg[2]" value="/mnt/<?=$disk['name']?>">
 <input type="hidden" name="#arg[3]" value="&>/dev/null &">
 
-<input type="reset" value="Reset">
+&nbsp;
 : <input type="submit" value="Scrub"><input type="text" name="#arg[1]" maxlength="256" value="-r"> Options (see Help)
 
 > **Scrub** will open a window and run the *btrfs scrub* program to check file system integrity device.
@@ -319,7 +319,7 @@ Spinup group(s):
 <?if (exec("/usr/local/sbin/background status $check_cmd")==""):?>
 <input type="hidden" name="#command" value="/usr/local/sbin/background start <?=$status_file?> <?=$check_cmd?>">
 
-<input type="reset" value="Reset">
+&nbsp;
 : <input type="submit" value="Check"><input type="text" name="#arg[1]" maxlength="256" value=""> Options (see Help)
 
 > **Check Filesystem** will run the *reiserfsck* program to check file system integrity on the device.
@@ -369,7 +369,7 @@ Spinup group(s):
 <?if (exec("/usr/local/sbin/background status $check_cmd")==""):?>
 <input type="hidden" name="#command" value="/usr/local/sbin/background start <?=$status_file?> <?=$check_cmd?>">
 
-<input type="reset" value="Reset">
+&nbsp;
 : <input type="submit" value="Check"><input type="text" name="#arg[1]" maxlength="256" value="-n"> Options (see Help)
 
 > **Check Filesystem** will run the *xfs_repair* program to check file system integrity on the device.

@@ -67,7 +67,8 @@ function prepareParity(form) {
 <?endif;?>
 $(function() {
 <?if (file_exists($memory)):?>
-  $('input[name="#apply"]').removeAttr('disabled');
+  setTimeout(function(){$('input[value="Apply"]').removeAttr('disabled');},0);
+  $('input[value="Done"]').val('Reset').prop('onclick',null).click(function(){refresh($(this).parentsUntil('form').parent().offset().top)});
 <?unlink($memory);?>
 <?endif;?>
   presetParity(document.parity_settings);
@@ -79,12 +80,6 @@ function presetParity(form) {
   form.hour.disabled = mode==0;
   form.month.disabled = mode<4;
   form.write.disabled = mode==0;
-}
-function resetParity(form) {
-  form.mode.selectedIndex = 0;
-  form.write.selectedIndex = 0;
-  form.submit();
-  $('input[name="#apply"]').removeAttr('disabled');
 }
 </script>
 <form markdown="1" name="parity_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareParity(this)">
@@ -190,6 +185,6 @@ Write corrections to parity disk:
 
 > Choose here whether any parity errors found during the check, need to be corrected on the parity disk or not.
 
-<input type="button" value="Default" onclick="resetParity(this.form)"><input type="reset" value="Reset">
+&nbsp;
 : <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()"></td>
 </form>

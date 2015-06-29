@@ -11,7 +11,6 @@
  */
 ?>
 <?
-
 // Invoke the plugin command with indicated method
 function plugin($method, $arg) {
   exec("/usr/local/sbin/plugin $method $arg", $output, $retval);

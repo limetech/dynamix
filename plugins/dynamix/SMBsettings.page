@@ -2,8 +2,8 @@ Menu="SMB:1"
 Title="SMB Settings"
 ---
 <?PHP
-/* Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -29,10 +29,10 @@ Enable SMB:
 > Note: changing this value with array Started may cause a brief interruption in network services.
 
 <?if ($var['fsState']=="Started"):?>
-<input type="reset" value="Reset">
+&nbsp;
 : <input type="submit" name="changeShare" value="Apply" disabled><input type="button" value="Done" onclick="done()">Array must be **Stopped** to change
 <?else:?>
-<input type="reset" value="Reset">
+&nbsp;
 : <input type="submit" name="changeShare" value="Apply"><input type="button" value="Done" onclick="done()">
 <?endif;?>
 </form>

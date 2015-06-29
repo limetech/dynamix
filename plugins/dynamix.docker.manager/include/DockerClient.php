@@ -376,8 +376,8 @@ class DockerTemplates {
 		$Images    		 = array('banner' => $this->getTemplateValue($Repository, "Banner"),
 		                       'icon' => $this->getTemplateValue($Repository, "Icon") );
 
-		$defaultImages = array('banner' => '/plugins/dynamix.docker.manager/assets/images/spacer.png',
-		                       'icon'   => '/plugins/dynamix.docker.manager/assets/images/question.png');
+		$defaultImages = array('banner' => '/plugins/dynamix.docker.manager/images/spacer.png',
+		                       'icon'   => '/plugins/dynamix.docker.manager/images/question.png');
 
 		foreach ($Images as $type => $imgUrl) {
 			preg_match_all("/(.*?):([\w]*$)/i", $Repository, $matches);

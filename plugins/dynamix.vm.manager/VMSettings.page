@@ -70,7 +70,7 @@ if ($boolACSEnabled != $boolACSInSyslinux) {
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
-<style type="text/css">
+<style>
   body { -webkit-overflow-scrolling: touch;}
   .fileTree {
 	width: 305px;
@@ -152,16 +152,16 @@ PCIe ACS Override:
 >
 > A reboot will be required for changes to this setting to take affect.
 
-<input type="reset" value="Reset">
+&nbsp;
 : <input type="button" id="applyBtn" value="Apply"/><input type="button" value="Done" onclick="done()">
 </form>
 
 > View the log for libvirt: <a id="openlog" title="/var/log/libvirt/libvirtd.log" href="#" onclick="openWindow('/usr/bin/tail -n 42 -f /var/log/libvirt/libvirtd.log','Log Information',600,900);">/var/log/libvirt/libvirtd.log</a>
 
 
-<script type="text/javascript" src="/webGui/scripts/jqueryFileTree.js"></script>
-<script type="text/javascript" src="/webGui/scripts/jquery.switchButton.js"></script>
-<script type="text/javascript" src="/plugins/dynamix.vm.manager/scripts/dynamix.vm.manager.js"></script>
+<script src="/webGui/javascript/jquery.filetree.js"></script>
+<script src="/webGui/javascript/jquery.switchbutton.js"></script>
+<script src="/plugins/dynamix.vm.manager/scripts/dynamix.vm.manager.js"></script>
 <script>
 $(function(){
 	$("#applyBtn").click(function(){

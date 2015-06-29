@@ -21,48 +21,16 @@ Icon="notifications.png"
 $events = explode('|', $notify['events']);
 $disabled = $notify['system'] ? '' : 'disabled';
 ?>
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
 <style>
-  .advanced{display:none;}
-  .switch-button-label.off{color:inherit;}
+.advanced{display:none;}
+.switch-button-label.off{color:inherit;}
 </style>
+<script src="/webGui/javascript/jquery.switchbutton.js"></script>
+
 <script>
-function resetNotify(form) {
-  form.date.selectedIndex = 0;
-  form.time.selectedIndex = 0;
-  form.position.selectedIndex = 1;
-  form.path.value = "/tmp/notifications";
-  form.system.selectedIndex = 0;
-  form.version.selectedIndex = 0;
-  form.docker_update.selectedIndex = 0;
-  form.status.selectedIndex = 0;
-  form.normal1.checked = true;
-  form.normal2.checked = false;
-  form.normal3.checked = false;
-  form.warning1.checked = true;
-  form.warning2.checked = false;
-  form.warning3.checked = false;
-  form.alert1.checked = true;
-  form.alert2.checked = false;
-  form.alert3.checked = false;
-  form.status.selectedIndex = 0;
-  form.plugin1.checked = true;
-  form.plugin2.checked = false;
-  form.plugin3.checked = false;
-  form.docker_notify1.checked = true;
-  form.docker_notify2.checked = false;
-  form.docker_notify3.checked = false;
-  form.report1.checked = true;
-  form.report2.checked = false;
-  form.report3.checked = false;
-  form.custom.value = '';
-  prepareCheckbox(0);
-  preparePlugin('');
-  prepareDocker('');
-  prepareReport('');
-  for (var i=1; i<=5; i++) form.elements['a'+i].checked = true;
-  $('input[name="#apply"]').removeAttr('disabled');
-}
+var this_tab = $('input[name$="tabs"]').length;
+
 function prepareNotify(form) {
   var events = [];
   form.entity.value = form.normal1.checked | form.warning1.checked | form.alert1.checked;
@@ -119,13 +87,31 @@ function prepareReport(value) {
   if (value=='') $('.report').hide(); else $('.report').show();
   prepareTitle();
 }
-function prepareNotifications() {
+$(function(){
+  var last = $('input[name$="tabs"]').length;
+  var elementId = "basicAdvanced";
+  $('.tabs').append($('<span id="'+elementId+'" class="status" style="margin-top: 2px;display: none;"><input type="checkbox" class="advancedview"></span>'));
+<?if ($tabbed):?>
+  if ($('#tab'+this_tab).is(':checked')) $('#'+elementId).show();
+  $('#tab'+this_tab).bind({click:function(){$('#'+elementId).show();}});
+  for (var x=1; x<=last; x++) if(x != this_tab) $('#tab'+x).bind({click:function(){$('#'+elementId).hide();}});
+<?else:?>
+  $('#'+elementId).show();
+<?endif;?>
+  if ($.cookie('notifcations_view_mode') == 'advanced') $('.advanced').show();
+  $('.advancedview').switchButton({
+    labels_placement: "left",
+    on_label: 'Advanced View',
+    off_label: 'Basic View',
+    checked: $.cookie('notifcations_view_mode') == 'advanced'
+  });
+  $('.advancedview').change(function() {
+    $('.advanced').finish().toggle('fast');
+    $.cookie('notifcations_view_mode', $(this).is(':checked') ? 'advanced' : 'basic', {expires:3650});
+  });
   preparePlugin(document.notify_settings.version.value);
   prepareDocker(document.notify_settings.docker_update.value);
   prepareReport(document.notify_settings.status.value);
-}
-$(function(){
-  prepareNotifications();
 });
 </script>
 <form markdown="1" name="notify_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareNotify(this)">
@@ -299,37 +285,6 @@ SMART attribute notifications:
 > In addition a custom SMART attribute number can be given to generate notifications. Be careful in the selection, this may cause an avalance of notifcations if an inappropriate SMART attribute is chosen.
 </div>
 
-<input type="button" value="Default" onclick="resetNotify(this.form);"><input type="reset" value="Reset" onclick="setTimeout(prepareNotifications,0)">
+<input type="submit" name="#default" value="Default">
 : <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()"></td>
 </form>
-<script type="text/javascript" src="/webGui/scripts/jquery.switchButton.js"></script>
-
-<script type="text/javascript">
-var this_tab = $('input[name$="tabs"]').length;
-$(function() {
-  var last = $('input[name$="tabs"]').length;
-  var elementId = "basicAdvanced";
-  $('.tabs').append($('<span id="'+elementId+'" class="status" style="margin-top: 2px;display: none;"><input type="checkbox" class="advancedview"></span>'));
-<?if ($tabbed):?>
-  if ($('#tab'+this_tab).is(':checked')) {
-    $('#'+elementId).show();
-  }
-  $('#tab'+this_tab).bind({click:function(){$('#'+elementId).show();}});
-  for (var x=1; x<=last; x++) if(x != this_tab) $('#tab'+x).bind({click:function(){$('#'+elementId).hide();}});
-<?endif;?>
-  if ($.cookie('notifcations_view_mode') == 'advanced') {
-    $('.advanced').show();
-  }
-
-  $('.advancedview').switchButton({
-    labels_placement: "left",
-    on_label: 'Advanced View',
-    off_label: 'Basic View',
-    checked: $.cookie('notifcations_view_mode') == 'advanced'
-  });
-  $('.advancedview').change(function () {
-    $('.advanced').finish().toggle('fast');
-    $.cookie('notifcations_view_mode', $(this).is(':checked') ? 'advanced' : 'basic', { expires: 3650 });
-  });
-});
-</script>

@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2014, Bergware International.
- * Copyright 2014, Lime Technology
+/* Copyright 2015, Bergware International.
+ * Copyright 2015, Lime Technology
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -22,7 +22,7 @@ foreach ($files as $file) {
     $item = explode('=', $field);
     if (!$c++) echo "<tr><td>".date("{$_POST['date']} {$_POST['time']}", $item[1])."</td>"; else echo "<td>{$item[1]}</td>";
   }
-  echo "<td style='text-align:center'><a href='/webGui/include/DeleteLogFile.php?log=$file' target='progressFrame'><img src='/webGui/images/delete.png' title='Delete notification'></a></td></tr>";
+  echo "<td style='text-align:right'><a href='#' onclick='$.get(\"/webGui/include/DeleteLogFile.php\",{log:\"$file\"},function(){archiveList();});return false' title='Delete notification'><i class='fa fa-trash-o'></i></a></td></tr>";
 }
 if (empty($files)) echo "<tr><td colspan='6' style='text-align:center'><em>No notifications available</em></td></tr>";
 ?>
