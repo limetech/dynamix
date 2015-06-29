@@ -21,11 +21,11 @@ Tabs="true"
 $tmp_stale = ($path != $prev);
 if ($tmp_stale) foreach (glob("/tmp/plugins/*.{plg,txt}", GLOB_NOSORT+GLOB_BRACE) as $entry) if (!file_exists("/var/log/plugins/".basename($entry))) @unlink($entry);
 ?>
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css">
-<style type="text/css">
-  #plugin_tree{width:33%;height:200px;overflow:scroll;}
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.filetree.css">
+<style>
+#plugin_tree{width:33%;height:200px;overflow:scroll;}
 </style>
-<script type="text/javascript" src="/webGui/scripts/jqueryFileTree.js"></script>
+<script src="/webGui/javascript/jquery.filetree.js"></script>
 
 <script>
 $(function() {

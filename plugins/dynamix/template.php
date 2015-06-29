@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -11,8 +11,8 @@
  */
 ?>
 <?
-require_once 'include/Helpers.php';
-require_once 'include/PageBuilder.php';
+require_once('include/Helpers.php');
+require_once('include/PageBuilder.php');
 
 // Extract the 'querystring'
 // variables provided by emhttp:
@@ -50,5 +50,5 @@ $myPage = $site[basename($path)];
 $pageroot = "{$docroot}/".dirname($myPage['file']);
 
 // Giddyup
-require_once 'include/DefaultPageLayout.php';
+require_once('include/DefaultPageLayout.php');
 ?>

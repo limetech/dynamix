@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -11,7 +11,7 @@
  */
 ?>
 <?
-require_once "Wrappers.php";
+require_once('Wrappers.php');
 
 // Helper functions
 function my_scale($value, &$unit, $precision = NULL) {

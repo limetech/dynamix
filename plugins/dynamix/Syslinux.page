@@ -35,8 +35,7 @@ Syslinux configuration:
 : <textarea spellcheck="false" cols="80" rows="22" maxlength="2048" name="text" style="font-family:bitstream;width:66%"><?=$text;?></textarea>
 
 <input type="button" value="Default" onclick="setDefault(this.form)">
-
-: <input type="submit" value="Apply"/><input type="reset"/><input type="button" value="Done" onclick="done()">
+: <input type="submit" value="Apply"/><input type="button" value="Done" onclick="done()">
 
 > Click the **Apply** button to commit the current edits.  Click **Reset** to
 > undo any changes you make (before Saving). Click **Done** to exit this page.

@@ -11,7 +11,12 @@
  */
 ?>
 <?
-require_once "Wrappers.php";
+require_once('Wrappers.php');
+
+function duration($h) {
+  $y = intval($h/8760);
+  return ' ('.($y?$y.'y, ':'').intval($h%8760/24).'d, '.($h%24).'h)';
+}
 
 $port = $_POST['port'];
 
@@ -32,6 +37,7 @@ case "attributes":
       if ($info[9]>=$max) $color = " class='red-text'"; else if ($info[9]>=$hot) $color = " class='orange-text'";
     }
     echo "<tr{$color}>";
+    if ($info[0] == 9 && is_numeric($info[9])) $info[9] .= duration($info[9]);
     foreach ($info as $field) echo "<td>".str_replace('_',' ',$field)."</td>";
     echo "</tr>";
   }

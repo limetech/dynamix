@@ -1,6 +1,6 @@
 <?PHP
-/* Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -23,6 +23,7 @@
  * #section : if present, then the ini file consists of a set of named sections, and all of the
  *            configuration parameters apply to this one particular section.
  *            if omitted, then it's just a flat ini file without sections.
+ * #default : if present, then the default values will be restored instead.
  * #include : specifies name of an include file to read and execute in before saving the file contents
  * #cleanup : if present then parameters with empty strings are omitted from being written to the file
  * #command : a shell command to execute after updating the configuration file
@@ -49,6 +50,7 @@ if ($file) {
   if ($file[0]!='/') $file = "/boot/config/plugins/$file";
   $section = isset($_POST['#section']) ? $_POST['#section'] : false;
   $cleanup = isset($_POST['#cleanup']);
+  $default = isset($_POST['#default']) ? @parse_ini_file('/usr/local/emhttp/plugins/'.basename(dirname($file)).'/default.cfg', $section) : array();
 
   $keys = @parse_ini_file($file, $section);
 // the 'save' switch can be reset by the include file to disallow settings saving
@@ -57,13 +59,13 @@ if ($file) {
   if ($save) {
     $text = "";
     if ($section) {
-      foreach ($_POST as $key => $value) if ($key[0]!='#') $keys[$section][$key] = $value;
+      foreach ($_POST as $key => $value) if ($key[0]!='#') $keys[$section][$key] = isset($default[$section][$key]) ? $default[$section][$key] : $value;
       foreach ($keys as $section => $block) {
         $text .= "[$section]\n";
         foreach ($block as $key => $value) if (strlen($value) || !$cleanup) $text .= "$key=\"$value\"\n";
       }
     } else {
-      foreach ($_POST as $key => $value) if ($key[0]!='#') $keys[$key] = $value;
+      foreach ($_POST as $key => $value) if ($key[0]!='#') $keys[$key] = isset($default[$key]) ? $default[$key] : $value;
       foreach ($keys as $key => $value) if (strlen($value) || !$cleanup) $text .= "$key=\"$value\"\n";
     }
     @mkdir(dirname($file));

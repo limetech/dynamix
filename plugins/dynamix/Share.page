@@ -12,7 +12,7 @@ Type="xmenu"
  * all copies or substantial portions of the Software.
  */
 ?>
-
+<?if ($name):?>
 <?
 $refs = array(); $n = 0;
 
@@ -37,3 +37,4 @@ $(function() {
 <?endif;?>
 });
 </script>
+<?endif;?>

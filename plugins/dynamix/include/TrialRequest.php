@@ -14,7 +14,7 @@ $var = parse_ini_file('state/var.ini');
 ?>
 <link type="text/css" rel="stylesheet" href="/webGui/styles/default-fonts.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/default-white.css">
-<script type="text/javascript" src="/webGui/scripts/dynamix.js"></script>
+<script src="/webGui/javascript/dynamix.js"></script>
 <script>
 function registerTrial(email, guid) {
   if (email.length) {

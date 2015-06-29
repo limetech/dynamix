@@ -34,7 +34,7 @@ function addDockerImageContext(image, imageTag){
 
 function execUpContainer(container){
   var title = 'Updating the container: ' + container;
-  var address = "/plugins/dynamix.docker.manager/createDocker.php?updateContainer=true&ct[]=" + encodeURIComponent(container);
+  var address = "/plugins/dynamix.docker.manager/include/CreateDocker.php?updateContainer=true&ct[]=" + encodeURIComponent(container);
   popupWithIframe(title, address, true);
 }
 
@@ -114,12 +114,12 @@ function rmContainer(containers, images){
     buttons: {
       "Just the container": function() {
         $( this ).dialog( "close" );
-        var cmd = '/plugins/dynamix.docker.manager/exec.php?cmd=' + encodeURIComponent(ctCmd);
+        var cmd = '/plugins/dynamix.docker.manager/include/Exec.php?cmd=' + encodeURIComponent(ctCmd);
         popupWithIframe(title, cmd, true);
       },
       "Container and image": function() {
         $( this ).dialog( "close" );
-        var cmd = '/plugins/dynamix.docker.manager/exec.php?cmd=' + encodeURIComponent(ctCmd + ";" + imgCmd);
+        var cmd = '/plugins/dynamix.docker.manager/include/Exec.php?cmd=' + encodeURIComponent(ctCmd + ";" + imgCmd);
         popupWithIframe(title, cmd, true);
       },
       Cancel: function() {
@@ -159,7 +159,7 @@ function updateContainer(containers){
     buttons: {
       "Just do it!": function() {
         $( this ).dialog( "close" );
-        var cmd = "/plugins/dynamix.docker.manager/createDocker.php?updateContainer=true" + ctCmd;
+        var cmd = "/plugins/dynamix.docker.manager/include/CreateDocker.php?updateContainer=true" + ctCmd;
         popupWithIframe(title, cmd, true);
       },
       Cancel: function() {
@@ -201,7 +201,7 @@ function rmImage(images, imageName){
     buttons: {
       "Just do it!": function() {
         $( this ).dialog( "close" );
-        var cmd = '/plugins/dynamix.docker.manager/exec.php?cmd=' + encodeURIComponent(imgCmd);
+        var cmd = '/plugins/dynamix.docker.manager/include/Exec.php?cmd=' + encodeURIComponent(imgCmd);
         popupWithIframe(title, cmd, true);
       },
       Cancel: function() {
@@ -224,7 +224,7 @@ function containerControl(container, action){
 
 function reloadUpdate(){
   $(".updatecolumn").html("<span style=\"color:#267CA8;white-space:nowrap;\"><i class=\"fa fa-spin fa-refresh\"></i> checking...</span>");
-  $("#cmdStartStop").val("/usr/local/emhttp/plugins/dynamix.docker.manager/dockerupdate.php");
+  $("#cmdStartStop").val("/usr/local/emhttp/plugins/dynamix.docker.manager/include/DockerUpdate.php");
   $("#formStartStop").submit();
 }
 

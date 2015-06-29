@@ -3,8 +3,8 @@ Title="Active Directory Settings"
 Cond="($var['shareSMBEnabled']=='ads')"
 ---
 <?PHP
-/* Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -46,6 +46,6 @@ AD initial owner:
 AD initial group:
 : <input type="text" name="shareInitialGroup" maxlength="40" value="<?=$var['shareInitialGroup'];?>">
 
-<input type="reset" value="Reset">
+&nbsp;
 : <input type="submit" name="changeShare" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>

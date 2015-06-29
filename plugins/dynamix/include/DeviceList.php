@@ -11,7 +11,7 @@
  */
 ?>
 <?
-require_once 'Helpers.php';
+require_once('Helpers.php');
 
 $path    = $_POST['path'];
 $width   = $_POST['width'];
@@ -36,7 +36,7 @@ function device_info($disk) {
     $href = "{$disk['device']}&file=$screen";
   }
   $action = strpos($disk['color'],'blink')===false ? "down" : "up";
-  if ($display['spin'] && $disk['rotational']==1 && $var['fsState']=='Started')
+  if ($disk['rotational']==1 && $var['fsState']=='Started')
     $ctrl = "<a href='update.htm?cmdSpin{$action}={$href}' title='Click to spin $action device' class='none' target='progressFrame' onclick=\"$.removeCookie('one',{path:'/'});\"><i class='fa fa-sort-$action spacing'></i></a>";
   else
     $ctrl = "";

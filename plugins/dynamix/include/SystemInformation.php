@@ -141,7 +141,10 @@ $memory_installed = exec("dmidecode -t 17 | awk -F: '/^\tSize: [0-9]+ MB$/{t+=$2
 // might have two or more of these.  The trick is to filter out any Flash/Bios types by matching on GB
 // Sum up all the Physical Memory Arrays to get the motherboard's total memory capacity
 $memory_maximum = exec("dmidecode -t 16 | awk -F: '/^\tMaximum Capacity: [0-9]+ GB$/{t+=$2} END{print t}'");
-echo $memory_installed . " MB (max. installable capacity ".$memory_maximum." GB)";
+$star = "";
+// If maximum < installed then roundup maximum to the next power of 2 size of installed. E.g. 6 -> 8 or 12 -> 16
+if ($memory_maximum*1024 < $memory_installed) {$memory_maximum = pow(2,ceil(log($memory_installed/1024)/log(2))); $star = "*";}
+echo "$memory_installed  MB (max. installable capacity $memory_maximum GB)".$star;
 ?>
 </div>
 <div><span style="width:90px; display:inline-block"><strong>Network:</strong></span>

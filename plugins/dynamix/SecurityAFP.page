@@ -93,7 +93,7 @@ Security:
 > Note: Private security is available only with ''Plus'' and ''Pro''
 > [registration](http://lime-technology.com/products/registration-keys).
 
-<input type="reset" value="Reset">
+&nbsp;
 : <input type="submit" name="changeShareSecurityAFP" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
 
@@ -103,7 +103,7 @@ Security:
 <div id="title" class="nocontrol"><dt>User Access</dt><i>Guests have <b>read-only</b> access.</i></div>
 <?input_secure_users($sec_afp);?>
 
-<input type="reset" value="Reset">
+&nbsp;
 : <input type="submit" name="changeShareAccessAFP" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
 
@@ -113,7 +113,7 @@ Security:
 <div id="title" class="nocontrol"><dt>User Access</dt><i>Guests have <b>no</b> access.</i></div>
 <?input_private_users($sec_afp);?>
 
-<input type="reset" value="Reset">
+&nbsp;
 : <input type="submit" name="changeShareAccessAFP" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
 <?endif;?>

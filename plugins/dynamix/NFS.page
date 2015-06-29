@@ -3,8 +3,8 @@ Title="NFS"
 Icon="linux-logo.png"
 ---
 <?PHP
-/* Copyright 2014, Lime Technology
- * Copyright 2014, Bergware International.
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License version 2,
@@ -57,6 +57,6 @@ Tunable (fuse_remember):
 > 108 bytes per file/directory name cached.  Depending how much RAM is installed in your server and how many
 > files/directories you access via NFS this may or may not lead to out-of-memory conditions.
 
-<input type="reset" value="Reset" onclick="setTimeout(checkNFSenable,0)">
+&nbsp;
 : <input type="submit" name="changeShare" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
