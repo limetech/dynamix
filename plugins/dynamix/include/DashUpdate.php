@@ -30,7 +30,7 @@ function my_usage(&$source,$used) {
   my_insert($source, $used ? "<div class='usage-disk all'><span style='width:$used'>$used</span></div>" : "-");
 }
 function my_temp($value,$unit) {
-  return ($unit=='C' ? $value : round(9/5*$value+32))." &deg;$unit";
+  return ($unit=='C' ? $value : round(9/5*$value+32))." $unit";
 }
 function my_clock($time) {
   if (!$time) return 'less than a minute';

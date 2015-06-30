@@ -24,7 +24,7 @@ function my_temp($value) {
   global $unraid;
   if ($value=='*') return ' - standby';
   $unit = $unraid['display']['unit'];
-  return ' - active '.($unit=='F' ? round(9/5*$value+32) : str_replace('.', $unraid['display']['number'][0], $value)).'°'.$unit;
+  return ' - active '.($unit=='F' ? round(9/5*$value+32) : str_replace('.', $unraid['display']['number'][0], $value)).' '.$unit;
 }
 
 function my_disk($name) {
