@@ -510,15 +510,23 @@ class DockerClient {
 		}
 		$out="$method {$url} HTTP/1.1\r\nConnection: Close\r\n\r\n";
 		fwrite($fp, $out);
-		while (!feof($fp)) {
-			$data .= fgets($fp, 5000);
+		// Strip headers out
+		while (($line = fgets($fp)) !== false) {
+			if (rtrim($line) == '') {
+				break;
+			}
+		}
+		$data = '';
+		while (($line = fgets($fp)) !== false) {
+			$data .= $line;
 		}
 		fclose($fp);
 		$data = $this->unchunk($data);
-		preg_match_all('/[^\{]*(\{.*\})/',$data, $matches);
-		$json = array();
-		foreach($matches[1] as $x){
-			$json[] = json_decode( $x, true );
+		$json = json_decode( $data, true );
+		if ($json === null) {
+			$json = array();
+		} else if (!array_key_exists(0, $json) && !empty($json)) {
+			$json = [ $json ];
 		}
 		return $json;
 	}
@@ -576,7 +584,10 @@ class DockerClient {
 
 			// echo "<pre>".print_r($details,TRUE)."</pre>";
 
-			$c["Image"]       = $obj['Image'];
+			// Docker 1.7 doesn't automatically append the tag 'latest', so we do that now if there's no tag
+			preg_match_all("/:([\w]*$)/i", $obj['Image'], $matches2);
+
+			$c["Image"]       = $obj['Image'] . (isset($matches2[1][0]) ? "" : ":latest");
 			$c["ImageId"]     = substr($details[0]["Image"],0,12);
 			$c["Name"]        = substr($details[0]['Name'], 1);
 			$c["Status"]      = $status;
