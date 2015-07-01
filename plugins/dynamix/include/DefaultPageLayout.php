@@ -192,7 +192,7 @@ for (var i=0,mobile; mobile=mobiles[i]; i++) {
  <div id="template">
   <div id="header" class="<?=$display['banner']?>">
    <div class="logo">
-   <a href="#" onclick="openBox('/webGui/include/Feedback.php','Feedback',450,450,true);"><img src="/webGui/images/limetech-logo-<?=$display['theme']?>.png" title="Feedback" border="0"/></a><br/>
+   <a href="#" onclick="openBox('/webGui/include/Feedback.php','Feedback',450,450,true);return false;"><img src="/webGui/images/limetech-logo-<?=$display['theme']?>.png" title="Feedback" border="0"/></a><br/>
    <a href="/Tools/Registration"><strong>unRAID Server <em><?=$var['regTy']?></em></strong></a>
    </div>
    <div class="block">

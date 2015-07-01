@@ -89,8 +89,8 @@
 	}
 
 ?>
-<link rel="stylesheet" href="/plugins/dynamix.vm.manager/styles/codemirrot/codemirror.css">
-<link rel="stylesheet" href="/plugins/dynamix.vm.manager/styles/codemirror/show-hint.css">
+<link rel="stylesheet" href="/plugins/dynamix.vm.manager/scripts/codemirror/lib/codemirror.css">
+<link rel="stylesheet" href="/plugins/dynamix.vm.manager/scripts/codemirror/addon/hint/show-hint.css">
 <style type="text/css">
 	.CodeMirror { border: 1px solid #eee; cursor: text; }
 	.CodeMirror pre.CodeMirror-placeholder { color: #999; }
@@ -117,13 +117,13 @@
 <? } ?>
 
 
-<script src="/plugins/dynamix.vm.manager/js/codemirror/codemirror.js"></script>
-<script src="/plugins/dynamix.vm.manager/js/codemirror/placeholder.js"></script>
-<script src="/plugins/dynamix.vm.manager/js/codemirror/foldcode.js"></script>
-<script src="/plugins/dynamix.vm.manager/js/codemirror/show-hint.js"></script>
-<script src="/plugins/dynamix.vm.manager/js/codemirror/xml-hint.js"></script>
-<script src="/plugins/dynamix.vm.manager/js/codemirror/libvirt-schema.js"></script>
-<script src="/plugins/dynamix.vm.manager/js/codemirror/xml.js"></script>
+<script src="/plugins/dynamix.vm.manager/scripts/codemirror/lib/codemirror.js"></script>
+<script src="/plugins/dynamix.vm.manager/scripts/codemirror/addon/display/placeholder.js"></script>
+<script src="/plugins/dynamix.vm.manager/scripts/codemirror/addon/fold/foldcode.js"></script>
+<script src="/plugins/dynamix.vm.manager/scripts/codemirror/addon/hint/show-hint.js"></script>
+<script src="/plugins/dynamix.vm.manager/scripts/codemirror/addon/hint/xml-hint.js"></script>
+<script src="/plugins/dynamix.vm.manager/scripts/codemirror/addon/hint/libvirt-schema.js"></script>
+<script src="/plugins/dynamix.vm.manager/scripts/codemirror/mode/xml/xml.js"></script>
 <script>
 $(function() {
 	function completeAfter(cm, pred) {

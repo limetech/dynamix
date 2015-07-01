@@ -68,8 +68,8 @@ if ($boolACSEnabled != $boolACSInSyslinux) {
 }
 ?>
 <link type="text/css" rel="stylesheet" href="/plugins/dynamix.vm.manager/styles/dynamix.vm.manager.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jqueryFileTree.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchButton.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.filetree.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.switchbutton.css">
 <style>
   body { -webkit-overflow-scrolling: touch;}
   .fileTree {
