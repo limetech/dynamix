@@ -15,7 +15,7 @@ $keyfile = trim(base64_encode(@file_get_contents($var['regFILE'])));
 ?>
 <link type="text/css" rel="stylesheet" href="/webGui/styles/default-fonts.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/default-white.css">
-<script type="text/javascript" src="/webGui/scripts/dynamix.js"></script>
+<script type="text/javascript" src="/webGui/javascript/dynamix.js"></script>
 <script>
 function checkEgg(keyfile) {
     var timestamp = <?=time()?>;
