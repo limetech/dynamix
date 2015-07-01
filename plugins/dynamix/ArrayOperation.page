@@ -131,14 +131,14 @@ $('.tabs').append("<span class='status vhshift'><input type='button' value='Refr
           <td></td>
           <td></td>
 <?        unset($time);
-          exec("awk '/sync completion/ {gsub(\"(time=|sec)\",\"\",x);print x;print \$NF};{x=\$NF}' /var/log/syslog|tail -2", $time);
+          exec("grep -A 1 -Po '(sync done. time=\K\d+|sync completion status: \K-?\d+)' /var/log/syslog|tail -2", $time);
           if (!count($time)) $time = array_fill(0,2,0);
           if ($time[1]==0):
 ?>          <td>Last checked on <strong><?=my_time($var['sbSynced']).day_count($var['sbSynced'])?></strong>, finding <strong><?=$var['sbSyncErrs']?></strong> error<?=$var['sbSyncErrs']==1?'':'s'?>.
-            <br><small>&forall; Duration: <?=my_check($time[0])?></small>
+            <br><small>Duration: <?=my_check($time[0])?></small>
 <?        else:?>
             <td>Last check incomplete on <strong><?=my_time($var['sbSynced']).day_count($var['sbSynced'])?></strong>, finding <strong><?=$var['sbSyncErrs']?></strong> error<?=$var['sbSyncErrs']==1?'':'s'?>.
-            <br><small>&forall; Error code: <?=my_error($time[1])?></small>
+            <br><small>Error code: <?=my_error($time[1])?></small>
 <?        endif;?>
           </td></tr>
 <?      endif;
