@@ -51,7 +51,7 @@ function my_temp($value) {
   return is_numeric($value) ? (($unit=='C' ? str_replace('.', $dot, $value) : round(9/5*$value+32))." $unit") : $value;
 }
 function my_disk($name) {
-  return ucfirst(preg_replace('/^(disk|cache)([0-9]+)/','$1 $2',$name));
+  return ucfirst(preg_replace(array('/^(disk|cache)([0-9]+)/','/^cache,disk/'),array('$1 $2','Cache, Disk '),$name));
 }
 function my_word($num) {
   $words = array('zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen','twenty');
