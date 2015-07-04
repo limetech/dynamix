@@ -14,18 +14,18 @@
  *   http://www.github.com/weixiyen/jquery-filedrop
  *
  * Version:  0.1.0
- * Modified by Bergware Int'l for unRAID OS 6 (June 2015)
+ * Adapted by Bergware for use in unRAID OS6 (June 2015)
  *
  * Features:
  *      Allows sending of extra parameters with file.
  *      Works with Firefox 3.6+
  *      Future-compliant with HTML5 spec (will work with Webkit browsers and IE9)
- *      Multi instances (Bergware)
  * Usage:
  *  See README at project homepage
  *
  */
 (function($) {
+  // bergware: expanded dataTransfer reading
   var hook = jQuery.event.fixHooks.drop;
   if (!hook) {
     jQuery.event.fixHooks.drop = {props:['dataTransfer']};
@@ -37,7 +37,7 @@
     refresh: 1000,
     paramname: 'userfile',
     maxfiles: 25,
-    maxfilesize: 1024, // 1MB (changed unit)
+    maxfilesize: 1024, // 1MB (bergware: changed unit from MB to KB)
     data: {},
     drop: empty,
     dragEnter: empty,
@@ -49,7 +49,7 @@
     beforeEach: empty,
     afterAll: empty,
     rename: empty,
-    error: function(err, file, i){alert(err);},
+    error: function(err, file, i) {alert(err);},
     uploadStarted: empty,
     uploadFinished: empty,
     progressUpdated: empty,
@@ -81,6 +81,7 @@
   }
 
   function getBuilder(filename, filedata) {
+    // bergware: rewrite of function to handle file transfer using standard POST request
     var builder = [];
     $.each(opts.data, function(key, val) {
       if (typeof val === 'function') val = val();
@@ -127,7 +128,7 @@
         if (beforeEach(files[i]) != false) {
           if (i === files_count) return;
           var reader = new FileReader(),
-          max_file_size = 1024 * opts.maxfilesize;
+          max_file_size = 1024 * opts.maxfilesize; // bergware: changed unit from MB to KB
           reader.index = i;
           if (files[i].size > max_file_size) {
             opts.error(errors[2], files[i], i);
@@ -135,7 +136,7 @@
             continue;
           }
           reader.onloadend = send;
-          reader.readAsDataURL(files[i]);
+          reader.readAsDataURL(files[i]); // bergware: changed binary upload to base64 upload
         } else {
           filesRejected++;
         }
@@ -147,6 +148,7 @@
     function send(e) {
       // Sometimes the index is not attached to the
       // event object. Find it by size. Hack for sure.
+      // bergware: adapted function to handle file transfer using standard POST request
       if (e.target.index == undefined) {
         e.target.index = getIndexBySize(e.total);
       }
