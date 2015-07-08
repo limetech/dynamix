@@ -2,7 +2,6 @@ UL.jqueryFileTree{font-family:arimo;font-size:11px;line-height:18px;padding:0px;
 UL.jqueryFileTree LI{	list-style:none;padding:0px;padding-left:20px;margin:0px;white-space:nowrap;}
 UL.jqueryFileTree A{color:inherit;text-decoration:none;display:inline-block;padding:0px 2px;}
 UL.jqueryFileTree A:hover{background:#BDF;}
-
 /* Core Styles */
 .jqueryFileTree LI.directory{background:url(../images/directory.png) left top no-repeat;}
 .jqueryFileTree LI.expanded{background:url(../images/folder_open.png) left top no-repeat;}
