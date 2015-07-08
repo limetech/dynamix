@@ -25,7 +25,7 @@ function sort_by($field, $opt, $show_disk) {
   $path = $docroot.preg_replace('/([\'" &()[\]\\\\])/','\\\\$1',$dir).'/*';
   $file = array(); $disk = array(); $list = array();
   $i = 0;
-  exec("stat -L -c'%F|%n|%s|%Y' $path 2>/dev/null", $file);
+  exec("shopt -s dotglob ; stat -L -c'%F|%n|%s|%Y' $path 2>/dev/null", $file);
   if ($show_disk)
     exec("getfattr --absolute-names -n user.LOCATIONS $path 2>/dev/null | awk -F'\"' '/^user.LOCATIONS/ {print $2}'", $disk);
   else
