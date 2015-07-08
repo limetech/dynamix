@@ -468,6 +468,11 @@
 							$arrUsedBootOrders[] = 1;
 						}
 
+						$readonly = '';
+						if (!empty($disk['readonly'])) {
+							$readonly = '<readonly/>';
+						}
+
 						$strDevType = @filetype(realpath($disk['image']));
 
 						if ($strDevType == 'file' || $strDevType == 'block') {
@@ -478,6 +483,7 @@
 											<source " . $strSourceType . "='" . htmlspecialchars($disk['image'], ENT_QUOTES | ENT_XML1) . "'/>
 											<target bus='" . $disk['bus'] . "' dev='" . $disk['dev'] . "'/>
 											$bootorder
+											$readonly
 										</disk>";
 						}
 					}
