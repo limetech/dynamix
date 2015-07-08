@@ -323,6 +323,19 @@
 	}
 
 
+	function getLatestMachineType($strType = 'i440fx') {
+		$arrMachineTypes = getValidMachineTypes();
+
+		foreach ($arrMachineTypes as $key => $value) {
+			if (stripos($key, $strType) !== false) {
+				return $key;
+			}
+		}
+
+		return array_shift(array_keys($arrMachineTypes));
+	}
+
+
 	function getValidDiskDrivers() {
 		$arrValidDiskDrivers = [
 			'raw' => 'raw',

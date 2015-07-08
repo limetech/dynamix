@@ -34,6 +34,8 @@ foreach ($ports as $port) {
   file_put_contents("/$diag/system/ethtool.txt", "--------------------------------\r\n", FILE_APPEND);
 }
 exec("ifconfig|todos >/$diag/system/ifconfig.txt");
+exec("find /sys/kernel/iommu_groups/ -type l|todos >/$diag/system/iommu_groups.txt");
+exec("cat /proc/cmdline >/$diag/system/cmdline.txt");
 exec("cp /boot/config/*.{cfg,conf,dat} /boot/config/go /$diag/config 2>/dev/null");
 if (is_dir("/boot/config/shares")) exec("cp /boot/config/shares/*.cfg /$diag/shares 2>/dev/null");
 $ini = "/var/local/emhttp/shares.ini";
