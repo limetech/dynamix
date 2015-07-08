@@ -172,6 +172,8 @@
 					// create folder if needed
 					if (!is_dir($strImgFolder)) {
 						mkdir($strImgFolder, 0777, true);
+						chown($strImgFolder, 'nobody');
+						chgrp($strImgFolder, 'users');
 					}
 
 					$this->set_folder_nodatacow($strImgFolder);
@@ -186,6 +188,8 @@
 					// create parent folder if needed
 					if (!is_dir($path_parts['dirname'])) {
 						mkdir($path_parts['dirname'], 0777, true);
+						chown($path_parts['dirname'], 'nobody');
+						chgrp($path_parts['dirname'], 'users');
 					}
 
 					$this->set_folder_nodatacow($path_parts['dirname']);
@@ -200,6 +204,9 @@
 					$return_value = 0;
 				} else {
 					$strLastLine = exec("qemu-img create -q -f " . escapeshellarg($disk['driver']) . " " . escapeshellarg($strImgPath) . " " . escapeshellarg($disk['size']), $output, $return_value);
+					chmod($strImgPath, 0777);
+					chown($strImgPath, 'nobody');
+					chgrp($strImgPath, 'users');
 				}
 
 				if ($return_value != 0) {
