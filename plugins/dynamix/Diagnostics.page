@@ -51,6 +51,8 @@ and configuration files are collected:
 + *System*
   <br>save output of the following commands:
   <br>lsscsi, lspci, free, ethtool & ifconfig
+  <br>display of iommu groups
+  <br>display of command line parameters (e.g. pcie acs override, pci stubbing, etc.)
 + *Array*
   <br>save disk status information about disks present in the unRAID array.
 + *SMART reports*
