@@ -62,6 +62,7 @@ table.tablesorter tbody tr:nth-child(even){background-color:#0C0C0C;}
 table.tablesorter tbody tr.tr_last{background:#181818;border-top:1px solid #202020;border-bottom:1px solid #202020;}
 table.tablesorter tbody tr.tr_last td{padding:8px 20px 8px 6px;}
 table.tablesorter tbody td{padding:4px 20px 4px 6px;vertical-align:middle;text-align:justify;}
+table.tablesorter.left tbody td{text-align:left;}
 table.tablesorter.plugins td:first-child{width:64px;text-align:center;}
 table.tablesorter.plugins tr>td+td+td{width:9%;white-space:nowrap;}
 table.tablesorter.plugins td:last-child{width:96px;padding:0;}
