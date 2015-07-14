@@ -24,6 +24,7 @@ function checkNetworkSettings() {
   form.BRIDGING.disabled = disabled;
   form.BRNAME.disabled = (form.BRIDGING.value != "yes") || disabled;
   form.BRSTP.disabled = (form.BRIDGING.value != "yes") || disabled;
+  form.BRFD.disabled = (form.BRIDGING.value != "yes") || disabled;
   form.USE_DHCP.disabled = disabled;
   form.IPADDR.disabled = (form.USE_DHCP.value == "yes") || disabled;
   form.NETMASK.disabled = (form.USE_DHCP.value == "yes") || disabled;
@@ -93,7 +94,7 @@ Bridge name:
 
 > This is the name of the bridge interface.  If left blank, the name of the bridge will be **br0**.
 
-Enable STP:
+Bridge enable STP:
 : <select name="BRSTP" size="1" onchange="checkNetworkSettings()">
   <?=mk_option($var['BRSTP'], "yes", "Yes");?>
   <?=mk_option($var['BRSTP'], "no", "No");?>
@@ -102,6 +103,18 @@ Enable STP:
 > STP (Spanning Tree Protocol) prevents loops in multi-NIC bridges.  This is enabled by default but
 > can cause delays upon network setup; in most configurations it would be safe to disable.  If unsure
 > however, leave this set to **Yes**.
+
+Bridge forward delay:
+: <input type="text" name="BRFD" maxlength="10" value="<?=$var['BRFD']?>" class="narrow">
+
+> Defines the bridge **forward delay** in seconds.
+>
+> Forwarding delay time is the time spent in each of the Listening and Learning states before the
+> Forwarding state is entered. This delay is so that when a new bridge comes onto a busy network it
+> looks at some traffic before participating.
+>
+> If the bridge is being used standalone (no other bridges near by), then it is safe to turn the
+> forwarding delay off (set it to zero), before adding interface to a bridge.
 
 Obtain IP address automatically:
 : <select name="USE_DHCP" size="1" onchange="checkNetworkSettings()">
