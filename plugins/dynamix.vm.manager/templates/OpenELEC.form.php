@@ -387,11 +387,13 @@
 		font-size: 1.1em;
 	}
 	#openelec_image {
-		color: #777;
+		color: #BBB;
+		display: none;
 	}
 	.delete_openelec_image {
 		cursor: pointer;
 		margin-left: 4px;
+		margin-right: 4px;
 		color: #CC0011;
 		font-size: 1.1em;
 	}
@@ -418,7 +420,7 @@
 					echo mk_option($arrConfig['template']['openelec'], $strOEVersion, $arrOEVersion['name'], 'localpath="' . $arrOEVersion['localpath'] . '" localfolder="' . $strLocalFolder . '" valid="' . $arrOEVersion['valid'] . '"');
 				}
 			?>
-			</select> <span id="openelec_image" class="installed"></span> <i class="fa fa-trash delete_openelec_image installed" title="Remove OpenELEC image"></i>
+			</select> <i class="fa fa-trash delete_openelec_image installed" title="Remove OpenELEC image"></i> <span id="openelec_image" class="installed"></span>
 		</td>
 	</tr>
 </table>
@@ -1015,6 +1017,10 @@ $(function() {
 							$("#template_openelec").change();
 						}, "json");
 					}
+				}).hover(function () {
+					$("#openelec_image").css('color', '#666');
+				}, function () {
+					$("#openelec_image").css('color', '#BBB');
 				});
 			});
 			$("#form_content #disk_0").val($selected.attr('localpath'));
