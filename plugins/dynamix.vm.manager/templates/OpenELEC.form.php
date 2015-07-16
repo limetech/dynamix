@@ -434,7 +434,7 @@
 		<tr>
 			<td>Download Folder:</td>
 			<td>
-				<input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/" value="" id="download_path" placeholder="e.g. /mnt/user/domain/" title="Folder to save the OpenELEC image to" />
+				<input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/" value="" id="download_path" placeholder="e.g. /mnt/user/domains/" title="Folder to save the OpenELEC image to" />
 			</td>
 		</tr>
 	</table>
