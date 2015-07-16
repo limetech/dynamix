@@ -286,7 +286,7 @@
 		'usb' => [],
 		'shares' => [
 			[
-				'source' => '',
+				'source' => (is_dir('/mnt/user/appdata') ? '/mnt/user/appdata/OpenELEC/' : ''),
 				'target' => 'appconfig'
 			]
 		]
