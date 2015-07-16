@@ -934,8 +934,10 @@ $(function() {
 					return;
 				}
 
-				$("#template_openelec").find('option:selected').attr('localpath', data.localpath);
-				$("#template_openelec").find('option:selected').attr('valid', '1');
+				$("#template_openelec").find('option:selected').attr({
+					localpath: data.localpath,
+					valid: '1'
+				});
 				$("#template_openelec").change();
 			}
 
@@ -958,8 +960,9 @@ $(function() {
 			}
 		} else {
 			$(".available").slideUp('fast');
-			$(".installed").slideDown('fast');
-			$("#form_content .domain_vcpu").change(); // restore the cpu checkbox disabled states
+			$(".installed").slideDown('fast', function () {
+				$("#form_content .domain_vcpu").change(); // restore the cpu checkbox disabled states
+			});
 			$("#form_content #disk_0").val($(this).find('option:selected').attr('localpath'));
 		}
 	}).change(); // Fire now too!
