@@ -117,6 +117,7 @@
 					// Status = done
 					$arrResponse['status'] = 'Done';
 					$arrResponse['localpath'] = $strExtractedFile;
+					$arrResponse['localfolder'] = dirname($strExtractedFile);
 
 				} else {
 					if (pgrep($strExtractPgrep)) {
@@ -374,7 +375,7 @@
 			<?php
 				foreach ($arrOpenELECVersions as $strOEVersion => $arrOEVersion) {
 					$strLocalFolder = ($arrOEVersion['localpath'] == '' ? '' : dirname($arrOEVersion['localpath']));
-					echo mk_option($arrConfig['template']['openelec'], $strOEVersion, $arrOEVersion['name'], 'localpath="' . $strLocalFolder . '" valid="' . $arrOEVersion['valid'] . '"');
+					echo mk_option($arrConfig['template']['openelec'], $strOEVersion, $arrOEVersion['name'], 'localpath="' . $arrOEVersion['localpath'] . '" localfolder="' . $strLocalFolder . '" valid="' . $arrOEVersion['valid'] . '"');
 				}
 			?>
 			</select>
@@ -936,6 +937,7 @@ $(function() {
 
 				$("#template_openelec").find('option:selected').attr({
 					localpath: data.localpath,
+					localfolder:  data.localfolder,
 					valid: '1'
 				});
 				$("#template_openelec").change();
@@ -953,8 +955,8 @@ $(function() {
 			$(".available").slideDown('fast');
 			$(".installed").slideUp('fast');
 			$("#download_status").html('');
-			$("#download_path").val($(this).find('option:selected').attr('localpath'));
-			if ($(this).find('option:selected').attr('localpath') !== '') {
+			$("#download_path").val($(this).find('option:selected').attr('localfolder'));
+			if ($(this).find('option:selected').attr('localfolder') !== '') {
 				// auto click download button to see status of current running job
 				$("#btnDownload").click();
 			}
