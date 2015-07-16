@@ -158,6 +158,10 @@ if ($action) {
     $mem = number_format($mem, 0);
    	$vcpu = $dom['nrVirtCpu'];
 		$auto = $is_autostart ? 'checked="checked"':"";
+    $template = $lv->_get_single_xpath_result($res, '//domain/metadata/vmtemplate/@name');
+    if (empty($template)) {
+      $template = 'Custom';
+    }
     $log = (is_file('/var/log/libvirt/qemu/' . $name . '.log') ? '/var/log/libvirt/qemu/' . $name . '.log' : '');
       if (($diskcnt = $lv->get_disk_count($res)) > 0) {
         	$disks = $diskcnt.' / '.$lv->get_disk_capacity($res);
@@ -184,7 +188,7 @@ if ($action) {
         	$id = '-';
       unset($dom);
 
-      $contextMenus[] = sprintf("addVMContext('%s', '%s', '%s', '%s', '%s');", addslashes($name), addslashes($uuid), $state, addslashes($vnc), addslashes($log));
+      $contextMenus[] = sprintf("addVMContext('%s', '%s', '%s', '%s', '%s', '%s');", addslashes($name), addslashes($uuid), addslashes($template), $state, addslashes($vnc), addslashes($log));
 
       // fallback icon for users that created VMs before metadata support was added
       $vmicon = '/plugins/dynamix.vm.manager/templates/images/' . ($lv->domain_get_clock_offset($res) == 'localtime' ? 'windows.png' : 'linux.png');
@@ -507,7 +511,7 @@ function ajaxVMDispatch(currentstate, params){
   }, "json");
 }
 
-function addVMContext(name, uuid, state, vncurl, log){
+function addVMContext(name, uuid, template, state, vncurl, log){
   var opts = [{header: name, image: "/plugins/dynamix.vm.manager/images/dynamix.vm.manager.png"}];
 
   var path = location.pathname;
@@ -596,12 +600,14 @@ function addVMContext(name, uuid, state, vncurl, log){
       }
     }});
 
-    opts.push({text: "Remove VM + Disks", icon: "fa-trash", action: function(e) {
-      e.preventDefault();
-      if (confirm('Completely REMOVE ' + name + ' disk image and definition?')) {
-        ajaxVMDispatch(state, { action: "domain-delete", uuid: uuid });
-      }
-    }});
+    if (template != 'OpenELEC') {
+      opts.push({text: "Remove VM + Disks", icon: "fa-trash", action: function(e) {
+        e.preventDefault();
+        if (confirm('Completely REMOVE ' + name + ' disk image and definition?')) {
+          ajaxVMDispatch(state, { action: "domain-delete", uuid: uuid });
+        }
+      }});
+    }
 
   } else {
 

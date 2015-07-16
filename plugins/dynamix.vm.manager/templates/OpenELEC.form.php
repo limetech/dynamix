@@ -56,6 +56,37 @@
 		}
 	}
 
+	if (array_key_exists('delete_version', $_POST)) {
+
+		//DEBUG
+		file_put_contents('/tmp/debug_libvirt_postparams.txt', print_r($_POST, true));
+
+		$arrDeleteOpenELEC = [];
+		if (array_key_exists($_POST['delete_version'], $arrOpenELECVersions)) {
+			$arrDeleteOpenELEC = $arrOpenELECVersions[$_POST['delete_version']];
+		}
+
+		$arrResponse = [];
+
+		if (empty($arrDeleteOpenELEC)) {
+			$arrResponse = ['error' => 'Unknown version: ' . $_POST['delete_version']];
+		} else {
+			// delete img file
+			@unlink($arrDeleteOpenELEC['localpath']);
+
+			// Save to strOpenELECConfig
+			unset($arrOpenELECConfig[$_POST['delete_version']]);
+			$text = '';
+			foreach ($arrOpenELECConfig as $key => $value) $text .= "$key=\"$value\"\n";
+			file_put_contents($strOpenELECConfig, $text);
+
+			$arrResponse = ['status' => 'ok'];
+		}
+
+		echo json_encode($arrResponse);
+		exit;
+	}
+
 	if (array_key_exists('download_path', $_POST)) {
 
 		//DEBUG
@@ -117,6 +148,7 @@
 					// Status = done
 					$arrResponse['status'] = 'Done';
 					$arrResponse['localpath'] = $strExtractedFile;
+					$arrResponse['localfolder'] = dirname($strExtractedFile);
 
 				} else {
 					if (pgrep($strExtractPgrep)) {
@@ -254,7 +286,7 @@
 		'usb' => [],
 		'shares' => [
 			[
-				'source' => '',
+				'source' => (is_dir('/mnt/user/appdata') ? '/mnt/user/appdata/OpenELEC/' : ''),
 				'target' => 'appconfig'
 			]
 		]
@@ -354,6 +386,17 @@
 		color: #08C;
 		font-size: 1.1em;
 	}
+	#openelec_image {
+		color: #BBB;
+		display: none;
+	}
+	.delete_openelec_image {
+		cursor: pointer;
+		margin-left: 4px;
+		margin-right: 4px;
+		color: #CC0011;
+		font-size: 1.1em;
+	}
 </style>
 
 <input type="hidden" name="domain[persistent]" value="<?=$arrConfig['domain']['persistent']?>">
@@ -374,17 +417,15 @@
 			<?php
 				foreach ($arrOpenELECVersions as $strOEVersion => $arrOEVersion) {
 					$strLocalFolder = ($arrOEVersion['localpath'] == '' ? '' : dirname($arrOEVersion['localpath']));
-					echo mk_option($arrConfig['template']['openelec'], $strOEVersion, $arrOEVersion['name'], 'localpath="' . $strLocalFolder . '" valid="' . $arrOEVersion['valid'] . '"');
+					echo mk_option($arrConfig['template']['openelec'], $strOEVersion, $arrOEVersion['name'], 'localpath="' . $arrOEVersion['localpath'] . '" localfolder="' . $strLocalFolder . '" valid="' . $arrOEVersion['valid'] . '"');
 				}
 			?>
-			</select>
+			</select> <i class="fa fa-trash delete_openelec_image installed" title="Remove OpenELEC image"></i> <span id="openelec_image" class="installed"></span>
 		</td>
 	</tr>
 </table>
 <blockquote class="inline_help">
-	<p>
-		TODO
-	</p>
+	<p>Select which OpenELEC version to download or use for this VM</p>
 </blockquote>
 
 
@@ -393,14 +434,12 @@
 		<tr>
 			<td>Download Folder:</td>
 			<td>
-				<input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/" value="" id="download_path" placeholder="e.g. /mnt/user/domain/" title="Folder on save the OpenELEC image to" />
+				<input type="text" data-pickfolders="true" data-pickfilter="NO_FILES_FILTER" data-pickroot="/mnt/" value="" id="download_path" placeholder="e.g. /mnt/user/domains/" title="Folder to save the OpenELEC image to" />
 			</td>
 		</tr>
 	</table>
 	<blockquote class="inline_help">
-		<p>
-			TODO
-		</p>
+		<p>Choose a folder where the OpenELEC image will downloaded to</p>
 	</blockquote>
 
 	<table>
@@ -427,9 +466,7 @@
 		</tr>
 	</table>
 	<blockquote class="inline_help">
-		<p>
-			TODO
-		</p>
+		<p>Choose a folder or type in a new name off of an existing folder to specify where OpenELEC will save configuration files.  If you create multiple OpenELEC VMs, these Config Folders must be unique for each instance.</p>
 	</blockquote>
 
 	<table>
@@ -916,7 +953,6 @@ $(function() {
 		$button.val($button.attr('busyvalue'));
 
 		$.post("/plugins/dynamix.vm.manager/templates/<?=basename(__FILE__)?>", postdata, function( data ) {
-			//console.debug(data);
 			if (data.error) {
 				$("#download_status").html($("#download_status").html() + '<br><span style="color: red">' + data.error + '</span>');
 			} else {
@@ -934,8 +970,11 @@ $(function() {
 					return;
 				}
 
-				$("#template_openelec").find('option:selected').attr('localpath', data.localpath);
-				$("#template_openelec").find('option:selected').attr('valid', '1');
+				$("#template_openelec").find('option:selected').attr({
+					localpath: data.localpath,
+					localfolder:  data.localfolder,
+					valid: '1'
+				});
 				$("#template_openelec").change();
 			}
 
@@ -947,20 +986,45 @@ $(function() {
 
 	// Fire events below once upon showing page
 	$("#template_openelec").change(function changeOpenELECVersion() {
-		if ($(this).find('option:selected').attr('valid') === '0') {
+		$selected = $(this).find('option:selected');
+
+		if ($selected.attr('valid') === '0') {
 			$(".available").slideDown('fast');
 			$(".installed").slideUp('fast');
 			$("#download_status").html('');
-			$("#download_path").val($(this).find('option:selected').attr('localpath'));
-			if ($(this).find('option:selected').attr('localpath') !== '') {
+			$("#download_path").val($selected.attr('localfolder'));
+			if ($selected.attr('localpath') !== '') {
 				// auto click download button to see status of current running job
 				$("#btnDownload").click();
 			}
 		} else {
 			$(".available").slideUp('fast');
-			$(".installed").slideDown('fast');
-			$("#form_content .domain_vcpu").change(); // restore the cpu checkbox disabled states
-			$("#form_content #disk_0").val($(this).find('option:selected').attr('localpath'));
+			$(".installed").slideDown('fast', function () {
+				$("#form_content .domain_vcpu").change(); // restore the cpu checkbox disabled states
+
+				// attach delete openelec image onclick event
+				$("#form_content .delete_openelec_image").off().click(function deleteOEVersion() {
+					if (confirm("Are you sure you want to remove this OpenELEC image file?")) {
+						$.post("/plugins/dynamix.vm.manager/templates/<?=basename(__FILE__)?>", {delete_version: $selected.val()}, function( data ) {
+							if (data.error) {
+								alert("Error deleting VM image: " + data.error);
+							} else if (data.status == 'ok') {
+								$selected.attr({
+									localpath: '',
+									valid: '0'
+								});
+							}
+							$("#template_openelec").change();
+						}, "json");
+					}
+				}).hover(function () {
+					$("#openelec_image").css('color', '#666');
+				}, function () {
+					$("#openelec_image").css('color', '#BBB');
+				});
+			});
+			$("#form_content #disk_0").val($selected.attr('localpath'));
+			$("#form_content #openelec_image").html($selected.attr('localpath'));
 		}
 	}).change(); // Fire now too!
 
