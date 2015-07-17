@@ -227,7 +227,7 @@ Excluded disk(s):
 
 > Specify the disks which can *not* be used by the share. By default no disks are excluded.
 
-<?if ($var['cacheActive']=="yes"):?>
+<?if (isset($disks['cache'])&&($disks['cache']['status']!='DISK_NP')&&($var['shareCacheEnabled']=='yes')):?>
 
 Use cache disk:
 : <select name="shareUseCache" size="1" onchange="setDiskList(this.value)">

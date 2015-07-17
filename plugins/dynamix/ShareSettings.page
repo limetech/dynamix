@@ -59,6 +59,20 @@ function presetShare(form) {
 }
 </script>
 <form markdown="1" name="share_settings" method="POST" action="/update.htm" target="progressFrame" onsubmit="prepareShare(this)">
+
+Enable disk shares:
+: <select name="shareDisk" size="1" onchange="presetShare(this.form)" <?=$disabled?>>
+  <?=mk_option($var['shareDisk'], "no", "No")?>
+  <?=mk_option($var['shareDisk'], "yes", "Yes")?>
+  <?=mk_option($var['shareDisk'], "auto", "Auto")?>
+  </select>
+
+> If set to No, disk shares are unconditionally not exported.
+>
+> If set to Yes, disk shares may be exported.
+>
+> If set to Auto, only disk shares not partiticapting in User Shares may be exported.
+
 Enable user shares:
 : <select name="shareUser" size="1" onchange="presetShare(this.form)" <?=$disabled?>>
   <?=mk_option($var['shareUser'], "e", "Yes")?>
@@ -98,4 +112,5 @@ Excluded disk(s):
 
 &nbsp;
 : <input type="submit" name="changeShare" value="Apply" <?=$disabled?>><input type="button" value="Done" onclick="done()"><?if ($disabled):?>Array must be **Stopped** to change<?endif;?>
+
 </form>

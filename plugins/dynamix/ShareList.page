@@ -80,6 +80,9 @@ endforeach;
 ?>
 </tbody>
 </table>
+<?if (!count($shares)):?>
+<div style="font-style:italic;font-size:14px;opacity:0.5;padding:5px;">There are no user shares</div>
+<?endif;?>
 <form method="GET" action="<?=$path?>/Share">
 <input type="hidden" name="name" value="">
 <?if ($var['startMode']=='Normal'):?>
