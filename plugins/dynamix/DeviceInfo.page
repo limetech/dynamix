@@ -210,11 +210,16 @@ Spinup group(s):
 <?if ($name=="cache" && $var['SYS_CACHE_SLOTS']>1):?>
 
 <div id="title" class="nocontrol"><span class="left"><img src="/plugins/dynamix/icons/poolinformation.png" class="icon">Pool Information</span></div>
-&nbsp;
+
+btrfs filesystem show
 : <?echo "<pre>".shell_exec("/sbin/btrfs filesystem show {$disk['uuid']}")."</pre>";?>
 
-> This is the output of *btrfs filesystem show /mnt/cache*.
+<?if ($disk['fsStatus']=="Mounted"):?>
 
+btrfs filesystem df
+: <?echo "<pre>".shell_exec("/sbin/btrfs filesystem df /mnt/{$disk['name']}")."</pre>";?>
+
+<?endif;?>
 <?if ($var['cacheSbNumDisks']>1):?>
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
 <?if ($disk['fsStatus']=="Mounted"):?>
