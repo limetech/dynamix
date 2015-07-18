@@ -74,16 +74,13 @@ function device_browse($disk) {
 }
 function device_desc($disk) {
   global $var;
-  $out = "{$disk['id']} ({$disk['device']})";
-  if ($var['fsState']=='Stopped') {
-    $out .= " - " . my_scale($disk['size']*1024, $unit) . " " . $unit;
-  }
-  return $out;
+  $size = my_scale($disk['size']*1024, $unit);
+  return "{$disk['id']} - $size $unit ({$disk['device']})";
 }
 function assignment($disk) {
   global $var, $devs, $screen;
   $out = "<form method='POST' name=\"{$disk['name']}Form\" action='/update.htm' target='progressFrame'><input type='hidden' name='changeDevice' value='Apply'>";
-  $out .= "<select name=\"slotId.{$disk['idx']}\" onChange=\"{$disk['name']}Form.submit()\">";
+  $out .= "<select style=\"max-width:none\" name=\"slotId.{$disk['idx']}\" onChange=\"{$disk['name']}Form.submit()\">";
   $empty = ($disk['idSb']!="" ? "no device" : "unassigned");
   if ($disk['id']!=""):
     $out .= "<option value=\"{$disk['id']}\" selected>".device_desc($disk)."</option>";
@@ -101,13 +98,15 @@ function assignment($disk) {
 function render_used_and_free($disk) {
   global $display;
   if ($disk['name']=='parity' || $disk['fsStatus']=='-') {
-    echo "<td>-</td><td>-</td>";
+    echo "<td></td><td></td><td></td><td></td>";
   } else if ($disk['fsStatus']=='Mounted') {
+    echo "<td>{$disk['fsType']}</td>";
+    echo "<td>".my_scale($disk['fsSize']*1024, $unit)." $unit</td>";
     if (!$display['text']) {
       echo "<td>".my_scale($disk['fsUsed']*1024, $unit)." $unit</td>";
       echo "<td>".my_scale($disk['fsFree']*1024, $unit)." $unit</td>";
     } else {
-      $free = round(100*$disk['fsFree']/$disk['size']);
+      $free = round(100*$disk['fsFree']/$disk['fsSize']);
       $used = 100-$free;
       echo "<td><div class='usage-disk'><span style='margin:0;width:{$used}%' class='".usage_color($used,false)."'><span>".my_scale($disk['fsUsed']*1024, $unit)." $unit</span></span></div></td>";
       echo "<td><div class='usage-disk'><span style='margin:0;width:{$free}%' class='".usage_color($free,true)."'><span>".my_scale($disk['fsFree']*1024, $unit)." $unit</span></span></div></td>";
@@ -120,132 +119,32 @@ function array_offline($disk) {
   echo "<tr>";
   switch ($disk['status']) {
   case "DISK_NP":
+  case "DISK_OK_NP":
+  case "DISK_NP_DSBL":
     echo "<td>".device_info($disk)."</td>";
-    echo "<td colspan='9'>".assignment($disk)."</td>";
-    echo "<td></td>";
+    echo "<td>".assignment($disk)."</td>";
+    echo "<td colspan='9'></td>";
   break;
   case "DISK_OK":
-    echo "<td>".device_info($disk)."</td>";
-    echo "<td>".assignment($disk)."</td>";
-    echo "<td>".my_temp($disk['temp'])."</td>";
-    echo "<td>".my_scale($disk['sizeSb']*1024, $unit)." $unit</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>{$disk['fsType']}</td>";
-    echo "<td>".($disk['name']!='parity' ? "<img src='/webGui/images/noview.png'>" : "")."</td>";
-  break;
-  case "DISK_OK_NP":
-    echo "<td>".device_info($disk)."</td>";
-    echo "<td>".assignment($disk)."</td>";
-    echo "<td></td>";
-    echo "<td></td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td></td>";
-    echo "<td></td>";
-    echo "<td></td>";
-    echo "<td>{$disk['fsType']}</td>";
-    echo "<td></td>";
-  break;
   case "DISK_INVALID":
-    echo "<td>".device_info($disk)."</td>";
-    echo "<td>".assignment($disk)."</td>";
-    echo "<td>".my_temp($disk['temp'])."</td>";
-    echo "<td>".my_scale($disk['sizeSb']*1024, $unit)." $unit</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>{$disk['fsType']}</td>";
-    echo "<td></td>";
-  break;
   case "DISK_DSBL":
-    echo "<td>".device_info($disk)."</td>";
-    echo "<td>".assignment($disk)."</td>";
-    echo "<td>".my_temp($disk['temp'])."</td>";
-    echo "<td>".my_scale($disk['sizeSb']*1024, $unit)." $unit</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>{$disk['fsType']}</td>";
-    echo "<td></td>";
-  break;
-  case "DISK_NP_DSBL":
-  if ($disk['name']=="parity") {
-    echo "<td>".device_info($disk)."</td>";
-    echo "<td colspan='8'>".assignment($disk)."</td>";
-    echo "<td></td>";
-  } else {
-    echo "<td>".device_info($disk)."<span class='diskinfo'><em>Not installed</em></span></td>";
-    echo "<td>".assignment($disk)."<em>{$disk['idSb']}</em></td>";
-    echo "<td>-</td>";
-    echo "<td><em>".my_scale($disk['sizeSb']*1024, $unit)." $unit</em></td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>{$disk['fsType']}</td>";
-    echo "<td></td>";
-  }
-  break;
   case "DISK_DSBL_NEW":
-    echo "<td>".device_info($disk)."</td>";
-    echo "<td>".assignment($disk)."</td>";
-    echo "<td>".my_temp($disk['temp'])."</td>";
-    echo "<td>".my_scale($disk['sizeSb']*1024, $unit)." $unit</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>{$disk['fsType']}</td>";
-    echo "<td></td>";
-  break;
-  case "DISK_NP_MISSING":
-    echo "<td>".device_info($disk)."<span class='diskinfo'><em>Missing</em></span></td>";
-    echo "<td>".assignment($disk)."<em>{$disk['idSb']}</em></td>";
-    echo "<td>-</td>";
-    echo "<td><em>".my_scale($disk['sizeSb']*1024, $unit)." $unit</em></td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>{$disk['fsType']}</td>";
-    echo "<td></td>";
-  break;
-  case "DISK_WRONG":
-    echo "<td>".device_info($disk)."<span class='diskinfo'><em>Wrong</em></span></td>";
-    echo "<td>".assignment($disk)."<em>{$disk['idSb']}</em></td>";
-    echo "<td>".my_temp($disk['temp'])."</td>";
-    echo "<td>".my_scale($disk['size']*1024, $unit)." $unit<br><em>".my_scale($disk['sizeSb']*1024, $unit)." $unit</em></td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>{$disk['fsType']}</td>";
-    echo "<td></td>";
-  break;
   case "DISK_NEW":
     echo "<td>".device_info($disk)."</td>";
     echo "<td>".assignment($disk)."</td>";
     echo "<td>".my_temp($disk['temp'])."</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>{$disk['fsType']}</td>";
-    echo "<td></td>";
+    echo "<td colspan='8'></td>";
+  break;
+  case "DISK_NP_MISSING":
+    echo "<td>".device_info($disk)."<span class='diskinfo'><em>Missing</em></span></td>";
+    echo "<td>".assignment($disk)."<em>{$disk['idSb']} - ".my_scale($disk['sizeSb']*1024, $unit)." $unit</em></td>";
+    echo "<td colspan='9'></td>";
+  break;
+  case "DISK_WRONG":
+    echo "<td>".device_info($disk)."<span class='diskinfo'><em>Wrong</em></span></td>";
+    echo "<td>".assignment($disk)."<em>{$disk['idSb']} - ".my_scale($disk['sizeSb']*1024, $unit)." $unit</em></td>";
+    echo "<td>".my_temp($disk['temp'])."</td>";
+    echo "<td colspan='8'></td>";
   break;
   }
   echo "</tr>";
@@ -261,7 +160,7 @@ function array_online($disk) {
   $errors += $disk['numErrors'];
   if (isset($disk['fsFree']) && $disk['name']!='parity') {
     $disk['fsUsed'] = $disk['fsSize'] - $disk['fsFree'];
-    $tot_size += $disk['size'];
+    $tot_size += $disk['fsSize'];
     $tot_free += $disk['fsFree'];
     $tot_used += $disk['fsUsed'];
   }
@@ -269,6 +168,7 @@ function array_online($disk) {
   switch ($disk['status']) {
   case "DISK_NP":
 // Suppress empty slots to keep device list short
+// (This actually should be configurable)
 //    echo "<td>".device_info($disk)."</td>";
 //    echo "<td colspan='9'>Not installed</td>";
 //    echo "<td></td>";
@@ -276,29 +176,33 @@ function array_online($disk) {
   case "DISK_OK_NP":
     echo "<td>".device_info($disk)."</td>";
     echo "<td>Not Installed</td>";
-    echo "<td></td>";
-    echo "<td></td>";
+    echo "<td colspan='4'></td>";
     render_used_and_free($disk);
-    echo "<td></td>";
-    echo "<td></td>";
-    echo "<td></td>";
-    echo "<td>{$disk['fsType']}</td>";
     echo "<td>".device_browse($disk)."</td>";
   break;
   case "DISK_NP_DSBL":
     echo "<td>".device_info($disk)."</td>";
   if ($disk['name']=="parity") {
-    echo "<td colspan='9'>Not installed</td>";
-    echo "<td></td>";
+    echo "<td>Not installed</td>";
+    echo "<td colspan='9'></td>";
   } else {
     echo "<td><em>Not installed</em></td>";
-    echo "<td>-</td>";
-    echo "<td><em>".my_scale($disk['sizeSb']*1024, $unit)." $unit</em></td>";
+    echo "<td colspan='4'></td>";
     render_used_and_free($disk);
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>".($disk['name']=="parity" ? "-" : $disk['fsType'])."</td>";
+    echo "<td>".device_browse($disk)."</td>";
+  }
+  break;
+  case "DISK_DSBL":
+    echo "<td>".device_info($disk)."</td>";
+    echo "<td>".device_desc($disk)."</td>";
+    echo "<td>".my_temp($disk['temp'])."</td>";
+    echo "<td>".my_number($disk['numReads'])."</td>";
+    echo "<td>".my_number($disk['numWrites'])."</td>";
+    echo "<td>".my_number($disk['numErrors'])."</td>";
+  if ($disk['name']=="parity") {
+    echo "<td colspan='5'></td>";
+  } else {
+    render_used_and_free($disk);
     echo "<td>".device_browse($disk)."</td>";
   }
   break;
@@ -306,12 +210,10 @@ function array_online($disk) {
     echo "<td>".device_info($disk)."</td>";
     echo "<td>".device_desc($disk)."</td>";
     echo "<td>".my_temp($disk['temp'])."</td>";
-    echo "<td>".my_scale($disk['sizeSb']*1024, $unit)." $unit</td>";
-    render_used_and_free($disk);
     echo "<td>".my_number($disk['numReads'])."</td>";
     echo "<td>".my_number($disk['numWrites'])."</td>";
     echo "<td>".my_number($disk['numErrors'])."</td>";
-    echo "<td>".($disk['name']=="parity" ? "-" : $disk['fsType'])."</td>";
+    render_used_and_free($disk);
     echo "<td>".device_browse($disk)."</td>";
   break;
   }
@@ -327,8 +229,8 @@ function my_clock($time) {
 function read_disk($device, $item) {
   global $var;
   $smart = "/var/local/emhttp/smart/$device";
-  if (!file_exists($smart) || (time()-filemtime($smart)>=$var['poll_attributes'])) exec("smartctl -A /dev/$device > $smart");
-  $temp = exec("awk '/Temperature/{print \$10}' $smart");
+  if (!file_exists($smart) || (time()-filemtime($smart)>=$var['poll_attributes'])) exec("smartctl -n standby -A /dev/$device > $smart");
+  $temp = exec("awk '/Temperature/{print \$10;exit}' $smart");
   switch ($item) {
     case 'color': return $temp ? 'blue-on' : 'blue-blink';
     case 'temp' : return $temp ? $temp : '*';
@@ -340,7 +242,11 @@ function show_totals($text) {
   echo "<td><img src='/webGui/images/sum.png' class='icon'>Total</td>";
   echo "<td>$text</td>";
   echo "<td>".($counts>0?my_temp(round($temps/$counts, 1)):'*')."</td>";
-  if ($var['startMode'] == "Normal") {
+  echo "<td>".my_number($reads)."</td>";
+  echo "<td>".my_number($writes)."</td>";
+  echo "<td>".my_number($errors)."</td>";
+  echo "<td></td>";
+  if (strstr($text,"Array") && ($var['startMode'] == "Normal")) {
     echo "<td>".my_scale($tot_size*1024, $unit)." $unit</td>";
     if (!$display['text']) {
       echo "<td>".my_scale($tot_used*1024, $unit)." $unit</td>";
@@ -350,17 +256,11 @@ function show_totals($text) {
       $used = 100-$free;
       echo "<td><div class='usage-disk'><span style='margin:0;width:{$used}%' class='".usage_color($used,false)."'><span>".my_scale($tot_used*1024, $unit)." $unit</span></span></div></td>";
       echo "<td><div class='usage-disk'><span style='margin:0;width:{$free}%' class='".usage_color($free,true)."'><span>".my_scale($tot_free*1024, $unit)." $unit</span></span></div></td>";
+      echo "<td></td>";
     }
-  } else {
-    echo "<td>-</td>";
-    echo "<td>-</td>";
-    echo "<td>-</td>";
   }
-  echo "<td>".my_number($reads)."</td>";
-  echo "<td>".my_number($writes)."</td>";
-  echo "<td>".my_number($errors)."</td>";
-  echo "<td></td>";
-  echo "<td></td>";
+  else
+    echo "<td colspan=4></td>";
   echo "</tr>";
 }
 function array_slots() {
@@ -411,6 +311,10 @@ case 'flash':
   echo "<td>".device_info($disk)."</td>";
   echo "<td>".device_desc($disk)."</td>";
   echo "<td>*</td>";
+  echo "<td>".$disk['numReads']."</td>";
+  echo "<td>".$disk['numWrites']."</td>";
+  echo "<td>".$disk['numErrors']."</td>";
+  echo "<td>{$disk['fsType']}</td>";
   echo "<td>".my_scale($disk['size']*1024, $unit)." $unit</td>";
   if (!$display['text']) {
     echo "<td>".my_scale($disk['fsUsed']*1024, $unit)." $unit</td>";
@@ -421,10 +325,6 @@ case 'flash':
     echo "<td><div class='usage-disk'><span style='margin:0;width:{$used}%' class='".usage_color($used,false)."'><span>".my_scale($disk['fsUsed']*1024, $unit)." $unit</span></span></div></td>";
     echo "<td><div class='usage-disk'><span style='margin:0;width:{$free}%' class='".usage_color($free,true)."'><span>".my_scale($disk['fsFree']*1024, $unit)." $unit</span></span></div></td>";
   }
-  echo "<td>".$disk['numReads']."</td>";
-  echo "<td>".$disk['numWrites']."</td>";
-  echo "<td>".$disk['numErrors']."</td>";
-  echo "<td>{$disk['fsType']}</td>";
   echo "<td>".device_browse($disk)."</td>";
   echo "</tr>";
 break;
@@ -449,13 +349,12 @@ case 'open':
     echo "<td>".device_info($dev)."</td>";
     echo "<td>".device_desc($dev)."</td>";
     echo "<td>".my_temp($dev['temp'])."</td>";
-    echo "<td>".my_scale($dev['size']*1024, $unit)." $unit</td>";
     if (file_exists("/tmp/preclear_stat_{$dev['device']}")) {
       $text = exec("cut -d'|' -f3 /tmp/preclear_stat_{$dev['device']} | sed 's:\^n:\<br\>:g'");
       if (strpos($text,'Total time')===false) $text = 'Preclear in progress... '.$text;
-      echo "<td colspan='6' style='text-align:right'><em>$text</em></td><td></td>";
+      echo "<td colspan='8' style='text-align:right'><em>$text</em></td>";
     } else
-      echo "<td colspan='6'></td><td></td>";
+      echo "<td colspan='8'></td>";
     echo "</tr>";
   }
 break;
