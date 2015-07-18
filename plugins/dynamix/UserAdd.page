@@ -67,7 +67,7 @@ $(function(){
   // attach the drag-n-drop feature to the 'dropbox' element
   dropbox.filedrop({
     maxfiles:1,
-    maxfilesize:20, // KB
+    maxfilesize:600, // KB
     url:'/webGui/include/FileUpload.php',
     data:{path:path},
     beforeEach:function(file) {
@@ -85,7 +85,7 @@ $(function(){
         alert('Too many files!\n\nPlease select one file only!');
         break;
       case 'FileTooLarge':
-        alert('File "'+file.name+'" is too large!\n\nPlease upload files up to 20 kB.');
+        alert('File "'+file.name+'" is too large!\n\nPlease upload files up to '+maxfilesize+' kB.');
         break;
       }
     },
@@ -130,6 +130,8 @@ Description:
 
 Custom image:
 : <span id="dropbox"><?=$void?></span><em>Drag-n-drop a PNG file or click the image at the left.</em><input type="file" id="drop" style="display:none">
+
+> The image will be scaled to 48x48 pixels in size.
 
 Password:
 : <input type="password" name="userPassword" maxlength="40" onKeyUp="this.form.cmdUserEdit.disabled=(this.form.userPassword.value!=this.form.userPasswordConf.value);">

@@ -56,7 +56,7 @@ $(function() {
   // attach the drag-n-drop feature to the 'dropbox' element
   dropbox.filedrop({
     maxfiles:1,
-    maxfilesize:100, // KB
+    maxfilesize:600, // KB
     url:'/webGui/include/FileUpload.php',
     data:{path:path},
     beforeEach:function(file) {
@@ -74,7 +74,7 @@ $(function() {
         alert('Too many files!\n\nPlease select one file only!');
         break;
       case 'FileTooLarge':
-        alert('File "'+file.name+'" is too large!\n\nPlease upload files up to 100 kB.');
+        alert('File "'+file.name+'" is too large!\n\nPlease upload files up to '+maxfilesize+' kB.');
         break;
       }
     },
@@ -252,6 +252,8 @@ Custom banner:
 <?endif;?>
   </span><em>Drag-n-drop a PNG file or click the image at the left.</em><input type="file" id="drop" style="display:none">
 </div>
+
+> Image will be scaled to 1270x90 pixels.  Max upload size: 600 kB.
 
 Show Dashboard apps:
 : <select name="dashapps" size="1">
