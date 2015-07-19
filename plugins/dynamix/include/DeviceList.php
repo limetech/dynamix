@@ -199,12 +199,12 @@ function array_online($disk) {
     echo "<td>".my_number($disk['numReads'])."</td>";
     echo "<td>".my_number($disk['numWrites'])."</td>";
     echo "<td>".my_number($disk['numErrors'])."</td>";
-  if ($disk['name']=="parity") {
-    echo "<td colspan='5'></td>";
-  } else {
-    render_used_and_free($disk);
-    echo "<td>".device_browse($disk)."</td>";
-  }
+    if ($disk['name']=="parity") {
+      echo "<td colspan='5'></td>";
+    } else {
+      render_used_and_free($disk);
+      echo "<td>".device_browse($disk)."</td>";
+    }
   break;
   default:
     echo "<td>".device_info($disk)."</td>";
@@ -251,6 +251,7 @@ function show_totals($text) {
     if (!$display['text']) {
       echo "<td>".my_scale($tot_used*1024, $unit)." $unit</td>";
       echo "<td>".my_scale($tot_free*1024, $unit)." $unit</td>";
+      echo "<td></td>";
     } else {
       $free = round(100*$tot_free/$tot_size);
       $used = 100-$free;
