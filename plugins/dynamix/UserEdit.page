@@ -79,7 +79,7 @@ $(function(){
         return false;
       }
     },
-    error: function(error, file) {
+    error: function(error, file, i) {
       switch (error) {
       case 'BrowserNotSupported':
         alert('Your browser does not support HTML5 file uploads!');
@@ -88,7 +88,7 @@ $(function(){
         alert('Too many files!\n\nPlease select one file only!');
         break;
       case 'FileTooLarge':
-        alert('File "'+file.name+'" is too large!\n\nPlease upload files up to '+maxfilesize+' kB.');
+        alert('File "'+file.name+'" is too large!\n\nPlease upload files up to 600 kB.');
         break;
       }
     },
@@ -113,7 +113,7 @@ $(function(){
   // simulate a drop action when manual file selection is done
   $('#drop').bind('change', function(e) {
     var files = e.target.files;
-    $('#dropbox').trigger({type:'drop',dataTransfer:{files:files}});
+    if ($('#dropbox').triggerHandler({type:'drop',dataTransfer:{files:files}})==false) e.stopImmediatePropagation();;
   });
 });
 </script>
