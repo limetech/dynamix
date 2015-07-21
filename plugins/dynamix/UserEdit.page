@@ -71,7 +71,7 @@ $(function(){
   // attach the drag-n-drop feature to the 'dropbox' element
   dropbox.filedrop({
     maxfiles:1,
-    maxfilesize:50, // KB
+    maxfilesize:600, // KB
     url:'/webGui/include/FileUpload.php',
     beforeEach:function(file) {
       if (!file.type.match(/^image\/png/)) {
@@ -88,7 +88,7 @@ $(function(){
         alert('Too many files!\n\nPlease select one file only!');
         break;
       case 'FileTooLarge':
-        alert('File "'+file.name+'" is too large!\n\nPlease upload files up to 50 kB.');
+        alert('File "'+file.name+'" is too large!\n\nPlease upload files up to 600 kB.');
         break;
       }
     },
