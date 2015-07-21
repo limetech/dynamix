@@ -75,9 +75,8 @@
       return false;
     }
     files_count = files.length;
-    upload();
     e.preventDefault();
-    return false;
+    return upload(); // bergware: return success/failure state
   }
 
   function getBuilder(filename, filedata) {
@@ -179,6 +178,7 @@
         }
       };
     }
+    return (filesRejected==0);
   }
 
   function getIndexBySize(size) {
