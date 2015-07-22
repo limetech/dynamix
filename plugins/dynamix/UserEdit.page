@@ -113,7 +113,7 @@ $(function(){
   // simulate a drop action when manual file selection is done
   $('#drop').bind('change', function(e) {
     var files = e.target.files;
-    if ($('#dropbox').triggerHandler({type:'drop',dataTransfer:{files:files}})==false) e.stopImmediatePropagation();;
+    if ($('#dropbox').triggerHandler({type:'drop',dataTransfer:{files:files}})==false) e.stopImmediatePropagation();
   });
 });
 </script>
