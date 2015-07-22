@@ -22,7 +22,7 @@ Title="Edit User"
 
 <?
 $file = "/boot/config/plugins/dynamix/users/$name.png";
-$void = "<img src='/webGui/images/user.png' id='image' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
+$void = "<img src='/webGui/images/user.png' width='48' height='48' id='image' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
 $icon = "<i class='fa fa-trash top' title='Restore default image' onclick='restore()'></i>";
 ?>
 
@@ -113,7 +113,7 @@ $(function(){
   // simulate a drop action when manual file selection is done
   $('#drop').bind('change', function(e) {
     var files = e.target.files;
-    if ($('#dropbox').triggerHandler({type:'drop',dataTransfer:{files:files}})==false) e.stopImmediatePropagation();;
+    if ($('#dropbox').triggerHandler({type:'drop',dataTransfer:{files:files}})==false) e.stopImmediatePropagation();
   });
 });
 </script>
