@@ -17,7 +17,7 @@ Icon="display-settings.png"
 
 <?
 $file = "/boot/config/plugins/dynamix/banner.png";
-$void = "<img src='/webGui/images/banner.unraid.png' id='image' width='330' height='30' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
+$void = "<img src='/webGui/images/banner.png' id='image' width='320' height='30' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
 $icon = "<i class='fa fa-trash top' title='Restore default image' onclick='restore()'></i>";
 ?>
 
@@ -28,8 +28,7 @@ i.top{position:absolute;padding-left:4px;cursor:pointer;}
 
 <script src="/webGui/javascript/jquery.filedrop.js"></script>
 <script>
-var path  = '/usr/local/emhttp/webGui/images';
-var file = '/boot/config/plugins/dynamix/banner.png';
+var path = '/boot/config/plugins/dynamix';
 var filename = '';
 
 function restore() {
@@ -39,34 +38,33 @@ function restore() {
   filename = 'reset';
 }
 
-function upload() {
+function upload(remove) {
   // gets invoked when the user clicks APPLY, at this point image will be saved or deleted
-  if (!filename) return;
-  if (filename=='reset') {
-    $.post("/webGui/include/FileUpload.php",{cmd:'reset',filename:'banner.unraid.png',path:path,output:'banner',flash:file});
-  } else {
-    $.post("/webGui/include/FileUpload.php",{cmd:'save',filename:filename,path:path,output:'banner',flash:file});
+  if (remove || filename=='reset') {
+    $.post("/webGui/include/FileUpload.php",{cmd:'delete',filename:filename,path:path,output:"banner"});
   }
-  // this will force the browser to reload the page (image and banner get updated)
-  $.cookie('refresh','init',{path:'/'});
+  else if (filename) {
+    $.post("/webGui/include/FileUpload.php",{cmd:'save',filename:filename,path:path,output:"banner"});
+  }
 }
 
 $(function() {
+  // appending a time dummy will make the browser think/realize the image has changed
+  $('#image').attr('src', $('#image').attr('src')+'?t='+new Date().getTime());
   var dropbox = $('#dropbox');
   // attach the drag-n-drop feature to the 'dropbox' element
   dropbox.filedrop({
     maxfiles:1,
-    maxfilesize:600, // KB
+    maxfilesize:95, // KB
     url:'/webGui/include/FileUpload.php',
-    data:{path:path},
     beforeEach:function(file) {
       if (!file.type.match(/^image\/png/)) {
         alert('Only PNG images are allowed!');
         return false;
       }
     },
-    error: function(error, file, i) {
-      switch (error) {
+    error: function(err, file, i) {
+      switch (err) {
       case 'BrowserNotSupported':
         alert('Your browser does not support HTML5 file uploads!');
         break;
@@ -74,7 +72,7 @@ $(function() {
         alert('Too many files!\n\nPlease select one file only!');
         break;
       case 'FileTooLarge':
-        alert('File "'+file.name+'" is too large!\n\nPlease upload files up to 600 kB.');
+        alert('File "'+file.name+'" is too large!\n\nMaximum file upload size is 95 kB (97,280 bytes)');
         break;
       }
     },
@@ -250,10 +248,10 @@ Custom banner:
 <?else:?>
   <?=$void?>
 <?endif;?>
-  </span><em>Drag-n-drop a PNG file or click the image at the left.</em><input type="file" id="drop" style="display:none">
+  </span><em>Drag-n-drop a PNG file or click the image at the left.</em><input type="file" id="drop" accept=".png" style="display:none">
 </div>
 
-> Image will be scaled to 1270x90 pixels.  Max upload size: 600 kB.
+> Image will be scaled to 1270x90 pixels. The maximum image file upload size is 95 kB (97,280 bytes).
 
 Show Dashboard apps:
 : <select name="dashapps" size="1">
@@ -326,11 +324,3 @@ Page update frequency:
 <input type="submit" name="#default" value="Default" onclick="filename='reset';upload()">
 : <input type="submit" name="#apply" value="Apply" onclick="upload()"><input type="button" value="Done" onclick="done()">
 </form>
-
-<script>
-// do a page reload to get new image and banner on screen (forced update browser cache)
-if ($.cookie('refresh')=='init') {
-  $.removeCookie('refresh',{path:'/'});
-  location.reload(true);
-}
-</script>

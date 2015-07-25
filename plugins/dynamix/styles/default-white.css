@@ -31,7 +31,7 @@ select[name=enter_share]{padding:0;float:right;}
 select.narrow{min-width:69px;}
 input.narrow{width:136px;}
 #header{height:90px;}
-#header.image{background:url(../images/banner.png) no-repeat #FFFFFF;border-radius:5px;color:#202020;}
+#header.image{background:background-size:1270px 90px; border-radius:5px;color:#202020;}
 #header .logo{float:left;margin-top:20px;margin-left:20px;}
 #header .logo img{margin:0 0 2px 1px;}
 #header .logo a{color:#478406;font-size:18px;}
