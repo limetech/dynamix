@@ -16,6 +16,6 @@ Icon="log.png"
 ?>
 <script>
 function LogButton() {
-  openWindow('/usr/bin/tail -n 42 -f /var/log/syslog','Log Information',600,900);
+  openWindow('follow /var/log/syslog','Log Information',600,900);
 }
 </script>

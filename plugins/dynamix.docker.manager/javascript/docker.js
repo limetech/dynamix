@@ -234,5 +234,5 @@ function autoStart(container, event){
 }
 
 function containerLogs(container){
-  openWindow('/usr/bin/docker logs --tail=350 -f ' + container, 'Log for: ' + container, 600, 900);
+  openWindow('docker logs --tail=350 -f ' + container, 'Log for: ' + container, 600, 900);
 }
