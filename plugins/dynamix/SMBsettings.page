@@ -26,11 +26,9 @@ Enable SMB:
 > also enables Windows host discovery.
 >
 > Select 'Yes (Active Directory)' to enable Active Directory integration.
->
-> Note: changing this value with array Started may cause a brief interruption in network services.
 
 Hide "dot" files:
-: <select name="hideDotFiles">
+: <select name="hideDotFiles"> <?if ($var['fsState']=="Started"):?>disabled<?endif;?>>
   <?=mk_option($var['hideDotFiles'], "no", "No");?>
   <?=mk_option($var['hideDotFiles'], "yes", "Yes");?>
   </select>
