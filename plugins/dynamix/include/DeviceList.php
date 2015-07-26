@@ -36,7 +36,7 @@ function device_info($disk) {
     $href = "{$disk['device']}&file=$screen";
   }
   $action = strpos($disk['color'],'blink')===false ? "down" : "up";
-  if ($disk['rotational']==1 && $var['fsState']=='Started')
+  if ($var['fsState']=='Started' && $type!='Flash' && $type!='Preclear')
     $ctrl = "<a href='update.htm?cmdSpin{$action}={$href}' title='Click to spin $action device' class='none' target='progressFrame' onclick=\"$.removeCookie('one',{path:'/'});\"><i class='fa fa-sort-$action spacing'></i></a>";
   else
     $ctrl = "";
@@ -182,15 +182,15 @@ function array_online($disk) {
   break;
   case "DISK_NP_DSBL":
     echo "<td>".device_info($disk)."</td>";
-  if ($disk['name']=="parity") {
-    echo "<td>Not installed</td>";
-    echo "<td colspan='9'></td>";
-  } else {
-    echo "<td><em>Not installed</em></td>";
-    echo "<td colspan='4'></td>";
-    render_used_and_free($disk);
-    echo "<td>".device_browse($disk)."</td>";
-  }
+    if ($disk['name']=="parity") {
+      echo "<td>Not installed</td>";
+      echo "<td colspan='9'></td>";
+    } else {
+      echo "<td><em>Not installed</em></td>";
+      echo "<td colspan='4'></td>";
+      render_used_and_free($disk);
+      echo "<td>".device_browse($disk)."</td>";
+    }
   break;
   case "DISK_DSBL":
     echo "<td>".device_info($disk)."</td>";

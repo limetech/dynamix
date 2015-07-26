@@ -224,7 +224,7 @@ function containerControl(container, action){
 
 function reloadUpdate(){
   $(".updatecolumn").html("<span style=\"color:#267CA8;white-space:nowrap;\"><i class=\"fa fa-spin fa-refresh\"></i> checking...</span>");
-  $("#cmdStartStop").val("/usr/local/emhttp/plugins/dynamix.docker.manager/include/DockerUpdate.php");
+  $("#cmdStartStop").val("/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/dockerupdate.php");
   $("#formStartStop").submit();
 }
 
@@ -234,5 +234,5 @@ function autoStart(container, event){
 }
 
 function containerLogs(container){
-  openWindow('/usr/bin/docker logs --tail=350 -f ' + container, 'Log for: ' + container, 600, 900);
+  openWindow('docker logs --tail=350 -f ' + container, 'Log for: ' + container, 600, 900);
 }

@@ -257,7 +257,7 @@ function addVMContext(name, uuid, template, state, vncurl, log){
 
   if (log !== "") {
     if (location.pathname.indexOf("/Dashboard") === 0) {
-      opts.push({text: "Logs", icon: "fa-navicon", action: function(e){ e.preventDefault(); openWindow('/usr/bin/tail -n 42 -f \'' + log.replace(/'/g, '\'\\\'\'') + '\'', 'Log for: ' + name, 600, 900); } });
+      opts.push({text: "Logs", icon: "fa-navicon", action: function(e){ e.preventDefault(); openWindow('follow \'' + log.replace(/'/g, '\'\\\'\'') + '\'', 'Log for: ' + name, 600, 900); } });
     }
   }
 

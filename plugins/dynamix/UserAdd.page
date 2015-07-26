@@ -67,7 +67,7 @@ $(function(){
   // attach the drag-n-drop feature to the 'dropbox' element
   dropbox.filedrop({
     maxfiles:1,
-    maxfilesize:600, // KB
+    maxfilesize:95, // KB
     url:'/webGui/include/FileUpload.php',
     data:{path:path},
     beforeEach:function(file) {
@@ -76,7 +76,7 @@ $(function(){
         return false;
       }
     },
-    error: function(error, file) {
+    error: function(error, file, i) {
       switch (error) {
       case 'BrowserNotSupported':
         alert('Your browser does not support HTML5 file uploads!');
@@ -85,7 +85,7 @@ $(function(){
         alert('Too many files!\n\nPlease select one file only!');
         break;
       case 'FileTooLarge':
-        alert('File "'+file.name+'" is too large!\n\nPlease upload files up to '+maxfilesize+' kB.');
+        alert('File "'+file.name+'" is too large!\n\nMaximum file upload size is 95 kB (97,280 bytes)');
         break;
       }
     },
@@ -110,7 +110,7 @@ $(function(){
   // simulate a drop action when manual file selection is done
   $('#drop').bind('change', function(e) {
     var files = e.target.files;
-    $('#dropbox').trigger({type:'drop',dataTransfer:{files:files}});
+    if ($('#dropbox').triggerHandler({type:'drop',dataTransfer:{files:files}})==false) e.stopImmediatePropagation();
   });
 });
 </script>
@@ -129,9 +129,9 @@ Description:
 > Up to 64 characters.
 
 Custom image:
-: <span id="dropbox"><?=$void?></span><em>Drag-n-drop a PNG file or click the image at the left.</em><input type="file" id="drop" style="display:none">
+: <span id="dropbox"><?=$void?></span><em>Drag-n-drop a PNG file or click the image at the left.</em><input type="file" id="drop" accept=".png" style="display:none">
 
-> The image will be scaled to 48x48 pixels in size.
+> The image will be scaled to 48x48 pixels in size. The maximum image file upload size is 95 kB (97,280 bytes).
 
 Password:
 : <input type="password" name="userPassword" maxlength="40" onKeyUp="this.form.cmdUserEdit.disabled=(this.form.userPassword.value!=this.form.userPasswordConf.value);">
