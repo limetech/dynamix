@@ -224,7 +224,7 @@ function containerControl(container, action){
 
 function reloadUpdate(){
   $(".updatecolumn").html("<span style=\"color:#267CA8;white-space:nowrap;\"><i class=\"fa fa-spin fa-refresh\"></i> checking...</span>");
-  $("#cmdStartStop").val("/usr/local/emhttp/plugins/dynamix.docker.manager/include/DockerUpdate.php");
+  $("#cmdStartStop").val("/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/dockerupdate.php");
   $("#formStartStop").submit();
 }
 

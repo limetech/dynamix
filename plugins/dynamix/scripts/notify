@@ -141,7 +141,7 @@ case 'cron-init':
   parse_cron_cfg("dynamix", "plugin-check", $text);
   $text = empty($notify['system']) ? "" : "# Generated system monitoring schedule:\n{$notify['system']} /usr/local/sbin/monitor &> /dev/null\n\n";
   parse_cron_cfg("dynamix", "monitor", $text);
-  $text = empty($notify['docker_update']) ? "" : "# Generated docker monitoring schedule:\n{$notify['docker_update']} /usr/local/emhttp/plugins/dynamix.docker.manager/dockerupdate.php check &> /dev/null\n\n";
+  $text = empty($notify['docker_update']) ? "" : "# Generated docker monitoring schedule:\n{$notify['docker_update']} /usr/local/emhttp/plugins/dynamix.docker.manager/scripts/dockerupdate.php check &> /dev/null\n\n";
   parse_cron_cfg("dynamix", "docker-update", $text);
   break;
 
