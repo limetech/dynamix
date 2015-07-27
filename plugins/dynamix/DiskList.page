@@ -21,7 +21,7 @@ function disk_share_settings($protocol,$share) {
   if (empty($share)) return;
   if ($protocol!='yes' || $share['export']=='-') return "-";
   if ($share['export']=='e') return ucfirst($share['security']);
-  return '<em>'.ucfirst($share['security']).'</em>';
+  return '<em>'.ucfirst($share['security']).' *</em>';
 }
 // Share size per disk
 $preserve = $path==$prev;
@@ -95,6 +95,6 @@ endforeach;
 >
 > <img src='/webGui/images/yellow-on.png' class='icon'>Mounted, underlying device does not have redundancy/protection.
 >
-> SMB security mode displayed in *italics* indicates exported hidden shares.
+> \* SMB security mode displayed in *italics* indicates exported hidden shares.
 >
-> AFP security mode displayed in *italics* indicates exported time-machine shares.
+> \* AFP security mode displayed in *italics* indicates exported time-machine shares.
