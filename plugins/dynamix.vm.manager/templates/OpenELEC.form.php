@@ -132,11 +132,11 @@
 			$strCleanPgrep = '-f "chmod.*chown.*rm.*' . $strTempFile . '"';
 
 			$strAllCmd = "#!/bin/bash\n\n";
-			$strAllCmd .= $strDownloadCmd . ' >>' . $strLogFile . ' 2>&1 && ';
+			$strAllCmd .= $strDownloadCmd . ' >>' . escapeshellarg($strLogFile) . ' 2>&1 && ';
 			$strAllCmd .= 'echo "' . $arrDownloadOpenELEC['md5'] . '  ' . $strTempFile . '" > ' . escapeshellarg($strMD5File) . ' && ';
 			$strAllCmd .= $strVerifyCmd . ' >' . escapeshellarg($strMD5StatusFile) . ' 2>/dev/null && ';
-			$strAllCmd .= $strExtractCmd . ' >>' . $strLogFile . ' 2>&1 && ';
-			$strAllCmd .= $strCleanCmd . ' >>' . $strLogFile . ' 2>&1 && ';
+			$strAllCmd .= $strExtractCmd . ' >>' . escapeshellarg($strLogFile) . ' 2>&1 && ';
+			$strAllCmd .= $strCleanCmd . ' >>' . escapeshellarg($strLogFile) . ' 2>&1 && ';
 			$strAllCmd .= 'rm ' . escapeshellarg($strInstallScript);
 
 			$arrResponse = [];
