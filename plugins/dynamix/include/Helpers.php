@@ -76,7 +76,7 @@ function my_usage() {
 }
 function usage_color($limit,$free) {
   global $display;
-  if ($display['text']<2) return '';
+  if ($display['text']==1 || intval($display['text']/10)==1) return '';
   if (!$free) {
     if ($limit>=$display['critical']) return 'redbar';
     if ($limit>=$display['warning']) return 'orangebar';

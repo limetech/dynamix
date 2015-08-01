@@ -272,6 +272,10 @@ Used / Free columns:
   <?=mk_option($display['text'], "0", "Text")?>
   <?=mk_option($display['text'], "1", "Bar (gray)")?>
   <?=mk_option($display['text'], "2", "Bar (color)")?>
+  <?=mk_option($display['text'], "10", "Text - Bar (gray)")?>
+  <?=mk_option($display['text'], "20", "Text - Bar (color)")?>
+  <?=mk_option($display['text'], "11", "Bar (gray) - Text")?>
+  <?=mk_option($display['text'], "21", "Bar (color) - Text")?>
   </select>
 
 Warning disk utilization level (%):
