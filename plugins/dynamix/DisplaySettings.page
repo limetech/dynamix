@@ -17,7 +17,7 @@ Icon="display-settings.png"
 
 <?
 $file = "/boot/config/plugins/dynamix/banner.png";
-$void = "<img src='/webGui/images/banner.png' id='image' width='320' height='30' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
+$void = "<img src='/webGui/images/banner.png' id='image' width='330' height='30' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
 $icon = "<i class='fa fa-trash top' title='Restore default image' onclick='restore()'></i>";
 ?>
 
@@ -42,9 +42,9 @@ function upload(remove) {
   // gets invoked when the user clicks APPLY, at this point image will be saved or deleted
   if (remove || filename=='reset') {
     $.post("/webGui/include/FileUpload.php",{cmd:'delete',filename:filename,path:path,output:"banner"});
-  }
-  else if (filename) {
+  } else if (filename) {
     $.post("/webGui/include/FileUpload.php",{cmd:'save',filename:filename,path:path,output:"banner"});
+    $.cookie('refresh','init',{path:'/'});
   }
 }
 
@@ -324,3 +324,12 @@ Page update frequency:
 <input type="submit" name="#default" value="Default" onclick="filename='reset';upload()">
 : <input type="submit" name="#apply" value="Apply" onclick="upload()"><input type="button" value="Done" onclick="done()">
 </form>
+<script>
+$(function() {
+  // do a page reload to get new image on screen (forced update browser cache)
+  if ($.cookie('refresh')=='init') {
+    $.removeCookie('refresh',{path:'/'});
+    location.reload(true);
+  }
+});
+</script>
