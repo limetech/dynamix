@@ -89,9 +89,6 @@ Security:
 > OS X user.<br>
 > OS X users logged in with a user name/password previously created on the server may read or
 > read/write (or have no access) according their access right for the share on the server.
->
-> Note: Private security is available only with ''Plus'' and ''Pro''
-> [registration](http://lime-technology.com/products/registration-keys).
 
 &nbsp;
 : <input type="submit" name="changeShareSecurityAFP" value="Apply"><input type="button" value="Done" onclick="done()">
