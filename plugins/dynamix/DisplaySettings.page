@@ -244,7 +244,7 @@ Custom banner:
 <input type="hidden" name="custom" value="custom">
 : <span id="dropbox">
 <?if (file_exists($file)):?>
-  <img src="<?=$file?>" width="320" height="30" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><?=$icon?>
+  <img src="<?=$file?>" width="330" height="30" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><?=$icon?>
 <?else:?>
   <?=$void?>
 <?endif;?>
