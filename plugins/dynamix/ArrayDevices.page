@@ -41,9 +41,9 @@ array_status();
 <?
 foreach ($disks as $disk):
   if ($disk['name']=='flash' or $disk['name']=='cache') continue;
-  echo "<tr><td colspan='10'>&nbsp;</td></tr>";
+  echo "<tr><td colspan='11'>&nbsp;</td></tr>";
 endforeach;
-if ($display['total']) echo "<tr class='tr_last'><td colspan='10'>&nbsp;</td></tr>";
+if ($display['total']) echo "<tr class='tr_last'><td colspan='11'>&nbsp;</td></tr>";
 ?>
 </tbody>
 </table>

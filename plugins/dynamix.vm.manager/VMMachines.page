@@ -1,6 +1,5 @@
-Menu="VMs:0"
+Menu="VMs"
 Title="Virtual Machines"
-Tabs="true"
 Cond="(pgrep('libvirtd')!==false)"
 ---
 <?PHP
@@ -502,7 +501,7 @@ function hideInput(){
 function ajaxVMDispatch(currentstate, params){
   $.post("/plugins/dynamix.vm.manager/VMajax.php", params, function( data ) {
     if (data.error) {
-      alert('Error: ' + data.error);
+      swal({title:"Execution error",text:data.error,type:"error"});
     } else {
       if (!data.state || currentstate != data.state) {
         location = window.location.href;

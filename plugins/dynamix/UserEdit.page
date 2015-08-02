@@ -47,21 +47,18 @@ function restore() {
   filename = 'reset';
 }
 
-function upload(remove) {
-  // gets invoked when the user clicks APPLY, at this point image will be saved or deleted
-  if (remove || filename=='reset') {$.post("/webGui/include/FileUpload.php",{cmd:'delete',filename:filename,path:path,output:"<?=$name?>"}); return;}
-  if (filename) {
-    $.post("/webGui/include/FileUpload.php",{cmd:'save',filename:filename,path:path,output:"<?=$name?>"});
-    $.cookie('refresh','1',{path:'/'});
-  }
+function forceReload() {
+  window.onload = parent.location.reload(true);
 }
 
-function done_plus() {
-  // this is a two step approach...
-  // first, the current screen is updated when user clicks APPLY (browser is instructed to reload the image).
-  // second, user has to click DONE to propagate the new image onto other pages (browser is forced to reload the page).
-  if ($.cookie('refresh')=='1') $.cookie('refresh','init',{path:'/'});
-  done();
+function upload(remove) {
+  // gets invoked when the user clicks APPLY, at this point image will be saved or deleted
+  if (remove || filename=='reset') {
+    $.post("/webGui/include/FileUpload.php",{cmd:'delete',filename:filename,path:path,output:"<?=$name?>"});
+  } else if (filename) {
+    $.post("/webGui/include/FileUpload.php",{cmd:'save',filename:filename,path:path,output:"<?=$name?>"});
+    window.onload = forceReload();
+  }
 }
 
 $(function(){
@@ -75,20 +72,20 @@ $(function(){
     url:'/webGui/include/FileUpload.php',
     beforeEach:function(file) {
       if (!file.type.match(/^image\/png/)) {
-        alert('Only PNG images are allowed!');
+        swal({title:"Warning",text:"Only PNG images are allowed!",type:"warning"});
         return false;
       }
     },
     error: function(error, file, i) {
       switch (error) {
       case 'BrowserNotSupported':
-        alert('Your browser does not support HTML5 file uploads!');
+        swal({title:"Browser error",text:"Your browser does not support HTML5 file uploads!",type:"error"});
         break;
       case 'TooManyFiles':
-        alert('Too many files!\n\nPlease select one file only!');
+        swal({title:"Too many files",text:"Please select one file only!",type:"error"});
         break;
       case 'FileTooLarge':
-        alert('File "'+file.name+'" is too large!\n\nMaximum file upload size is 95 kB (97,280 bytes)');
+        swal({title:"File too large",text:"Maximum file upload size is 95 kB (97,280 bytes)",type:"error"});
         break;
       }
     },
@@ -106,7 +103,7 @@ $(function(){
         $('input[name="userDesc"]').trigger('change');
         filename = file.name;
       } else {
-        alert(response);
+        swal({title:"Upload error",text:response,type:"error"});
       }
     }
   });
@@ -142,7 +139,7 @@ Custom image:
 <?else:?>
 Delete<input type="checkbox" name="confirmDelete" onChange="chkDelete(this.form, this.form.cmdUserEdit)">
 <?endif;?>
-: <input type="submit" name="cmdUserEdit" value="Apply" onclick="upload(<?=$name=="root" ? 'false' : 'this.form.confirmDelete.checked'?>)"><input type="button" value="Done" onclick="done_plus()">
+: <input type="submit" name="cmdUserEdit" value="Apply" onclick="upload(<?=$name=="root" ? 'false' : 'this.form.confirmDelete.checked'?>)"><input type="button" value="Done" onclick="done()">
 </form>
 <br><br>
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
@@ -154,5 +151,5 @@ Retype password:
 : <input type="password" name="userPasswordConf" maxlength="40" onKeyUp="this.form.cmdUserEdit.disabled = (this.form.userPassword.value != this.form.userPasswordConf.value);">
 
 &nbsp;
-: <input type="submit" name="cmdUserEdit" value="Change"><input type="button" value="Done" onclick="done_plus()">
+: <input type="submit" name="cmdUserEdit" value="Change"><input type="button" value="Done" onclick="done()">
 </form>
