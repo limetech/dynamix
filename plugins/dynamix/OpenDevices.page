@@ -43,7 +43,7 @@ open_status();
 <tbody id="open_devices">
 <?
 foreach ($devs as $dev):
-  echo "<tr><td colspan='10'>&nbsp;</td></tr>";
+  echo "<tr><td colspan='11'>&nbsp;</td></tr>";
 endforeach;
 ?>
 </tbody>

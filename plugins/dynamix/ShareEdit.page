@@ -86,7 +86,7 @@ function prepareEdit(form) {
 // Test share name validity
   var share = form.shareName.value.trim();
   if (share.match('^(disk[0-9]+|cache[0-9]*|flash)$')) {
-    alert('Invalid share name "'+share+'" specified\n\nDo not use reserved names.');
+    swal({title:"Invalid share name",text:"Do not use reserved names",type:"error"});
     return false;
   }
   form.shareName.value = share;

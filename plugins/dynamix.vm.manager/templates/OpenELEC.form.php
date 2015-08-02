@@ -929,7 +929,7 @@ $(function() {
 				done();
 			}
 			if (data.error) {
-				alert("Error creating VM: " + data.error);
+        swal({title:"VM creation error",text:data.error,type:"error"});
 				$form.find('input').prop('disabled', false);
 				$("#form_content .domain_vcpu").change(); // restore the cpu checkbox disabled states
 				$button.val($button.attr('readyvalue'));
@@ -1004,10 +1004,10 @@ $(function() {
 
 				// attach delete openelec image onclick event
 				$("#form_content .delete_openelec_image").off().click(function deleteOEVersion() {
-					if (confirm("Are you sure you want to remove this OpenELEC image file?")) {
-						$.post("/plugins/dynamix.vm.manager/templates/<?=basename(__FILE__)?>", {delete_version: $selected.val()}, function( data ) {
+          swal({title:"Are you sure?",text:"Remove this OpenELEC file: ",type:"warning",showCancelButton:true},function() {
+						$.post("/plugins/dynamix.vm.manager/templates/<?=basename(__FILE__)?>", {delete_version: $selected.val()}, function(data) {
 							if (data.error) {
-								alert("Error deleting VM image: " + data.error);
+                swal({title:"VM image deletion error",text:data.error,type:"error"});
 							} else if (data.status == 'ok') {
 								$selected.attr({
 									localpath: '',
@@ -1016,7 +1016,7 @@ $(function() {
 							}
 							$("#template_openelec").change();
 						}, "json");
-					}
+					});
 				}).hover(function () {
 					$("#openelec_image").css('color', '#666');
 				}, function () {

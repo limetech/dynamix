@@ -76,7 +76,7 @@ function my_usage() {
 }
 function usage_color($limit,$free) {
   global $display;
-  if ($display['text']<2) return '';
+  if ($display['text']==1 || intval($display['text']/10)==1) return '';
   if (!$free) {
     if ($limit>=$display['critical']) return 'redbar';
     if ($limit>=$display['warning']) return 'orangebar';
@@ -119,8 +119,8 @@ function mk_option_check($name, $value, $text = "") {
   }
 }
 function day_count($time) {
-  $now  = new DateTime();
-  $last = new DateTime("@$time");
+  $now  = new DateTime("@".intval(time()/86400)*86400);
+  $last = new DateTime("@".intval($time/86400)*86400);
   $days = date_diff($last,$now)->format('%a');
   switch (true) {
   case ($days<0):

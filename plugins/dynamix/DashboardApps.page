@@ -177,7 +177,7 @@ foreach ($allVMs as $name) {
 function ajaxVMDispatch(currentstate, params){
   $.post("/plugins/dynamix.vm.manager/VMajax.php", params, function( data ) {
     if (data.error) {
-      alert('Error: ' + data.error);
+      swal({title:"Execution error",text:data.error,type:"error"});
     } else {
       if (!data.state || currentstate != data.state) {
         location = window.location.href;
@@ -270,17 +270,13 @@ function addVMContext(name, uuid, template, state, vncurl, log){
 
     opts.push({text: "Remove VM", icon: "fa-minus", action: function(e) {
       e.preventDefault();
-      if (confirm('Are your sure you want to remove the definition ' + name + '?')) {
-        ajaxVMDispatch(state, { action: "domain-undefine", uuid: uuid });
-      }
+      swal({title:"Are you sure?",text:"Remove definition: "+name,type:"warning",showCancelButton:true},function(){ajaxVMDispatch(state,{action:"domain-undefine",uuid:uuid});});
     }});
 
     if (template != 'OpenELEC') {
       opts.push({text: "Remove VM + Disks", icon: "fa-trash", action: function(e) {
         e.preventDefault();
-        if (confirm('Completely REMOVE ' + name + ' disk image and definition?')) {
-          ajaxVMDispatch(state, { action: "domain-delete", uuid: uuid });
-        }
+        swal({title:"Are you sure?",text:"Completely REMOVE "+name+" disk image and definition",type:"warning",showCancelButton:true},function(){ajaxVMDispatch(state,{action:"domain-delete",uuid:uuid});});
       }});
     }
 

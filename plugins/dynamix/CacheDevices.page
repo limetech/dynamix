@@ -39,7 +39,7 @@ cache_status();
 <tbody id="cache_device">
 <?
 foreach ($disks as $disk):
-  if ($disk['type']=='Cache') echo "<tr><td colspan='10'>&nbsp;</td></tr>";
+  if ($disk['type']=='Cache') echo "<tr><td colspan='11'>&nbsp;</td></tr>";
 endforeach;
 ?>
 </tbody>
