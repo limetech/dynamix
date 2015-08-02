@@ -1,6 +1,5 @@
-Menu="VMs:0"
+Menu="VMs"
 Title="Virtual Machines"
-Tabs="true"
 Cond="(pgrep('libvirtd')!==false)"
 ---
 <?PHP
