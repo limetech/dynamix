@@ -76,20 +76,20 @@ $(function(){
     url:'/webGui/include/FileUpload.php',
     beforeEach:function(file) {
       if (!file.type.match(/^image\/png/)) {
-        alert('Only PNG images are allowed!');
+        swal({title:"Warning",text:"Only PNG images are allowed!",type:"warning"});
         return false;
       }
     },
     error: function(error, file, i) {
       switch (error) {
       case 'BrowserNotSupported':
-        alert('Your browser does not support HTML5 file uploads!');
+        swal({title:"Browser error",text:"Your browser does not support HTML5 file uploads!",type:"error"});
         break;
       case 'TooManyFiles':
-        alert('Too many files!\n\nPlease select one file only!');
+        swal({title:"Too many files",text:"Please select one file only!",type:"error"});
         break;
       case 'FileTooLarge':
-        alert('File "'+file.name+'" is too large!\n\nMaximum file upload size is 95 kB (97,280 bytes)');
+        swal({title:"File too large",text:"Maximum file upload size is 95 kB (97,280 bytes)",type:"error"});
         break;
       }
     },
@@ -107,7 +107,7 @@ $(function(){
         $('input[name="userDesc"]').trigger('change');
         filename = file.name;
       } else {
-        alert(response);
+        swal({title:"Upload error",text:response,type:"error"});
       }
     }
   });

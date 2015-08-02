@@ -48,15 +48,15 @@ function upload() {
 function checkUsername(form) {
   var username = form.userName.value.trim();
   if (username.length==0) {
-    alert('Please enter a user name.');
+    swal({title:"Missing user name",text:"Please enter a user name",type:"error"});
     return false;
   }
   if (username.match('[A-Z]| ')) {
-    alert('Invalid user name "'+username+'" specified\n\nDo not use uppercase or space characters.');
+    swal({title:"Invalid user name",text:"Do not use uppercase or space characters",type:"error"});
     return false;
   }
   if (username.match('^(disk[0-9]+|cache[0-9]*|flash)$')) {
-    alert('Invalid user name "'+username+'" specified\n\nDo not use reserved names.');
+    swal({title:"Invalid user name",text:"Do not use reserved names",type:"error"});
     return false;
   }
   return true;
@@ -72,20 +72,20 @@ $(function(){
     data:{path:path},
     beforeEach:function(file) {
       if (!file.type.match(/^image\/png/)) {
-        alert('Only PNG images are allowed!');
+        swal({title:"Warning",text:"Only PNG images are allowed!",type:"warning"});
         return false;
       }
     },
     error: function(error, file, i) {
       switch (error) {
       case 'BrowserNotSupported':
-        alert('Your browser does not support HTML5 file uploads!');
+        swal({title:"Browser error",text:"Your browser does not support HTML5 file uploads!",type:"error"});
         break;
       case 'TooManyFiles':
-        alert('Too many files!\n\nPlease select one file only!');
+        swal({title:"Too many files",text:"Please select one file only!",type:"error"});
         break;
       case 'FileTooLarge':
-        alert('File "'+file.name+'" is too large!\n\nMaximum file upload size is 95 kB (97,280 bytes)');
+        swal({title:"File too large",text:"Maximum file upload size is 95 kB (97,280 bytes)",type:"error"});
         break;
       }
     },
@@ -103,7 +103,7 @@ $(function(){
         $('input[name="userDesc"]').trigger('change');
         filename = file.name;
       } else {
-        alert(response);
+        swal({title:"Upload error",text:response,type:"error"});
       }
     }
   });

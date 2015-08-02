@@ -21,12 +21,13 @@
 <link type="image/png" rel="shortcut icon" href="/webGui/images/<?=$var['mdColor']?>.png">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/default-fonts.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.sweetalert.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/default-<?=$display['theme']?>.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/dynamix-<?=$display['theme']?>.css">
 <?if (file_exists("/boot/config/plugins/dynamix/banner.png")):?>
-  <link type="text/css" rel="stylesheet" href="/webGui/styles/custom-banner.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/custom-banner.css">
 <?else:?>
-  <link type="text/css" rel="stylesheet" href="/webGui/styles/default-banner.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/default-banner.css">
 <?endif?>
 
 <style>

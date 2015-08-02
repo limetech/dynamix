@@ -917,7 +917,7 @@ $(function() {
 				done();
 			}
 			if (data.error) {
-				alert("Error creating VM: " + data.error);
+        swal({title:"VM creation error",text:data.error,type:"error"});
 				$form.find('input').prop('disabled', false);
 				$("#form_content .domain_vcpu").change(); // restore the cpu checkbox disabled states
 				<? if (!empty($arrConfig['domain']['state'])) echo '$(\'#domain_ovmf\').prop(\'disabled\', true); // restore bios disabled state' . "\n"; ?>

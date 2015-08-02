@@ -186,7 +186,7 @@ $(function() {
 				done();
 			}
 			if (data.error) {
-				alert("Error creating VM: " + data.error);
+        swal({title:"VM creation error",text:data.error,type:"error"});
 				$form.find('input').prop('disabled', false);
 				$button.val($button.attr('readyvalue'));
 			}

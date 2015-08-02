@@ -59,20 +59,20 @@ $(function() {
     url:'/webGui/include/FileUpload.php',
     beforeEach:function(file) {
       if (!file.type.match(/^image\/png/)) {
-        alert('Only PNG images are allowed!');
+        swal({title:"Warning",text:"Only PNG images are allowed!",type:"warning"});
         return false;
       }
     },
     error: function(err, file, i) {
       switch (err) {
       case 'BrowserNotSupported':
-        alert('Your browser does not support HTML5 file uploads!');
+        swal({title:"Browser error",text:"Your browser does not support HTML5 file uploads!",type:"error"});
         break;
       case 'TooManyFiles':
-        alert('Too many files!\n\nPlease select one file only!');
+        swal({title:"Too many files",text:"Please select one file only!",type:"error"});
         break;
       case 'FileTooLarge':
-        alert('File "'+file.name+'" is too large!\n\nMaximum file upload size is 95 kB (97,280 bytes)');
+        swal({title:"File too large",text:"Maximum file upload size is 95 kB (97,280 bytes)",type:"error"});
         break;
       }
     },
@@ -90,7 +90,7 @@ $(function() {
         $('select[name="banner"]').trigger('change');
         filename = file.name;
       } else {
-        alert(response);
+        swal({title:"Upload error",text:response,type:"error"});
       }
     }
   });
@@ -105,11 +105,11 @@ $(function() {
 
 function prepareDisplay(form) {
   if (!form.critical.value | !form.warning.value) {
-    alert('An empty percentage value is not allowed!');
+    swal({title:"Missing value",text:"An empty percentage value is not allowed!",type:"error"});
     return false;
   }
   if (form.warning.value>form.critical.value) {
-    alert('Warning percentage must be lower than Critical percentage!');
+    swal({title:"Wrong value",text:"Warning percentage must be lower than Critical percentage!",type:"error"});
     return false;
   }
   if (!form.number.value) form.number.value='.,';
@@ -155,7 +155,10 @@ function presetPassive(index) {
 }
 
 function checkTemp(form,what) {
-  if (form.hot.value>=form.max.value) alert(what ? 'Warning temperature must be lower than Critical temperature' : 'Critical temperature must be higher than Warning temperature');
+  if (form.hot.value>=form.max.value) {
+    var message = what ? 'Warning temperature must be lower than Critical temperature' : 'Critical temperature must be higher than Warning temperature';
+    swal({title:"Incorrect value",text:message,type:"warning"});
+  }
 }
 </script>
 
