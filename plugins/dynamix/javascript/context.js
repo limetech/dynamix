@@ -139,12 +139,12 @@ var context = context || (function () {
 			if (place_above) {
 				$dd.addClass('dropdown-context-up').css({
 					top: e.pageY - 24 - $dd.height(),
-					left: Math.max(e.pageX - 13, 0)
+					left: Math.min(Math.max(e.pageX - 13, 0), window.innerWidth - 168)
 				}).fadeIn(options.fadeSpeed);
 			} else {
 				$dd.removeClass('dropdown-context-up').css({
 					top: e.pageY + 24,
-					left: Math.max(e.pageX - 13, 0)
+					left: Math.min(Math.max(e.pageX - 13, 0), window.innerWidth - 168)
 				}).fadeIn(options.fadeSpeed);
 			}
 		});
