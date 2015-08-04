@@ -595,9 +595,6 @@
 					}
 				?>
 				</select>
-				<?php if (!empty($arrConfig['domain']['state'])) { ?>
-					<input type="hidden" name="domain[ovmf]" value="<?=$arrConfig['domain']['ovmf']?>">
-				<?php } ?>
 			</td>
 		</tr>
 	</table>
