@@ -39,13 +39,14 @@
     <link rel="alternate stylesheet" href="include/blue.css" TITLE="Blue" />
 
     <!--
-    <script src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>
+    <script type='text/javascript'
+        src='http://getfirebug.com/releases/lite/1.2/firebug-lite-compressed.js'></script>
     -->
 
 </head>
 
 <body>
-    <div id="noVNC-control-bar">
+    <div id="noVNC-control-bar" class="noVNC_status_normal">
         <!--noVNC Mobile Device only Buttons-->
         <div class="noVNC-buttons-left">
             <input type="image" alt="viewport drag" src="images/drag.png"
@@ -69,8 +70,7 @@
                      style for example -->
                 <textarea id="keyboardinput" autocapitalize="off"
                     autocorrect="off" autocomplete="off" spellcheck="false"
-                    mozactionhint="Enter" onsubmit="return false;"
-                    style="ime-mode: disabled;"></textarea>
+                    mozactionhint="Enter"></textarea>
                 <div id="noVNC_extra_keys">
                     <input type="image" alt="Extra keys" src="images/showextrakeys.png"
                         id="showExtraKeysButton" class="noVNC_status_button">
@@ -86,19 +86,22 @@
             </div>
         </div>
 
-        <div id="noVNC_status">Loading</div>
+        <div id="noVNC_status"></div>
 
         <!--noVNC Buttons-->
         <div class="noVNC-buttons-right">
-            <input type="hidden" alt="Ctrl+Alt+Del" src="images/ctrlaltdel.png"
+            <input type="image" alt="Ctrl+Alt+Del" src="images/ctrlaltdel.png"
                 id="sendCtrlAltDelButton" class="noVNC_status_button"
                 title="Send Ctrl-Alt-Del" />
-            <input type="hidden" alt="Shutdown/Reboot" src="images/power.png"
+            <input type="image" alt="Shutdown/Reboot" src="images/power.png"
                 id="xvpButton" class="noVNC_status_button"
                 title="Shutdown/Reboot..." />
             <input type="image" alt="Clipboard" src="images/clipboard.png"
                 id="clipboardButton" class="noVNC_status_button"
                 title="Clipboard" />
+            <input type="image" alt="Fullscreen" src="images/fullscreen.png"
+                id="fullscreenButton" class="noVNC_status_button"
+                title="Fullscreen" />
             <input type="image" alt="Settings" src="images/settings.png"
                 id="settingsButton" class="noVNC_status_button"
                 title="Settings" />
@@ -126,8 +129,8 @@
             <input id="descriptionButton" type="button" value="Close">
         </div>
 
-        <!-- Popup Status Panel -->
-        <div id="noVNC_popup_status_panel" class="">
+        <!-- Popup Status -->
+        <div id="noVNC_popup_status" class="">
         </div>
 
         <!-- Clipboard Panel -->
@@ -158,7 +161,16 @@
                     <li><input id="noVNC_clip" type="checkbox"> Clip to Window</li>
                     <li><input id="noVNC_shared" type="checkbox"> Shared Mode</li>
                     <li><input id="noVNC_view_only" type="checkbox"> View Only</li>
+                    <hr>
                     <li><input id="noVNC_path" type="input" value="websockify"> Path</li>
+                    <li><label>
+                        <select id="noVNC_resize" name="vncResize">
+                            <option value="off">None</option>
+                            <option value="scale" selected="selected">Local Scaling</option>
+                            <option value="downscale">Local Downscaling</option>
+                            <option value="remote">Remote Resizing</option>
+                        </select> Scaling Mode</label>
+                    </li>
                     <li><input id="noVNC_repeaterID" type="input" value=""> Repeater ID</li>
                     <hr>
                     <!-- Stylesheet selection dropdown -->
@@ -193,13 +205,11 @@
 
 
     <div id="noVNC_screen">
-        <div id="noVNC_screen_pad"></div>
-
         <h1 id="noVNC_logo"><span>no</span><br />VNC</h1>
 
         <!-- HTML5 Canvas -->
         <div id="noVNC_container">
-            <canvas id="noVNC_canvas" width="640px" height="20px">
+            <canvas id="noVNC_canvas" width="0" height="0">
                         Canvas not supported.
             </canvas>
         </div>
