@@ -95,10 +95,10 @@ $('.tabs').append("<span class='status vhshift'><input type='button' value='Refr
   case "Started":
 ?><tr>
   <td><?=status_indicator()?><strong>Started<?=(($var['startMode']=='Maintenance')?' - Maintenance Mode':'')?></strong></td>
-  <td><input type="submit" name="cmdStop" value="Stop"<?=($confirm['stop']||$var['mdResync'])?' disabled':''?>></td>
+  <td><input type="submit" name="cmdStop" value="Stop"<?=($confirm['stop']||$var['mdResync']||file_exists('/var/run/mover.pid'))?' disabled':''?>></td>
   <td><strong>Stop</strong> will take the array off-line.
 <?if ($confirm['stop']):?>
-  <br><input type="checkbox" name="confirmStop" value="OFF" onClick="arrayOps.cmdStop.disabled=!arrayOps.confirmStop.checked"<?=$var['mdResync']==0?'':' disabled'?>><small>Yes I want to do this</small>
+  <br><input type="checkbox" name="confirmStop" value="OFF" onClick="arrayOps.cmdStop.disabled=!arrayOps.confirmStop.checked"<?=$var['mdResync']>0||file_exists('/var/run/mover.pid')?'disabled':''?>><small>Yes I want to do this</small>
 <?endif;?>
   </td>
   </tr>
