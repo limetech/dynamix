@@ -25,6 +25,7 @@ $red    = "class='red-text'";
 $green  = "class='green-text'";
 $orange = "class='orange-text'";
 $status = array_fill(0,6,"<td>-</td>");
+$all    = $_GET['all']=='true';
 $result = array();
 
 if (file_exists("/var/run/apcupsd.pid")) {
@@ -52,14 +53,17 @@ if (file_exists("/var/run/apcupsd.pid")) {
       $status[5] = $load>=90 ? "<td $red>$val</td>" : "<td $green>$val</td>";
       break;
     }
-    if ($i%2==0) $result[] = "<tr>";
-    $result[]= "<td><strong>$key</strong></td><td>$val</td>";
-    if ($i%2==1) $result[] = "</tr>";
+    if ($all) {
+      if ($i%2==0) $result[] = "<tr>";
+      $result[]= "<td><strong>$key</strong></td><td>$val</td>";
+      if ($i%2==1) $result[] = "</tr>";
+    }
   }
-  if (count($rows)%2==1) $result[] = "<td></td><td></td></tr>";
+  if ($all && count($rows)%2==1) $result[] = "<td></td><td></td></tr>";
   if ($power && $load) $status[4] = ($load>=90 ? "<td $red>" : "<td $green>").intval($power*$load/100)." Watts</td>";
 }
-if (!$rows) $result[] = "<tr><td colspan='4'><center>No information available</center></td></tr>";
+if ($all && !$rows) $result[] = "<tr><td colspan='4'><center>No information available</center></td></tr>";
 
-echo "<tr>".implode('', $status)."</tr>\n".implode('', $result);
+echo "<tr>".implode('', $status)."</tr>";
+if ($all) echo "\n".implode('', $result);
 ?>
