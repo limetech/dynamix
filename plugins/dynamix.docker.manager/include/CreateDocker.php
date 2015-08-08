@@ -344,9 +344,10 @@ function getXmlVal($xml, $element, $attr=null, $pos=0) {
 }
 
 function setXmlVal(&$xml, $value, $el, $attr=null, $pos=0) {
+  global $echo;
   $xml = (is_file($xml)) ? simplexml_load_file($xml) : simplexml_load_string($xml);
-  $element = $xml->xpath("(//$el)[$pos]");
-  if (! $element) $element = $xml->addChild($el);
+  $element = $xml->xpath("//$el")[$pos];
+  if (! isset($element)) $element = $xml->addChild($el);
   if ($attr) {
     $element[$attr] = $value;
   } else {
@@ -446,10 +447,9 @@ if ($_GET['updateContainer']){
       continue;
     }
 
-    $xml = xmlToVar($tmpl);
-
-    $Repository = $xml["Repository"];
-    $Registry = $xml["Registry"];
+    $xml = file_get_contents($tmpl);
+    list($cmd, $Name, $Repository) = xmlToCommand($tmpl);
+    $Registry = getXmlVal($xml, "Registry");
 
     readfile("/usr/local/emhttp/plugins/dynamix.docker.manager/log.htm");
     echo "<script>addLog('<p>Preparing to update: " . $Repository . "</p>');</script>";
@@ -464,8 +464,7 @@ if ($_GET['updateContainer']){
     }
 
     $oldContainerID = $DockerClient->getImageID($Repository);
-    list($cmd, $Name, $Repository) = xmlToCommand($xml);
-
+    
     // Pull image
     flush();
     pullImage($Repository);
@@ -956,10 +955,6 @@ $showAdditionalInfo = true;
         </td>
       </tr>
       <?endif;?>
-      <tr id="Overview">
-        <td style="width: 150px; vertical-align: top;">Overview:</td>
-        <td><div style="color: #3B5998; width:50%;" name="contDescription"></div></td>
-      </tr>
       <tr>
         <td style="width: 150px; vertical-align: top;">Name:</td>
         <td><input type="text" name="contName" class="textPath" required></td>
@@ -970,6 +965,10 @@ $showAdditionalInfo = true;
             <p>Give the container a name or leave it as default.</p>
           </blockquote>
         </td>
+      </tr>
+      <tr id="Overview">
+        <td style="width: 150px; vertical-align: top;">Overview:</td>
+        <td><div style="color: #3B5998; width:50%;" name="contDescription"></div></td>
       </tr>
       <tr <?if(!$showAdditionalInfo) echo "class='advanced'";?>>
         <td>Repository:</td>
