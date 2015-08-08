@@ -160,6 +160,7 @@ function postToXML($post, $setOwnership = FALSE){
   $xml->ExtraParams        = xml_encode($post['contExtraParams']);
 
   # V1 compatibility
+  $xml->Description      = xml_encode($post['contOverview']);
   $xml->Networking->Mode = xml_encode($post['contNetwork']);
   $xml->Networking->addChild("Publish");
   $xml->addChild("Data");
