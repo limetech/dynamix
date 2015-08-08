@@ -544,7 +544,7 @@ $showAdditionalInfo = true;
   input.textPath{width:270px;}
 
   table.Preferences{width:100%;}
-  table.Preferences tr>td{font-weight: bold}
+  table.Preferences tr>td{font-weight: bold;padding-right: 10px;}
   table.Preferences tr>td+td{font-weight: normal;}
   .show{display:block;}
   table td{font-size:14px;vertical-align:bottom;text-align:left;}
@@ -553,6 +553,7 @@ $showAdditionalInfo = true;
   .toggleMode{cursor:pointer;color:#a3a3a3;letter-spacing:0;padding:0;padding-right:10px;font-family:arimo;font-size:12px;line-height:1.3em;font-weight:bold;margin:0;}
   .toggleMode:hover,.toggleMode:focus,.toggleMode:active,.toggleMode .active{color:#625D5D;}
   .advanced{display: none;}
+  .required:after {content: " * ";color: #E80000}
 
   .switch-wrapper {
     display: inline-block;
@@ -636,7 +637,6 @@ $showAdditionalInfo = true;
                                  opts.Buttons,
                                  (opts.Required == "true") ? "required" : ""
                                  );
-    console.log(opts.Description);
     newConfig = "<div id='ConfigNum"+opts.Number+"' style='margin-top: 30px;' class='"+opts.Display+"'>"+newConfig+"</div>";
     newConfig = $($.parseHTML(newConfig));
     value     = newConfig.find("input[name='confValue[]']");
@@ -700,11 +700,18 @@ $showAdditionalInfo = true;
             Opts[e] = getVal(Element, e);
           });
           Opts.Description = (Opts.Description.length) ? Opts.Description : "Container "+Opts.Type+": "+Opts.Target;
-          Opts.Buttons     = "<button type='button' onclick='editConfigPopup("+confNum+")'> Edit</button> ";
-          Opts.Buttons    += "<button type='button' onclick='removeConfig("+confNum+");'>Remove</button>";
+          if (Opts.Required == "true") {
+            Opts.Buttons     = "<span class='advanced'><button type='button' onclick='editConfigPopup("+num+")'> Edit</button> ";
+            Opts.Buttons    += "<button type='button' onclick='removeConfig("+num+");'> Remove</button></span>";
+          } else {
+            Opts.Buttons     = "<button type='button' onclick='editConfigPopup("+num+")'> Edit</button> ";
+            Opts.Buttons    += "<button type='button' onclick='removeConfig("+num+");'> Remove</button>";
+          }
           Opts.Number      = confNum;
           newConf = makeConfig(Opts);
           $("#configLocation").append(newConf);
+          $(".advanced").toggle($(".advanced-switch:first").is(":checked")); 
+          $(".hidden").toggle($(".hidden-switch:first").is(":checked"));
         },
         Cancel: function() {
           $( this ).dialog( "close" );
@@ -762,12 +769,19 @@ $showAdditionalInfo = true;
             Opts[e] = getVal(Element, e);
           });
           Opts.Description = (Opts.Description.length) ? Opts.Description : "Container "+Opts.Type+": "+Opts.Target;
-          Opts.Buttons     = "<button type='button' onclick='editConfigPopup("+num+")'> Edit</button> ";
-          Opts.Buttons    += "<button type='button' onclick='removeConfig("+num+");'>Remove</button>";
+          if (Opts.Required == "true") {
+            Opts.Buttons     = "<span class='advanced'><button type='button' onclick='editConfigPopup("+num+")'> Edit</button> ";
+            Opts.Buttons    += "<button type='button' onclick='removeConfig("+num+");'> Remove</button></span>";
+          } else {
+            Opts.Buttons     = "<button type='button' onclick='editConfigPopup("+num+")'> Edit</button> ";
+            Opts.Buttons    += "<button type='button' onclick='removeConfig("+num+");'> Remove</button>";
+          }
           Opts.Number      = confNum;
           newConf = makeConfig(Opts);
           config.removeClass("always advanced hidden").addClass(Opts.Display);
           $("#ConfigNum" + num).html(newConf);
+          $(".advanced").toggle($(".advanced-switch:first").is(":checked")); 
+          $(".hidden").toggle($(".hidden-switch:first").is(":checked"));
         },
         Cancel: function() {
           $( this ).dialog( "close" );
@@ -1142,8 +1156,8 @@ $showAdditionalInfo = true;
       <dt>Required:</dt>
       <dd>
         <select name="Required">
-          <option value="true" selected>Yes</option>
-          <option value="false">No</option>
+          <option value="false" selected>No</option>
+          <option value="true" >Yes</option>
         </select>
       </dd>
       <div id="Mask">
@@ -1170,15 +1184,16 @@ $showAdditionalInfo = true;
   <input type="hidden" name="confDisplay[]" value="{6}">
   <input type="hidden" name="confRequired[]" value="{7}">
   <input type="hidden" name="confMask[]" value="{8}">
-  <table>
+  <table class="Preferences">
     <tr>
-      <td rowspan="4" style="vertical-align: top; min-width: 150px; white-space: nowrap; padding-top: 17px;"><b>{0} :</b></td>
+      <td style="vertical-align: top; min-width: 150px; white-space: nowrap; padding-top: 17px;" class="{11}"><b>{0}: </b></td>
       <td style="width: 100%">
         <input type="text" class="textPath" name="confValue[]" default="{2}" value="{9}" {11}> <button type="button" onclick="resetField(this);">Reset</button>
         {10}
       </td>
     </tr>
     <tr>
+      <td>&nbsp;</td>
       <td style="padding-top: 0px;"><span style='color: #b94a48;'>{4}</span></td>
     </tr>
 <!--     <tr class='advanced'>
@@ -1226,8 +1241,13 @@ $showAdditionalInfo = true;
         confNum += 1;
         Opts             = Settings.Config[i];
         Opts.Description = (Opts.Description.length) ? Opts.Description : "Container "+Opts.Type+": "+Opts.Target;
-        Opts.Buttons     = "<button type='button' onclick='editConfigPopup("+confNum+")'> Edit</button> ";
-        Opts.Buttons    += "<span class='advanced'><button type='button' onclick='removeConfig("+confNum+");'> Remove</button></span>";
+        if (Opts.Required == "true") {
+          Opts.Buttons     = "<span class='advanced'><button type='button' onclick='editConfigPopup("+confNum+")'> Edit</button> ";
+          Opts.Buttons    += "<button type='button' onclick='removeConfig("+confNum+");'> Remove</button></span>";
+        } else {
+          Opts.Buttons     = "<button type='button' onclick='editConfigPopup("+confNum+")'> Edit</button> ";
+          Opts.Buttons    += "<button type='button' onclick='removeConfig("+confNum+");'> Remove</button>";
+        }
         Opts.Number      = confNum;
         newConf = makeConfig(Opts);
         $("#configLocation").append(newConf);
