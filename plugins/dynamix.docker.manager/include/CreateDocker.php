@@ -16,7 +16,7 @@ require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/include/DockerCli
 $DockerClient = new DockerClient();
 $DockerUpdate = new DockerUpdate();
 $DockerTemplates = new DockerTemplates();
-                                                   
+
 #   ███████╗██╗   ██╗███╗   ██╗ ██████╗████████╗██╗ ██████╗ ███╗   ██╗███████╗
 #   ██╔════╝██║   ██║████╗  ██║██╔════╝╚══██╔══╝██║██╔═══██╗████╗  ██║██╔════╝
 #   █████╗  ██║   ██║██╔██╗ ██║██║        ██║   ██║██║   ██║██╔██╗ ██║███████╗
@@ -590,9 +590,9 @@ $showAdditionalInfo = true;
   var this_tab = $('input[name$="tabs"]').length;
   $(function() {
     var content= "<div class='switch-wrapper'><input type='checkbox' class='advanced-switch'></div>";
-  <?if (!$tabbed):?>
+    <?if (!$tabbed):?>
     $("#docker_tabbed").html(content);
-  <?else:?>
+    <?else:?>
     var last = $('input[name$="tabs"]').length;
     var elementId = "normalAdvanced";
     $('.tabs').append("<span id='"+elementId+"' class='status vhshift' style='display: none;'>"+content+"&nbsp;</span>");
@@ -601,7 +601,7 @@ $showAdditionalInfo = true;
     }
     $('#tab'+this_tab).bind({click:function(){$('#'+elementId).show();}});
     for (var x=1; x<=last; x++) if(x != this_tab) $('#tab'+x).bind({click:function(){$('#'+elementId).hide();}});
-  <?endif;?>
+      <?endif;?>
     // $('.advanced-switch').switchButton({ labels_placement: "left", on_label: 'Advanced', off_label: 'Normal', checked: $.cookie('docker-advanced-view') != 'false'});
     $('.advanced-switch').switchButton({ labels_placement: "left", on_label: 'Advanced', off_label: 'Normal'});
     $('.advanced-switch').change(function () {
@@ -618,9 +618,6 @@ $showAdditionalInfo = true;
       $('.hidden').toggle(status);
       // $.cookie('docker-hidden-view', status ? 'true' : 'false', { expires: 3650 });
     });
-
-    $(".advanced").toggle($(".advanced-switch:first").is(":checked")); 
-    $(".hidden").toggle($(".hidden-switch:first").is(":checked")); 
   });
 </script>
 <script type="text/javascript">
@@ -672,9 +669,11 @@ $showAdditionalInfo = true;
       var newValue = "<select name='confValue[]' class='textPath' default='"+valueOpts[0]+"'>";
       for (var i = 0; i < valueOpts.length; i++) {
         newValue += "<option value='"+valueOpts[i]+"' "+(opts.Value == valueOpts[i] ? "selected" : "")+">"+valueOpts[i]+"</option>";
-      }
+      } 
       newValue += "</select>";
       value.replaceWith(newValue);
+    } else if (opts.Type == "Port") {
+      value.addClass("numbersOnly");
     }
     if (opts.Mask == "true") {
       value.prop("type", "password");
@@ -733,8 +732,7 @@ $showAdditionalInfo = true;
           Opts.Number      = confNum;
           newConf = makeConfig(Opts);
           $("#configLocation").append(newConf);
-          $(".advanced").toggle($(".advanced-switch:first").is(":checked")); 
-          $(".hidden").toggle($(".hidden-switch:first").is(":checked"));
+          reloadTriggers();
         },
         Cancel: function() {
           $( this ).dialog( "close" );
@@ -803,8 +801,7 @@ $showAdditionalInfo = true;
           newConf = makeConfig(Opts);
           config.removeClass("always advanced hidden").addClass(Opts.Display);
           $("#ConfigNum" + num).html(newConf);
-          $(".advanced").toggle($(".advanced-switch:first").is(":checked")); 
-          $(".hidden").toggle($(".hidden-switch:first").is(":checked"));
+          reloadTriggers();
         },
         Cancel: function() {
           $( this ).dialog( "close" );
@@ -816,9 +813,6 @@ $showAdditionalInfo = true;
     $(".ui-dialog .ui-dialog-content").css('padding-top','15px').css('vertical-align','bottom');
     $(".ui-button-text").css('padding','0px 5px');
     $('.desc_readmore').readmore({maxHeight:10});
-
-    $(".advanced").toggle($(".advanced-switch:first").is(":checked")); 
-    $(".hidden").toggle($(".hidden-switch:first").is(":checked")); 
   }
 
   function removeConfig(num) {
@@ -850,12 +844,15 @@ $showAdditionalInfo = true;
     } else if(index == 1){
       // Port
       mode.html("<dt>Mode</dt><dd><select name='Mode'><option value='tcp'>TCP</option><option value='udp'>UDP</option></select></dd>");
+      value.addClass("numbersOnly");
+      target.addClass("numbersOnly");
     } else if(index == 3){
       // Device
       targetDiv.css('display', 'none');
       defaultDiv.css('display', 'none');
       value.bind("click",function(){openFileBrowser(this,$(this).val(),'',true,true);});
     }
+    reloadTriggers();
   }
 
   function loadTemplate(el) {
@@ -888,9 +885,9 @@ $showAdditionalInfo = true;
       root: root,
       filter: filter,
       allowBrowsing : true
-      },
-      function(file){if(on_files){p.val(file);if(close_on_select){ft.slideUp('fast',function (){ft.remove();});}}},
-      function(folder){if(on_folders){p.val(folder);if(close_on_select){$(ft).slideUp('fast',function (){$(ft).remove();});}}}
+    },
+    function(file){if(on_files){p.val(file);if(close_on_select){ft.slideUp('fast',function (){ft.remove();});}}},
+    function(folder){if(on_folders){p.val(folder);if(close_on_select){$(ft).slideUp('fast',function (){$(ft).remove();});}}}
     );
     // Format fileTree according to parent position, height and width
     ft.css({'left':p.position().left,'top':( p.position().top + p.outerHeight() ),'width':(p.width()) });
@@ -922,7 +919,7 @@ $showAdditionalInfo = true;
   <div id="canvas" style="z-index:1;">
     <table class="Preferences">
       <? if($xmlType == "edit"):
-        if (ContainerExist($templateName)): echo "<input type='hidden' name='existingContainer' value='${templateName}'>\n"; endif;
+      if (ContainerExist($templateName)): echo "<input type='hidden' name='existingContainer' value='${templateName}'>\n"; endif;
       else:?>
       <tr>
         <td>Template:</td>
@@ -1124,9 +1121,9 @@ $showAdditionalInfo = true;
         </tr>
       </table>
     </div>
-      <input type="submit" value="<?= ($xmlType != 'edit') ? 'Create' : 'Save' ?>">
-      <button class="advanced" type="submit" name="dryRun" value="true" onclick="$('*[required]').prop( 'required', null );">Dry Run</button>
-      <input type="button" value="Cancel" onclick="done()">
+    <input type="submit" value="<?= ($xmlType != 'edit') ? 'Create' : 'Save' ?>">
+    <button class="advanced" type="submit" name="dryRun" value="true" onclick="$('*[required]').prop( 'required', null );">Dry Run</button>
+    <input type="button" value="Cancel" onclick="done()">
     <br><br><br>
   </div>
 </form>
@@ -1167,8 +1164,7 @@ $showAdditionalInfo = true;
     <div id="Mode"></div>
     <dt>Description:</dt>
     <dd>
-    <textarea name="Description" rows="6" style="width: 304px;"></textarea>
-    <!-- <input type="text" name="Description" class="textPath"> -->
+      <textarea name="Description" rows="6" style="width: 304px;"></textarea>
     </dd>
     <div class="advanced">
       <dt>Display:</dt>
@@ -1238,6 +1234,11 @@ $showAdditionalInfo = true;
 
 
 <script type="text/javascript">
+  function reloadTriggers() {
+    $(".advanced").toggle($(".advanced-switch:first").is(":checked")); 
+    $(".hidden").toggle($(".hidden-switch:first").is(":checked"));
+    $(".numbersOnly").keypress(function(e){if(e.which != 45 && e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)){return false;}});
+  }
   $(function(){
     // Load container info on page load
     if (typeof Settings != 'undefined') {
@@ -1277,17 +1278,15 @@ $showAdditionalInfo = true;
         Opts.Number      = confNum;
         newConf = makeConfig(Opts);
         $("#configLocation").append(newConf);
+        reloadTriggers();
       }
-      $(".advanced").toggle($(".advanced-switch:first").is(":checked")); 
-      $(".hidden").toggle($(".hidden-switch:first").is(":checked")); 
     } else {
       $('#canvas').find('#Overview:first').hide();
     }
 
-    // Create some switchButton checkboxes
-    $(function(){
-      $('.switch-on-off').each(function(){var checked = $(this).is(":checked");$(this).switchButton({labels_placement: "right", checked:checked});});
-    });
+    // Add switchButton
+    $('.switch-on-off').each(function(){var checked = $(this).is(":checked");$(this).switchButton({labels_placement: "right", checked:checked});});
+
   });
 </script>
 <?END:?>
