@@ -16,7 +16,7 @@ Title="UPS Details"
 ?>
 <script>
 function getUPSstatus() {
-  $.get('/plugins/dynamix.apcupsd/include/UPSstatus.php',function(data) {
+  $.get('/plugins/dynamix.apcupsd/include/UPSstatus.php',{all:'true'},function(data) {
     if (data) {
       data = data.split(/\n/);
       $('#ups_summary').html(data[0]);
@@ -32,5 +32,5 @@ $(getUPSstatus);
 
 <table class="tablesorter shift">
 <thead><tr><th style="width:15%">Key</th><th style="width:35%">Value</th><th style="width:15%">Key</th><th style="width:35%">Value</th></tr></thead>
-<tbody id="ups_status"><tr><td colspan="4"><center>Please wait, retrieving UPS information...</center></td></tr></tbody>
+<tbody id="ups_status"><tr><td colspan="4"><center><i class="fa fa-spinner fa-spin icon"></i><em>Please wait, retrieving UPS information...</em></center></td></tr></tbody>
 </table>
