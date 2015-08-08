@@ -540,7 +540,7 @@ $showAdditionalInfo = true;
   option.list{padding:0 0 0 7px;font-size:11px;}
   optgroup.bold{font-weight:bold;font-size:12px;margin-top:5px;}
   optgroup.title{background-color:#625D5D;color:#FFFFFF;text-align:center;margin-top:10px;}
-  input.textPath{width:270px;}
+  .textPath{width:270px;}
 
   table.Preferences{width:100%;}
   table.Preferences tr>td{font-weight: bold;padding-right: 10px;}
@@ -561,6 +561,30 @@ $showAdditionalInfo = true;
     vertical-align: middle;
   }
   .spacer{padding-right: 20px}
+
+  .label, .label-warning, .label-success, .label-important {
+    padding: 1px 4px 2px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    font-size: 10.998px;
+    font-weight: bold;
+    line-height: 14px;
+    color: #ffffff;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+    white-space: nowrap;
+    vertical-align: middle;
+    background-color: #999999;
+  }
+  .label-warning {
+    background-color: #f89406;
+  }
+  .label-success {
+    background-color: #468847;
+  }
+  .label-important {
+    background-color: #b94a48;
+  }
 </style>
 <script type="text/javascript">
   var this_tab = $('input[name$="tabs"]').length;
@@ -1141,7 +1165,9 @@ $showAdditionalInfo = true;
     </div>
     <div id="Mode"></div>
     <dt>Description:</dt>
-    <dd><input type="text" name="Description" class="textPath">
+    <dd>
+    <textarea name="Description" rows="6" style="width: 304px;"></textarea>
+    <!-- <input type="text" name="Description" class="textPath"> -->
     </dd>
     <div class="advanced">
       <dt>Display:</dt>
@@ -1193,7 +1219,7 @@ $showAdditionalInfo = true;
     </tr>
     <tr>
       <td>&nbsp;</td>
-      <td style="padding-top: 0px;"><span style='color: #b94a48;'>{4}</span></td>
+      <td style="padding-top: 0px;"><div style='color: #b94a48;line-height: 1.6em'>{4}</div></td>
     </tr>
 <!--     <tr class='advanced'>
       <td style="padding-top: 0px;">
