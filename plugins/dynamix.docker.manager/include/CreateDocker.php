@@ -724,11 +724,11 @@ $showAdditionalInfo = true;
           });
           Opts.Description = (Opts.Description.length) ? Opts.Description : "Container "+Opts.Type+": "+Opts.Target;
           if (Opts.Required == "true") {
-            Opts.Buttons     = "<span class='advanced'><button type='button' onclick='editConfigPopup("+num+")'> Edit</button> ";
-            Opts.Buttons    += "<button type='button' onclick='removeConfig("+num+");'> Remove</button></span>";
+            Opts.Buttons     = "<span class='advanced'><button type='button' onclick='editConfigPopup("+confNum+")'> Edit</button> ";
+            Opts.Buttons    += "<button type='button' onclick='removeConfig("+confNum+");'> Remove</button></span>";
           } else {
-            Opts.Buttons     = "<button type='button' onclick='editConfigPopup("+num+")'> Edit</button> ";
-            Opts.Buttons    += "<button type='button' onclick='removeConfig("+num+");'> Remove</button>";
+            Opts.Buttons     = "<button type='button' onclick='editConfigPopup("+confNum+")'> Edit</button> ";
+            Opts.Buttons    += "<button type='button' onclick='removeConfig("+confNum+");'> Remove</button>";
           }
           Opts.Number      = confNum;
           newConf = makeConfig(Opts);
@@ -875,6 +875,7 @@ $showAdditionalInfo = true;
     if (on_folders === undefined) on_folders = true;
     if (on_files   === undefined) on_files = true;
     if (! filter && ! on_files)   filter = 'HIDE_FILES_FILTER';
+    if (! root.trim() ) root = "/mnt/user/";
     p = $(el);
     // Skip is fileTree is already open
     if ( p.next().hasClass('fileTree') ){return null;}
