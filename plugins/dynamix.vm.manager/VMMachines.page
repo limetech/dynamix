@@ -118,7 +118,7 @@ if ($action) {
 	if(!is_array($doms)){
 		if ($libvirt_running == "yes") {
       echo "<tr><td></td><td colspan=\"7\">No Virtual Machines Installed</td></tr>";
-			$msg = "No domains defined. Create from template or add XML.";
+			$msg = "No VMs defined. Create from template or add XML.";
 		} else {
 			$msg = "Libvirt is not running. Goto Settings tab then click Start.";
     }
@@ -211,7 +211,7 @@ if ($action) {
                      </div>
                   </div>
                </td>
-        	      <td><a href='#' onclick=\"return toggle_id('name$i');\" title='click for more domain info'>$name</a></td>
+        	      <td><a href='#' onclick=\"return toggle_id('name$i');\" title='click for more VM info'>$name</a></td>
                <td>$vcpu</td>
                <td>$mem</td>
                <td title='$diskdesc'>$disks</td>
@@ -277,8 +277,15 @@ if ($action) {
 								</span></form>
 							</td>
                      <td>$allocation</td>
-                     <td>N/A</td>
-						</tr>";
+                     <td>";
+            /* add detach button if shutoff */
+                     if ($state == 'shutoff')
+                        echo "detach <a href='#' onclick=\"swal({title:'Are you sure?',text:'Detach ".basename($disk)." from VM: ".$name."',type:'warning',showCancelButton:true},function(){ajaxVMDispatch('attached',{action:'disk-remove',uuid:'".$uuid."',dev:'".$dev."'});});return false;\" title='detach disk from VM'>
+                          <i class='fa fa-eject blue'></i></a>";
+                     else
+                      echo "N/A";
+          echo '</td>
+						</tr>';
 				}
          }
 		/*end display disk display*/
@@ -313,11 +320,10 @@ if ($action) {
                      <td>$capacity</td>
                      <td>$allocation</td>
                      <td>";
-						/* add remove button if shutoff */
+						/* add detach button if shutoff */
                      if ($state == 'shutoff')
-                 	      echo "remove <a href='?subaction=disk-remove&amp;uuid=$uuid&amp;dev=$dev'
-                  	      onclick=\"return confirm('Disk is not deleted. Remove from domain?')\" title='remove disk from domain'>
-                  	      <i class='fa fa-trash-o red'></i></a>";
+                 	      echo "detach <a href='#' onclick=\"swal({title:'Are you sure?',text:'Detach ".basename($disk)." from VM: ".$name."',type:'warning',showCancelButton:true},function(){ajaxVMDispatch('attached',{action:'disk-remove',uuid:'".$uuid."',dev:'".$dev."'});});return false;\" title='detach disk from VM'>
+                  	      <i class='fa fa-eject blue'></i></a>";
                  	   else
                  	   	echo "N/A";
 					echo '</td>
@@ -594,17 +600,13 @@ function addVMContext(name, uuid, template, state, vncurl, log){
 
     opts.push({text: "Remove VM", icon: "fa-minus", action: function(e) {
       e.preventDefault();
-      if (confirm('Are your sure you want to remove the definition ' + name + '?')) {
-        ajaxVMDispatch(state, { action: "domain-undefine", uuid: uuid });
-      }
+      swal({title:"Are you sure?",text:"Remove definition: "+name,type:"warning",showCancelButton:true},function(){ajaxVMDispatch(state,{action:"domain-undefine",uuid:uuid});});
     }});
 
     if (template != 'OpenELEC') {
       opts.push({text: "Remove VM + Disks", icon: "fa-trash", action: function(e) {
         e.preventDefault();
-        if (confirm('Completely REMOVE ' + name + ' disk image and definition?')) {
-          ajaxVMDispatch(state, { action: "domain-delete", uuid: uuid });
-        }
+        swal({title:"Are you sure?",text:"Completely REMOVE "+name+" disk image and definition",type:"warning",showCancelButton:true},function(){ajaxVMDispatch(state,{action:"domain-delete",uuid:uuid});});
       }});
     }
 

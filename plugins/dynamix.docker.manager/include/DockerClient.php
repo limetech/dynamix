@@ -93,8 +93,8 @@ class DockerTemplates {
 		$tmpls = array();
 		$dirs = array();
 		if ($type == "all"){
-			$dirs[] = $dockerManPaths['templates-storage'];
 			$dirs[] = $dockerManPaths['templates-user'];
+			$dirs[] = $dockerManPaths['templates-storage'];
 
 		} else if ($type == "user"){
 			$dirs[] = $dockerManPaths['templates-user'];
@@ -207,13 +207,7 @@ class DockerTemplates {
 
 
 	public function getTemplateValue($Repository, $field, $scope = "all"){
-		$tmpls = array();
-		if ($scope == "default" || $scope == "all") {
-			$tmpls = array_merge($tmpls, $this->getTemplates("default"));
-		}
-		if ($scope == "user" || $scope == "all") {
-			$tmpls = array_merge($tmpls, $this->getTemplates("user"));
-		}
+		$tmpls = $this->getTemplates($scope);
 
 		foreach ($tmpls as $file) {
 			$doc = new DOMDocument();
@@ -252,7 +246,7 @@ class DockerTemplates {
 		global $var;
 		$DockerClient = new DockerClient();
 		$IP         = $var["IPADDR"];
-		$Repository = preg_replace("/:[\w]*$/i", "", $Repository);
+		$Repository = "";
 
 		foreach ($DockerClient->getDockerContainers() as $ct) {
 			if ($ct['Name'] == $name) {
@@ -327,35 +321,26 @@ class DockerTemplates {
 			$tmp['running'] = $ct['Running'];
 			$tmp['autostart'] = in_array($name, $allAutoStart);
 
-			if (!array_key_exists('icon', $tmp) || !array_key_exists('banner', $tmp) || $reload) {
-				$img = $this->getBannerIcon( $image );
-				$tmp['banner'] = ( $img['banner'] ) ? $img['banner'] : "#";
-				$tmp['icon']   = ( $img['icon'] )   ? $img['icon'] : "#";
-			}
+			$img = $this->getBannerIcon( $image );
+			$tmp['banner'] = ( $img['banner'] ) ? $img['banner'] : "#";
+			$tmp['icon']   = ( $img['icon'] )   ? $img['icon'] : "#";
 
-			if (!array_key_exists('url', $tmp) || $reload) {
-				$WebUI      = $this->getControlURL($name);
-				$tmp['url'] = ($WebUI) ? $WebUI : "#";
-			}
+			$WebUI      = $this->getControlURL($name);
+			$tmp['url'] = ($WebUI) ? $WebUI : "#";
 
-			if (!array_key_exists('registry', $tmp) || $reload ){
-				$Registry = $this->getTemplateValue($image, "Registry");
-				$tmp['registry'] = ( $Registry ) ? $Registry : "#";
-			}
+			$Registry = $this->getTemplateValue($image, "Registry");
+			$tmp['registry'] = ( $Registry ) ? $Registry : "#";
 
-			if (!array_key_exists('updated', $tmp) || $reload) {
-				if ($reload) {
-					$nv = $DockerUpdate->getUpdateStatus($name, $image);
-					if ($nv != 'undef'){
-						$updateStatus[$name] = $nv;
-					}
+			if ($reload) {
+				$nv = $DockerUpdate->getUpdateStatus($name, $image);
+				if ($nv != 'undef'){
+					$updateStatus[$name] = $nv;
 				}
-				$tmp['updated'] = (array_key_exists($name, $updateStatus)) ? $updateStatus[$name] : 'undef';
 			}
+			$tmp['updated'] = (array_key_exists($name, $updateStatus)) ? $updateStatus[$name] : 'undef';
 
-			if (!array_key_exists('template', $tmp) || $reload){
-				$tmp['template'] = $this->getUserTemplate($name);
-			}
+			$tmp['template'] = $this->getUserTemplate($name);
+
   		$this->debug("\n$name");foreach ($tmp as $c => $d) $this->debug(sprintf("   %-10s: %s", $c, $d));
 			$new_info[$name] = $tmp;
 		}
