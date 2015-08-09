@@ -262,7 +262,8 @@
 				'image' => $arrOpenELECVersion['localpath'],
 				'size' => '',
 				'driver' => 'raw',
-				'dev' => 'hda'
+				'dev' => 'hda',
+				'readonly' => 1
 			]
 		],
 		'gpu' => [
@@ -407,6 +408,7 @@
 
 <input type="hidden" name="disk[0][image]" id="disk_0" value="<?=$arrConfig['disk'][0]['image']?>">
 <input type="hidden" name="disk[0][dev]" value="<?=$arrConfig['disk'][0]['dev']?>">
+<input type="hidden" name="disk[0][readonly]" value="1">
 
 
 <table>
