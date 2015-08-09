@@ -25,6 +25,14 @@
 	$strCPUModel = getHostCPUModel();
 
 	$arrOpenELECVersions = [
+		'5.95.3_1' => [
+			'name' => '6.0.0 Beta3',
+			'url' => 'https://s3.amazonaws.com/dnld.lime-technology.com/images/OpenELEC/OpenELEC-unRAID.x86_64-5.95.3_1.tar.xz',
+			'size' => 153990180,
+			'md5' => '8936cda74c28ddcaa165cc49ff2a477a',
+			'localpath' => '',
+			'valid' => '0'
+		],
 		'5.95.2_1' => [
 			'name' => '6.0.0 Beta2',
 			'url' => 'https://s3.amazonaws.com/dnld.lime-technology.com/images/OpenELEC/OpenELEC-unRAID.x86_64-5.95.2_1.tar.xz',
@@ -262,7 +270,8 @@
 				'image' => $arrOpenELECVersion['localpath'],
 				'size' => '',
 				'driver' => 'raw',
-				'dev' => 'hda'
+				'dev' => 'hda',
+				'readonly' => 1
 			]
 		],
 		'gpu' => [
@@ -407,6 +416,7 @@
 
 <input type="hidden" name="disk[0][image]" id="disk_0" value="<?=$arrConfig['disk'][0]['image']?>">
 <input type="hidden" name="disk[0][dev]" value="<?=$arrConfig['disk'][0]['dev']?>">
+<input type="hidden" name="disk[0][readonly]" value="1">
 
 
 <table>
