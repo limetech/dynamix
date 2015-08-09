@@ -25,6 +25,14 @@
 	$strCPUModel = getHostCPUModel();
 
 	$arrOpenELECVersions = [
+		'5.95.3_1' => [
+			'name' => '6.0.0 Beta3',
+			'url' => 'https://s3.amazonaws.com/dnld.lime-technology.com/images/OpenELEC/OpenELEC-unRAID.x86_64-5.95.3_1.tar.xz',
+			'size' => 153990180,
+			'md5' => '8936cda74c28ddcaa165cc49ff2a477a',
+			'localpath' => '',
+			'valid' => '0'
+		],
 		'5.95.2_1' => [
 			'name' => '6.0.0 Beta2',
 			'url' => 'https://s3.amazonaws.com/dnld.lime-technology.com/images/OpenELEC/OpenELEC-unRAID.x86_64-5.95.2_1.tar.xz',
