@@ -87,7 +87,7 @@ img.stopped{opacity:0.3;}
 			$status         = ($ct["Running"]) ? "started" : "stopped";
 
 			$Icon           = $info[$name]['icon'];
-			if ( $Icon == "#" ){
+			if ( ! $Icon ){
 				$Icon = "/plugins/dynamix.docker.manager/images/question.png";
 			}
 

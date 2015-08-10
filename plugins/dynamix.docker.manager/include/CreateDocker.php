@@ -26,11 +26,6 @@ $DockerTemplates = new DockerTemplates();
 
 $echo = function($m){echo "<pre>".print_r($m,true)."</pre>";};
 
-// if (isset($_POST['contName'])) {
-// $echo($_POST);
-// goto END;
-// }
-
 function prepareDir($dir){
   if (strlen($dir)){
     if ( ! is_dir($dir) && ! is_file($dir)){
@@ -392,9 +387,6 @@ if (isset($_POST['contName'])) {
 
   // Will only pull image if it's absent
   if (! ImageExist($Repository)) {
-    // Add current version to XML
-    $currentVersion = $DockerUpdate->getRemoteVersion($_POST["contRegistry"], $_POST["contRepository"]);
-    setXmlVal($postXML, $currentVersion, "Version");
 
     // Pull image
     pullImage($Repository);    
@@ -427,8 +419,9 @@ if (isset($_POST['contName'])) {
   $_GET['cmd'] = $cmd;
   include($dockerManPaths['plugin'] . "/include/Exec.php");
 
-  $DockerTemplates->removeInfo($Name);
-  $DockerUpdate->syncVersions($Name);
+  // Force information reload
+  $DockerTemplates->removeInfo($Name, $Repository);
+  $DockerUpdate->reloadUpdateStatus($Repository);
 
   echo '<center><input type="button" value="Done" onclick="done()"></center><br>';
   goto END;
@@ -455,14 +448,6 @@ if ($_GET['updateContainer']){
     echo "<script>addLog('<p>Preparing to update: " . $Repository . "</p>');</script>";
     @flush();
 
-    $CurrentVersion = $DockerUpdate->getRemoteVersion($Registry, $Repository);
-
-    if ($CurrentVersion){
-      setXmlVal($xml, $CurrentVersion, "Version");
-
-      file_put_contents($tmpl, $xml);
-    }
-
     $oldContainerID = $DockerClient->getImageID($Repository);
     
     // Pull image
@@ -475,15 +460,15 @@ if ($_GET['updateContainer']){
     $_GET['cmd'] = $cmd;
     include($dockerManPaths['plugin'] . "/include/Exec.php");
 
-    $DockerTemplates->removeInfo($Name);
     $newContainerID = $DockerClient->getImageID($Repository);
     if ( $oldContainerID and $oldContainerID != $newContainerID){
       $_GET['cmd'] = sprintf("/usr/bin/docker rmi %s", $oldContainerID);
       include($dockerManPaths['plugin'] . "/include/Exec.php");
     }
 
-    $DockerTemplates->removeInfo($Name);
-    $DockerUpdate->syncVersions($Name);
+    // Force information reload
+    $DockerTemplates->removeInfo($Name, $Repository);
+    $DockerUpdate->reloadUpdateStatus($Repository);
   }
 
   echo '<center><input type="button" value="Done" onclick="window.parent.jQuery(\'#iframe-popup\').dialog(\'close\');"></center><br>';
@@ -562,7 +547,7 @@ $showAdditionalInfo = true;
   }
   .spacer{padding-right: 20px}
 
-  .label, .label-warning, .label-success, .label-important {
+  .label-warning, .label-success, .label-important {
     padding: 1px 4px 2px;
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
@@ -574,7 +559,6 @@ $showAdditionalInfo = true;
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
     white-space: nowrap;
     vertical-align: middle;
-    background-color: #999999;
   }
   .label-warning {
     background-color: #f89406;
