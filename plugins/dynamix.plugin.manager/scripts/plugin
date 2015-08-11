@@ -347,7 +347,7 @@ if ($method == "checkall") {
     if (plugin("pluginURL", $installed_plugin_file, $error) === false) continue;
     $plugin = basename($installed_plugin_file);
     echo "plugin: checking $plugin ...\n";
-    exec("/usr/local/sbin/plugin check $plugin", $output, $retval);
+    exec(realpath($argv[0]) . " check $plugin", $output, $retval);
   }
   exit(0);
 }

@@ -71,7 +71,7 @@ function settings(form, data) {
 <form markdown="1" name="smtp_setup" method="POST" action="/update.php" target="progressFrame" onsubmit="return mailcheck(this)" onchange="disableTest()">
 <input type="hidden" name="#file"  value="dynamix/dynamix.cfg">
 <input type="hidden" name="#section" value="ssmtp">
-<input type="hidden" name="#command" value="/usr/local/sbin/notify smtp-init">
+<input type="hidden" name="#command" value="/webGui/scripts/notify smtp-init">
 Preset service:
 : <select name="service" size="1" onchange="settings(this.form,this.value)">
 <?=mk_option($ssmtp['service'], "smtp.gmail.com:465:YES:NO:login", "Gmail")?>

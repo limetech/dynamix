@@ -10,9 +10,9 @@
  */
 ?>
 <?
- /* This file provides basic local setup for php cli and is
+/* This file provides basic local setup for php cli and is
  * named in /etc/php/php.ini like this:
- * auto_prepend_file="webGui/include/local_prepend.php"
+ * auto_prepend_file="/usr/local/emhttp/webGui/include/local_prepend.php"
  */
 setlocale(LC_ALL,'en_US.UTF-8');
 date_default_timezone_set(substr(readlink('/etc/localtime-copied-from'),20));

@@ -32,7 +32,7 @@ if (!isset($check)) {
   require_once("/usr/local/emhttp/webGui/include/Wrappers.php");
   $client = new DockerClient();
   $update = new DockerUpdate();
-  $notify = "/usr/local/sbin/notify";
+  $notify = "/usr/local/emhttp/webGui/scripts/notify";
   $unraid = parse_plugin_cfg("dynamix",true);
   $server = strtoupper($var['NAME']);
   $output = $unraid['notify']['docker_notify'];

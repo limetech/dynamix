@@ -34,8 +34,6 @@ if (!file_exists($cfgfile)) {
   return;
 }
 $dockercfg = parse_ini_file($cfgfile);
-
-
 if (!array_key_exists('DOCKER_ENABLED', $dockercfg)) {
   $dockercfg['DOCKER_ENABLED'] = 'no';
 }
@@ -61,10 +59,10 @@ if (file_exists($realfile)) {
 .fileTree{width:305px;max-height:150px;overflow:scroll;position:absolute;z-index:100;display:none;}
 </style>
 <?if (pgrep('docker') === false):?>
-
 <form id="settingsForm" markdown="1" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#file" value="<?=$cfgfile;?>" />
 <input type="hidden" id="command" name="#command" value="" />
+
 Enable Docker:
 : <select id="DOCKER_ENABLED" name="DOCKER_ENABLED" class="narrow">
 <?= mk_option($dockercfg['DOCKER_ENABLED'], 'no', 'No'); ?>
@@ -93,15 +91,15 @@ Docker image:
 
 &nbsp;
 : <input id="applyBtn" type="button" value="Apply"/><input type="button" value="Done" onclick="done()">
-</form>
 
+</form>
 <?else:
 // IF DOCKER STARTED
 ?>
-
 <form id="settingsForm" markdown="1" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#file" value="<?=$cfgfile;?>" />
 <input type="hidden" id="command" name="#command" value="" />
+
 Enable Docker:
 : <select id="DOCKER_ENABLED" name="DOCKER_ENABLED" class="narrow">
 <?= mk_option($dockercfg['DOCKER_ENABLED'], 'no', 'No'); ?>
@@ -122,65 +120,56 @@ Docker image:
 
 &nbsp;
 : <input type="button" id="applyBtn" value="Apply"><input type="button" value="Done" onclick="done()">
-</form>
 
+</form>
 <div id="title"><span class="left"><img src="/plugins/dynamix.docker.manager/icons/vcard.png" class="icon">Docker volume info</span></div>
-&nbsp;
+
+btrfs filesystem show:
 : <?echo "<pre>".shell_exec("btrfs filesystem show /var/lib/docker")."</pre>";?>
 
-> This is the output of *btrfs filesystem show /var/lib/docker*.
+<form markdown="1" method="POST" action="/update.php" target="progressFrame">
+<?exec("/usr/local/emhttp/webGui/scripts/btrfs scrub status /var/lib/docker", $scrub_status, $retval);?>
 
-<?$cmd="btrfs scrub start /var/lib/docker";?>
+btrfs scrub status:
+: <?echo "<pre>" . implode("\n", $scrub_status) . "</pre>";?>
 
-<?if (pgrep("-f '$cmd'") !== false):?>
-
-<form markdown="1" method="POST" action="/update.htm" target="progressFrame">
-
-&nbsp;
-: <input type="submit" value="Scrub" disabled> *Running*
-
-> If you want to Cancel the operation, close the window where it is running and then Refresh this page.
+<?if ($retval != 0):?>
+<input type="hidden" name="#command" value="/webGui/scripts/btrfs scrub start -B">
+<input type="hidden" name="#arg[2]" value="/var/lib/docker">
+<input type="hidden" name="#arg[3]" value="&>/dev/null &">
 
 &nbsp;
-: <input type="submit" value="Stop" disabled>
-</form>
+: <input type="submit" value="Scrub"><input type="text" name="#arg[1]" maxlength="256" value="-r"> Options (see Help)
 
-<?else:?>
-
-<form markdown="1" method="POST" action="/update.htm" target="progressFrame">
-&nbsp;
-: <input type="button" value="Scrub" onclick="openBox('<?=$cmd;?> '+document.getElementById('scrub_options').value,'Scrub',490,430)">
-  <input type="text" id="scrub_options" maxlength="256" value="-B -R -d -r"> Options (see Help)
-
-> **Scrub** will open a window and run the *btrfs scrub* program to check file system integrity.
+> **Scrub** runs the *btrfs scrub* program to check file system integrity.
 >
 > The *Options* field is initialized to include *-r* which specifies read-only.  If repair is needed, you should run
 > a second Scrub pass, removing the *-r* option; this will permit *btrfs scrub* to fix the file system.
->
-> After starting a Scrub, you should monitor the newly opened window for progress and status.  Closing the
-> window before completion will Cancel the operation, but is not recommended - you should let it finish.  Depending on
-> how large the file system is, and what errors might be present, the operation can take **a long time** to finish (hours).
-> Not much info is printed in the window, but you can verify the operation is running by observing the read/write counters
-> increasing for the device on the Main page.
+
+<?else:?>
+<input type="hidden" name="#command" value="/webGui/scripts/btrfs scrub cancel /var/lib/docker">
+
+&nbsp;
+: <input type="submit" value="Cancel"> *Running*
+
+> **Cancel** will cancel the Scrub operation in progress.
 
 </form>
-
 <?endif;?>
 <?endif;?>
-
 <script src="/webGui/javascript/jquery.filetree.js"></script>
 <script>
 $(function() {
   //$.ajaxSetup({ async: false });
   $("#applyBtn").click(function(){
     if ($("#deleteCheckbox").length && $("#deleteCheckbox").is(":checked")) {
-      $("#command").val("/usr/bin/rm \"" + $("#DOCKER_IMAGE_FILE").val() + "\"");
+      $("#command").val("/plugins/dynamix.docker.manager/scripts/docker_rm");
       $("#DOCKER_IMAGE_FILE").val("");
       $("#settingsForm").submit();
       return;
     }
 
-    $("#command").val("/usr/local/emhttp/plugins/dynamix.docker.manager/event/" + ($("#DOCKER_ENABLED").val()=="yes" ? "started;/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/dockerupdate.php" : "stopping_svcs"));
+    $("#command").val("/plugins/dynamix.docker.manager/event/" + ($("#DOCKER_ENABLED").val()=="yes" ? "started" : "stopping_svcs"));
 
     if ($("#DOCKER_IMAGE_SIZE").length && $("#DOCKER_IMAGE_FILE").length) {
       var isError = false;

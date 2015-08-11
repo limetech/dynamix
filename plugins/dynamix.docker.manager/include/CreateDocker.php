@@ -164,7 +164,7 @@ function xmlToCommand($xmlFile){
     $templateExtraParams = $doc->getElementsByTagName( "ExtraParams" )->item(0)->nodeValue;
   }
 
-  $cmd = sprintf('/usr/bin/docker run -d %s %s %s %s %s %s %s %s', $cmdName, $cmdMode, $cmdPrivileged, implode(' -e ', $Variables),
+  $cmd = sprintf('/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/docker run -d %s %s %s %s %s %s %s %s', $cmdName, $cmdMode, $cmdPrivileged, implode(' -e ', $Variables),
        implode(' -p ', $Ports), implode(' -v ', $Volumes), $templateExtraParams, $Repository);
   $cmd = preg_replace('/\s+/', ' ', $cmd);
 
@@ -278,14 +278,14 @@ if ($_POST){
 
   // Remove existing container
   if (ContainerExist($Name)){
-    $_GET['cmd'] = "/usr/bin/docker rm -f $Name";
+    $_GET['cmd'] = "/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/docker rm -f $Name";
     include($dockerManPaths['plugin'] . "/include/Exec.php");
   }
 
   // Remove old container if renamed
   $existing = isset($_POST['existingContainer']) ? $_POST['existingContainer'] : FALSE;
   if ($existing && ContainerExist($existing)){
-    $_GET['cmd'] = "/usr/bin/docker rm -f $existing";
+    $_GET['cmd'] = "/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/docker rm -f $existing";
     include($dockerManPaths['plugin'] . "/include/Exec.php");
   }
 
@@ -344,7 +344,7 @@ if ($_GET['updateContainer']){
     flush();
     pullImage($Repository);
 
-    $_GET['cmd'] = "/usr/bin/docker rm -f $Name";
+    $_GET['cmd'] = "/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/docker rm -f $Name";
     include($dockerManPaths['plugin'] . "/include/Exec.php");
 
     $_GET['cmd'] = $cmd;
@@ -353,7 +353,7 @@ if ($_GET['updateContainer']){
     $DockerTemplates->removeInfo($Name);
     $newContainerID = $DockerClient->getImageID($Repository);
     if ( $oldContainerID and $oldContainerID != $newContainerID){
-      $_GET['cmd'] = sprintf("/usr/bin/docker rmi %s", $oldContainerID);
+      $_GET['cmd'] = sprintf("/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/docker rmi %s", $oldContainerID);
       include($dockerManPaths['plugin'] . "/include/Exec.php");
     }
 

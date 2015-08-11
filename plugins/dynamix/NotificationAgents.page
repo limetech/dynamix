@@ -53,9 +53,9 @@ function prepareService(el, name) {
   FileEnabled = FilesEnabled[name];
   FileDisabled = FilesDisabled[name];
   if (form.find("select[name=Enabled]").val() == "yes") {
-    form.find("input[name=#command]").val("/usr/bin/mv -f '"+FileDisabled+"' '"+FileEnabled+"'");
+    form.find("input[name=#command]").val("mv -f '"+FileDisabled+"' '"+FileEnabled+"'");
   } else {
-    form.find("input[name=#command]").val("/usr/bin/mv -f '"+FileEnabled+"' '"+FileDisabled+"'");
+    form.find("input[name=#command]").val("mv -f '"+FileEnabled+"' '"+FileDisabled+"'");
   }
   form.find('input[name=text]').val(script.format(vars,"\n"));
 }
@@ -140,7 +140,7 @@ foreach ($xml->Agent as $agent) {
   echo "<dl><dt>&nbsp;</dt><dd><input type='submit' value='Apply' onclick='prepareService(this, \"${Name}\")'>";
   echo "<input type='button' value='Done' onclick='done()'>";
   if (is_file($File)) {
-    echo "<input type='button' value='Delete' onclick='execCmd(\"/usr/bin/rm $File\")'>";
+    echo "<input type='button' value='Delete' onclick='execCmd(\"rm $File\")'>";
     echo "<input type='button' value='Test' onclick='testService(\"$Name\",\"$File\")'>";
   }
   echo "</dd></dl></form><div style='min-height:50px;'></div>";

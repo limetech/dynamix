@@ -14,8 +14,6 @@
 <?
 require_once('/usr/local/emhttp/webGui/include/Wrappers.php');
 
-$notify = "/usr/local/sbin/notify";
-
 function plus($val, $word, $last) {
   return $val>0 ? (($val || $last) ? ($val.' '.$word.($val!=1?'s':'').($last ?'':', ')) : '') : '';
 }
@@ -173,7 +171,7 @@ $warn = ($error0 || $error3) ? "alert" : (($error1 || $error2) ? "warning" : "no
 $stat = $warn=="normal" ? "[PASS]" : "[FAIL]";
 $info = "Array has $size disk".($size==1 ? "" : "s").($parity ? " ({$word}parity".($cache ? " & cache)" : ")") : ($cache ? " ({$word}cache)" : ""));
 $message = implode('\n', $data);
-exec("$notify -s \"Notice [$server] - array health report $stat\" -d \"$info\" -m \"$message\" -i \"$warn $output\"");
+exec("/usr/local/emhttp/webGui/scripts/notify -s \"Notice [$server] - array health report $stat\" -d \"$info\" -m \"$message\" -i \"$warn $output\"");
 
 exit(0);
 ?>

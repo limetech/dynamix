@@ -1,0 +1,10 @@
+#!/bin/bash
+case "$2" in
+'status')
+  /sbin/btrfs "$@"
+  /sbin/btrfs "$@" | grep -q running
+;;
+*)
+  exec /sbin/btrfs "$@"
+;;
+esac
