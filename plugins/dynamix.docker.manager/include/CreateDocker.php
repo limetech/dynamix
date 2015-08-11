@@ -493,7 +493,7 @@ if ($_GET['xmlTemplate']) {
     $xml = xmlToVar($xmlTemplate);
     $templateName = $xml["Name"];
     $xml['Description'] = str_replace(array('[', ']'), array('<', '>'), $xml['Overview']);
-    echo "<script> var Settings = Object; var Settings=".json_encode($xml).";</script>";
+    echo "<script>var Settings=".json_encode($xml).";</script>";
   }
 }
 
@@ -547,7 +547,7 @@ $showAdditionalInfo = true;
   }
   .spacer{padding-right: 20px}
 
-  .label-warning, .label-success, .label-important {
+  .label-warning, .label-success, .label-important, orange, red, green {
     padding: 1px 4px 2px;
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
@@ -560,13 +560,13 @@ $showAdditionalInfo = true;
     white-space: nowrap;
     vertical-align: middle;
   }
-  .label-warning {
+  .label-warning, orange {
     background-color: #f89406;
   }
-  .label-success {
+  .label-success, green {
     background-color: #468847;
   }
-  .label-important {
+  .label-important, red {
     background-color: #b94a48;
   }
 </style>
