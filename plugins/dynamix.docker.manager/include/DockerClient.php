@@ -498,7 +498,7 @@ class DockerClient {
 	}
 
 
-	private function getDockerJSON($url, $method = "GET"){
+	private function getDockerJSON($url, $method = "GET", $callback = null){
 		$fp = stream_socket_client('unix:///var/run/docker.sock', $errno, $errstr);
 
 		if ($fp === false) {
@@ -508,26 +508,33 @@ class DockerClient {
 		$out="$method {$url} HTTP/1.1\r\nConnection: Close\r\n\r\n";
 		fwrite($fp, $out);
 		// Strip headers out
+		$headers = '';
 		while (($line = fgets($fp)) !== false) {
+			$headers .= $line;
 			if (rtrim($line) == '') {
 				break;
 			}
 		}
-		$data = '';
+		$data = array();
 		while (($line = fgets($fp)) !== false) {
-			$data .= $line;
+			if (is_array($j = json_decode($line, true))) {
+				 $data = array_merge($data, $j);
+				 if ($callback) $callback($line);
+			}
 		}
 		fclose($fp);
-		$data = $this->unchunk($data);
-		$json = json_decode( $data, true );
-		if ($json === null) {
-			$json = array();
-		} else if (!array_key_exists(0, $json) && !empty($json)) {
-			$json = [ $json ];
-		}
-		return $json;
+		return $data;
 	}
 
+
+	public function createDockerContainer() {
+		return false;
+
+	}
+
+	public function pullImage($image, $callback = null) {
+		return $this->getDockerJSON("/images/create?fromImage=$image", "POST", $callback);
+	}
 
 	public function getInfo(){
 		$info = $this->getDockerJSON("/info");
@@ -536,7 +543,7 @@ class DockerClient {
 	}
 
 
-	private function getContainerDetails($id){
+	public function getContainerDetails($id){
 		$json = $this->getDockerJSON("/containers/{$id}/json");
 		return $json;
 	}
@@ -582,20 +589,18 @@ class DockerClient {
 			// echo "<pre>".print_r($details,TRUE)."</pre>";
 
 			// Docker 1.7 doesn't automatically append the tag 'latest', so we do that now if there's no tag
-			preg_match_all("/:([\w]*$)/i", $obj['Image'], $matches2);
-
-			$c["Image"]       = $obj['Image'] . (isset($matches2[1][0]) ? "" : ":latest");
-			$c["ImageId"]     = substr($details[0]["Image"],0,12);
-			$c["Name"]        = substr($details[0]['Name'], 1);
+			$c["Image"]       = ($obj['Image'] && count(preg_split("#[:\/]#", $obj['Image'])) < 3) ? "${obj[Image]}:latest" : $obj['Image'];
+			$c["ImageId"]     = substr($details["Image"],0,12);
+			$c["Name"]        = substr($details['Name'], 1);
 			$c["Status"]      = $status;
 			$c["Running"]     = $running;
 			$c["Cmd"]         = $obj['Command'];
 			$c["Id"]          = substr($obj['Id'],0,12);
-			$c['Volumes']     = $details[0]["HostConfig"]['Binds'];
+			$c['Volumes']     = $details["HostConfig"]['Binds'];
 			$c["Created"]     = $this->humanTiming($obj['Created']);
-			$c["NetworkMode"] = $details[0]['HostConfig']['NetworkMode'];
+			$c["NetworkMode"] = $details['HostConfig']['NetworkMode'];
 
-			$Ports = $details[0]['HostConfig']['PortBindings'];
+			$Ports = $details['HostConfig']['PortBindings'];
 			$Ports = (count ( $Ports )) ? $Ports : array();
 			$c["Ports"] = array();
 			if ($c["NetworkMode"] != 'host'){
@@ -612,6 +617,16 @@ class DockerClient {
 		}
 		usort($containers, $this->build_sorter('Name'));
 		return $containers;
+	}
+
+	public function getContainerID($Container){
+		foreach ($this->getDockerContainers() as $ct) {
+			preg_match("%" . preg_quote($Container, "%") ."%", $ct["Name"], $matches);
+			if( $matches){
+				return $ct["Id"];
+			}
+		}
+		return NULL;
 	}
 
 

@@ -67,56 +67,50 @@ function trimLine($text){
   return preg_replace("/([\n^])[\s]+/", '$1', $text);
 }
 
+$pullecho = function($line) {
+  global $alltotals;
+  $cnt =  json_decode( $line, TRUE );
+  $id = ( isset( $cnt['id'] )) ? $cnt['id'] : "";
+  $status = ( isset( $cnt['status'] )) ? $cnt['status'] : "";
+  if (strlen(trim($status)) && strlen(trim($id))) {
+    if ( isset($cnt['progressDetail']['total']) && $cnt['progressDetail']['total'] > 0 ) {
+      $alltotals[$cnt['id']] = $cnt['progressDetail']['total'];
+    }
+    echo "<script>addToID('${id}','${status}');</script>";
+    @flush();
+  }
+  if ($status == "Downloading") {
+    $total = $cnt['progressDetail']['total'];
+    $current = $cnt['progressDetail']['current'];
+    $alltotals[$cnt['id']] = $cnt['progressDetail']['current'];
+    if ($total > 0) {
+      $percentage = round(($current/$total) * 100);
+      echo "<script>progress('${id}',' ". $percentage ."% of " . sizeToHuman($total) . "');</script>\n";
+    } else {
+      // Docker must not know the total download size (http-chunked or something?)
+      //  just show the current download progress without the percentage
+      echo "<script>progress('${id}',' " . sizeToHuman($current) . "');</script>\n";
+    }
+    @flush();
+  }
+};
+
+
 function pullImage($image) {
+  global $DockerClient, $pullecho, $alltotals;
+  $alltotals = array();
   if (! preg_match("/:[\w]*$/i", $image)) $image .= ":latest";
   readfile("/usr/local/emhttp/plugins/dynamix.docker.manager/log.htm");
-  echo '<script>function add_to_id(m){$(".id:last").append(" "+m);}</script>';
-  echo "<script>addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Pulling image: " . $image . "</legend><p class=\"logLine\" id=\"logBody\"></p></fieldset>');</script>";
+  echo "<script>
+  addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Pulling image: ${image}</legend><p class=\"logLine\" id=\"logBody\"></p></fieldset>');
+  function progress(id, prog){ $('.'+id+'_progress:last').text(prog);}
+  function addToID(id, m) {
+    if ($('#'+id).length === 0){ addLog('<span id=\"'+id+'\">IMAGE ID ['+id+']: </span>');}
+    if ($('#'+id).find('.content:last').text() != m){ $('#'+id).append('<span class=\"content\">'+m+'</span><span class=\"'+id+'_progress\"></span>. ');}
+  }</script>";
   @flush();
 
-  $fp = stream_socket_client('unix:///var/run/docker.sock', $errno, $errstr);
-  if ($fp === false) {
-    echo "Couldn't create socket: [$errno] $errstr";
-    return NULL;
-  }
-  $out="POST /images/create?fromImage=$image HTTP/1.1\r\nConnection: Close\r\n\r\n";
-  fwrite($fp, $out);
-  $cid = "";
-  $cstatus="";
-  $alltotals = [];
-  while (!feof($fp)) {
-    $cnt =  json_decode( fgets($fp, 5000), TRUE );
-    $id = ( isset( $cnt['id'] )) ? $cnt['id'] : "";
-    if ($id != $cid && strlen($id)) {
-      $cid = $id;
-      $cstatus = "";
-      echo "<script>addLog('IMAGE ID [". $id ."]: <span class=\"id\"></span>');</script>";
-      @flush();
-    }
-    $status = ( isset( $cnt['status'] )) ? $cnt['status'] : "";
-    if ($status != $cstatus && strlen($status)) {
-      if ( isset($cnt['progressDetail']['total']) && $cnt['progressDetail']['total'] > 0 ) {
-        $alltotals[$cnt['id']] = $cnt['progressDetail']['total'];
-      }
-      $cstatus = $status;
-      echo "<script>add_to_id('". $status ."<span class=\"progress\"></span>.');</script>";
-      @flush();
-    }
-    if ($status == "Downloading") {
-      $total = $cnt['progressDetail']['total'];
-      $current = $cnt['progressDetail']['current'];
-      $alltotals[$cnt['id']] = $cnt['progressDetail']['current'];
-      if ($total > 0) {
-        $percentage = round(($current/$total) * 100);
-        echo "<script>show_Prog(' ". $percentage ."% of " . sizeToHuman($total) . "');</script>\n";
-      } else {
-        // Docker must not know the total download size (http-chunked or something?)
-        //  just show the current download progress without the percentage
-        echo "<script>show_Prog(' " . sizeToHuman($current) . "');</script>\n";
-      }
-      @flush();
-    }
-  }
+  $DockerClient->pullImage($image, $pullecho);
   echo "<script>addLog('<br><b>TOTAL DATA PULLED:</b> " . sizeToHuman(array_sum($alltotals)) . "<span class=\"progress\"></span>');</script>\n";
 }
 
@@ -374,7 +368,6 @@ if (isset($_POST['contName'])) {
   // Get the command line
   list($cmd, $Name, $Repository) = xmlToCommand($postXML);
   
-
   // Run dry
   if ($_POST['dryRun'] == "true") {
     echo "<h2>XML</h2>";
@@ -384,10 +377,9 @@ if (isset($_POST['contName'])) {
     echo '<center><input type="button" value="Done" onclick="done()"></center><br>';
     goto END;
   }
-
+ 
   // Will only pull image if it's absent
   if (! ImageExist($Repository)) {
-
     // Pull image
     pullImage($Repository);    
   }
