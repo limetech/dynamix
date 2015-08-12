@@ -137,7 +137,7 @@ foreach ($allVMs as $name) {
       $template = 'Custom';
     }
 
-	$log = (is_file('/var/log/libvirt/qemu/' . $name . '.log') ? '/var/log/libvirt/qemu/' . $name . '.log' : '');
+	$log = (is_file('/var/log/libvirt/qemu/' . $name . '.log') ? 'libvirt/qemu/' . $name . '.log' : '');
 
 	$contextMenus[] = sprintf("addVMContext('%s', '%s', '%s', '%s', '%s', '%s');", addslashes($name), addslashes($uuid), addslashes($template), $state, addslashes($vnc), addslashes($log));
 
@@ -257,7 +257,7 @@ function addVMContext(name, uuid, template, state, vncurl, log){
 
   if (log !== "") {
     if (location.pathname.indexOf("/Dashboard") === 0) {
-      opts.push({text: "Logs", icon: "fa-navicon", action: function(e){ e.preventDefault(); openWindow('follow \'' + log.replace(/'/g, '\'\\\'\'') + '\'', 'Log for: ' + name, 600, 900); } });
+      opts.push({text: "Logs", icon: "fa-navicon", action: function(e){ e.preventDefault(); openWindow('/webGui/scripts/tail_log \'' + log.replace(/'/g, '\'\\\'\'') + '\'', 'Log for: ' + name, 600, 900); } });
     }
   }
 

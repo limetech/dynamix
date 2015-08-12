@@ -12,7 +12,7 @@
  */
 ?>
 <?
-$notify = "/usr/local/sbin/notify";
+$notify = "/usr/local/emhttp/webGui/scripts/notify";
 switch ($_POST['cmd']) {
 case 'init':
   shell_exec("$notify init");

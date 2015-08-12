@@ -1,0 +1,21 @@
+#!/bin/bash
+# xfs_repair start <dev> <id> <options>
+# xfs_repair status <dev> <id>
+# xfs_repair cancel <dev> 
+
+case "$1" in
+'start')
+  /sbin/xfs_repair $4 $2 &> /var/lib/xfs/check.status.$3 &
+;;
+'status')
+  if [ -f /var/lib/xfs/check.status.$3 ]; then
+    cat /var/lib/xfs/check.status.$3
+  else
+    echo "Not available"
+  fi;
+  pgrep -f "/sbin/xfs_repair .\*$2" >/dev/null
+;;
+'cancel')
+  pkill -f "/sbin/xfs_repair .\*$2"
+;;
+esac

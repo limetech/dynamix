@@ -28,7 +28,7 @@ Enable SMB:
 > Select 'Yes (Active Directory)' to enable Active Directory integration.
 
 Hide "dot" files:
-: <select name="hideDotFiles"> <?if ($var['fsState']=="Started"):?>disabled<?endif;?>>
+: <select name="hideDotFiles" size="1" <?if ($var['fsState']=="Started"):?>disabled<?endif;?>>
   <?=mk_option($var['hideDotFiles'], "no", "No");?>
   <?=mk_option($var['hideDotFiles'], "yes", "Yes");?>
   </select>

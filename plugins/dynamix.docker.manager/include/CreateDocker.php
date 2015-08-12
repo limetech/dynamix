@@ -319,9 +319,17 @@ function xmlToCommand($xml) {
       $Devices[] = '"'.$containerConfig.'"';
     }
   }
+  $cmd = sprintf('/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/docker run -d %s %s %s %s %s %s %s %s %s', 
+                 $cmdName,
+                 $cmdNetwork,
+                 $cmdPrivileged, 
+                 implode(' -e ', $Variables),
+                 implode(' -p ', $Ports), 
+                 implode(' -v ', $Volumes), 
+                 implode(' --device=', $Devices), 
+                 $xml['ExtraParams'], 
+                 $xml['Repository']);
 
-  $cmd = sprintf('/usr/bin/docker run -d %s %s %s %s %s %s %s %s %s', $cmdName, $cmdNetwork, $cmdPrivileged, implode(' -e ', $Variables),
-                 implode(' -p ', $Ports), implode(' -v ', $Volumes), implode(' --device=', $Devices), $xml['ExtraParams'], $xml['Repository']);
   $cmd = preg_replace('/\s+/', ' ', $cmd);
   return array($cmd, $xml['Name'], $xml['Repository']);
 }
@@ -396,14 +404,14 @@ if (isset($_POST['contName'])) {
 
   // Remove existing container
   if (ContainerExist($Name)){
-    $_GET['cmd'] = "/usr/bin/docker rm -f $Name";
+    $_GET['cmd'] = "/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/docker rm -f $Name";
     include($dockerManPaths['plugin'] . "/include/Exec.php");
   }
 
   // Remove old container if renamed
   $existing = isset($_POST['existingContainer']) ? $_POST['existingContainer'] : FALSE;
   if ($existing && ContainerExist($existing)){
-    $_GET['cmd'] = "/usr/bin/docker rm -f $existing";
+    $_GET['cmd'] = "/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/docker rm -f $existing";
     include($dockerManPaths['plugin'] . "/include/Exec.php");
   }
 
@@ -446,7 +454,7 @@ if ($_GET['updateContainer']){
     flush();
     pullImage($Repository);
 
-    $_GET['cmd'] = "/usr/bin/docker rm -f $Name";
+    $_GET['cmd'] = "/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/docker rm -f $Name";
     include($dockerManPaths['plugin'] . "/include/Exec.php");
 
     $_GET['cmd'] = $cmd;
@@ -454,7 +462,7 @@ if ($_GET['updateContainer']){
 
     $newContainerID = $DockerClient->getImageID($Repository);
     if ( $oldContainerID and $oldContainerID != $newContainerID){
-      $_GET['cmd'] = sprintf("/usr/bin/docker rmi %s", $oldContainerID);
+      $_GET['cmd'] = sprintf("/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/docker rmi %s", $oldContainerID);
       include($dockerManPaths['plugin'] . "/include/Exec.php");
     }
 

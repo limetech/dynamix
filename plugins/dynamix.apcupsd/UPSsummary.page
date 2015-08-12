@@ -1,4 +1,4 @@
-Menu="Dashboard:0"
+Menu="Dashboard:2"
 Title="UPS Summary"
 Cond="file_exists('/var/run/apcupsd.pid')"
 ---

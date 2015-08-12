@@ -156,7 +156,7 @@ PCIe ACS Override:
 : <input type="button" id="applyBtn" value="Apply"/><input type="button" value="Done" onclick="done()">
 </form>
 
-> View the log for libvirt: <a id="openlog" title="/var/log/libvirt/libvirtd.log" href="#" onclick="openWindow('follow /var/log/libvirt/libvirtd.log','Log Information',600,900);">/var/log/libvirt/libvirtd.log</a>
+> View the log for libvirt: <a id="openlog" title="/var/log/libvirt/libvirtd.log" href="#" onclick="openWindow('/webGui/scripts/tail_log libvirt/libvirtd.log','Log Information',600,900);">/var/log/libvirt/libvirtd.log</a>
 
 
 <script src="/webGui/javascript/jquery.filetree.js"></script>
@@ -165,7 +165,7 @@ PCIe ACS Override:
 <script>
 $(function(){
 	$("#applyBtn").click(function(){
-		$("#command").val("/usr/local/emhttp/plugins/dynamix.vm.manager/event/" + ($("#SERVICE").val()=="enable" ? "started" : "stopping_svcs"));
+		$("#command").val("/plugins/dynamix.vm.manager/event/" + ($("#SERVICE").val()=="enable" ? "started" : "stopping_svcs"));
 
 		if ($('#pcie_acs_override').val() == '1') {
 			$.get("/plugins/dynamix.vm.manager/VMajax.php?action=acs-override-enable", function( data ) {

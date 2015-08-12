@@ -291,7 +291,7 @@ default:
   echo '<span class="green"><strong>Array Started</strong></span>'; break;
 }
 echo "</span>&bullet;&nbsp;<span class='bitstream'>Dynamix webGui v";
-echo exec("/usr/local/sbin/plugin version /var/log/plugins/dynamix.plg");
+echo exec("/usr/local/emhttp/plugins/dynamix.plugin.manager/scripts/plugin version /var/log/plugins/dynamix.plg");
 echo "</span></span><span id='countdown'></span><span id='copyright'>unRAID&trade; webGui &copy; 2015, Lime Technology, Inc.";
 if (isset($myPage['Author'])) {
   echo "&nbsp;|&nbsp;Page author: {$myPage['Author']}";

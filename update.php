@@ -76,7 +76,12 @@ if ($command) {
   if (isset($_POST['#env'])) {
     foreach ($_POST['#env'] as $env) putenv($env);
   }
-  if (substr($command,0,1) != "/") $command = "{$_SERVER['DOCUMENT_ROOT']}/$command";
+  if (strpos($command, $_SERVER['DOCUMENT_ROOT']) !== false)
+    syslog(LOG_INFO, "Deprecated absolute #command path: $command");
+  else if ($command[0] != '/')
+    syslog(LOG_INFO, "Deprecated relative #command path: $command");
+  else
+    $command = $_SERVER['DOCUMENT_ROOT'] . $command;
   if (isset($_POST['#arg'])) {
     $args = $_POST['#arg'];
     ksort($args);

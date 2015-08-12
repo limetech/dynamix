@@ -141,7 +141,8 @@ Partition format:
 Comments:
 : <input type="text" name="diskComment.<?=$disk['idx'];?>" maxlength="256" value="<?=$disk['comment']?>">
 
-> Anything you like, up to 256 characters.
+> This text will appear under the *Comments* column for the share in Windows Explorer.
+> Enter anything you like, up to 256 characters.
 
 <?endif;?>
 
@@ -211,28 +212,27 @@ Spinup group(s):
 
 <div id="title" class="nocontrol"><span class="left"><img src="/plugins/dynamix/icons/poolinformation.png" class="icon">Pool Information</span></div>
 
-btrfs filesystem show
+btrfs filesystem show:
 : <?echo "<pre>".shell_exec("/sbin/btrfs filesystem show {$disk['uuid']}")."</pre>";?>
 
 <?if ($disk['fsStatus']=="Mounted"):?>
 
-btrfs filesystem df
+btrfs filesystem df:
 : <?echo "<pre>".shell_exec("/sbin/btrfs filesystem df /mnt/{$disk['name']}")."</pre>";?>
 
 <?endif;?>
 <?if ($var['cacheSbNumDisks']>1):?>
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
 <?if ($disk['fsStatus']=="Mounted"):?>
-<?exec("/sbin/btrfs balance status /mnt/{$disk['name']}", $balance_status, $retval);?>
+<?exec("/usr/local/emhttp/webGui/scripts/btrfs balance status /mnt/{$disk['name']}", $balance_status, $retval);?>
 
 <div id="title" class="nocontrol"><span class="left"><img src="/plugins/dynamix/icons/balancestatus.png" class="icon">Balance Status</span></div>
-&nbsp;
+
+btrfs balance status:
 : <?echo "<pre>" . implode("\n", $balance_status) . "</pre>";?>
 
-> This is the output of *btrfs balance status /mnt/cache*.
-
-<?if (strstr(implode($balance_status), "running")===FALSE):?>
-<input type="hidden" name="#command" value="/sbin/btrfs balance start">
+<?if ($retval != 0):?>
+<input type="hidden" name="#command" value="/webGui/scripts/btrfs balance start">
 <input type="hidden" name="#arg[2]" value="/mnt/<?=$disk['name']?>">
 <input type="hidden" name="#arg[3]" value="&>/dev/null &">
 
@@ -244,7 +244,7 @@ btrfs filesystem df
 > The default *Options* are appropriate for btrfs-raid1.  Do not change this unless you know what you are doing!
 
 <?else:?>
-<input type="hidden" name="#command" value="/sbin/btrfs balance cancel /mnt/<?=$disk['name']?>">
+<input type="hidden" name="#command" value="/webGui/scripts/btrfs balance cancel /mnt/<?=$disk['name']?>">
 
 &nbsp;
 : <input type="submit" value="Cancel"> *Running*
@@ -266,30 +266,28 @@ btrfs filesystem df
 <?if ($disk['fsType']=="btrfs"):?>
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
 <?if ($disk['fsStatus']=="Mounted"):?>
-<?$scrub_cmd = "/sbin/btrfs scrub start -B";?>
-<?exec("/sbin/btrfs scrub status /mnt/{$disk['name']}", $scrub_status, $retval);?>
+<?exec("/usr/local/emhttp/webGui/scripts/btrfs scrub status /mnt/{$disk['name']}", $scrub_status, $retval);?>
 
 <div id="title" class="nocontrol"><span class="left"><img src="/plugins/dynamix/icons/scrubstatus.png" class="icon">Scrub Status</span></div>
-&nbsp;
+
+btrfs scrub status:
 : <?echo "<pre>" . implode("\n", $scrub_status) . "</pre>";?>
 
-> This is the output of *btrfs scrub status /mnt/cache*.
-
-<?if (exec("/usr/local/sbin/background status $scrub_cmd")==""):?>
-<input type="hidden" name="#command" value="<?=$scrub_cmd?>">
+<?if ($retval != 0):?>
+<input type="hidden" name="#command" value="/webGui/scripts/btrfs scrub start -B">
 <input type="hidden" name="#arg[2]" value="/mnt/<?=$disk['name']?>">
 <input type="hidden" name="#arg[3]" value="&>/dev/null &">
 
 &nbsp;
 : <input type="submit" value="Scrub"><input type="text" name="#arg[1]" maxlength="256" value="-r"> Options (see Help)
 
-> **Scrub** will open a window and run the *btrfs scrub* program to check file system integrity device.
+> **Scrub** runs the *btrfs scrub* program to check file system integrity.
 >
 > The *Options* field is initialized to include *-r* which specifies read-only.  If repair is needed, you should run
 > a second Scrub pass, removing the *-r* option; this will permit *btrfs scrub* to fix the file system.
 
 <?else:?>
-<input type="hidden" name="#command" value="/sbin/btrfs scrub cancel /mnt/<?=$disk['name']?>">
+<input type="hidden" name="#command" value="/webGui/scripts/btrfs scrub cancel /mnt/<?=$disk['name']?>">
 
 &nbsp;
 : <input type="submit" value="Cancel"> *Running*
@@ -310,19 +308,15 @@ btrfs filesystem df
 <?if ($disk['fsType']=="reiserfs"):?>
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
 <?if ($var['fsState']=="Started" && $var['startMode']=='Maintenance'):?>
-<?$check_cmd = "reiserfsck /dev/{$disk['deviceSb']} --yes --quiet";?>
-<?$status_file = "/var/lib/reiserfs/check.status.{$disk['id']}";?>
-<?$check_status = @file($status_file);?>
-<?if ($check_status === FALSE) $check_status = array("Not available");?>
+<?exec("/usr/local/emhttp/webGui/scripts/reiserfsck status /dev/{$disk['deviceSb']} {$disk['id']}", $check_status, $retval);?>
 
 <div id="title" class="nocontrol"><span class="left"><img src="/plugins/dynamix/icons/filesystemstatus.png" class="icon">Check Filesystem Status</span></div>
-&nbsp;
+
+reiserfsck status:
 : <?echo "<pre>" . implode("\n", $check_status) . "</pre>";?>
 
-> This is the latest *file system check* status.
-
-<?if (exec("/usr/local/sbin/background status $check_cmd")==""):?>
-<input type="hidden" name="#command" value="/usr/local/sbin/background start <?=$status_file?> <?=$check_cmd?>">
+<?if ($retval != 0):?>
+<input type="hidden" name="#command" value="/webGui/scripts/reiserfsck start /dev/<?=$disk['deviceSb']?> <?=$disk['id']?>">
 
 &nbsp;
 : <input type="submit" value="Check"><input type="text" name="#arg[1]" maxlength="256" value=""> Options (see Help)
@@ -339,7 +333,7 @@ btrfs filesystem df
 > increasing for the device on the Main page.
 
 <?else:?>
-<input type="hidden" name="#command" value="/usr/local/sbin/background cancel <?=$check_cmd?>">
+<input type="hidden" name="#command" value="/webGui/scripts/reiserfsck cancel /dev/<?=$disk['deviceSb']?>">
 
 &nbsp;
 : <input type="submit" value="Cancel"> *Running*
@@ -360,19 +354,15 @@ btrfs filesystem df
 <?if ($disk['fsType']=="xfs"):?>
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
 <?if ($var['fsState']=="Started" && $var['startMode']=='Maintenance'):?>
-<?$check_cmd = "xfs_repair /dev/{$disk['deviceSb']}";?>
-<?$status_file = "/var/lib/xfs/check.status.{$disk['id']}";?>
-<?$check_status = @file($status_file);?>
-<?if ($check_status === FALSE) $check_status = array("Not available");?>
+<?exec("/usr/local/emhttp/webGui/scripts/xfs_repair status /dev/{$disk['deviceSb']} {$disk['id']}", $check_status, $retval);?>
 
 <div id="title" class="nocontrol"><span class="left"><img src="/plugins/dynamix/icons/filesystemstatus.png" class="icon">Check Filesystem Status</span></div>
-&nbsp;
+
+xfs_repair status:
 : <?echo "<pre>" . implode("\n", $check_status) . "</pre>";?>
 
-> This is the latest *file system check* status.
-
-<?if (exec("/usr/local/sbin/background status $check_cmd")==""):?>
-<input type="hidden" name="#command" value="/usr/local/sbin/background start <?=$status_file?> <?=$check_cmd?>">
+<?if ($retval != 0):?>
+<input type="hidden" name="#command" value="/webGui/scripts/xfs_repair start /dev/<?=$disk['deviceSb']?> <?=$disk['id']?>">
 
 &nbsp;
 : <input type="submit" value="Check"><input type="text" name="#arg[1]" maxlength="256" value="-n"> Options (see Help)
@@ -388,7 +378,7 @@ btrfs filesystem df
 > increasing for the device on the Main page.
 
 <?else:?>
-<input type="hidden" name="#command" value="/usr/local/sbin/background cancel <?=$check_cmd?>">
+<input type="hidden" name="#command" value="/webGui/scripts/xfs_repair cancel /dev/<?=$disk['deviceSb']?>">
 
 &nbsp;
 : <input type="submit" value="Cancel"> *Running*

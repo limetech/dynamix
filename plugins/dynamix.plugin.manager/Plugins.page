@@ -35,7 +35,7 @@ $(function() {
     $('.desc_readmore').readmore({maxHeight:58});
   });
   $('#plugin_tree').fileTree({root:'/boot/',filter:'plg'}, function(file) {$('#plugin_file').val(file);});
-  $('.tabs').append("<span class='status vhshift'><input type='button' value='Check for Updates' onclick='openBox(\"plugin checkall\",\"Plugin Update Check\",490,430,true)'></span>");
+  $('.tabs').append("<span class='status vhshift'><input type='button' value='Check for Updates' onclick='openBox(\"/plugins/dynamix.plugin.manager/scripts/plugin checkall\",\"Plugin Update Check\",490,430,true)'></span>");
 });
 </script>
 
