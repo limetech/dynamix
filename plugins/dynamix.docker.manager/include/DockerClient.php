@@ -498,18 +498,21 @@ class DockerClient {
 	}
 
 
-	private function getDockerJSON($url, $method = "GET", $callback = null){
+	public function getDockerJSON($url, $method = "GET", &$code = null, $callback = null){
 		$fp = stream_socket_client('unix:///var/run/docker.sock', $errno, $errstr);
 
 		if ($fp === false) {
 			echo "Couldn't create socket: [$errno] $errstr";
 			return NULL;
 		}
-		$out="$method {$url} HTTP/1.1\r\nConnection: Close\r\n\r\n";
+		$out="$method {$url} HTTP/1.0\r\nConnection: Close\r\n\r\n";
 		fwrite($fp, $out);
 		// Strip headers out
 		$headers = '';
 		while (($line = fgets($fp)) !== false) {
+			if (! is_bool(strpos($line, "HTTP/1"))) {
+				$code = vsprintf('%2$s',preg_split("#\s+#", $line));
+			}
 			$headers .= $line;
 			if (rtrim($line) == '') {
 				break;
@@ -518,9 +521,9 @@ class DockerClient {
 		$data = array();
 		while (($line = fgets($fp)) !== false) {
 			if (is_array($j = json_decode($line, true))) {
-				 $data = array_merge($data, $j);
-				 if ($callback) $callback($line);
+				$data = array_merge($data, $j);
 			}
+			if ($callback) $callback($line);
 		}
 		fclose($fp);
 		return $data;
@@ -532,14 +535,16 @@ class DockerClient {
 
 	}
 
-	public function pullImage($image, $callback = null) {
-		return $this->getDockerJSON("/images/create?fromImage=$image", "POST", $callback);
-	}
 
 	public function getInfo(){
 		$info = $this->getDockerJSON("/info");
 		$version = $this->getDockerJSON("/version");
-		return array_merge($info[0], $version[0]);
+		return array_merge($info, $version);
+	}
+
+
+	public function getContainetLog($id, $callback, $tail = null, $since = null) {
+		$this->getDockerJSON("/containers/${id}/logs?stderr=1&stdout=1&tail=${tail}&since=${since}", "GET", $code, $callback);
 	}
 
 
@@ -550,20 +555,37 @@ class DockerClient {
 
 
 	public function startContainer($id){
-		$json = $this->getDockerJSON("/containers/${id}/start", "POST");
-		return $json;
-	}
-
-
-	public function removeImage($id){
-		$json = $this->getDockerJSON("/images/{$id}", "DELETE");
-		return $json;
+		$this->getDockerJSON("/containers/${id}/start", "POST", $code);
+		return ($code == "204") ? true : false;
 	}
 
 
 	public function stopContainer($id){
-		$json = $this->getDockerJSON("/containers/${id}/stop", "POST");
-		return $json;
+		$this->getDockerJSON("/containers/${id}/stop", "POST", $code);
+		return ($code == "204") ? true : false;
+	}
+
+
+	public function restartContainer($id){
+		$json = $this->getDockerJSON("/containers/${id}/restart", "POST", $code);
+		return ($code == "204") ? true : false;
+	}
+
+
+	public function removeContainer($id){
+		$json = $this->getDockerJSON("/containers/{$id}?force=1", "DELETE", $code);
+		return ($code == "204") ? true : false;
+	}
+
+
+	public function pullImage($image, $callback = null) {
+		return $this->getDockerJSON("/images/create?fromImage=$image", "POST", $code, $callback);
+	}
+
+
+	public function removeImage($id){
+		$json = $this->getDockerJSON("/images/{$id}?force=1", "DELETE", $code);
+		return ($code == "200") ? true : false;
 	}
 
 
