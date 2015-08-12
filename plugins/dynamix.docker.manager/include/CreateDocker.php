@@ -532,7 +532,7 @@ $showAdditionalInfo = true;
   table.Preferences tr>td+td{font-weight: normal;}
   .show{display:block;}
   table td{font-size:14px;vertical-align:bottom;text-align:left;}
-  .inline_help{font-size:12px;}
+  .inline_help{font-size:12px;font-weight: normal;}
   .desc{padding:6px;line-height:15px;width:inherit;}
   .toggleMode{cursor:pointer;color:#a3a3a3;letter-spacing:0;padding:0;padding-right:10px;font-family:arimo;font-size:12px;line-height:1.3em;font-weight:bold;margin:0;}
   .toggleMode:hover,.toggleMode:focus,.toggleMode:active,.toggleMode .active{color:#625D5D;}
@@ -1194,7 +1194,7 @@ $showAdditionalInfo = true;
     <tr>
       <td style="vertical-align: top; min-width: 150px; white-space: nowrap; padding-top: 17px;" class="{11}"><b>{0}: </b></td>
       <td style="width: 100%">
-        <input type="text" class="textPath" name="confValue[]" default="{2}" value="{9}" {11}> <button type="button" onclick="resetField(this);">Reset</button>
+        <input type="text" class="textPath" name="confValue[]" default="{2}" value="{9}" {11}> <button type="button" onclick="resetField(this);">Default</button>
         {10}
       </td>
     </tr>
