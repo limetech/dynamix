@@ -608,10 +608,12 @@ class DockerClient {
 			$running = $matches ? TRUE : FALSE;
 			$details = $this->getContainerDetails($obj['Id']);
 
-			// echo "<pre>".print_r($details,TRUE)."</pre>";
+			// echo "<pre>".print_r($obj,TRUE)."</pre>";			
 
+			// Docker 1.7 uses full image ID when there aren't tags, so lets crop it
+			$Image            = (strlen($obj['Image']) == 64) ? substr($obj['Image'],0,12) : $obj['Image'];
 			// Docker 1.7 doesn't automatically append the tag 'latest', so we do that now if there's no tag
-			$c["Image"]       = ($obj['Image'] && count(preg_split("#[:\/]#", $obj['Image'])) < 3) ? "${obj[Image]}:latest" : $obj['Image'];
+			$c["Image"]       = ($Image && count(preg_split("#[:\/]#", $Image)) < 3) ? "${Image}:latest" : $Image;
 			$c["ImageId"]     = substr($details["Image"],0,12);
 			$c["Name"]        = substr($details['Name'], 1);
 			$c["Status"]      = $status;
@@ -641,16 +643,18 @@ class DockerClient {
 		return $containers;
 	}
 
+
 	public function getContainerID($Container){
-		foreach ($this->getDockerContainers() as $ct) {
-			preg_match("%" . preg_quote($Container, "%") ."%", $ct["Name"], $matches);
-			if( $matches){
-				return $ct["Id"];
+		$json = $this->getDockerJSON("/containers/json?all=1");
+		if (! $json ){ return null; }
+		foreach($json as $obj){
+			$Name = substr($obj['Names'][0], 1);
+			$Id   = substr($obj['Id'],0,12);
+			if (! is_bool(strpos($Name, $Container))){
+				return $Id;
 			}
 		}
-		return NULL;
 	}
-
 
 	public function getImageID($Image){
 		$allImages = $this->getDockerImages();
