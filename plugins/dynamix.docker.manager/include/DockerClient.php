@@ -712,7 +712,7 @@ class DockerClient {
 				              "BaseImageId" => substr($image['Id'],0,12));
 			}	
 		}
-		return array("BaseImage"   => null,
+		return array("BaseImage"   => "not available",
 				         "BaseImageId" => null);
 	}
 
