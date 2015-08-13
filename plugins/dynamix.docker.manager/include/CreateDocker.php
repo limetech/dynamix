@@ -899,7 +899,7 @@ $showAdditionalInfo = true;
   <input type="hidden" id="rmTemplate" name="rmTemplate" value="" />
 </form>
 
-<form method="POST">
+<form method="POST" autocomplete="off">
   <div id="canvas" style="z-index:1;">
     <table class="Preferences">
       <? if($xmlType == "edit"):
@@ -1194,7 +1194,7 @@ $showAdditionalInfo = true;
     <tr>
       <td style="vertical-align: top; min-width: 150px; white-space: nowrap; padding-top: 17px;" class="{11}"><b>{0}: </b></td>
       <td style="width: 100%">
-        <input type="text" class="textPath" name="confValue[]" default="{2}" value="{9}" {11}> <button type="button" onclick="resetField(this);">Default</button>
+        <input type="text" class="textPath" name="confValue[]" default="{2}" value="{9}" autocomplete="off" {11} > <button type="button" onclick="resetField(this);">Default</button>
         {10}
       </td>
     </tr>

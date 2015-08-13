@@ -457,6 +457,12 @@ class DockerUpdate{
 ######################################
 class DockerClient {
 
+	private $allContainersCache = null;
+
+
+	private $allImagesCache = null;
+
+
 	private function build_sorter($key) {
 		return function ($a, $b) use ($key) {
 			return strnatcmp(strtolower($a[$key]), strtolower($b[$key]));
@@ -557,25 +563,40 @@ class DockerClient {
 
 	public function startContainer($id){
 		$this->getDockerJSON("/containers/${id}/start", "POST", $code);
-		return ($code == "204") ? true : false;
+		$codes = array("204" => "No error",
+		               "304" => "Container already started",
+		               "404" => "No such container",
+		               "500" => "Server error");
+		return ($code == "204") ? true : $codes[$code];
 	}
 
 
 	public function stopContainer($id){
 		$this->getDockerJSON("/containers/${id}/stop", "POST", $code);
-		return ($code == "204") ? true : false;
+		$codes = array("204" => "No error.",
+		               "304" => "Container already started.",
+		               "404" => "No such container.",
+		               "500" => "Server error.");
+		return ($code == "204") ? true : $codes[$code];
 	}
 
 
 	public function restartContainer($id){
 		$json = $this->getDockerJSON("/containers/${id}/restart", "POST", $code);
-		return ($code == "204") ? true : false;
+		$codes = array("204" => "No error.",
+		               "404" => "No such container.",
+		               "500" => "Server error.");
+		return ($code == "204") ? true : $codes[$code];
 	}
 
 
 	public function removeContainer($id){
 		$json = $this->getDockerJSON("/containers/{$id}?force=1", "DELETE", $code);
-		return ($code == "204") ? true : false;
+		$codes = array("204" => "No error.",
+		               "400" => "Bad parameter.",
+		               "404" => "No such container.",
+		               "500" => "Server error.");
+		return ($code == "204") ? true : $codes[$code];
 	}
 
 
@@ -586,7 +607,11 @@ class DockerClient {
 
 	public function removeImage($id){
 		$json = $this->getDockerJSON("/images/{$id}?force=1", "DELETE", $code);
-		return ($code == "200") ? true : false;
+		$codes = array("200" => "No error.",
+		               "404" => "No such image.",
+		               "409" => "Conflict: image used by container ".$this->usedBy($id)[0].".",
+		               "500" => "Server error.");
+		return ($code == "200") ? true : $codes[$code];
 	}
 
 
@@ -597,6 +622,11 @@ class DockerClient {
 
 
 	public function getDockerContainers(){
+		// Return cached values
+		if (is_array($this->allContainersCache)){
+			return $this->allContainersCache;
+		}
+
 		$containers = array();
 		$json = $this->getDockerJSON("/containers/json?all=1");
 
@@ -637,24 +667,27 @@ class DockerClient {
 					                      'Type'        => $Type );
 				}
 			}
+			// Add BaseImage
+			$c = array_merge($c, $this->getBaseImage($details["Image"]));
 
 			$containers[] = $c;
 		}
 		usort($containers, $this->build_sorter('Name'));
+		$this->allContainersCache = $containers;
+
 		return $containers;
 	}
 
 
 	public function getContainerID($Container){
-		$json = $this->getDockerJSON("/containers/json?all=1");
-		if (! $json ){ return null; }
-		foreach($json as $obj){
-			$Name = substr($obj['Names'][0], 1);
-			$Id   = substr($obj['Id'],0,12);
-			if (! is_bool(strpos($Name, $Container))){
-				return $Id;
+		$allContainers = $this->getDockerContainers();
+		foreach ($allContainers as $ct) {
+			preg_match("%" . preg_quote($Container, "%") ."%", $ct["Name"], $matches);
+			if( $matches){
+				return $ct["Id"];
 			}
 		}
+		return NULL;
 	}
 
 	public function getImageID($Image){
@@ -669,12 +702,27 @@ class DockerClient {
 	}
 
 
+	public function getBaseImage($id){
+		$json = $this->getDockerJSON("/images/${id}/history");
+		// Remove this image.
+		unset($json[0]);
+		foreach ($json as $image) {
+			if (is_array($image["Tags"]) && strlen($image['Tags'][0]) ) {
+				 return array("BaseImage"   => $image['Tags'][0],
+				              "BaseImageId" => substr($image['Id'],0,12));
+			}	
+		}
+		return array("BaseImage"   => null,
+				         "BaseImageId" => null);
+	}
+
+
 	private function usedBy($imageId){
 		$out = array();
 		$Containers = $this->getDockerContainers();
 		$Containers = ( count( $Containers )) ? $Containers : array();
 		foreach ($Containers as $ct) {
-			if ($ct["ImageId"] == $imageId){
+			if ($ct["ImageId"] == $imageId || $ct["BaseImageId"] == $imageId){
 				$out[] = $ct["Name"];
 			}
 		}
@@ -683,7 +731,10 @@ class DockerClient {
 
 
 	public function getDockerImages(){
-
+		// Return cached values
+		if (is_array($this->allImagesCache)){
+			return $this->allImagesCache;
+		}
 		$images = array();
 		$c = array();
 		$json = $this->getDockerJSON("/images/json?all=0");
@@ -706,15 +757,9 @@ class DockerClient {
 			$c["Repository"]   = vsprintf('%1$s/%2$s',preg_split("#[:\/]#", $tags[0]));
 			$c["usedBy"]       = $this->usedBy($c["Id"]);
 
-			$imgDetails = $this->getImageDetails($obj['Id']);
-			// echo "<pre>".print_r($imgDetails,TRUE)."</pre>";
-			$a = $imgDetails[0]['Config']['Volumes'];
-			$b = $imgDetails[0]['Config']['ExposedPorts'];
-			$c['ImageType'] = (! count($a) && ! count($b)) ? 'base' : 'user';
-
 			$images[]          = $c;
-
 		}
+		$this->allImagesCache = $images;
 		return $images;
 	}
 }

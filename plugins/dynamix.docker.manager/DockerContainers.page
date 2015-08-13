@@ -142,6 +142,7 @@ img.stopped{opacity:0.3;}
 					echo htmlspecialchars($ct['Image']);
 				}
 				?>
+				<div class="advanced" style="color:#888; width: 160px;"><i class="fa fa-cubes" style="margin-right: 5px"></i><?=htmlspecialchars($ct['BaseImage']);?></div>
 			</td>
 			<td class="updatecolumn">
 				<?

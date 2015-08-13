@@ -90,7 +90,7 @@ function editContainer(container, template) {
 
 function rmContainer(container, image, id){
   var title = 'Removing container: '+ container;
-  $( "#dialog-confirm" ).html();
+  $( "#dialog-confirm" ).html('');
   $( "#dialog-confirm" ).append( "<br><span style='color: #E80000;'>Are you sure?</span>" );
   $( "#dialog-confirm" ).dialog({
     title: title,
@@ -121,20 +121,12 @@ function rmContainer(container, image, id){
   $(".ui-button-text").css('padding','0px 5px');
 }
 
-function updateContainer(containers){
-  var ctCmd ="";
+function updateContainer(container){
+  var ctCmd = "&ct[]=" + encodeURIComponent(container);
   var ctTitle = "";
-  if (typeof containers === "object") {
-    for (var i = 0; i < containers.length; i++) {
-      ctCmd  += "&ct[]=" + encodeURIComponent(containers[i]);
-      ctTitle += containers[i] + "<br>";
-    }
-  } else {
-    ctCmd += "&ct[]=" + encodeURIComponent(containers);
-    ctTitle += containers + "<br>";
-  }
-  var title = 'Updating container';
-  $( "#dialog-confirm" ).html(ctTitle);
+  
+  var title = 'Updating container: '+container;
+  $( "#dialog-confirm" ).html('');
   $( "#dialog-confirm" ).append( "<br><span style='color: #E80000;'>Are you sure?</span>" );
   $( "#dialog-confirm" ).dialog({
     title: title,
@@ -195,12 +187,22 @@ function rmImage(image, imageName){
 
 function imageControl(image, action, reload){
   if (typeof reload == undefined) reload = true
-  $.post(eventURL,{action:action, image:image},function(data){if(data.success && reload){location.reload();}},"json");
+  $.post(eventURL,{action:action, image:image},function(data){
+    if(data.success === true) {
+      if (reload) location.reload();
+    } else {
+      alert("Error:\n\n"+data.success);
+    }},"json");
 }
 
 function containerControl(container, action, reload){
   if (typeof reload == undefined) reload = true
-  $.post(eventURL,{action:action, container:container},function(data){if(data.success && reload){location.reload();}},"json");
+  $.post(eventURL,{action:action, container:container},function(data){
+    if(data.success === true) {
+      if (reload) location.reload();
+    } else {
+      alert("Error:\n\n"+data.success);
+    }},"json");
 }
 
 function reloadUpdate(){
