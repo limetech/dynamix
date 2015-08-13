@@ -50,7 +50,7 @@ $(function() {
 
 <form markdown="1" name="apcupsd_settings" method="POST" action="/update.php" target="progressFrame">
 <input type="hidden" name="#file" value="<?=$sName?>/<?=$sName?>.cfg">
-<input type="hidden" name="#include" value="update.apcupsd.php">
+<input type="hidden" name="#include" value="/plugins/<?=$sName?>/include/update.apcupsd.php">
 <span style="float:right;margin-right:10px"><a href="http://apcupsd.org/manual/manual.html" target="_blank" title="APC UPS Daemon user manual"><i class="fa fa-file-text-o"></i> <u>Online Manual</u></a></span>
 
 Start APC UPS daemon:

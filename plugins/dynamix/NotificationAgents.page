@@ -110,7 +110,7 @@ foreach ($xml->Agent as $agent) {
   }
   echo "<div id='title' style='position:relative;margin:0px;top:-21px;'><span class='left'><img src='/plugins/dynamix/icons/".strtolower($Name).".png' class='icon' style='height:16px;width:16px;'>${Name}</span><span class='status'>".(is_file($FileEnabled) ? "<span class='green'>Enabled</span>": "<span class='red'>Disabled</span>")."</span></div>";
   echo  "<form method='POST' name=\"${Name}\" action='/update.php' target='progressFrame'>";
-  echo  "<input type='hidden' name='#include' value='update.file.php'>";
+  echo  "<input type='hidden' name='#include' value='/webGui/include/update.file.php'>";
   echo  "<input type='hidden' name='#file' value='${File}'>";
   echo  "<input type='hidden' name='#command' value=''>";
   echo  "<input type='hidden' name='text' value=''>";
