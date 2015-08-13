@@ -498,14 +498,15 @@ class DockerClient {
 	}
 
 
-	public function getDockerJSON($url, $method = "GET", &$code = null, $callback = null){
+	public function getDockerJSON($url, $method = "GET", &$code = null, $callback = null, $unchunk = false){
 		$fp = stream_socket_client('unix:///var/run/docker.sock', $errno, $errstr);
 
 		if ($fp === false) {
 			echo "Couldn't create socket: [$errno] $errstr";
 			return NULL;
 		}
-		$out="$method {$url} HTTP/1.0\r\nConnection: Close\r\n\r\n";
+		$protocol = ($unchunk) ? "HTTP/1.0" : "HTTP/1.1";
+		$out="${method} {$url} ${protocol}\r\nConnection: Close\r\n\r\n";
 		fwrite($fp, $out);
 		// Strip headers out
 		$headers = '';
@@ -544,7 +545,7 @@ class DockerClient {
 
 
 	public function getContainetLog($id, $callback, $tail = null, $since = null) {
-		$this->getDockerJSON("/containers/${id}/logs?stderr=1&stdout=1&tail=${tail}&since=${since}", "GET", $code, $callback);
+		$this->getDockerJSON("/containers/${id}/logs?stderr=1&stdout=1&tail=${tail}&since=${since}", "GET", $code, $callback, true);
 	}
 
 

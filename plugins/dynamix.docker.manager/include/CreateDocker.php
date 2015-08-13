@@ -76,7 +76,7 @@ $pullecho = function($line) {
     if ( isset($cnt['progressDetail']['total']) && $cnt['progressDetail']['total'] > 0 ) {
       $alltotals[$cnt['id']] = $cnt['progressDetail']['total'];
     }
-    echo "<script>addToID('${id}','${status}');</script>";
+    echo "<script>addToID('${id}','${status}');</script>\n";
     @flush();
   }
   if ($status == "Downloading") {
