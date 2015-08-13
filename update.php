@@ -53,7 +53,10 @@ if ($file) {
   $keys = @parse_ini_file($file, $section);
 // the 'save' switch can be reset by the include file to disallow settings saving
   $save = true;
-  if (isset($_POST['#include'])) include str_replace("//","/","/usr/local/emhttp/{$_POST['#include']}");
+  if (isset($_POST['#include'])) {
+    $include = realpath("/usr/local/emhttp/{$_POST['#include']}");
+    if (substr($include,0,18) == "/usr/local/emhttp/") include $include;
+  }
   if ($save) {
     $text = "";
     if ($section) {
