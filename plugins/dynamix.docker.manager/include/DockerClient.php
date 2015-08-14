@@ -383,6 +383,12 @@ class DockerTemplates {
 ##   	  DOCKERUPDATE CLASS        ##
 ######################################
 class DockerUpdate{
+	public $verbose = false;
+
+	private function debug($m) {
+		if($this->verbose) echo $m."\n";
+	}
+
 
   public function download_url($url, $path = "", $bg = FALSE){
     exec("curl --max-time 30 --silent --insecure --location --fail ".($path ? " -o " . escapeshellarg($path) : "")." " . escapeshellarg($url) . " ".($bg ? ">/dev/null 2>&1 &" : "2>/dev/null"), $out, $exit_code );
@@ -392,6 +398,7 @@ class DockerUpdate{
 
 	public function getRemoteVersion($image){
 		$apiUrl     = vsprintf("http://index.docker.io/v1/repositories/%s/%s/tags/%s", preg_split("#[:\/]#", $image));
+		$this->debug("API URL: $apiUrl");
 		$apiContent = $this->download_url($apiUrl);
 		return ( $apiContent === FALSE ) ? NULL : substr(json_decode($apiContent, TRUE)[0]['id'],0,8);
 	}
@@ -438,9 +445,11 @@ class DockerUpdate{
 			$updateStatus[$img] = array('local'  => $localVersion,
 			                            'remote' => $remoteVersion,
 			                            'status' => $status);
+			$this->debug("Update status: Image='${img}', Local='${localVersion}', Remote='${remoteVersion}'");
 		}
 		file_put_contents($update_file, json_encode($updateStatus, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 	}
+
 
 	public function syncVersions($container) {
 		global $dockerManPaths;
@@ -638,7 +647,6 @@ class DockerClient {
 			preg_match("/\b^Up\b/", $status, $matches);
 			$running = $matches ? TRUE : FALSE;
 			$details = $this->getContainerDetails($obj['Id']);
-
 			// echo "<pre>".print_r($obj,TRUE)."</pre>";			
 
 			// Docker 1.7 uses full image ID when there aren't tags, so lets crop it
@@ -654,6 +662,7 @@ class DockerClient {
 			$c['Volumes']     = $details["HostConfig"]['Binds'];
 			$c["Created"]     = $this->humanTiming($obj['Created']);
 			$c["NetworkMode"] = $details['HostConfig']['NetworkMode'];
+			$c["BaseImage"]   = isset($obj["Labels"]["BASEIMAGE"]) ? $obj["Labels"]["BASEIMAGE"] : false;
 
 			$Ports = $details['HostConfig']['PortBindings'];
 			$Ports = (count ( $Ports )) ? $Ports : array();
@@ -667,8 +676,6 @@ class DockerClient {
 					                      'Type'        => $Type );
 				}
 			}
-			// Add BaseImage
-			$c = array_merge($c, $this->getBaseImage($details["Image"]));
 
 			$containers[] = $c;
 		}
@@ -690,6 +697,7 @@ class DockerClient {
 		return NULL;
 	}
 
+
 	public function getImageID($Image){
 		$allImages = $this->getDockerImages();
 		foreach ($allImages as $img) {
@@ -702,27 +710,12 @@ class DockerClient {
 	}
 
 
-	public function getBaseImage($id){
-		$json = $this->getDockerJSON("/images/${id}/history");
-		// Remove this image.
-		unset($json[0]);
-		foreach ($json as $image) {
-			if (is_array($image["Tags"]) && strlen($image['Tags'][0]) ) {
-				 return array("BaseImage"   => $image['Tags'][0],
-				              "BaseImageId" => substr($image['Id'],0,12));
-			}	
-		}
-		return array("BaseImage"   => "not available",
-				         "BaseImageId" => null);
-	}
-
-
 	private function usedBy($imageId){
 		$out = array();
 		$Containers = $this->getDockerContainers();
 		$Containers = ( count( $Containers )) ? $Containers : array();
 		foreach ($Containers as $ct) {
-			if ($ct["ImageId"] == $imageId || $ct["BaseImageId"] == $imageId){
+			if ($ct["ImageId"] == $imageId){
 				$out[] = $ct["Name"];
 			}
 		}
@@ -747,6 +740,7 @@ class DockerClient {
 			foreach($obj['RepoTags'] as $t){
 				$tags[] = htmlentities($t);
 			}
+				// echo "<pre>".print_r($obj,TRUE)."</pre>";	
 
 			$c["Created"]      = $this->humanTiming($obj['Created']);//date('Y-m-d H:i:s', $obj['Created']);
 			$c["Id"]           = substr($obj['Id'],0,12);
@@ -757,7 +751,7 @@ class DockerClient {
 			$c["Repository"]   = vsprintf('%1$s/%2$s',preg_split("#[:\/]#", $tags[0]));
 			$c["usedBy"]       = $this->usedBy($c["Id"]);
 
-			$images[]          = $c;
+			$images[$c["Id"]]  = $c;
 		}
 		$this->allImagesCache = $images;
 		return $images;
