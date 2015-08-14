@@ -30,9 +30,7 @@
  * #arg     : an array of arguments for the shell command
  */
 function write_log($string) {
-  if (empty($string)) {
-    return;
-  }
+  if (empty($string)) return;
   syslog(LOG_INFO, $string);
   $string = str_replace("\n", "<br>", $string);
   $string = str_replace('"', "\\\"", trim($string));
@@ -55,7 +53,13 @@ if ($file) {
   $keys = @parse_ini_file($file, $section);
 // the 'save' switch can be reset by the include file to disallow settings saving
   $save = true;
-  if (isset($_POST['#include'])) include $_POST['#include'];
+  if (isset($_POST['#include'])) {
+    $include = realpath("/usr/local/emhttp/{$_POST['#include']}");
+    if (substr($include,0,18) == "/usr/local/emhttp/") include $include; else {
+      syslog(LOG_INFO, "Include file not allowed: $include. Settings not saved!");
+      $save = false;
+    }
+  }
   if ($save) {
     $text = "";
     if ($section) {
@@ -91,8 +95,6 @@ if ($command) {
   $proc = popen($command, 'r');
   while (!feof($proc)) {
     write_log(fgets($proc));
-//    write_log(fread($proc, 4096));
-//    @flush();
   }
 }
 ?>

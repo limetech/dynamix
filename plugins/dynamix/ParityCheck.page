@@ -85,7 +85,7 @@ function presetParity(form) {
 <form markdown="1" name="parity_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareParity(this)">
 <input type="hidden" name="#file" value="dynamix/dynamix.cfg"/>
 <input type="hidden" name="#section" value="parity"/>
-<input type="hidden" name="#include" value="update.parity.php"/>
+<input type="hidden" name="#include" value="/webGui/include/update.parity.php"/>
 Scheduled parity check:
 : <select name="mode" size="1" onchange="submit()">
   <?for ($m=0; $m<count($mode); $m++):?>

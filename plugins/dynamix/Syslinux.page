@@ -28,7 +28,7 @@ function setDefault(form) {
 }
 </script>
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
-<input type="hidden" name="#include" value="update.file.php">
+<input type="hidden" name="#include" value="/webGui/include/update.file.php">
 <input type="hidden" name="#file" value="<?=$file;?>">
 Syslinux configuration:
 
