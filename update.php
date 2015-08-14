@@ -56,7 +56,7 @@ if ($file) {
   if (isset($_POST['#include'])) {
     $include = realpath("/usr/local/emhttp/{$_POST['#include']}");
     if (substr($include,0,18) == "/usr/local/emhttp/") include $include; else {
-      syslog(LOG_INFO, "Include file not found: $include. Settings not saved!");
+      syslog(LOG_INFO, "Include file not allowed: $include. Settings not saved!");
       $save = false;
     }
   }
