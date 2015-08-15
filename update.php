@@ -42,20 +42,21 @@ readfile('update.htm');
 
 $file = isset($_POST['#file']) ? $_POST['#file'] : false;
 $command = isset($_POST['#command']) ? $_POST['#command'] : false;
+$docroot = $_SERVER['DOCUMENT_ROOT'];
 
 if ($file) {
 // prepend with boot (flash) if path is relative
   if ($file[0]!='/') $file = "/boot/config/plugins/$file";
   $section = isset($_POST['#section']) ? $_POST['#section'] : false;
   $cleanup = isset($_POST['#cleanup']);
-  $default = isset($_POST['#default']) ? @parse_ini_file('/usr/local/emhttp/plugins/'.basename(dirname($file)).'/default.cfg', $section) : array();
+  $default = isset($_POST['#default']) ? @parse_ini_file("$docroot/plugins/".basename(dirname($file))."/default.cfg", $section) : array();
 
   $keys = @parse_ini_file($file, $section);
 // the 'save' switch can be reset by the include file to disallow settings saving
   $save = true;
   if (isset($_POST['#include'])) {
-    $include = realpath("/usr/local/emhttp/{$_POST['#include']}");
-    if (substr($include,0,18) == "/usr/local/emhttp/") include $include; else {
+    $include = realpath($docroot.'/'.$_POST['#include']);
+    if (strpos($include, $docroot) === 0) include $include; else {
       syslog(LOG_INFO, "Include file not allowed: $include. Settings not saved!");
       $save = false;
     }
@@ -80,16 +81,16 @@ if ($command) {
   if (isset($_POST['#env'])) {
     foreach ($_POST['#env'] as $env) putenv($env);
   }
-  if (strpos($command, $_SERVER['DOCUMENT_ROOT']) !== false)
+  if (strpos($command, $docroot) !== 0)
     syslog(LOG_INFO, "Deprecated absolute #command path: $command");
   else if ($command[0] != '/')
     syslog(LOG_INFO, "Deprecated relative #command path: $command");
   else
-    $command = $_SERVER['DOCUMENT_ROOT'] . $command;
+    $command = $docroot.$command;
   if (isset($_POST['#arg'])) {
     $args = $_POST['#arg'];
     ksort($args);
-    $command = "$command " . implode(" ", $args);
+    $command .= " ".implode(" ", $args);
   }
   write_log($command);
   $proc = popen($command, 'r');
