@@ -14,7 +14,7 @@
 <?
 require_once('/usr/local/emhttp/webGui/include/Wrappers.php');
 
-$notify = "/usr/local/emhttp/webGui/notify";
+$notify = "/usr/local/emhttp/webGui/scripts/notify";
 
 $ram = "/var/local/emhttp/monitor.ini";
 $rom = "/boot/config/plugins/dynamix/monitor.ini";
