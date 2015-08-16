@@ -81,7 +81,7 @@ if ($command) {
   if (isset($_POST['#env'])) {
     foreach ($_POST['#env'] as $env) putenv($env);
   }
-  if (strpos($command, $docroot) !== 0)
+  if (strpos($command, $docroot) === 0)
     syslog(LOG_INFO, "Deprecated absolute #command path: $command");
   else if ($command[0] != '/')
     syslog(LOG_INFO, "Deprecated relative #command path: $command");
