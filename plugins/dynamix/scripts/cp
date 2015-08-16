@@ -1,0 +1,4 @@
+#!/bin/bash
+# restricted 'cp'
+[[ ${2:0:21} == /boot/config/plugins/ ]] && /bin/cp -f $1 $2
+[[ ${2:0:18} == /usr/local/emhttp/ ]] && /bin/cp -f $1 $2

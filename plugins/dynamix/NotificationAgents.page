@@ -49,43 +49,51 @@ function prepareService(el, name) {
       }
     });
     vars += $(this).attr('name')+'="'+include+"\"\n";
-  }); 
+  });
   FileEnabled = FilesEnabled[name];
   FileDisabled = FilesDisabled[name];
+  form.find("input[name=#command]").val("/webGui/scripts/mv");
   if (form.find("select[name=Enabled]").val() == "yes") {
-    form.find("input[name=#command]").val("mv -f '"+FileDisabled+"' '"+FileEnabled+"'");
+    form.find("input[name=#arg\\[1\\]]").val(FileDisabled);
+    form.find("input[name=#arg\\[2\\]]").val(FileEnabled);
   } else {
-    form.find("input[name=#command]").val("mv -f '"+FileEnabled+"' '"+FileDisabled+"'");
+    form.find("input[name=#arg\\[1\\]]").val(FileEnabled);
+    form.find("input[name=#arg\\[2\\]]").val(FileDisabled);
   }
   form.find('input[name=text]').val(script.format(vars,"\n"));
 }
-function execCmd(command) {
+function execCmd(command, arg1, arg2) {
   form = $("#formExec");
-  form.find("input[name=#command]").val(command);
+  form.find("input[name=#command]").val('/webGui/scripts/'+command);
+  if (arg1) form.find("input[name=#arg\\[1\\]]").val(arg1);
+  if (arg2) form.find("input[name=#arg\\[2\\]]").val(arg2);
   form.submit();
 }
 function testService(name, file) {
   form = $("#formExec");
-  form.find("input[name=#command]").val(file);
+  form.find("input[name=#command]").val('/webGui/scripts/bash');
+  form.find("input[name=#arg\\[1\\]]").val(file);
   form.append('<input type="hidden" name="#env[]" value="EVENT='+name+' test.">');
   form.append('<input type="hidden" name="#env[]" value="SUBJECT='+name+' test.">');
   form.append('<input type="hidden" name="#env[]" value="DESCRIPTION='+name+' test.">');
   form.append('<input type="hidden" name="#env[]" value="IMPORTANCE=normal">');
-  execCmd(file);
+  form.submit();
 }
 function initDropdown() {
-  if (openPage) { $("[id^='slot_']").dropdownchecklist({width:300,explicitClose:'...close'}); openPage = false; }
+  if (openPage) {$("[id^='slot_']").dropdownchecklist({width:300,explicitClose:'...close'}); openPage = false;}
 }
 </script>
 <form method='POST' id="formExec" action='/update.php' target='progressFrame'>
 <input type='hidden' name='#command' value=''>
+<input type='hidden' name='#arg[1]' value=''>
+<input type='hidden' name='#arg[2]' value=''>
 </form>
 <?
 $xml = @simplexml_load_file($xml_file) or die("Fail opening $xml_file");
 foreach ($xml->Agent as $agent) {
   $Name = $agent->Name;
-  $FileEnabled = "${agents_dir}/${Name}.sh";
-  $FileDisabled = "${agents_disabled}/${Name}.sh";
+  $FileEnabled = "${agents_dir}/$Name.sh";
+  $FileDisabled = "${agents_disabled}/$Name.sh";
   if (file_exists($FileDisabled)) {
     $File = $FileDisabled;
     if (is_file($FileEnabled)) unlink($FileEnabled);
@@ -108,17 +116,19 @@ foreach ($xml->Agent as $agent) {
   foreach (explode(PHP_EOL,(String) $agent->Script) as $line) {
     if(trim($line)) $Script .= trim($line)."{1}";
   }
-  echo "<div id='title' style='position:relative;margin:0px;top:-21px;'><span class='left'><img src='/plugins/dynamix/icons/".strtolower($Name).".png' class='icon' style='height:16px;width:16px;'>${Name}</span><span class='status'>".(is_file($FileEnabled) ? "<span class='green'>Enabled</span>": "<span class='red'>Disabled</span>")."</span></div>";
-  echo  "<form method='POST' name=\"${Name}\" action='/update.php' target='progressFrame'>";
-  echo  "<input type='hidden' name='#include' value='/webGui/include/update.file.php'>";
-  echo  "<input type='hidden' name='#file' value='${File}'>";
-  echo  "<input type='hidden' name='#command' value=''>";
-  echo  "<input type='hidden' name='text' value=''>";
-  echo  "<dl><dt>Agent function:</dt><dd><select name='Enabled' size='1'>";
-  echo  mk_option(is_file($FileDisabled), 'no', 'Disabled');
-  echo  mk_option(is_file($FileEnabled), 'yes', 'Enabled');
+  echo "<div id='title' style='position:relative;margin:0px;top:-21px;'><span class='left'><img src='/plugins/dynamix/icons/".strtolower($Name).".png' class='icon' style='height:16px;width:16px;'>$Name</span><span class='status'>".(is_file($FileEnabled) ? "<span class='green'>Enabled</span>": "<span class='red'>Disabled</span>")."</span></div>";
+  echo "<form method='POST' name=\"$Name\" action='/update.php' target='progressFrame'>";
+  echo "<input type='hidden' name='#include' value='/webGui/include/update.file.php'>";
+  echo "<input type='hidden' name='#file' value='${File}'>";
+  echo "<input type='hidden' name='#command' value=''>";
+  echo "<input type='hidden' name='#arg[1]' value=''>";
+  echo "<input type='hidden' name='#arg[2]' value=''>";
+  echo "<input type='hidden' name='text' value=''>";
+  echo "<dl><dt>Agent function:</dt><dd><select name='Enabled' size='1'>";
+  echo mk_option(is_file($FileDisabled), 'no', 'Disabled');
+  echo mk_option(is_file($FileEnabled), 'yes', 'Enabled');
   echo "</select></dd></dl>";
-  echo "<script>Scripts['${Name}']=".json_encode($Script).";FilesEnabled['${Name}']='$FileEnabled';FilesDisabled['${Name}']='$FileDisabled';</script>";
+  echo "<script>Scripts['$Name']=".json_encode($Script).";FilesEnabled['$Name']='$FileEnabled';FilesDisabled['$Name']='$FileDisabled';</script>";
   $i = 1;
   foreach ($agent->Variables->children() as $Var) {
     $vName = preg_replace('#\[([^\]]*)\]#', '<$1>', (string) $Var);
@@ -137,10 +147,10 @@ foreach ($xml->Agent as $agent) {
     echo "</dd></dl>";
     if ($vHelp) echo "<blockquote class='inline_help'>$vHelp</blockquote>";
   }
-  echo "<dl><dt>&nbsp;</dt><dd><input type='submit' value='Apply' onclick='prepareService(this, \"${Name}\")'>";
+  echo "<dl><dt>&nbsp;</dt><dd><input type='submit' value='Apply' onclick='prepareService(this, \"$Name\")'>";
   echo "<input type='button' value='Done' onclick='done()'>";
   if (is_file($File)) {
-    echo "<input type='button' value='Delete' onclick='execCmd(\"rm $File\")'>";
+    echo "<input type='button' value='Delete' onclick='execCmd(\"rm\",\"$File\")'>";
     echo "<input type='button' value='Test' onclick='testService(\"$Name\",\"$File\")'>";
   }
   echo "</dd></dl></form><div style='min-height:50px;'></div>";
