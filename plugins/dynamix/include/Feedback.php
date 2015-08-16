@@ -33,7 +33,8 @@ if (array_key_exists('getdiagnostics', $_GET)) {
 .allpanels{display:none;position:absolute;left:15px;right:15px;top:40px;bottom:25px;overflow:auto;margin-top:15px;}
 #footer_panel{position:fixed;left:5px;right:5px;bottom:0;height:30px;line-height:10px;text-align:center}
 textarea{width:100%;height:250px;margin:10px 0}
-input[type=button]{margin-right:0}
+input[type=button]{margin-right:0;float:right}
+input[type=email]{margin-top:8px;float:left}
 </style>
 <body>
 <div style="margin-top:0;font-size:12px;line-height:30px;color:#303030;margin-left:5px;margin-right:5px">
@@ -49,17 +50,17 @@ input[type=button]{margin-right:0}
 <div id="featurerequest_panel" class="allpanels">
 <textarea id="featureDescription" placeholder="Please summarize your feature request here."></textarea>
 <br>
-<input type="button" style="float:right;" id="featureSubmit" value="Submit"/>
+<input type="email" id="featureEmail" placeholder="Contact Email Address (optional)" /><input type="button" id="featureSubmit" value="Submit"/>
 </div>
 <div id="bugreport_panel" class="allpanels">
 <textarea id="bugDescription"></textarea>
 <p style="line-height:14px;margin-top:0;font-size:11px"><b>NOTE:</b> <i>Submission of this bug report will automatically send your system diagnostics to Lime Technology.</i></p>
-<input type="button" style="float:right;" id="bugSubmit" value="Submit"/>
+<input type="email" id="bugEmail" placeholder="Contact Email Address (optional)" /><input type="button" id="bugSubmit" value="Submit"/>
 </div>
 <div id="comment_panel" class="allpanels">
 <textarea id="commentDescription" placeholder="Type your question or comment to Lime Technology here.  We will respond by to the e-mail address associated with your registration key."></textarea>
 <br>
-<input type="button" style="float:right;" id="commentSubmit" value="Submit"/>
+<input type="email" id="commentEmail" placeholder="Contact Email Address (optional)" /><input type="button" id="commentSubmit" value="Submit"/>
 </div>
 <div id="spinner_image"><img src="/webGui/images/loading.gif"/></div>
 <div id="footer_panel">
@@ -90,9 +91,18 @@ function onlinepoll_load() {
     });
 }
 
-function featurerequest_reset() { $('#featureDescription').val(""); }
-function bugreport_reset() { $('#bugDescription').val("Bug Description:\n\nHow to reproduce:\n\nExpected results:\n\nActual results:\n\nOther information:\n\n"); }
-function comment_reset() { $('#commentDescription').val(""); }
+function featurerequest_reset() {
+    $('#featureDescription').val("");
+    $('#featureEmail').val("");
+}
+function bugreport_reset() {
+    $('#bugDescription').val("Bug Description:\n\nHow to reproduce:\n\nExpected results:\n\nActual results:\n\nOther information:\n\n");
+    $('#bugEmail').val("");
+}
+function comment_reset() {
+    $('#commentDescription').val("");
+    $('#commentEmail').val("");
+}
 
 function form_submit(url, params, $panel, diagnostics) {
     $panel.find('textarea,input').prop('disabled', true);
@@ -161,17 +171,17 @@ $(function() {
 
     $('#featureSubmit').click(function featureSubmitClick(){
         if ($('#featureDescription').val() === '') return;
-        form_submit('https://keys.lime-technology.com/feedback/featurerequest',{description:$('#featureDescription').val()},$('#featurerequest_panel'));
+        form_submit('https://keys.lime-technology.com/feedback/featurerequest',{description:$('#featureDescription').val(),email:$('#featureEmail').val()},$('#featurerequest_panel'));
     });
 
     $('#bugSubmit').click(function bugSubmitClick(){
         if ($('#bugDescription').val() === '') return;
-        form_submit('https://keys.lime-technology.com/feedback/bugreport',{description:$('#bugDescription').val()},$('#bugreport_panel'),true); // attach diagnostics
+        form_submit('https://keys.lime-technology.com/feedback/bugreport',{description:$('#bugDescription').val(),email:$('#bugEmail').val()},$('#bugreport_panel'),true); // attach diagnostics
     });
 
     $('#commentSubmit').click(function commentSubmitClick(){
         if ($('#commentDescription').val() === '') return;
-        form_submit('https://keys.lime-technology.com/feedback/comment',{description:$('#commentDescription').val()},$('#comment_panel'));
+        form_submit('https://keys.lime-technology.com/feedback/comment',{description:$('#commentDescription').val(),email:$('#commentEmail').val()},$('#comment_panel'));
     });
 
     featurerequest_reset();
