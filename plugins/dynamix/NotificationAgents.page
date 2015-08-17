@@ -1,10 +1,6 @@
 Menu="Notifications:3"
 Title="Notification Agents"
 ---
-<?
-$xml_file = "webGui/include/NotificationAgents.xml";
-$fields = array('Event','Subject','Timestamp','Description','Importance','Content');
-?>
 <script>
 var scripts = new Object();
 var enabledAgents = new Object();
@@ -78,6 +74,8 @@ function initDropdown() {
 <input type='hidden' name='#arg[2]' value=''>
 </form>
 <?
+$fields = array('Event','Subject','Timestamp','Description','Importance','Content');
+$xml_file = "webGui/include/NotificationAgents.xml";
 $xml = @simplexml_load_file($xml_file) or die("Failed to open $xml_file");
 foreach ($xml->Agent as $agent) {
   $name = $agent->Name;
