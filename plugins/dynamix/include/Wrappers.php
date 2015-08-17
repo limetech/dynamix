@@ -24,4 +24,12 @@ function parse_cron_cfg($plugin, $job, $text = "") {
   if ($text) file_put_contents($cron, $text); else @unlink($cron);
   exec("/usr/local/sbin/update_cron");
 }
+
+function agent_fullname($agent, $state) {
+  switch ($state) {
+    case 'enabled' : return "/boot/config/plugins/dynamix/notifications/agents/$agent";
+    case 'disabled': return "/boot/config/plugins/dynamix/notifications/agents-disabled/$agent";
+    default        : return $agent;
+  }
+}
 ?>
