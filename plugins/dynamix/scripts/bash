@@ -1,4 +1,0 @@
-#!/bin/bash
-# restricted 'bash'
-[[ ${1:0:21} == /boot/config/plugins/ ]] && /bin/bash $1
-[[ ${1:0:18} == /usr/local/emhttp/ ]] && /bin/bash $1

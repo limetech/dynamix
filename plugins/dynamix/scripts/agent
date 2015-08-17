@@ -1,0 +1,25 @@
+#!/bin/bash
+
+flash="/boot/config/plugins/"
+docroot="/usr/local/emhttp/"
+f=${#flash}
+d=${#docroot}
+
+case $1 in
+enable)
+  [[ ${3:0:$f} == $flash ]] && /bin/mv -f $2 $3
+  [[ ${3:0:$d} == $docroot ]] && /bin/mv -f $2 $3
+;;
+disable)
+  [[ ${2:0:$f} == $flash ]] && /bin/mv -f $3 $2
+  [[ ${2:0:$d} == $docroot ]] && /bin/mv -f $3 $2
+;;
+delete)
+  [[ ${2:0:$f} == $flash ]] && /bin/rm -f $2
+  [[ ${2:0:$d} == $docroot ]] && /bin/rm -f $2
+;;
+test)
+  [[ ${2:0:$f} == $flash ]] && /bin/bash $2
+  [[ ${2:0:$d} == $docroot ]] && /bin/bash $2
+;;
+esac

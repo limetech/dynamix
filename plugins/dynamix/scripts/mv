@@ -1,4 +1,0 @@
-#!/bin/bash
-# restricted 'mv'
-[[ ${2:0:21} == /boot/config/plugins/ ]] && /bin/mv -f $1 $2
-[[ ${2:0:18} == /usr/local/emhttp/ ]] && /bin/mv -f $1 $2
