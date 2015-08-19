@@ -22,8 +22,8 @@ if ($argv[1]) {
   $zip = "/boot/logs/$server-diagnostics-".date('Ymd-Hi').".zip";
 }
 $diag = basename($zip, '.zip');
-exec("mkdir -p /$diag/array /$diag/system /$diag/config /$diag/logs /$diag/shares /$diag/smart /$diag/qemu");
-file_put_contents("/$diag/array/array.txt", file_exists('/var/local/emhttp/disks.ini') ? str_replace("\n","\r\n",print_r(parse_ini_file('/var/local/emhttp/disks.ini',true),true)) : "No disks.ini file found.\r\n");
+exec("mkdir -p /$diag/system /$diag/config /$diag/logs /$diag/shares /$diag/smart /$diag/qemu");
+foreach (glob("/var/local/emhttp/*.ini") as $file) file_put_contents("/$diag/system/vars.txt",preg_replace(array("/\n/","/^Array/"),array("\r\n",basename($file,".ini")),print_r(parse_ini_file($file,true),true)),FILE_APPEND);
 exec("lsscsi -vgl|todos >/$diag/system/lsscsi.txt");
 exec("lspci -knn|todos >/$diag/system/lspci.txt");
 exec("free -mt|todos >/$diag/system/memory.txt");
