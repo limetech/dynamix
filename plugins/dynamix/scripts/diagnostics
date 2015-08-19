@@ -24,7 +24,7 @@ if ($argv[1]) {
 $diag = basename($zip, '.zip');
 exec("mkdir -p /$diag/system /$diag/config /$diag/logs /$diag/shares /$diag/smart /$diag/qemu");
 foreach (glob("/var/local/emhttp/*.ini") as $file) file_put_contents("/$diag/system/vars.txt",preg_replace(array("/\n/","/^Array/"),array("\r\n",basename($file,".ini")),print_r(parse_ini_file($file,true),true)),FILE_APPEND);
-exec("sed -i '/\[reg.*\]/d' /$diag/system/vars.txt"); // remove registration info
+exec("sed -r -i '/\[(reg|flash).*\]/d' /$diag/system/vars.txt"); // remove registration and flash info
 exec("lsscsi -vgl|todos >/$diag/system/lsscsi.txt");
 exec("lspci -knn|todos >/$diag/system/lspci.txt");
 exec("free -mt|todos >/$diag/system/memory.txt");
