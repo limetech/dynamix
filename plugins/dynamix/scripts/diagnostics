@@ -23,8 +23,13 @@ if ($argv[1]) {
 }
 $diag = basename($zip, '.zip');
 exec("mkdir -p /$diag/system /$diag/config /$diag/logs /$diag/shares /$diag/smart /$diag/qemu");
-foreach (glob("/var/local/emhttp/*.ini") as $file) file_put_contents("/$diag/system/vars.txt",preg_replace(array("/\n/","/^Array/"),array("\r\n",basename($file,".ini")),print_r(parse_ini_file($file,true),true)),FILE_APPEND);
-exec("sed -r -i '/\[(reg|flash).*\]/d' /$diag/system/vars.txt"); // remove registration and flash info
+foreach (glob("/var/local/emhttp/*.ini") as $file) {
+  $ini = basename($file,".ini");
+  // skip users file
+  if ($ini != "users") file_put_contents("/$diag/system/vars.txt",preg_replace(array("/\n/","/^Array/"),array("\r\n",$ini),print_r(parse_ini_file($file,true),true)),FILE_APPEND);
+}
+exec("sed -r -i '/\[(reg|flash).*\]/d' /$diag/system/vars.txt");                    // remove registration and flash info
+exec("sed -r -i 's/(\[(read|write)List\] => )\S+/\\1xxx/' /$diag/system/vars.txt"); // anonymize user names
 exec("lsscsi -vgl|todos >/$diag/system/lsscsi.txt");
 exec("lspci -knn|todos >/$diag/system/lspci.txt");
 exec("free -mt|todos >/$diag/system/memory.txt");
