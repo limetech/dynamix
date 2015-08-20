@@ -128,18 +128,18 @@ btrfs filesystem show:
 : <?echo "<pre>".shell_exec("btrfs filesystem show /var/lib/docker")."</pre>";?>
 
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
-<?exec("/usr/local/emhttp/webGui/scripts/btrfs scrub status /var/lib/docker", $scrub_status, $retval);?>
+<?exec("/usr/local/emhttp/webGui/scripts/btrfs_scrub status /var/lib/docker", $scrub_status, $retval);?>
 
 btrfs scrub status:
 : <?echo "<pre>" . implode("\n", $scrub_status) . "</pre>";?>
 
 <?if ($retval != 0):?>
-<input type="hidden" name="#command" value="/webGui/scripts/btrfs scrub start -B">
+<input type="hidden" name="#command" value="/webGui/scripts/btrfs_scrub">
+<input type="hidden" name="#arg[1]" value="start">
 <input type="hidden" name="#arg[2]" value="/var/lib/docker">
-<input type="hidden" name="#arg[3]" value="&>/dev/null &">
 
 &nbsp;
-: <input type="submit" value="Scrub"><input type="text" name="#arg[1]" maxlength="256" value="-r"> Options (see Help)
+: <input type="submit" value="Scrub"><input type="text" name="#arg[3]" maxlength="256" value="-r"> Options (see Help)
 
 > **Scrub** runs the *btrfs scrub* program to check file system integrity.
 >
@@ -147,7 +147,9 @@ btrfs scrub status:
 > a second Scrub pass, removing the *-r* option; this will permit *btrfs scrub* to fix the file system.
 
 <?else:?>
-<input type="hidden" name="#command" value="/webGui/scripts/btrfs scrub cancel /var/lib/docker">
+<input type="hidden" name="#command" value="/webGui/scripts/btrfs_scrub">
+<input type="hidden" name="#arg[1]" value="cancel">
+<input type="hidden" name="#arg[2]" value="/var/lib/docker">
 
 &nbsp;
 : <input type="submit" value="Cancel"> *Running*

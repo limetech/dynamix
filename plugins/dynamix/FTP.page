@@ -29,11 +29,11 @@ $(function() {
 });
 </script>
 
-<form markdown="1" method="POST" action="/update.htm" target="progressFrame">
-<input type="hidden" name="cmd" value="echo">
-<input type="hidden" name="arg2" value="| tr ' ' '\n' > <?=$ftp_userlist_file;?>">
+<form markdown="1" method="POST" action="/update.php" target="progressFrame">
+<input type="hidden" name="#command" value="/webGui/scripts/ftpusers">
+
 FTP user(s):
-: <input type="text" name="arg1" size="40" maxlength="80" value="<?=$ftp_userlist;?>">
+: <input type="text" name="#arg[1]" size="40" maxlength="80" value="<?=$ftp_userlist;?>">
 
 > Enter the user names (separated by spaces) permitted to acces the server using [FTP](/Help).
 > To disable FTP, clear this setting.
@@ -42,6 +42,7 @@ FTP user(s):
 
 &nbsp;
 : <input type="submit" value="Apply"><input type="button" value="Done" onclick="done()">
+
 </form>
 
 > ### Overview
