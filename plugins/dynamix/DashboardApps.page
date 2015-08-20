@@ -76,7 +76,7 @@ foreach ($allContainers as $ct) {
 	$updateStatus   = ($updateStatus == "true" or $updateStatus == "undef" ) ? 'true' : 'false';
 	$running        = ($ct['Running']) ? 'true' : 'false';
 	$webGuiUrl      = $info['url'];
-	$contextMenus[] = sprintf("addDockerContainerContext('%s', '%s', '%s', %s, %s, %s, '%s');", addslashes($ct['Name']), addslashes($ct['ImageId']), addslashes($info['template']), $running, $updateStatus, $is_autostart, addslashes($webGuiUrl));
+	$contextMenus[] = sprintf("addDockerContainerContext('%s', '%s', '%s', %s, %s, %s, '%s', '%s');", addslashes($ct['Name']), addslashes($ct['ImageId']), addslashes($info['template']), $running, $updateStatus, $is_autostart, addslashes($webGuiUrl), $ct["Id"] );
 	$shape          = ($ct["Running"]) ? "play" : "square";
 	$status         = ($ct["Running"]) ? "started" : "stopped";
 
