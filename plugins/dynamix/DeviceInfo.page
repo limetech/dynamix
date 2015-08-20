@@ -224,7 +224,7 @@ btrfs filesystem df:
 <?if ($var['cacheSbNumDisks']>1):?>
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
 <?if ($disk['fsStatus']=="Mounted"):?>
-<?exec("/usr/local/emhttp/webGui/scripts/btrfs balance status /mnt/{$disk['name']}", $balance_status, $retval);?>
+<?exec("webGui/scripts/btrfs balance status /mnt/{$disk['name']}", $balance_status, $retval);?>
 
 <div id="title" class="nocontrol"><span class="left"><img src="/plugins/dynamix/icons/balancestatus.png" class="icon">Balance Status</span></div>
 
@@ -232,22 +232,28 @@ btrfs balance status:
 : <?echo "<pre>" . implode("\n", $balance_status) . "</pre>";?>
 
 <?if ($retval != 0):?>
-<input type="hidden" name="#command" value="/webGui/scripts/btrfs balance start">
-<input type="hidden" name="#arg[2]" value="/mnt/<?=$disk['name']?>">
-<input type="hidden" name="#arg[3]" value="&>/dev/null &">
+<input type="hidden" name="#command" value="/webGui/scripts/btrfs">
+<input type="hidden" name="#arg[1]" value="balance">
+<input type="hidden" name="#arg[2]" value="start">
+<input type="hidden" name="#arg[3]" value="/mnt/<?=$disk['name']?>">
+<input type="hidden" name="#redirect[&]" value="/dev/null">
+<input type="hidden" name="#background" value="1">
 
 &nbsp;
-: <input type="submit" value="Balance"><input type="text" name="#arg[1]" maxlength="256" value="-dconvert=raid1 -mconvert=raid1"> Options (see Help)
+: <input type="submit" value="Balance"><input type="text" name="#arg[4]" maxlength="256" value="-dconvert=raid1 -mconvert=raid1"> Options (see Help)
 
 > **Balance** will run the *btrfs balance* program to restripe the extents across all pool devices.
 >
 > The default *Options* are appropriate for btrfs-raid1.  Do not change this unless you know what you are doing!
 
 <?else:?>
-<input type="hidden" name="#command" value="/webGui/scripts/btrfs balance cancel /mnt/<?=$disk['name']?>">
+<input type="hidden" name="#command" value="/webGui/scripts/btrfs">
+<input type="hidden" name="#arg[1]" value="balance">
+<input type="hidden" name="#arg[2]" value="cancel">
+<input type="hidden" name="#arg[3]" value="/mnt/<?=$disk['name']?>">
 
 &nbsp;
-: <input type="submit" value="Cancel"> *Running*
+: <input type="button" value="Refresh" onclick="refresh()"><input type="submit" value="Cancel"> *Running*
 
 > **Cancel** will cancel the balance operation in progress.
 
@@ -266,7 +272,7 @@ btrfs balance status:
 <?if ($disk['fsType']=="btrfs"):?>
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
 <?if ($disk['fsStatus']=="Mounted"):?>
-<?exec("/usr/local/emhttp/webGui/scripts/btrfs scrub status /mnt/{$disk['name']}", $scrub_status, $retval);?>
+<?exec("webGui/scripts/btrfs scrub status /mnt/{$disk['name']}", $scrub_status, $retval);?>
 
 <div id="title" class="nocontrol"><span class="left"><img src="/plugins/dynamix/icons/scrubstatus.png" class="icon">Scrub Status</span></div>
 
@@ -274,23 +280,30 @@ btrfs scrub status:
 : <?echo "<pre>" . implode("\n", $scrub_status) . "</pre>";?>
 
 <?if ($retval != 0):?>
-<input type="hidden" name="#command" value="/webGui/scripts/btrfs scrub start -B">
-<input type="hidden" name="#arg[2]" value="/mnt/<?=$disk['name']?>">
-<input type="hidden" name="#arg[3]" value="&>/dev/null &">
+<input type="hidden" name="#command" value="/webGui/scripts/btrfs">
+<input type="hidden" name="#arg[1]" value="scrub">
+<input type="hidden" name="#arg[2]" value="start">
+<input type="hidden" name="#arg[3]" value="-B">
+<input type="hidden" name="#arg[4]" value="/mnt/<?=$disk['name']?>">
+<input type="hidden" name="#redirect[&]" value="/dev/null">
+<input type="hidden" name="#background" value="1">
 
 &nbsp;
-: <input type="submit" value="Scrub"><input type="text" name="#arg[1]" maxlength="256" value="-r"> Options (see Help)
+: <input type="submit" value="Scrub"><input type="checkbox" name="#arg[5]" value="-r" checked>Read-only
 
 > **Scrub** runs the *btrfs scrub* program to check file system integrity.
 >
-> The *Options* field is initialized to include *-r* which specifies read-only.  If repair is needed, you should run
-> a second Scrub pass, removing the *-r* option; this will permit *btrfs scrub* to fix the file system.
+> By default the Scrub operation is executed in read-only mode. If repair is needed, you should run
+> a second Scrub pass, unchecking the *read-only* option; this will permit *btrfs scrub* to fix the file system.
 
 <?else:?>
-<input type="hidden" name="#command" value="/webGui/scripts/btrfs scrub cancel /mnt/<?=$disk['name']?>">
+<input type="hidden" name="#command" value="/webGui/scripts/btrfs">
+<input type="hidden" name="#arg[1]" value="scrub">
+<input type="hidden" name="#arg[2]" value="cancel">
+<input type="hidden" name="#arg[3]" value="/mnt/<?=$disk['name']?>">
 
 &nbsp;
-: <input type="submit" value="Cancel"> *Running*
+: <input type="button" value="Refresh" onclick="refresh()"><input type="submit" value="Cancel"> *Running*
 
 > **Cancel** will cancel the Scrub operation in progress.
 
@@ -308,7 +321,7 @@ btrfs scrub status:
 <?if ($disk['fsType']=="reiserfs"):?>
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
 <?if ($var['fsState']=="Started" && $var['startMode']=='Maintenance'):?>
-<?exec("/usr/local/emhttp/webGui/scripts/reiserfsck status /dev/{$disk['deviceSb']} {$disk['id']}", $check_status, $retval);?>
+<?exec("webGui/scripts/reiserfsck status /dev/{$disk['deviceSb']} {$disk['id']}", $check_status, $retval);?>
 
 <div id="title" class="nocontrol"><span class="left"><img src="/plugins/dynamix/icons/filesystemstatus.png" class="icon">Check Filesystem Status</span></div>
 
@@ -316,10 +329,15 @@ reiserfsck status:
 : <?echo "<pre>" . implode("\n", $check_status) . "</pre>";?>
 
 <?if ($retval != 0):?>
-<input type="hidden" name="#command" value="/webGui/scripts/reiserfsck start /dev/<?=$disk['deviceSb']?> <?=$disk['id']?>">
+<input type="hidden" name="#command" value="/webGui/scripts/reiserfsck">
+<input type="hidden" name="#arg[1]" value="start">
+<input type="hidden" name="#arg[2]" value="/dev/<?=$disk['deviceSb']?>">
+<input type="hidden" name="#arg[3]" value="<?=$disk['id']?>">
+<input type="hidden" name="#redirect[&]" value="/dev/null">
+<input type="hidden" name="#background" value="1">
 
 &nbsp;
-: <input type="submit" value="Check"><input type="text" name="#arg[1]" maxlength="256" value=""> Options (see Help)
+: <input type="submit" value="Check"><input type="text" name="#arg[4]" maxlength="256" value=""> Options (see Help)
 
 > **Check Filesystem** will run the *reiserfsck* program to check file system integrity on the device.
 >
@@ -333,10 +351,12 @@ reiserfsck status:
 > increasing for the device on the Main page.
 
 <?else:?>
-<input type="hidden" name="#command" value="/webGui/scripts/reiserfsck cancel /dev/<?=$disk['deviceSb']?>">
+<input type="hidden" name="#command" value="/webGui/scripts/reiserfsck">
+<input type="hidden" name="#arg[1]" value="cancel">
+<input type="hidden" name="#arg[2]" value="/dev/<?=$disk['deviceSb']?>">
 
 &nbsp;
-: <input type="submit" value="Cancel"> *Running*
+: <input type="button" value="Refresh" onclick="refresh()"><input type="submit" value="Cancel"> *Running*
 
 > **Cancel** will cancel the Check Filesystem operation in progress.
 
@@ -354,7 +374,7 @@ reiserfsck status:
 <?if ($disk['fsType']=="xfs"):?>
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
 <?if ($var['fsState']=="Started" && $var['startMode']=='Maintenance'):?>
-<?exec("/usr/local/emhttp/webGui/scripts/xfs_repair status /dev/{$disk['deviceSb']} {$disk['id']}", $check_status, $retval);?>
+<?exec("webGui/scripts/xfs_repair status /dev/{$disk['deviceSb']} {$disk['id']}", $check_status, $retval);?>
 
 <div id="title" class="nocontrol"><span class="left"><img src="/plugins/dynamix/icons/filesystemstatus.png" class="icon">Check Filesystem Status</span></div>
 
@@ -362,15 +382,20 @@ xfs_repair status:
 : <?echo "<pre>" . implode("\n", $check_status) . "</pre>";?>
 
 <?if ($retval != 0):?>
-<input type="hidden" name="#command" value="/webGui/scripts/xfs_repair start /dev/<?=$disk['deviceSb']?> <?=$disk['id']?>">
+<input type="hidden" name="#command" value="/webGui/scripts/xfs_repair">
+<input type="hidden" name="#arg[1]" value="start">
+<input type="hidden" name="#arg[2]" value="/dev/<?=$disk['deviceSb']?>">
+<input type="hidden" name="#arg[3]" value="<?=$disk['id']?>">
+<input type="hidden" name="#redirect[&]" value="/dev/null">
+<input type="hidden" name="#background" value="1">
 
 &nbsp;
-: <input type="submit" value="Check"><input type="text" name="#arg[1]" maxlength="256" value="-n"> Options (see Help)
+: <input type="submit" value="Check"><input type="checkbox" name="#arg[4]" value="-n" checked>Read-only
 
 > **Check Filesystem** will run the *xfs_repair* program to check file system integrity on the device.
 >
-> The *Options* field is initialized with *-n* which specifies check-only.  If repair is needed, you should run
-> a second Check Filesystem pass, setting the *Options* blank; this will permit *xfs_repair* to fix the file system.
+> By default the Check Filesystem operation is executed in read-only mode. If repair is needed, you should run
+> a second Check Filesystem pass, unchecking the *read-only* option; this will permit *xfs_repair* to fix the file system.
 >
 > After starting a Check Filesystem, you should Refresh to monitor progress and status.  Depending on
 > how large the file system is, and what errors might be present, the operation can take **a long time** to finish (hours).
@@ -378,10 +403,12 @@ xfs_repair status:
 > increasing for the device on the Main page.
 
 <?else:?>
-<input type="hidden" name="#command" value="/webGui/scripts/xfs_repair cancel /dev/<?=$disk['deviceSb']?>">
+<input type="hidden" name="#command" value="/webGui/scripts/xfs_repair">
+<input type="hidden" name="#arg[1]" value="cancel">
+<input type="hidden" name="#arg[2]" value="/dev/<?=$disk['deviceSb']?>">
 
 &nbsp;
-: <input type="submit" value="Cancel"> *Running*
+: <input type="button" value="Refresh" onclick="refresh()"><input type="submit" value="Cancel"> *Running*
 
 > **Cancel** will cancel the Check Filesystem operation in progress.
 

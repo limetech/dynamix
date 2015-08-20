@@ -87,8 +87,8 @@ function editContainer(container, template) {
 }
 
 function rmContainer(containers, images){
-  var ctCmd = "/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/docker rm -f";
-  var imgCmd = "/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/docker rmi";
+  var ctCmd = "/plugins/dynamix.docker.manager/scripts/docker rm -f";
+  var imgCmd = "/plugins/dynamix.docker.manager/scripts/docker rmi";
   var ctTitle = "";
   if (typeof containers === "object") {
     for (var i = 0; i < containers.length; i++) {
@@ -176,7 +176,7 @@ function updateContainer(containers){
 }
 
 function rmImage(images, imageName){
-  var imgCmd   = "/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/docker rmi";
+  var imgCmd   = "/plugins/dynamix.docker.manager/scripts/docker rmi";
   var imgTitle = "";
   if (typeof images === "object") {
     for (var i = 0; i < images.length; i++) {
@@ -218,13 +218,17 @@ function rmImage(images, imageName){
 }
 
 function containerControl(container, action){
-  $("#cmdStartStop").val("/plugins/dynamix.docker.manager/scripts/docker " + action + " " + container);
+  $("#cmdStartStop").val("/plugins/dynamix.docker.manager/scripts/docker");
+  $("#cmdArg1").val(action);
+  $("#cmdArg2").val(container);
   $("#formStartStop").submit();
 }
 
 function reloadUpdate(){
   $(".updatecolumn").html("<span style=\"color:#267CA8;white-space:nowrap;\"><i class=\"fa fa-spin fa-refresh\"></i> checking...</span>");
   $("#cmdStartStop").val("/plugins/dynamix.docker.manager/scripts/dockerupdate.php");
+  $("#cmdArg1").remove();
+  $("#cmdArg2").remove();
   $("#formStartStop").submit();
 }
 
