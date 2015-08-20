@@ -16,18 +16,20 @@
  * The $_POST variable contains a list of key/value parameters to be updated in the file.
  * There are a number of special parameters prefixed with a hash '#' character:
  *
- * #file    : the pathname of the file to be updated. It does not need to previously exist.
- *            If pathname is relative (no leading '/'), the configuration file will placed
- *            placed under '/boot/config/plugins'.
- *            This parameter may be omitted to perform a command execution only (see #command).
- * #section : if present, then the ini file consists of a set of named sections, and all of the
- *            configuration parameters apply to this one particular section.
- *            if omitted, then it's just a flat ini file without sections.
- * #default : if present, then the default values will be restored instead.
- * #include : specifies name of an include file to read and execute in before saving the file contents
- * #cleanup : if present then parameters with empty strings are omitted from being written to the file
- * #command : a shell command to execute after updating the configuration file
- * #arg     : an array of arguments for the shell command
+ * #file       : the pathname of the file to be updated. It does not need to previously exist.
+ *               If pathname is relative (no leading '/'), the configuration file will placed
+ *               placed under '/boot/config/plugins'.
+ *               This parameter may be omitted to perform a command execution only (see #command).
+ * #section    : if present, then the ini file consists of a set of named sections, and all of the
+ *               configuration parameters apply to this one particular section.
+ *               if omitted, then it's just a flat ini file without sections.
+ * #default    : if present, then the default values will be restored instead.
+ * #include    : specifies name of an include file to read and execute in before saving the file contents
+ * #cleanup    : if present then parameters with empty strings are omitted from being written to the file
+ * #command    : a shell command to execute after updating the configuration file
+ * #arg        : an array of arguments for the shell command
+ * #redirect   : an array of output redirect directives for the shell command
+ * #background : if set the shell command will be executed in the background
  */
 function write_log($string) {
   if (empty($string)) return;
@@ -85,13 +87,20 @@ if ($command) {
     syslog(LOG_INFO, "Deprecated absolute #command path: $command");
   else if ($command[0] != '/')
     syslog(LOG_INFO, "Deprecated relative #command path: $command");
+  else if (strpos($command, " "))
+    syslog(LOG_INFO, "Invalid parameters in $command");
   else
-    $command = $docroot.$command;
+    $command = escapeshellcmd($docroot.$command);
   if (isset($_POST['#arg'])) {
-    $args = $_POST['#arg'];
-    ksort($args);
-    $command .= " ".implode(" ", $args);
+    $command .= " ".implode(" ", array_map("escapeshellarg", $_POST['#arg']));
   }
+  if (isset($_POST['#redirect'])) {
+    foreach ($_POST['#redirect'] as $fd => $redir) {
+      if (is_numeric($fd) || $fd == "&") $command .= " $fd>".(is_numeric($redir) ? "&$redir" : escapeshellarg($redir));
+    }
+  }
+  if (isset($_POST['#background'])) $command .= " &";
+
   write_log($command);
   $proc = popen($command, 'r');
   while (!feof($proc)) {
