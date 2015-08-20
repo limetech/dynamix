@@ -11,7 +11,7 @@
  */
 ?>
 <?
-require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/include/DockerClient.php");
+require_once('plugins/dynamix.docker.manager/include/DockerClient.php');
 
 // Autostart file
 global $dockerManPaths;
@@ -22,7 +22,7 @@ $template_repos = $dockerManPaths['template-repos'];
 if ($_POST['action'] == "autostart" ){
   $json = ($_POST['response'] == 'json') ? true : false;
 
-  if (! $json) readfile("/usr/local/emhttp/update.htm");
+  if (!$json) readfile('update.htm');
 
   $container = urldecode(($_POST['container']));
   unset($_POST['container']);
@@ -42,14 +42,14 @@ if ($_POST['action'] == "autostart" ){
 }
 
 if ($_POST['#action'] == "templates" ){
-  readfile("/usr/local/emhttp/update.htm");
+  readfile('update.htm');
   $repos = $_POST['template_repos'];
   file_put_contents($template_repos, $repos);
   $DockerTemplates = new DockerTemplates();
   $DockerTemplates->downloadTemplates();
 }
 
-if ( isset($_GET['is_dir'] )) {
-  echo json_encode( array( 'is_dir' => is_dir( $_GET['is_dir'] )));
+if (isset($_GET['is_dir'])) {
+  echo json_encode(array('is_dir' => is_dir($_GET['is_dir'])));
 }
 ?>

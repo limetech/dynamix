@@ -21,7 +21,7 @@ if ($var['fsState'] != "Started") {
 }
 
 // Add the Docker JSON client
-require_once('/usr/local/emhttp/plugins/dynamix.docker.manager/include/DockerClient.php');
+require_once('plugins/dynamix.docker.manager/include/DockerClient.php');
 $docker          = new DockerClient();
 $DockerUpdate    = new DockerUpdate();
 $DockerTemplates = new DockerTemplates();
@@ -128,29 +128,36 @@ btrfs filesystem show:
 : <?echo "<pre>".shell_exec("btrfs filesystem show /var/lib/docker")."</pre>";?>
 
 <form markdown="1" method="POST" action="/update.php" target="progressFrame">
-<?exec("/usr/local/emhttp/webGui/scripts/btrfs scrub status /var/lib/docker", $scrub_status, $retval);?>
+<?exec("webGui/scripts/btrfs scrub status /var/lib/docker", $scrub_status, $retval);?>
 
 btrfs scrub status:
 : <?echo "<pre>" . implode("\n", $scrub_status) . "</pre>";?>
 
 <?if ($retval != 0):?>
-<input type="hidden" name="#command" value="/webGui/scripts/btrfs scrub start -B">
-<input type="hidden" name="#arg[2]" value="/var/lib/docker">
-<input type="hidden" name="#arg[3]" value="&>/dev/null &">
+<input type="hidden" name="#command" value="/webGui/scripts/btrfs">
+<input type="hidden" name="#arg[1]" value="scrub">
+<input type="hidden" name="#arg[2]" value="start">
+<input type="hidden" name="#arg[3]" value="-B">
+<input type="hidden" name="#arg[4]" value="/var/lib/docker">
+<input type="hidden" name="#redirect[&]" value="/dev/null">
+<input type="hidden" name="#background" value="1">
 
 &nbsp;
-: <input type="submit" value="Scrub"><input type="text" name="#arg[1]" maxlength="256" value="-r"> Options (see Help)
+: <input type="submit" value="Scrub"><input type="checkbox" name="#arg[5]" value="-r" checked>Read-only
 
 > **Scrub** runs the *btrfs scrub* program to check file system integrity.
 >
-> The *Options* field is initialized to include *-r* which specifies read-only.  If repair is needed, you should run
-> a second Scrub pass, removing the *-r* option; this will permit *btrfs scrub* to fix the file system.
+> By default the Scrub operation is executed in read-only mode. If repair is needed, you should run
+> a second Scrub pass, unchecking the *read-only* option; this will permit *btrfs scrub* to fix the file system.
 
 <?else:?>
-<input type="hidden" name="#command" value="/webGui/scripts/btrfs scrub cancel /var/lib/docker">
+<input type="hidden" name="#command" value="/webGui/scripts/btrfs">
+<input type="hidden" name="#arg[1]" value="scrub">
+<input type="hidden" name="#arg[2]" value="cancel">
+<input type="hidden" name="#arg[3]" value="/var/lib/docker">
 
 &nbsp;
-: <input type="submit" value="Cancel"> *Running*
+: <input type="button" value="Refresh" onclick="refresh()"><input type="submit" value="Cancel"> *Running*
 
 > **Cancel** will cancel the Scrub operation in progress.
 
