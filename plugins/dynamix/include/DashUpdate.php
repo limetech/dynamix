@@ -108,9 +108,10 @@ case 'disk':
 break;
 case 'sys':
   exec("grep -Po '^Mem(Total|Available):\s+\K\d+' /proc/meminfo",$memory);
+  exec("df /boot /var/log /var/lib/docker|grep -Po '\d+%'",$sys);
   $cpu = min(@file_get_contents('state/cpuload.ini'),100);
   $mem = max(round((1-$memory[1]/$memory[0])*100),0);
-  echo "{$cpu}%#{$mem}%";
+  echo "{$cpu}%#{$mem}%#".implode('#',$sys);
 break;
 case 'cpu':
   exec("grep -Po '^cpu MHz\s+: \K\d+' /proc/cpuinfo",$speeds);
