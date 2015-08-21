@@ -22,7 +22,7 @@ function make_link($method, $arg) {
   $id = basename($arg, ".plg").$method;
   $check = $method=='update' ? "" : "<input type='checkbox' onClick='document.getElementById(\"$id\").disabled=!this.checked'>";
   $disabled = $check ? " disabled" : "";
-  $cmd = $method == "delete" ? "/plugins/dynamix.plugin.manager/scripts/plugin_rm $arg" : "/plugins/dynamix.plugin.manager/scripts/plugin $method $arg";
+  $cmd = $method == "delete" ? "/plugins/dynamix.plugin.manager/scripts/plugin_rm&arg1=$arg" : "/plugins/dynamix.plugin.manager/scripts/plugin&arg1=$method&arg2=$arg";
   return "{$check}<input type='button' id='$id' value='{$method}' onclick='openBox(\"{$cmd}\",\"{$method} Plugin\",600,900,true)'{$disabled}>";
 }
 
