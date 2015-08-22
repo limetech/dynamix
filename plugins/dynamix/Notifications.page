@@ -117,7 +117,8 @@ $(function(){
 <form markdown="1" name="notify_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareNotify(this)">
 <input type="hidden" name="#file" value="dynamix/dynamix.cfg">
 <input type="hidden" name="#section" value="notify">
-<input type="hidden" name="#command" value="/webGui/scripts/notify cron-init">
+<input type="hidden" name="#command" value="/webGui/scripts/notify">
+<input type="hidden" name="#arg[1]" value="cron-init">
 <input type="hidden" name="entity">
 <input type="hidden" name="normal">
 <input type="hidden" name="warning">

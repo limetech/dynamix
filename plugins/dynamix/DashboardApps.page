@@ -29,9 +29,11 @@ div.Panel:hover{overflow:visible;z-index:10;}
 .switch-button-label.on{color:#009900;}
 </style>
 <form method="POST" id="formStartStop" action="/update.php" target="progressFrame">
-<input type="hidden" id="cmdStartStop" name="#command" value="" />
+<input type="hidden" id="cmdStartStop" name="#command" value="">
+<input type="hidden" id="cmdArg1" name="#arg[1]" value="">
+<input type="hidden" id="cmdArg2" name="#arg[2]" value="">
 </form>
-<form markdown="1" id="formAutostart" method="POST" action="/plugins/dynamix.docker.manager/UpdateConfig.php" target="progressFrame">
+<form method="POST" id="formAutostart" action="/plugins/dynamix.docker.manager/include/UpdateConfig.php" target="progressFrame">
 <input type="hidden" name="action" value="autostart" />
 <input type="hidden" name="container" value="none" />
 </form>
