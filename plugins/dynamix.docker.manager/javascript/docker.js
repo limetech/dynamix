@@ -234,5 +234,5 @@ function autoStart(container, event){
 }
 
 function containerLogs(container){
-  openWindow('/plugins/dynamix.docker.manager/scripts/docker logs --tail=350 -f ' + container, 'Log for: ' + container, 600, 900);
+  openWindow('/plugins/dynamix.docker.manager/scripts/docker&arg1=logs&arg2=--tail=350&arg3=-f ' + container, 'Log for: ' + container, 600, 900);
 }

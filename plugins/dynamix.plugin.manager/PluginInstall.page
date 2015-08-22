@@ -16,7 +16,7 @@ Title="Install Plugin"
 <script>
 function installPlugin(name) {
   var file = name.trim();
-  if (file) openBox('/plugins/dynamix.plugin.manager/scripts/plugin install '+file,'Install Plugin',600,900,true);
+  if (file) openBox('/plugins/dynamix.plugin.manager/scripts/plugin&arg1=install&arg2='+file,'Install Plugin',600,900,true);
 }
 </script>
 **Enter URL of remote plugin file or local plugin file**

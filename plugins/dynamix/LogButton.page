@@ -16,6 +16,6 @@ Icon="log.png"
 ?>
 <script>
 function LogButton() {
-  openWindow('/webGui/scripts/tail_log syslog','Log Information',600,900);
+  openWindow('/webGui/scripts/tail_log&arg1=syslog','Log Information',600,900);
 }
 </script>

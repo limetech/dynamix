@@ -220,7 +220,7 @@ if ($action) {
 
       // Log file
       if (!empty($log)) {
-         echo "<td><a class='log' href='#' onclick=\"openWindow('/webGui/scripts/tail_log " . addslashes(escapeshellarg($log)) . "', '" . addslashes($name) . " QEMU Log', 600, 900); return false;\"><img class='basic' src='/webGui/icons/log.png'/></a></td>";
+         echo "<td><a class='log' href='#' onclick=\"openWindow('/webGui/scripts/tail_log&arg1=$log', '$name QEMU Log', 600, 900); return false;\"><img class='basic' src='/webGui/icons/log.png'/></a></td>";
       } else {
          echo "<td><img class='basic' src='/webGui/icons/log.png' style='opacity: 0.3' title='Log not available'/></a></td>";
       }
@@ -587,7 +587,7 @@ function addVMContext(name, uuid, template, state, vncurl, log){
 
   if (log !== "") {
     if (location.pathname.indexOf("/Dashboard") === 0) {
-      opts.push({text: "Logs", icon: "fa-navicon", action: function(e){ e.preventDefault(); openWindow('/webGui/scripts/tail_log \'' + log.replace(/'/g, '\'\\\'\'') + '\'', 'Log for: ' + name, 600, 900); } });
+      opts.push({text: "Logs", icon: "fa-navicon", action: function(e){ e.preventDefault(); openWindow('/webGui/scripts/tail_log&arg1=' + log + ')', 'Log for: ' + name, 600, 900); } });
     }
   }
 

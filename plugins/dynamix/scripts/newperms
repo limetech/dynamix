@@ -17,7 +17,8 @@
 #  ugo+X   Set the 'x' bit for directories in user, group, and other
 
 function process {
-  if [ -e "$1" ] ; then
+  echo "$1"
+  if [ -d $1 ] ; then
     owner=nobody
     group=users
     if [ $# -ge 2 ]; then
