@@ -22,11 +22,13 @@ if ( isset( $_GET['cmd'] )) {
         );
 
   foreach (explode(';', $commands) as $command){
-    echo "<p class=\"logLine\" id=\"logBody\"></p>";
-    $command = trim($command);
-    if (! strlen($command)) continue;
+    $parts = explode(" ", $command);
+    $command = escapeshellcmd(realpath($_SERVER['DOCUMENT_ROOT'].array_shift($parts)));
+    if (!$command) continue;
+    $command .= " ".implode(" ", $parts); // should add 'escapeshellarg' here, but this requires changes in all the original arguments
     $id = mt_rand();
     $output = array();
+    echo "<p class=\"logLine\" id=\"logBody\"></p>";
     echo "<script>addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Command:</legend>";
     echo "root@localhost:# {$command}<br>";
     echo "<span id=\"wait{$id}\">Please wait </span>";

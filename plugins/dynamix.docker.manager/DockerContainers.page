@@ -46,7 +46,9 @@ img.stopped{opacity:0.3;}
   <input type="hidden" name="container" value="none" />
 </form>
 <form id="formStartStop" method="POST" action="/update.php" target="progressFrame">
-  <input type="hidden" id="cmdStartStop" name="#command" value="" />
+  <input type="hidden" id="cmdStartStop" name="#command" value="">
+  <input type="hidden" id="cmdArg1" name="#arg[1]" value="">
+  <input type="hidden" id="cmdArg2" name="#arg[2]" value="">
 </form>
 <div id="dialog-confirm" style="display:none;" title="Dialog Title"></div>
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
