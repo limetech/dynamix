@@ -82,16 +82,16 @@ case "stop":
   exec("smartctl -X /dev/$port");
   break;
 case "update":
-  if (!exec("hdparm -C /dev/$port|grep -o active")) {
+  if (!exec("hdparm -C /dev/$port|grep -om1 active")) {
     echo "<a href='/update.htm?cmdSpinup={$_POST['name']}' class='info' target='progressFrame'><input type='button' value='Spin Up'></a><span class='orange-text'><big>Unavailable - disk must be spun up</big></span>";
     break;
   }
-  $progress = exec("smartctl -c /dev/$port|grep -Po '\d+%'");
+  $progress = exec("smartctl -c /dev/$port|grep -Pom1 '\d+%'");
   if ($progress) {
     echo "<big><i class='fa fa-spinner fa-pulse'></i> ".(100-substr($progress,0,-1))."% complete</big>";
     break;
   }
-  $result = trim(exec("smartctl -l selftest /dev/$port|grep '^# 1'|cut -c26-55"));
+  $result = trim(exec("smartctl -l selftest /dev/$port|grep -m1 '^# 1'|cut -c26-55"));
   if (!$result) {
     echo "<big>No self-tests logged on this disk</big>";
     break;
