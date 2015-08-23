@@ -21,7 +21,7 @@ function my_smart(&$source,$name) {
   $thumb = 'good';
   $saved = @parse_ini_file("/var/local/emhttp/monitor.ini",true);
   $last = isset($saved["smart"]["$name.5"]) ? $saved["smart"]["$name.5"] : 0;
-  $smart = exec("grep -Po '^  5.+ \K\d+$' /var/local/emhttp/smart/$name");
+  $smart = exec("grep -Pom1 '^  5.+ \K\d+$' /var/local/emhttp/smart/$name");
   if (!$smart) $smart = 0;
   if (($last == 0 && $smart > 0) || ($last > 0 && $smart > $last)) $thumb = 'bad';
   my_insert($source, "<a href=\"/Main/Device?name=$name\" onclick=\"$.cookie('one','tab2',{path:'/'})\" title=\"$smart reallocated sectors\"><img src=\"$path/$thumb.png\"></a>");
@@ -128,9 +128,9 @@ case 'port':
     foreach ($ports as $port) {
       unset($info);
       if ($port=='bond0') {
-        $ports[$i++] = exec("grep -Po '^Bonding Mode: \K.+' /proc/net/bonding/bond0");
+        $ports[$i++] = exec("grep -Pom1 '^Bonding Mode: \K.+' /proc/net/bonding/bond0");
       } else if ($port=='lo') {
-        $ports[$i++] = str_replace('yes','loopback',exec("ethtool lo|grep -Po '^\s+Link detected: \K.+'"));
+        $ports[$i++] = str_replace('yes','loopback',exec("ethtool lo|grep -Pom1 '^\s+Link detected: \K.+'"));
       } else {
         exec("ethtool $port|grep -Po '^\s+(Speed|Duplex): \K[^U]+'",$info);
         $ports[$i++] = $info[0] ? "{$info[0]} - ".strtolower($info[1])." duplex" : "not connected";
