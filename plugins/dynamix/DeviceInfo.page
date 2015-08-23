@@ -18,7 +18,7 @@ Png="devicesettings.png"
 <?
 $disk = $disks[$name];
 $dev  = $disk['device'];
-$off  = exec("hdparm -C /dev/$dev|awk '/active/{print $4}'") ? "" : "disabled";
+$on   = exec("hdparm -C /dev/$dev|grep -Pom1 'active'");
 $tmp  = "/var/tmp";
 $file = str_replace(' ','_',strtolower($var['NAME']))."-smart-report-".$disk['name']."-".date('Ymd-Hi').".rtf";
 $refs = array(); $n = 0;
@@ -62,7 +62,7 @@ function testUpdate(init) {
     } else {
       $('#short_test').val('Start');
       $('#long_test').val('Start');
-<?if (!$off):?>
+<?if ($on):?>
       $('#short_test').removeAttr('disabled');
       $('#long_test').removeAttr('disabled');
 <?endif;?>
@@ -114,7 +114,7 @@ $(function() {
   var tester = $.cookie('tester.<?=$dev?>');
   testUpdate(tester===undefined);
   if (tester !== undefined) $('#'+tester+'_test').val('Stop').removeAttr('disabled');
-<?if (!$off):?>
+<?if ($on):?>
   $('#toggle_log').removeAttr('disabled');
   $('#toggle_error').removeAttr('disabled');
   $.post('/webGui/include/SmartInfo.php',{cmd:'selftest',port:'<?=$dev?>'},function(data) { $('#selftest').html(data); });
@@ -249,7 +249,7 @@ btrfs balance status:
 <input type="hidden" name="#arg[2]" value="/mnt/<?=$disk['name']?>">
 
 &nbsp;
-: <input type="submit" value="Cancel"> *Running*
+: <input type="button" value="Refresh" onclick="refresh()"><input type="submit" value="Cancel"> *Running*
 
 > **Cancel** will cancel the balance operation in progress.
 
@@ -294,7 +294,7 @@ btrfs scrub status:
 <input type="hidden" name="#arg[2]" value="/mnt/<?=$disk['name']?>">
 
 &nbsp;
-: <input type="submit" value="Cancel"> *Running*
+: <input type="button" value="Refresh" onclick="refresh()"><input type="submit" value="Cancel"> *Running*
 
 > **Cancel** will cancel the Scrub operation in progress.
 
@@ -346,7 +346,7 @@ reiserfsck status:
 <input type="hidden" name="#arg[3]"  value="<?=$disk['id']?>">
 
 &nbsp;
-: <input type="submit" value="Cancel"> *Running*
+: <input type="button" value="Refresh" onclick="refresh()"><input type="submit" value="Cancel"> *Running*
 
 > **Cancel** will cancel the Check Filesystem operation in progress.
 
@@ -396,7 +396,7 @@ xfs_repair status:
 <input type="hidden" name="#arg[2]"  value="/dev/<?=$disk['deviceSb']?>">
 
 &nbsp;
-: <input type="submit" value="Cancel"> *Running*
+: <input type="button" value="Refresh" onclick="refresh()"><input type="submit" value="Cancel"> *Running*
 
 > **Cancel** will cancel the Check Filesystem operation in progress.
 

@@ -154,7 +154,7 @@ $i = 0;
 foreach ($sPorts as $port) {
   if ($i++) echo "<br><span style='width:94px; display:inline-block'>&nbsp;</span>";
   if ($port=='bond0') {
-    echo "$port: ".exec("grep -Po '^Bonding Mode: \K.+' /proc/net/bonding/bond0");
+    echo "$port: ".exec("grep -Pom1 '^Bonding Mode: \K.+' /proc/net/bonding/bond0");
   } else {
     unset($info);
     exec("ethtool $port|grep -Po '^\s+(Speed|Duplex): \K[^U]+'",$info);

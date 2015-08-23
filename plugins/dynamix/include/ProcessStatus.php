@@ -17,10 +17,10 @@ case 'crontab':
   $pid = file_exists("/boot/config/plugins/{$_POST['plugin']}/{$_POST['job']}.cron");
   break;
 case 'preclear_disk':
-  $pid = exec("ps -o pid,command --ppid 1 | awk -F/ '/$name .*{$_POST['device']}$/ {print $1}'");
+  $pid = exec("ps -o pid,command --ppid 1|awk -F/ '/$name .*{$_POST['device']}$/{print $1;exit}'");
   break;
 case is_numeric($name):
-  $pid = exec("lsof -i:$name -n -P | awk '/\(LISTEN\)/ {print $2}'");
+  $pid = exec("lsof -i:$name -Pn|awk '/\(LISTEN\)/{print $2;exit}'");
   break;
 case 'pid':
   $pid = file_exists("/var/run/{$_POST['plugin']}.pid");
