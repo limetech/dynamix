@@ -27,7 +27,7 @@ function sort_by($field, $opt, $show_disk) {
   $i = 0;
   exec("shopt -s dotglob ; stat -L -c'%F|%n|%s|%Y' $path 2>/dev/null", $file);
   if ($show_disk)
-    exec("getfattr --absolute-names -n user.LOCATIONS $path 2>/dev/null | awk -F'\"' '/^user.LOCATIONS/ {print $2}'", $disk);
+    exec("getfattr --absolute-names -n user.LOCATIONS $path 2>/dev/null|grep -Po '^user.LOCATIONS=\"\K[^\\\"]+'", $disk);
   else
     $disk = array_fill(0, max(count($file),1), '');
   foreach ($file as $entry) {
@@ -124,9 +124,9 @@ $disk_order=($column=='disk'?$order:'A');
 <?  else:
       $files++;
       $total+=$entry['size'];
-      $warn = substr($entry['disk'],-1)=="*" ? " style='color:orange'" : "";
+      $warn = substr($entry['disk'],-1)=="*" ? ' class="warning"' : '';
 ?>    <td><div class="icon-file icon-<?=strtolower($entry['fext'])?>"></div></td>
-      <td<?=$warn?>><a href="<?=urlencode_path($dir.'/'.$entry['name']);?>" class="none"><?=$entry['name']?></a></td>
+      <td><a href="<?=urlencode_path($dir.'/'.$entry['name']);?>" <?=$warn?$warn:'class="none"'?>><?=$entry['name']?></a></td>
       <td<?=$warn?>><?=my_scale($entry['size'],$unit).' '.$unit?></td>
 <?  endif;?>
 <?if ($show_disk):?>
