@@ -18,7 +18,7 @@ Png="devicesettings.png"
 <?
 $disk = $disks[$name];
 $dev  = $disk['device'];
-$off  = exec("hdparm -C /dev/$dev|awk '/active/{print $4}'") ? "" : "disabled";
+$on   = exec("hdparm -C /dev/$dev|grep -Pom1 'active'");
 $tmp  = "/var/tmp";
 $file = str_replace(' ','_',strtolower($var['NAME']))."-smart-report-".$disk['name']."-".date('Ymd-Hi').".rtf";
 $refs = array(); $n = 0;
@@ -62,7 +62,7 @@ function testUpdate(init) {
     } else {
       $('#short_test').val('Start');
       $('#long_test').val('Start');
-<?if (!$off):?>
+<?if ($on):?>
       $('#short_test').removeAttr('disabled');
       $('#long_test').removeAttr('disabled');
 <?endif;?>
@@ -114,7 +114,7 @@ $(function() {
   var tester = $.cookie('tester.<?=$dev?>');
   testUpdate(tester===undefined);
   if (tester !== undefined) $('#'+tester+'_test').val('Stop').removeAttr('disabled');
-<?if (!$off):?>
+<?if ($on):?>
   $('#toggle_log').removeAttr('disabled');
   $('#toggle_error').removeAttr('disabled');
   $.post('/webGui/include/SmartInfo.php',{cmd:'selftest',port:'<?=$dev?>'},function(data) { $('#selftest').html(data); });
