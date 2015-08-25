@@ -152,7 +152,7 @@ btrfs scrub status:
 <input type="hidden" name="#arg[2]" value="/var/lib/docker">
 
 &nbsp;
-: <input type="submit" value="Cancel"> *Running*
+: <input type="button" value="Refresh" onclick="refresh()"><input type="submit" value="Cancel"> *Running*
 
 > **Cancel** will cancel the Scrub operation in progress.
 
