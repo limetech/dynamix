@@ -13,21 +13,22 @@
 ?>
 <?
 $conf  = "/etc/apcupsd/apcupsd.conf";
-$cable = $_POST['UPSCABLE']=='custom' ? $_POST['CUSTOMUPSCABLE'] : $_POST['UPSCABLE'];
+$new   = array_replace_recursive($_POST, $default);
+$cable = $new['UPSCABLE']=='custom' ? $new['CUSTOMUPSCABLE'] : $new['UPSCABLE'];
 
 exec("/etc/rc.d/rc.apcupsd stop");
 exec("sed -i -e '/^NISIP/c\\NISIP 0.0.0.0' $conf");
-exec("sed -i -e '/^UPSTYPE/c\\UPSTYPE '{$_POST['UPSTYPE']}'' $conf");
-exec("sed -i -e '/^DEVICE/c\\DEVICE '{$_POST['DEVICE']}'' $conf");
-exec("sed -i -e '/^BATTERYLEVEL/c\\BATTERYLEVEL '{$_POST['BATTERYLEVEL']}'' $conf");
-exec("sed -i -e '/^MINUTES/c\\MINUTES '{$_POST['MINUTES']}'' $conf");
-exec("sed -i -e '/^TIMEOUT/c\\TIMEOUT '{$_POST['TIMEOUT']}'' $conf");
+exec("sed -i -e '/^UPSTYPE/c\\UPSTYPE '{$new['UPSTYPE']}'' $conf");
+exec("sed -i -e '/^DEVICE/c\\DEVICE '{$new['DEVICE']}'' $conf");
+exec("sed -i -e '/^BATTERYLEVEL/c\\BATTERYLEVEL '{$new['BATTERYLEVEL']}'' $conf");
+exec("sed -i -e '/^MINUTES/c\\MINUTES '{$new['MINUTES']}'' $conf");
+exec("sed -i -e '/^TIMEOUT/c\\TIMEOUT '{$new['TIMEOUT']}'' $conf");
 exec("sed -i -e '/^UPSCABLE/c\\UPSCABLE '{$cable}'' $conf");
 
-if ($_POST['KILLUPS']=='yes' && $_POST['SERVICE']=='enable')
+if ($new['KILLUPS']=='yes' && $new['SERVICE']=='enable')
   exec("! grep -q apccontrol /etc/rc.d/rc.6 && sed -i -e 's:/sbin/poweroff:/etc/apcupsd/apccontrol killpower; /sbin/poweroff:' /etc/rc.d/rc.6");
 else
   exec("grep -q apccontrol /etc/rc.d/rc.6 && sed -i -e 's:/etc/apcupsd/apccontrol killpower; /sbin/poweroff:/sbin/poweroff:' /etc/rc.d/rc.6");
 
-if ($_POST['SERVICE']=='enable') exec("/etc/rc.d/rc.apcupsd start");
+if ($new['SERVICE']=='enable') exec("/etc/rc.d/rc.apcupsd start");
 ?>
