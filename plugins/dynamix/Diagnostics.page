@@ -23,11 +23,13 @@ function cleanUp() {
   if (document.hasFocus()) {
     $('#pleaseWait').hide('slow');
     $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?=$zip?>'});
+    $('#collectButton').prop('disabled',false);
   } else {
     setTimeout(cleanUp,2000);
   }
 }
 function diagnostics() {
+  $('#collectButton').prop('disabled',true);
   $('#pleaseWait').show('slow');
   $.post('/webGui/include/Download.php',{cmd:'diag',file:'<?=$zip?>'},function(data) {
     location = data;
@@ -68,6 +70,6 @@ by unRAID Server OS; however, your server name, IP address, and user share names
 *Note that 3rd-party plugins **may** or may not store personal information in plugin-specific configuration files and/or output
 to the system log.*
 
-<input type="button" value="Collect" onclick="diagnostics()"><input type="button" value="Done" onclick="done()">
+<input type="button" value="Collect" id="collectButton" onclick="diagnostics()"><input type="button" value="Done" onclick="done()">
 
 <br><div id="pleaseWait" style="display:none;font-weight:bold;color:red;text-align:center">Please wait, collecting diagnostic information...</div>
