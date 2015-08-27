@@ -50,5 +50,6 @@ $myPage = $site[basename($path)];
 $pageroot = "{$docroot}/".dirname($myPage['file']);
 
 // Giddyup
+$_VERSION = 'v=1'; // increment when default stylesheets or dynamix.js changes 
 require_once('include/DefaultPageLayout.php');
 ?>

@@ -22,8 +22,8 @@
 <link type="text/css" rel="stylesheet" href="/webGui/styles/default-fonts.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/font-awesome.css">
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.sweetalert.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/default-<?=$display['theme']?>.css">
-<link type="text/css" rel="stylesheet" href="/webGui/styles/dynamix-<?=$display['theme']?>.css">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/default-<?=$display['theme']?>.css?<?=$_VERSION?>">
+<link type="text/css" rel="stylesheet" href="/webGui/styles/dynamix-<?=$display['theme']?>.css?<?=$_VERSION?>">
 <?if (file_exists("/boot/config/plugins/dynamix/banner.png")):?>
 <link type="text/css" rel="stylesheet" href="/webGui/styles/custom-banner.css">
 <?else:?>
@@ -34,7 +34,7 @@
 .inline_help{display:none;}
 </style>
 
-<script src="/webGui/javascript/dynamix.js"></script>
+<script src="/webGui/javascript/dynamix.js?<?=$_VERSION?>"></script>
 <script>
 Shadowbox.init({skipSetup:true});
 
