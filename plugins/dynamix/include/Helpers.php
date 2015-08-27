@@ -200,6 +200,7 @@ function is_block($path) {
 }
 function autov($file) {
   global $docroot;
+  clearstatcache(true, $docroot.$file);
   echo "$file?v=".filemtime($docroot.$file);
 }
 ?>
