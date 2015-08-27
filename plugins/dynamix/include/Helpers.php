@@ -198,4 +198,8 @@ function input_private_users($sec) {
 function is_block($path) {
   return (@filetype(realpath($path)) == 'block');
 }
+function autov($file) {
+  global $docroot;
+  echo "$file?v=".filemtime($docroot.$file);
+}
 ?>
