@@ -316,11 +316,10 @@
 				$bus = "sata";
 				$ctrl = "<controller type='usb' index='0' model='ich9-ehci1'/>
 						<controller type='usb' index='0' model='ich9-uhci1'/>";
-			}
-
-			// OVMF needs the bus set to ide for cdroms
-			if (!empty($domain['ovmf'])) {
-				$bus = "ide";
+				if (!empty($domain['ovmf'])) {
+					// OVMF + Q35 needs the bus set to usb for cdroms
+					$bus = "usb";
+				}
 			}
 
 			$clock = "<clock offset='" . $domain['clock'] . "'>
