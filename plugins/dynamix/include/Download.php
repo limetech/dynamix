@@ -11,31 +11,27 @@
  */
 ?>
 <?
+$docroot = $_SERVER['DOCUMENT_ROOT'];
+$file = $_POST['file'];
 switch ($_POST['cmd']) {
 case 'save':
-  $os = empty($_POST['os']) ? false : $_POST['os'];
-  $file = $_POST['file'];
   $source = $_POST['source'];
-  if ($os == false) {
-    $tmp = '/var/tmp/'.basename($source).'.txt';
+  if (pathinfo($source, PATHINFO_EXTENSION) == 'txt') {
+    exec("zip -qlj $docroot/$file $source");
+  } else {
+    $tmp = "$docroot/".basename($source).".txt";
     copy($source, $tmp);
-    exec("zip -qlj $file $tmp");
+    exec("zip -qlj $docroot/$file $tmp");
     @unlink($tmp);
-  } elseif ($os == 'windows') {
-    exec("todos <$source >$file");
-  } elseif ($os == 'unix') {
-    exec("cp -f $source $file");
-  }
-  echo "/".basename($file);
+  }    
+  echo "/$file";
   break;
 case 'delete':
-  $file = $_POST['file'];
-  @unlink($file);
+  @unlink("$docroot/$file");
   break;
 case 'diag':
-  $file = $_POST['file'];
-  exec("/usr/local/emhttp/plugins/dynamix/scripts/diagnostics $file");
-  echo "/".basename($file);
+  exec("$docroot/webGui/scripts/diagnostics $docroot/$file");
+  echo "/$file";
   break;
 }
 ?>
