@@ -261,8 +261,8 @@
 				$arrMatch['name'] = trim($arrMatch['name']);
 
 				if (empty($arrMatch['name'])) {
-					// Device name is blank, skip device
-					continue;
+					// Device name is blank, replace using fallback default
+					$arrMatch['name'] = 'unnamed device ('.$arrMatch['id'].')';
 				}
 
 				if (stripos($GLOBALS['var']['flashGUID'], str_replace(':', '-', $arrMatch['id'])) === 0) {

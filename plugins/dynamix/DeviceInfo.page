@@ -19,8 +19,9 @@ Png="devicesettings.png"
 $disk = $disks[$name];
 $dev  = $disk['device'];
 $on   = exec("hdparm -C /dev/$dev|grep -Pom1 'active'");
-$tmp  = "/var/tmp";
-$file = str_replace(' ','_',strtolower($var['NAME']))."-smart-report-".$disk['name']."-".date('Ymd-Hi').".rtf";
+$date = date('Ymd-Hi');
+$file = "{$disk['id']}-$date.txt";
+$zip = str_replace(' ','_',strtolower($var['NAME']))."-smart-$date.zip";
 $refs = array(); $n = 0;
 $slot = strpos($disk['status'],'_NP')===false;
 
@@ -40,16 +41,18 @@ var ctrl = "<span class='status vhshift'><a href='/Main/Device?name=<?=$prev?>' 
 
 function cleanUp() {
   if (document.hasFocus()) {
-    $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?="$tmp/$file"?>'});
-    $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?="$docroot/$file"?>'});
+    $('input[value="Downloading..."]').val('Download').prop('disabled',false);
+    $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?=$file?>'});
+    $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?=$zip?>'});
   } else {
     setTimeout(cleanUp,4000);
   }
 }
 function saveSMART() {
-  $.post('/webGui/include/SmartInfo.php',{cmd:'save',port:'<?=$dev?>',file:'<?="$tmp/$file"?>'}, function() {
-    $.post('/webGui/include/Download.php',{cmd:'save',os:'windows',source:'<?="$tmp/$file"?>',file:'<?="$docroot/$file"?>'},function(data) {
-      location = data;
+  $('input[value="Download"]').val('Downloading...').prop('disabled',true);
+  $.post('/webGui/include/SmartInfo.php',{cmd:'save',port:'<?=$dev?>',file:'<?=$file?>'}, function() {
+    $.post('/webGui/include/Download.php',{cmd:'save',source:'<?=$file?>',file:'<?=$zip?>'},function(zip) {
+      location = zip;
       setTimeout(cleanUp,4000);
     });
   });

@@ -70,7 +70,7 @@ case "identify":
   }
   break;
 case "save":
-  exec("smartctl -a /dev/$port >{$_POST['file']}");
+  exec("smartctl -a /dev/$port >{$_SERVER['DOCUMENT_ROOT']}/{$_POST['file']}");
   break;
 case "short":
   exec("smartctl -t short /dev/$port");

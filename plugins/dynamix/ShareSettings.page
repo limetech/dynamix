@@ -72,7 +72,7 @@ Enable disk shares:
 > If set to Yes, disk shares may be exported.  **WARNING:** Do not copy data from a disk share to a user share
 > unless you *know* what you are doing.  This may result in the loss of data and is not supported.
 >
-> If set to Auto, only disk shares not partiticapting in User Shares may be exported.
+> If set to Auto, only disk shares not participating in User Shares may be exported.
 
 Enable user shares:
 : <select name="shareUser" size="1" onchange="presetShare(this.form)" <?=$disabled?>>
