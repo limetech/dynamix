@@ -20,15 +20,31 @@ Workgroup:
 
 > Enter your local network Workgroup name. Usually this is "WORKGROUP".
 
-Local master:
+Local master browser:
 : <select name="localMaster">
   <?=mk_option($var['localMaster'], "no", "No");?>
   <?=mk_option($var['localMaster'], "yes", "Yes");?>
-  </select>
+  </select><span id="master0"></span>
 
 > If set to 'Yes' then the server will fully participate in browser elections, and in the absense
-> of other servers, will usually become the local Master Browser.
+> of other servers, will usually become the local master browser (LMB).
+
+Current elected master:
+: <span id="master1">please wait, obtaining...</span>
+
+> Shows in real-time the current elected local master browser by name and IP address.
 
 &nbsp;
 : <input type="submit" name="changeShare" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>
+<script>
+function getMaster() {
+  $.get('/webGui/include/LocalMaster.php',{smb:true},function(data) {
+    if (data) {$.each(data.split('#'),function(k,v) {$('#master'+k).html(v);});}
+<?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
+    setTimeout(getMaster,5000);
+<?endif;?>
+  });
+}
+$(getMaster);
+</script>
