@@ -14,25 +14,25 @@ Title="Diagnostics"
  */
 ?>
 <?
-$zip = $docroot."/".str_replace(' ','_',strtolower($var['NAME']))."-diagnostics-".date('Ymd-Hi').".zip";
+$zip = str_replace(' ','_',strtolower($var['NAME']))."-diagnostics-".date('Ymd-Hi').".zip";
 ?>
 <style>ul,li{margin:0;padding-top:0;padding-bottom:0;}</style>
 
 <script>
 function cleanUp() {
   if (document.hasFocus()) {
+    $('input[value="Downloading..."]').val('Download').prop('disabled',false);
     $('#pleaseWait').hide('slow');
     $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?=$zip?>'});
-    $('#collectButton').prop('disabled',false);
   } else {
     setTimeout(cleanUp,2000);
   }
 }
 function diagnostics() {
-  $('#collectButton').prop('disabled',true);
+  $('input[value="Download"]').val('Downloading...').prop('disabled',true);
   $('#pleaseWait').show('slow');
-  $.post('/webGui/include/Download.php',{cmd:'diag',file:'<?=$zip?>'},function(data) {
-    location = data;
+  $.post('/webGui/include/Download.php',{cmd:'diag',file:'<?=$zip?>'},function(zip) {
+    location = zip;
     setTimeout(cleanUp,4000);
   });
 }
@@ -52,24 +52,23 @@ and configuration files are collected:
   <br>copy the current *syslog* file and any previous existing *syslog* files.
 + *System*
   <br>save output of the following commands:
-  <br>lsscsi, lspci, free, ethtool & ifconfig
-  <br>display of iommu groups
-  <br>display of command line parameters (e.g. pcie acs override, pci stubbing, etc.)
-+ *Array*
-  <br>save disk status information about disks present in the unRAID array.
+  <br>lsscsi, lspci, free, lsof, ps, ethtool & ifconfig.
+  <br>display of iommu groups.
+  <br>display of command line parameters (e.g. pcie acs override, pci stubbing, etc).
+  <br>save system variables.
 + *SMART reports*
   <br>save a SMART report of each individual disk present in your system.
 + *Docker*
-  <br>save files *docker.log*, *libvirtd.log* and *libvirt/qemu/\*.log*
+  <br>save files *docker.log*, *libvirtd.log* and *libvirt/qemu/\*.log*.
 </pre>
 
-Clicking **Collect** will start the collection and may open a new window to allow local saving of the zip file.
+Clicking **Download** will start the collection and may open a new window to allow local saving of the zip file.
 
 *No personal information such as user names, passwords, or any other file contents not specified above is included
 by unRAID Server OS; however, your server name, IP address, and user share names* **will** *be included.*  
 *Note that 3rd-party plugins **may** or may not store personal information in plugin-specific configuration files and/or output
 to the system log.*
 
-<input type="button" value="Collect" id="collectButton" onclick="diagnostics()"><input type="button" value="Done" onclick="done()">
+<input type="button" value="Download" onclick="diagnostics()"><input type="button" value="Done" onclick="done()">
 
 <br><div id="pleaseWait" style="display:none;font-weight:bold;color:red;text-align:center">Please wait, collecting diagnostic information...</div>
