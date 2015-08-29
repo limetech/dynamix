@@ -15,20 +15,22 @@ Title="System Log"
 ?>
 
 <?
-$zip = $docroot."/".str_replace(' ','_',strtolower($var['NAME']))."-syslog-".date('Ymd-Hi').".zip";
+$zip = str_replace(' ','_',strtolower($var['NAME']))."-syslog-".date('Ymd-Hi').".zip";
 echo "<pre class='up'>".shell_exec('cat /var/log/syslog')."</pre>";
 ?>
 <script>
 function cleanUp() {
   if (document.hasFocus()) {
+    $('input[value="Downloading..."]').val('Download').prop('disabled',false);
     $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?=$zip?>'});
   } else {
     setTimeout(cleanUp,4000);
   }
 }  
 function syslog() {
-  $.post('/webGui/include/Download.php',{cmd:'save',source:'/var/log/syslog',file:'<?=$zip?>'},function(data) {
-    location = data;
+  $('input[value="Download"]').val('Downloading...').prop('disabled',true);
+  $.post('/webGui/include/Download.php',{cmd:'save',source:'/var/log/syslog',file:'<?=$zip?>'},function(zip) {
+    location = zip;
     setTimeout(cleanUp,4000);
   });
 }
