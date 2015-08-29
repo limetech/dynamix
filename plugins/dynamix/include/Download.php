@@ -19,7 +19,7 @@ case 'save':
   if (pathinfo($source, PATHINFO_EXTENSION) == 'txt') {
     exec("zip -qlj $docroot/$file $source");
   } else {
-    $tmp = "$docroot/".basename($source).".txt";
+    $tmp = "/var/tmp/".basename($source).".txt";
     copy($source, $tmp);
     exec("zip -qlj $docroot/$file $tmp");
     @unlink($tmp);
