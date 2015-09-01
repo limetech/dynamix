@@ -62,7 +62,7 @@ and configuration files are collected:
   <br>save files *docker.log*, *libvirtd.log* and *libvirt/qemu/\*.log*.
 </pre>
 
-Clicking **Download** will start the collection and may open a new window to allow local saving of the zip file.
+Clicking **Download** will start the collection process and then instruct your browser to save the zip file locally.
 
 *No personal information such as user names, passwords, or any other file contents not specified above is included
 by unRAID Server OS; however, your server name, IP address, and user share names* **will** *be included.*  
