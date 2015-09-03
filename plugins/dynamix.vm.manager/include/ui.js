@@ -268,6 +268,8 @@ var UI;
                     var scaleRatio = display.autoscale(size.w, size.h, downscaleOnly);
                     UI.rfb.get_mouse().set_scale(scaleRatio);
                     Util.Debug('Scaling by ' + UI.rfb.get_mouse().get_scale());
+                } else if (scaleType === 'off') {
+                    display.set_scale(1.0);
                 }
             }
         },
@@ -402,7 +404,6 @@ var UI;
             // Close settings if open
             if (UI.settingsOpen === true) {
                 UI.settingsApply();
-                UI.closeSettingsMenu();
             }
             // Close connection settings if open
             if (UI.connSettingsOpen === true) {
@@ -431,7 +432,6 @@ var UI;
             // Close settings if open
             if (UI.settingsOpen === true) {
                 UI.settingsApply();
-                UI.closeSettingsMenu();
             }
             // Close connection settings if open
             if (UI.connSettingsOpen === true) {
@@ -501,7 +501,6 @@ var UI;
             // Close connection settings if open
             if (UI.settingsOpen === true) {
                 UI.settingsApply();
-                UI.closeSettingsMenu();
                 $D('connectButton').className = "noVNC_status_button";
             }
             // Close clipboard panel if open
@@ -537,7 +536,6 @@ var UI;
             $D('noVNC_description').style.display = "none";
             if (UI.settingsOpen) {
                 UI.settingsApply();
-                UI.closeSettingsMenu();
             } else {
                 UI.updateSetting('encrypt');
                 UI.updateSetting('true_color');
@@ -614,9 +612,12 @@ var UI;
             // Settings with immediate (non-connected related) effect
             WebUtil.selectStylesheet(UI.getSetting('stylesheet'));
             WebUtil.init_logging(UI.getSetting('logging'));
+            UI.onresize();
             UI.setViewClip();
             UI.updateViewDrag();
             //Util.Debug("<< settingsApply");
+
+            UI.closeSettingsMenu();
         },
 
 
@@ -722,7 +723,7 @@ var UI;
             }
 
             UI.enableDisableViewClip();
-            $D('noVNC_resize').disabled = connected;
+            //$D('noVNC_resize').disabled = connected;
             $D('noVNC_shared').disabled = connected;
             $D('noVNC_view_only').disabled = connected;
             $D('noVNC_path').disabled = connected;
