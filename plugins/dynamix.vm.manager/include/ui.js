@@ -21,7 +21,7 @@ var UI;
     window.onscriptsload = function () { UI.load(); };
     Util.load_scripts(["webutil.js", "base64.js", "websock.js", "des.js",
                        "keysymdef.js", "keyboard.js", "input.js", "display.js",
-                       "jsunzip.js", "rfb.js", "keysym.js"]);
+                       "rfb.js", "keysym.js", "inflator.js"]);
 
     UI = {
 
@@ -625,7 +625,7 @@ var UI;
             UI.rfb.sendPassword($D('noVNC_password').value);
             //Reset connect button.
             $D('noVNC_connect_button').value = "Connect";
-            $D('noVNC_connect_button').onclick = UI.Connect;
+            $D('noVNC_connect_button').onclick = UI.connect;
             //Hide connection panel.
             UI.toggleConnectPanel();
             return false;
