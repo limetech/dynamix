@@ -2377,7 +2377,7 @@ var ZStream = require('./lib/zlib/zstream.js');
 
 var Inflate = function () {
     this.strm = new ZStream();
-    this.chunkSize = 1024 * 10 * 10;
+    this.chunkSize = 1024 * 10 * 10 * 10;
     this.strm.output = new Uint8Array(this.chunkSize);
     this.windowBits = 5;
 
