@@ -81,6 +81,7 @@ function export_settings($protocol,$share) {
 var timer2,timer30;
 
 function changeMode(item) {
+  $.cookie('shareMode',item,{path:'/',expires:3650});
 <?if ($var['shareSMBEnabled']=='yes'):?>
   if (item==0) $('.smb').show(); else $('.smb').hide();
 <?endif;?>
@@ -92,6 +93,7 @@ function changeMode(item) {
 <?endif;?>
 }
 function changeView(item) {
+  $.cookie('viewMode',item,{path:'/',expires:3650});
   if (item==0) $('.view1').show(); else $('.view1').hide();
   if (item==1) $('.view2').show(); else $('.view2').hide();
   if (item==2) $('.view3').show(); else $('.view3').hide();
@@ -150,12 +152,16 @@ function heatAlarm() {
   }
   timer2 = setTimeout(heatAlarm,2000);
 }
-$(update3);
-$(update60);
-$(update30);
+$(function() {
+  if ($.cookie('shareMode')!=null) { $('select[name="enter_share"] option')[$.cookie('shareMode')].selected = true; $('select[name="enter_share"]').change(); }
+  if ($.cookie('viewMode')!=null) { $('select[name="enter_view"] option')[$.cookie('viewMode')].selected = true; $('select[name="enter_view"]').change(); }
+  update3();
+  update60();
+  update30();
 <?if ($display['refresh']==0 || ($display['refresh']<0 && $var['mdResync']>0)):?>
-$('.tabs').append("<span class='status vhshift'><input type='button' value='Refresh' onclick='refresh()'></span>");
+  $('.tabs').append("<span class='status vhshift'><input type='button' value='Refresh' onclick='refresh()'></span>");
 <?endif;?>
+});
 </script>
 
 <table class='share_status fixed'>
