@@ -6,5 +6,6 @@ if grep -q 'fsState="Started"' /var/local/emhttp/var.ini && grep -q 'startMode="
 	if [ -x /etc/rc.d/rc.docker ]; then
 		echo "Starting Docker..."
 		/etc/rc.d/rc.docker start | logger
+		/usr/local/emhttp/plugins/dynamix.docker.manager/scripts/dockerupdate.php | logger
 	fi
 fi

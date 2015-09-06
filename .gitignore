@@ -24,3 +24,5 @@ nbproject
 sftp-settings.json
 sftp-config.json
 
+# omit non-dynamix plugins
+unRAIDServer/
