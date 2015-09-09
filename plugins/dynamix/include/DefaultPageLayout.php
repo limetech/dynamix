@@ -175,14 +175,6 @@ function countDown() {
   $('#countdown').html('<small>Page refresh in '+counting+' sec</small>');
   setTimeout(countDown,1000);
 }
-function localMaster() {
-  $.get('/webGui/include/LocalMaster.php',function(data) {
-    $('#localmaster').html(data);
-<?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
-    timers.localmaster = setTimeout(localMaster,<?=max(30000,abs($display['refresh']))?>);
-<?endif;?>
-  });
-}
 $(function() {
   var tab = $.cookie('one')||$.cookie('tab')||'tab1';
   if (tab=='tab0') tab = 'tab'+$('input[name$="tabs"]').length; else if ($('#'+tab).length==0) {initab(); tab = 'tab1';}
@@ -210,7 +202,7 @@ for (var i=0,mobile; mobile=mobiles[i]; i++) {
    <a href="/Tools/Registration"><strong>unRAID Server <em><?=$var['regTy']?></em></strong></a>
    </div>
    <div class="block">
-    <span class="text-left"><span id="localmaster"></span>Server<br/>Description<br/>Version<br/>Uptime</span>
+    <span class="text-left">Server<br/>Description<br/>Version<br/>Uptime</span>
     <span class="text-right"><?=$var['NAME'].($var['IPADDR'] ? " &bullet; {$var['IPADDR']}" : "")?><br/><?=$var['COMMENT']?><br/><?=$var['version']?><br/><span id="uptime"></span></span>
    </div>
   </div>
@@ -322,7 +314,6 @@ $(function() {
   var top = ($.cookie('top')||0) - $('.tabs').offset().top - 75;
   if (top>0) {$('html,body').scrollTop(top);}
   $.removeCookie('top',{path:'/'});
-  localMaster();
 });
 </script>
 </body>
