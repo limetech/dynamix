@@ -280,6 +280,8 @@
 		<td>
 			<select name="domain[mem]" id="domain_mem" class="narrow" title="define the amount memory">
 			<?php
+				echo mk_option($arrConfig['domain']['mem'], 128 * 1024, '128 MB');
+				echo mk_option($arrConfig['domain']['mem'], 256 * 1024, '256 MB');
 				for ($i = 1; $i <= ($maxmem*2); $i++) {
 					$label = ($i * 512) . ' MB';
 					$value = $i * 512 * 1024;
@@ -293,6 +295,8 @@
 		<td class="advanced">
 			<select name="domain[maxmem]" id="domain_maxmem" class="narrow" title="define the maximum amount of memory">
 			<?php
+				echo mk_option($arrConfig['domain']['maxmem'], 128 * 1024, '128 MB');
+				echo mk_option($arrConfig['domain']['maxmem'], 256 * 1024, '256 MB');
 				for ($i = 1; $i <= ($maxmem*2); $i++) {
 					$label = ($i * 512) . ' MB';
 					$value = $i * 512 * 1024;
