@@ -60,8 +60,8 @@ function my_check($time) {
 function my_time($time) {
   global $unraid;
   $date = strftime($unraid['display']['date'].($unraid['display']['date']!='%c' ? ", {$unraid['display']['time']}" : ""), $time);
-  $now  = new DateTime();
-  $last = new DateTime("@$time");
+  $now  = new DateTime("@".intval(time()/86400)*86400);
+  $last = new DateTime("@".intval($time/86400)*86400);
   $days = date_diff($last,$now)->format('%a');
   switch (true) {
   case ($days<0):

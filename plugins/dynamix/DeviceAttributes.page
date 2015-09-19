@@ -17,13 +17,13 @@ Cond="strpos($disks[$name]['status'],'_NP')===false"
 
 <script>
 $(function() {
-  $.post("/webGui/include/SmartInfo.php",{cmd:'attributes',port:'<?=$disks[$name]['device']?>'}, function(data) {
+  $.post("/webGui/include/SmartInfo.php",{cmd:'attributes',port:'<?=isset($disks[$name]['device'])?$disks[$name]['device']:$name?>'}, function(data) {
     $('#disk_attributes').html(data);
   });
 });
 </script>
 <table class='share_status small'>
-<thead><td>#</td><td>Attribute Name</td><td>Flag</td><td>Value</td><td>Worst</td><td>Threshold</td><td>Type</td><td>Updated</td><td>Failed</td><td>Raw Value</td></thead>
+<thead><td style="width:30px">#</td><td>Attribute Name</td><td>Flag</td><td>Value</td><td>Worst</td><td>Threshold</td><td>Type</td><td>Updated</td><td>Failed</td><td style="width:145px">Raw Value</td></thead>
 <tbody id="disk_attributes"><tr><td colspan='10'><br><center><i class='fa fa-spinner fa-spin'></i>&nbsp;<em>Please wait... retrieving S.M.A.R.T. information!</em></center></td></tr></tbody>
 </table>
 <input type="button" value="Done" onclick="done()">

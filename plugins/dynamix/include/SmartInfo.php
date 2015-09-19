@@ -14,8 +14,11 @@
 require_once('Wrappers.php');
 
 function duration($h) {
-  $y = intval($h/8760);
-  return ' ('.($y?$y.'y, ':'').intval($h%8760/24).'d, '.($h%24).'h)';
+  $time = ceil(time()/3600)*3600;
+  $now = new DateTime("@$time");
+  $poh = new DateTime("@".($time-$h*3600));
+  $age = date_diff($poh,$now);
+  return " (".($age->y?"{$age->y}y, ":"").($age->m?"{$age->m}m, ":"").($age->d?"{$age->d}d, ":"")."{$age->h}h)";
 }
 
 $port = $_POST['port'];
