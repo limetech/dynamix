@@ -16,11 +16,17 @@ Png="devicesettings.png"
 ?>
 
 <?
-$disk = $disks[$name];
-$dev  = $disk['device'];
-$on   = exec("hdparm -C /dev/$dev|grep -Pom1 'active'");
 $date = date('Ymd-Hi');
-$file = "{$disk['id']}-$date.txt";
+if (isset($disks[$name])) {
+  $disk = $disks[$name];
+  $dev  = $disk['device'];
+  $file = "{$disk['id']}-$date.txt";
+} else {
+  $disk = [];
+  $dev  = $name;
+  $file = exec("ls -l /dev/disk/by-id/[au]*|grep '$name\$'|grep -Po '[ata|usb]-\K\S+'")."-$date.txt";
+}
+$on   = exec("hdparm -C /dev/$dev|grep -Pom1 'active'");
 $zip = str_replace(' ','_',strtolower($var['NAME']))."-smart-$date.zip";
 $refs = array(); $n = 0;
 $slot = strpos($disk['status'],'_NP')===false;
