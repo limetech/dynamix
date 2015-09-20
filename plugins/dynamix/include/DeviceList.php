@@ -336,20 +336,10 @@ case 'flash':
   echo "<td>".device_info($disk)."</td>";
   echo "<td>".device_desc($disk)."</td>";
   echo "<td>*</td>";
-  echo "<td>".$disk['numReads']."</td>";
-  echo "<td>".$disk['numWrites']."</td>";
-  echo "<td>".$disk['numErrors']."</td>";
-  echo "<td>{$disk['fsType']}</td>";
-  echo "<td>".my_scale($disk['size']*1024, $unit)." $unit</td>";
-  if (!$display['text']) {
-    echo "<td>".my_scale($disk['fsUsed']*1024, $unit)." $unit</td>";
-    echo "<td>".my_scale($disk['fsFree']*1024, $unit)." $unit</td>";
-  } else {
-    $free = round(100*$disk['fsFree']/$disk['size']);
-    $used = 100-$free;
-    echo "<td><div class='usage-disk'><span style='margin:0;width:{$used}%' class='".usage_color($used,false)."'><span>".my_scale($disk['fsUsed']*1024, $unit)." $unit</span></span></div></td>";
-    echo "<td><div class='usage-disk'><span style='margin:0;width:{$free}%' class='".usage_color($free,true)."'><span>".my_scale($disk['fsFree']*1024, $unit)." $unit</span></span></div></td>";
-  }
+  echo "<td>".my_number($disk['numReads'])."</td>";
+  echo "<td>".my_number($disk['numWrites'])."</td>";
+  echo "<td>".my_number($disk['numErrors'])."</td>";
+  render_used_and_free($disk);
   echo "<td>".device_browse($disk)."</td>";
   echo "</tr>";
   break;
