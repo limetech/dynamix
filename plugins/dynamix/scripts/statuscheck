@@ -34,7 +34,7 @@ function my_scale($value, &$unit, $precision = NULL) {
   $scale = $unraid['display']['scale'];
   $number = $unraid['display']['number'];
   $units = array('B','KB','MB','GB','TB','PB');
-  if ($scale==0 && !$precision) {
+  if ($scale==0 && $precision!==NULL) {
     $unit = '';
     return number_format($value, 0, $number[0], ($value>=10000 ? $number[1] : ''));
   } else {

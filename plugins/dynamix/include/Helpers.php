@@ -21,7 +21,7 @@ function my_scale($value, &$unit, $precision = NULL) {
   $dot = substr($number,0,1);
   $comma = substr($number,1,1);
   $units = array('B','KB','MB','GB','TB','PB');
-  if ($scale==0 && !$precision) {
+  if ($scale==0 && $precision!==NULL) {
     $unit = '';
     return number_format($value, 0, $dot, ($value>=10000 ? $comma : ''));
   } else {
