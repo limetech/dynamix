@@ -40,8 +40,9 @@ function my_scale($value, &$unit, $precision = NULL) {
   } else {
     $base = $value ? floor(log($value, 1000)) : 0;
     if ($scale>0 && $base>$scale) $base = $scale;
-    $unit = $units[$base];
     $value = round($value/pow(1000, $base), $precision ? $precision : 2);
+    if ($value>=1000) { $value = 1; $base++; }
+    $unit = $units[$base];
     return number_format($value, $precision ? $precision : (($value-intval($value)==0 || $value>=100) ? 0 : ($value>=10 ? 1 : 2)), $number[0], ($value>=10000 ? $number[1] : ''));
   }
 }
