@@ -25,10 +25,10 @@ function my_scale($value, &$unit, $precision = NULL) {
   } else {
     $base = $value ? floor(log($value, 1000)) : 0;
     if ($scale>0 && $base>$scale) $base = $scale;
-    $value = round($value/pow(1000, $base), $precision!==NULL ? $precision : 2);
+    $value = round($value/pow(1000, $base), $precision===NULL ? 2 : $precision);
     if ($value>=1000 && $scale<0) { $value = 1; $base++; }
     $unit = $units[$base];
-    return number_format($value, $precision!==NULL ? $precision : (($value-intval($value)==0 || $value>=100) ? 0 : ($value>=10 ? 1 : 2)), $number[0], ($value>=10000 ? $number[1] : ''));
+    return number_format($value, $precision===NULL ? (($value-intval($value)==0 || $value>=100) ? 0 : ($value>=10 ? 1 : 2)) : $precision, $number[0], ($value>=10000 ? $number[1] : ''));
   }
 }
 function my_number($value) {
