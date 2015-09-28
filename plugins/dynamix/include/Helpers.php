@@ -18,26 +18,23 @@ function my_scale($value, &$unit, $precision = NULL) {
   global $display;
   $scale = $display['scale'];
   $number = $display['number'];
-  $dot = substr($number,0,1);
-  $comma = substr($number,1,1);
   $units = array('B','KB','MB','GB','TB','PB');
-  if ($scale==0 && !$precision) {
+  if ($scale==0 && $precision===NULL) {
     $unit = '';
-    return number_format($value, 0, $dot, ($value>=10000 ? $comma : ''));
+    return number_format($value, 0, $number[0], ($value>=10000 ? $number[1] : ''));
   } else {
     $base = $value ? floor(log($value, 1000)) : 0;
     if ($scale>0 && $base>$scale) $base = $scale;
+    $value = round($value/pow(1000, $base), $precision===NULL ? 2 : $precision);
+    if ($value>=1000 && $scale<0) { $value = 1; $base++; }
     $unit = $units[$base];
-    $value = round($value/pow(1000, $base), $precision ? $precision : 2);
-    return number_format($value, $precision ? $precision : (($value-intval($value)==0 || $value>=100) ? 0 : ($value>=10 ? 1 : 2)), $dot, ($value>=10000 ? $comma : ''));
+    return number_format($value, $precision===NULL ? (($value-intval($value)==0 || $value>=100) ? 0 : ($value>=10 ? 1 : 2)) : $precision, $number[0], ($value>=10000 ? $number[1] : ''));
   }
 }
 function my_number($value) {
   global $display;
   $number = $display['number'];
-  $dot = substr($number,0,1);
-  $comma = substr($number,1,1);
-  return number_format($value, 0, $dot, ($value>=10000 ? $comma : ''));
+  return number_format($value, 0, $number[0], ($value>=10000 ? $number[1] : ''));
 }
 function my_time($time, $fmt = NULL) {
   global $display;
@@ -47,8 +44,8 @@ function my_time($time, $fmt = NULL) {
 function my_temp($value) {
   global $display;
   $unit = $display['unit'];
-  $dot = substr($display['number'],0,1);
-  return is_numeric($value) ? (($unit=='C' ? str_replace('.', $dot, $value) : round(9/5*$value+32))." $unit") : $value;
+  $number = $display['number'];
+  return is_numeric($value) ? (($unit=='C' ? str_replace('.', $number[0], $value) : round(9/5*$value+32))." $unit") : $value;
 }
 function my_disk($name) {
   return ucfirst(preg_replace(array('/^(disk|cache)([0-9]+)/','/^cache,disk/'),array('$1 $2','Cache, Disk '),$name));
