@@ -1,4 +1,4 @@
-#!/usr/bin/php -q
+#!/usr/bin/php
 <?php
 // usage: ftpusers 0|1 ['user1 user2 .. ']
 // 0 = disable, 1 = enable FTP server daemon
