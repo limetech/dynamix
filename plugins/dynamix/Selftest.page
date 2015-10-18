@@ -19,7 +19,6 @@ $date = date('Ymd-Hi');
 $sheets = []; $n = 0;
 $type = isset($disks[$name]) ? 'Device' : 'New';
 if ($type=='New') {
-  $slot = true;
   $dev = $name;
   foreach ($devs as $sheet) {
     $sheets[] = $sheet['device'];
@@ -28,7 +27,6 @@ if ($type=='New') {
   }
 } else {
   $disk = $disks[$name];
-  $slot = strpos($disk['status'],'_NP')===false;
   $dev = $disk['device'];
   $id = $disk['device'];
   foreach ($disks as $sheet) {
@@ -46,7 +44,7 @@ $file = "$id-$date.txt";
 $zip  = str_replace(' ','_',strtolower($var['NAME']))."-smart-$date.zip";
 ?>
 Download SMART report:
-: <input type='button' value='Download' onclick='saveSMART()'<?if (!$slot):?> disabled<?endif;?>>
+: <input type='button' value='Download' onclick='saveSMART()'>
 
 SMART self-test history:
 : <input type="button" value="Show" id="toggle_log" onclick="selftestLog()" disabled>
@@ -83,11 +81,7 @@ SMART extended self-test:
 > This feature is only available when the disk is in active mode.
 
 Last SMART test result:
-<?if ($slot):?>
 : <span id="test_result"><i class='fa fa-spinner fa-spin'></i>&nbsp;<em>Please wait... retrieving S.M.A.R.T. information!</em></span>
-<?else:?>
-: ---
-<?endif;?>
 
 > When no test is running it will show here the latest obtained self-test result (if available).
 > Otherwise a progress indicator (percentage value) is shown for a running test.
@@ -162,7 +156,9 @@ function startLongTest() {
   }
 }
 <?if (count($sheets)>1):?>
-var ctrl = "<span class='status vhshift'><a href='/Main/<?=$type?>?name=<?=$prev?>' title='previous device'><button type='button' style='margin-right:4px'><i class='fa fa-chevron-left'></i></button></a><a href='/Main/<?=$type?>?name=<?=$next?>' title='next device'><button type='button'><i class='fa fa-chevron-right'></i></button></a></span>";
+var ctrl  = "<span class='status vhshift'><span id='waitmsg' style='display:none;font-size:small;font-style:italic;color:orange;margin-right:8px'>please wait...</span><a href='/Main/<?=$type?>?name=<?=$prev?>' title='previous device'>";
+    ctrl += "<button type='button' style='margin-right:4px' onclick='this.disabled=true;$(\"#waitmsg\").show();'><i class='fa fa-chevron-left'></i></button></a>";
+    ctrl += "<a href='/Main/<?=$type?>?name=<?=$next?>' title='next device'><button type='button' onclick='this.disabled=true;$(\"#waitmsg\").show();'><i class='fa fa-chevron-right'></i></button></a></span>";
 
 $(function() {
 <?if ($tabbed):?>
@@ -174,7 +170,6 @@ $(function() {
 <?endif;?>
 
 $(function() {
-<?if ($slot):?>
   var tester = $.cookie('tester.<?=$dev?>');
   testUpdate(tester===undefined);
   if (tester !== undefined) $('#'+tester+'_test').val('Stop').removeAttr('disabled');
@@ -183,7 +178,6 @@ $(function() {
   $('#toggle_error').removeAttr('disabled');
   $.post('/webGui/include/SmartInfo.php',{cmd:'selftest',port:'<?=$dev?>'},function(data) {$('#selftest').html(data);});
   $.post('/webGui/include/SmartInfo.php',{cmd:'errorlog',port:'<?=$dev?>'},function(data) {$('#errorlog').html(data);});
-<?endif;?>
 <?endif;?>
 });
 </script>
