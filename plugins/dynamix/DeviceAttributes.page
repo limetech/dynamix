@@ -1,4 +1,4 @@
-Menu="Device"
+Menu="Device New"
 Title="Attributes"
 Cond="strpos($disks[$name]['status'],'_NP')===false"
 ---

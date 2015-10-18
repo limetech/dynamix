@@ -22,44 +22,28 @@ $tmp   = '/tmp/screen_buffer';
 extract(parse_plugin_cfg('dynamix',true));
 
 function device_info($disk) {
-  global $path, $var, $tmp;
-  $href = $disk['name'];
-  if ($href != 'preclear') {
-    $name = my_disk($href);
-    $type = $disk['type'];
-  } else {
-    $name = $disk['device'];
-    $type = 'Preclear';
-    $href = "{$disk['device']}&file=$tmp";
-  }
+  global $path, $var;
+  $name = $disk['name'];
+  $type = $disk['type']=='Flash' || $disk['type']=='New' ? $disk['type'] : 'Device';
   $action = strpos($disk['color'],'blink')===false ? "down" : "up";
-  if ($var['fsState']=='Started' && $type!='Flash' && $type!='Preclear')
-    $ctrl = "<a href='update.htm?cmdSpin{$action}={$href}' title='Click to spin $action device' class='none' target='progressFrame' onclick=\"$.removeCookie('one',{path:'/'});\"><i class='fa fa-sort-$action spacing'></i></a>";
-  else
+  if ($var['fsState']=='Started' && $type!='Flash') {
+    $cmd = $type=='New' ? "cmd=/webGui/scripts/hd_parm&arg1=$action&arg2=$name" : "cmdSpin$action=$name"; 
+    $ctrl = "<a href='update.htm?$cmd' title='Click to spin $action device' class='none' target='progressFrame' onclick=\"$.removeCookie('one',{path:'/'});\"><i class='fa fa-sort-$action spacing'></i></a>";
+  } else
     $ctrl = "";
-  $ball = "/webGui/images/{$disk['color']}.png";
   switch ($disk['color']) {
     case 'green-on': $help = 'Normal operation, device is active'; break;
     case 'green-blink': $help = 'Device is in standby mode (spun-down)'; break;
-    case 'blue-on': $help = ($disk['name']=='preclear' ? 'Unassigned device' : 'New device'); break;
-    case 'blue-blink': $help = ($disk['name']=='preclear' ? 'Unassigned device, in standby mode' : 'New device, in stadby mode (spun-down)'); break;
-    case 'yellow-on': $help = ($href=='parity' ? 'Parity is invalid' : 'Device contents emulated'); break;
-    case 'yellow-blink': $help = 'Device contents emulated, in standby mode (spun-down)'; break;
-    case 'red-on':
-    case 'red-blink': $help = ($href=='parity' ? 'Parity device is disabled' : 'Device is disabled, contents emulated'); break;
-    case 'red-off': $help = ($href=='parity' ? 'Parity device missing' : 'Device is missing (disabled), contents emulated'); break;
+    case 'blue-on': $help = 'New device'; break;
+    case 'blue-blink': $help = 'New device, in standby mode (spun-down)'; break;
+    case 'yellow-on': $help = $name=='parity' ? 'Parity is invalid' : 'Device contents emulated'; break;
+    case 'yellow-blink': $help = $name=='parity' ? 'Parity is invalid, in standby mode (spun-down)' : 'Device contents emulated, in standby mode (spun-down)'; break;
+    case 'red-on': case 'red-blink': $help = $name=='parity' ? 'Parity device is disabled' : 'Device is disabled, contents emulated'; break;
+    case 'red-off': $help = $name=='parity' ? 'Parity device is missing' : 'Device is missing (disabled), contents emulated'; break;
     case 'grey-off': $help = 'Device not present'; break;
   }
-  switch ($type) {
-  case 'Flash':
-    $device = $type;
-    break;
-  default:
-    $device = 'Device';
-    break;
-  }
-  $status = "${ctrl}<a class='info nohand' onclick='return false'><img src='$ball' class='icon'><span>${help}</span></a>";
-  $link = strpos($disk['status'], 'DISK_NP')===false ? "<a href='$path/$device?name=$href'>$name</a>" : $name;
+  $status = "$ctrl<a class='info nohand' onclick='return false'><img src='/webGui/images/{$disk['color']}.png' class='icon'><span>$help</span></a>";
+  $link = strpos($disk['status'], 'DISK_NP')===false ? "<a href='$path/$type?name=$name'>".my_disk($name)."</a>" : my_disk($name);
   return $status.$link;
 }
 function device_browse($disk) {
@@ -199,12 +183,14 @@ function my_clock($time) {
 }
 function read_disk($device, $item) {
   global $var;
-  $smart = "/var/local/emhttp/smart/$device";
-  if (!file_exists($smart) || (time()-filemtime($smart)>=$var['poll_attributes'])) exec("smartctl -n standby -A /dev/$device > $smart");
-  $temp = exec("awk '\$1==190||\$1==194{print \$10;exit}' $smart");
   switch ($item) {
-    case 'color': return $temp ? 'blue-on' : 'blue-blink';
-    case 'temp' : return $temp ? $temp : '*';
+  case 'color': 
+    return exec("hdparm -C /dev/$device|grep -Po active") ? 'blue-on' : 'blue-blink';
+  case 'temp':
+    $smart = "/var/local/emhttp/smart/$device";
+    if (!file_exists($smart) || (time()-filemtime($smart)>=$var['poll_attributes'])) exec("smartctl -n standby -A /dev/$device > $smart");
+    $temp = exec("awk '\$1==190||\$1==194{print \$10;exit}' $smart");
+    return $temp ? $temp : '*';
   }
 }
 function show_totals($text) {
@@ -242,7 +228,7 @@ function array_slots() {
   $max = max($var['MAX_ARRAYSZ'] - max($var['SYS_CACHE_SLOTS']-1, 0), 2);
   $out = "<form method='POST' action='/update.htm' target='progressFrame'>";
   $out .= "<input type='hidden' name='changeSlots' value='Apply'>";
-  $out .= "<select style=\"min-width:auto\" name='SYS_ARRAY_SLOTS' onChange='this.form.submit()'>";
+  $out .= "<select style='min-width:auto' name='SYS_ARRAY_SLOTS' onChange='this.form.submit()'>";
   for ($n=$min; $n<=$max; $n++) {
     $selected = ($n == $var['SYS_ARRAY_SLOTS'])? " selected" : "";
     $out .= "<option value='$n'{$selected}>$n</option>";
@@ -256,7 +242,7 @@ function cache_slots() {
   $max = $var['MAX_DEVICES'] - max($var['SYS_ARRAY_SLOTS'], 2);
   $out = "<form method='POST' action='/update.htm' target='progressFrame'>";
   $out .= "<input type='hidden' name='changeSlots' value='Apply'>";
-  $out .= "<select style=\"min-width:auto\" name='SYS_CACHE_SLOTS' onChange='this.form.submit()'>";
+  $out .= "<select style='min-width:auto' name='SYS_CACHE_SLOTS' onChange='this.form.submit()'>";
   for ($n=$min; $n<=$max; $n++) {
     $option = $n ? $n : "none";
     $selected = ($n == $var['SYS_CACHE_SLOTS'])? " selected" : "";
@@ -298,12 +284,11 @@ case 'cache':
   }
   break;
 case 'open':
-  $status = isset($confirm['preclear']) ? '' : '_NP';
   foreach ($devs as $dev) {
-    $dev['name'] = 'preclear';
+    $dev['name'] = $dev['device'];
+    $dev['type'] = 'New';
     $dev['color'] = read_disk($dev['device'],'color');
     $dev['temp'] = read_disk($dev['device'],'temp');
-    $dev['status'] = $status;
     echo "<tr>";
     echo "<td>".device_info($dev)."</td>";
     echo "<td>".device_desc($dev)."</td>";

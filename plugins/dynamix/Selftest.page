@@ -1,0 +1,189 @@
+Menu="Device:2 New:2"
+Title="Self-Test"
+Cond="strpos($disks[$name]['status'],'_NP')===false"
+---
+<?PHP
+/* Copyright 2015, Lime Technology
+ * Copyright 2015, Bergware International.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+$sheets = []; $n = 0;
+$on = exec("hdparm -C /dev/$dev|grep -Pom1 'active'");
+$date = date('Ymd-Hi');
+$sign = isset($disks[$name]) ? 'Device' : 'New';
+if ($sign=='New') {
+  $slot = true;
+  $dev = $name;
+  foreach ($devs as $sheet) {
+    $sheets[] = $sheet['device'];
+    if ($sheet['device']==$name) {$i = $n; $id = $sheet['id'];}
+    $n++;
+  }
+} else {
+  $disk = $disks[$name];
+  $slot = strpos($disk['status'],'_NP')===false;
+  $dev = $disk['device'];
+  $id = $disk['device'];
+  foreach ($disks as $sheet) {
+    if ($sheet['name']=='flash' || strpos($sheet['status'],'_NP')) continue;
+    $sheets[] = $sheet['name'];
+    if ($sheet['name']==$name) $i = $n;
+    $n++;
+  }
+}
+$end  = count($sheets)-1;
+$prev = $i>0 ? $sheets[$i-1] : $sheets[$end];
+$next = $i<$end ? $sheets[$i+1] : $sheets[0];
+$file = "$id-$date.txt";
+$zip  = str_replace(' ','_',strtolower($var['NAME']))."-smart-$date.zip";
+?>
+Download SMART report:
+: <input type='button' value='Download' onclick='saveSMART()'<?if (!$slot):?> disabled<?endif;?>>
+
+SMART self-test history:
+: <input type="button" value="Show" id="toggle_log" onclick="selftestLog()" disabled>
+
+> Press **Show** to view the self-test history as is kept on the disk itself.
+> This feature is only available when the disk is in active mode.
+
+<pre id="selftest" style="display:none"></pre>
+
+SMART error log:
+: <input type="button" value="Show" id="toggle_error" onclick="errorLog()" disabled>
+
+> Press **Show** to view the error report as is kept on the disk itself.
+> This feature is only available when the disk is in active mode.
+
+<pre id="errorlog" style="display:none"></pre>
+
+SMART short self-test:
+: <input type='button' value='Start' id='short_test' onclick="startShortTest()" disabled>
+
+> Starts a *short* SMART self-test, the estimated duration can be viewed under the *Capabilities* section. This is usually a few minutes.
+>
+> When the disk is spun down, it will abort any running self-test.
+> This feature is only available when the disk is in active mode.
+
+SMART extended self-test:
+: <input type='button' value='Start' id='long_test' onclick="startLongTest()" disabled>
+
+> Starts an *extended* SMART self-test, the estimated duration can be viewed under the *Capabilities* section. This is usually several hours.
+>
+> When the disk is spun down, it will abort any running self-test. It is advised to disable the spin down timer of the disk
+> to avoid interruption of this self-test.
+>
+> This feature is only available when the disk is in active mode.
+
+Last SMART test result:
+<?if ($slot):?>
+: <span id="test_result"><i class='fa fa-spinner fa-spin'></i>&nbsp;<em>Please wait... retrieving S.M.A.R.T. information!</em></span>
+<?else:?>
+: ---
+<?endif;?>
+
+> When no test is running it will show here the latest obtained self-test result (if available).
+> Otherwise a progress indicator (percentage value) is shown for a running test.
+
+<script>
+function cleanUp() {
+  if (document.hasFocus()) {
+    $('input[value="Downloading..."]').val('Download').prop('disabled',false);
+    $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?=$file?>'});
+    $.post('/webGui/include/Download.php',{cmd:'delete',file:'<?=$zip?>'});
+  } else {
+    setTimeout(cleanUp,4000);
+  }
+}
+function saveSMART() {
+  $('input[value="Download"]').val('Downloading...').prop('disabled',true);
+  $.post('/webGui/include/SmartInfo.php',{cmd:'save',port:'<?=$dev?>',file:'<?=$file?>'}, function() {
+    $.post('/webGui/include/Download.php',{cmd:'save',source:'<?=$file?>',file:'<?=$zip?>'},function(zip) {
+      location = zip;
+      setTimeout(cleanUp,4000);
+    });
+  });
+}
+function testUpdate(init) {
+  $.post('/webGui/include/SmartInfo.php',{cmd:'update',port:'<?=$dev?>',name:'<?=$name?>',sign:'<?=$sign?>'},function(data) {
+    $('#test_result').html(data);
+    if (data.indexOf('%')>=0) {
+      if (!init) timers.tester = setTimeout(testUpdate, 3000);
+    } else {
+      $('#short_test').val('Start');
+      $('#long_test').val('Start');
+<?if ($on):?>
+      $('#short_test').removeAttr('disabled');
+      $('#long_test').removeAttr('disabled');
+<?endif;?>
+      $.removeCookie('tester.<?=$dev?>',{path:'/'});
+    }
+  });
+}
+function selftestLog() {
+  $('#selftest').toggle('slow');
+  var text = $('#toggle_log').val()=='Show' ? 'Hide' : 'Show';
+  $('#toggle_log').val(text);
+}
+function errorLog() {
+  $('#errorlog').toggle('slow');
+  var text = $('#toggle_error').val()=='Show' ? 'Hide' : 'Show';
+  $('#toggle_error').val(text);
+}
+function startShortTest() {
+  if ($('#short_test').val()=='Start') {
+    $('#short_test').val('Stop');
+    $('#long_test').attr('disabled','disabled');
+    $.cookie('tester.<?=$dev?>','short',{path:'/'});
+    $.post('/webGui/include/SmartInfo.php',{cmd:'short',port:'<?=$dev?>'},function() {timers.tester = setTimeout(testUpdate,0);});
+  } else {
+    clearTimeout(timers.tester);
+    $.removeCookie('tester.<?=$dev?>',{path:'/'});
+    $.post('/webGui/include/SmartInfo.php',{cmd:'stop',port:'<?=$dev?>'}, function() {setTimeout(testUpdate,0);});
+  }
+}
+function startLongTest() {
+  if ($('#long_test').val()=='Start') {
+    $('#long_test').val('Stop');
+    $('#short_test').attr('disabled','disabled');
+    $.cookie('tester.<?=$dev?>','long',{path:'/'});
+    $.post('/webGui/include/SmartInfo.php',{cmd:'long',port:'<?=$dev?>'},function(){timers.tester = setTimeout(testUpdate,0);});
+  } else {
+    clearTimeout(timers.tester);
+    $.removeCookie('tester.<?=$dev?>',{path:'/'});
+    $.post('/webGui/include/SmartInfo.php',{cmd:'stop',port:'<?=$dev?>'}, function() {setTimeout(testUpdate,0);});
+  }
+}
+<?if (count($sheets)>1):?>
+var ctrl = "<span class='status vhshift'><a href='/Main/<?=$sign?>?name=<?=$prev?>' title='previous device'><button type='button' style='margin-right:4px'><i class='fa fa-chevron-left'></i></button></a><a href='/Main/<?=$sign?>?name=<?=$next?>' title='next device'><button type='button'><i class='fa fa-chevron-right'></i></button></a></span>";
+
+$(function() {
+<?if ($tabbed):?>
+  $('.tabs').append(ctrl);
+<?else:?>
+  $('div[id=title]:not(".nocontrol")').each(function(){$(this).append(ctrl);});
+<?endif;?>
+});
+<?endif;?>
+
+$(function() {
+<?if ($slot):?>
+  var tester = $.cookie('tester.<?=$dev?>');
+  testUpdate(tester===undefined);
+  if (tester !== undefined) $('#'+tester+'_test').val('Stop').removeAttr('disabled');
+<?if ($on):?>
+  $('#toggle_log').removeAttr('disabled');
+  $('#toggle_error').removeAttr('disabled');
+  $.post('/webGui/include/SmartInfo.php',{cmd:'selftest',port:'<?=$dev?>'},function(data) {$('#selftest').html(data);});
+  $.post('/webGui/include/SmartInfo.php',{cmd:'errorlog',port:'<?=$dev?>'},function(data) {$('#errorlog').html(data);});
+<?endif;?>
+<?endif;?>
+});
+</script>
