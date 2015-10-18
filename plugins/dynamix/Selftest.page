@@ -156,9 +156,9 @@ function startLongTest() {
   }
 }
 <?if (count($sheets)>1):?>
-var ctrl  = "<span class='status vhshift'><span id='waitmsg' style='display:none;font-size:small;font-style:italic;margin-right:8px'>please wait...</span><a href='/Main/<?=$type?>?name=<?=$prev?>' title='previous device'>";
-    ctrl += "<button type='button' style='margin-right:4px' onclick='this.disabled=true;$(\"#waitmsg\").show();'><i class='fa fa-chevron-left'></i></button></a>";
-    ctrl += "<a href='/Main/<?=$type?>?name=<?=$next?>' title='next device'><button type='button' onclick='this.disabled=true;$(\"#waitmsg\").show();'><i class='fa fa-chevron-right'></i></button></a></span>";
+var ctrl  = "<span class='status vhshift'><span class='waitmsg' style='display:none;font-size:small;font-style:italic;margin-right:8px'>please wait...</span><a href='/Main/<?=$type?>?name=<?=$prev?>' title='previous device'>";
+    ctrl += "<button type='button' style='margin-right:4px' onclick='this.disabled=true;$(\".waitmsg\").show();'><i class='fa fa-chevron-left'></i></button></a>";
+    ctrl += "<a href='/Main/<?=$type?>?name=<?=$next?>' title='next device'><button type='button' onclick='this.disabled=true;$(\".waitmsg\").show();'><i class='fa fa-chevron-right'></i></button></a></span>";
 
 $(function() {
 <?if ($tabbed):?>
