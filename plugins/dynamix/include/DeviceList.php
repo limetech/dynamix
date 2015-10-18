@@ -81,9 +81,8 @@ function assignment($disk) {
   if ($disk['id']!="") {
     $out .= "<option value=\"{$disk['id']}\" selected>".device_desc($disk)."</option>";
     $out .= "<option value=''>$empty</option>";
-  } else {
+  } else
     $out .= "<option value='' selected>$empty</option>";
-  }
   $disabled = ($var['slotsRemaining'] ? "" : " disabled");
   foreach ($devs as $dev) {
     if (!file_exists("$tmp_{$dev['device']}")) $out .= "<option value=\"{$dev['id']}\"$disabled>".device_desc($dev)."</option>";
@@ -98,31 +97,20 @@ function fs_info($disk) {
   } else if ($disk['fsStatus']=='Mounted') {
     echo "<td>{$disk['fsType']}</td>";
     echo "<td>".my_scale($disk['fsSize']*1024,$unit)." $unit</td>";
-    switch ($display['text']) {
-    case 0:
-      $text1 = true; $text2 = true; break;
-    case 1: case 2:
-      $text1 = false; $text2 = false; break;
-    case 10: case 20:
-      $text1 = true; $text2 = false; break;
-    case 11: case 21:
-      $text1 = false; $text2 = true; break;
-    }
-    if ($text1) {
+    if ($display['text']%10==0) {
       echo "<td>".my_scale($disk['fsUsed']*1024,$unit)." $unit</td>";
     } else {
       $used = $disk['fsSize'] ? 100-round(100*$disk['fsFree']/$disk['fsSize']) : 0;
       echo "<td><div class='usage-disk'><span style='margin:0;width:$used%' class='".usage_color($used,false)."'><span>".my_scale($disk['fsUsed']*1024,$unit)." $unit</span></span></div></td>";
     }
-    if ($text2) {
+    if ($display['text']<10 ? $display['text']%10==0 : $display['text']%10!=0) {
       echo "<td>".my_scale($disk['fsFree']*1024,$unit)." $unit</td>";
     } else {
       $free = $disk['fsSize'] ? round(100*$disk['fsFree']/$disk['fsSize']) : 0;
       echo "<td><div class='usage-disk'><span style='margin:0;width:$free%' class='".usage_color($free,true)."'><span>".my_scale($disk['fsFree']*1024,$unit)." $unit</span></span></div></td>";
     }
-  } else {
+  } else
     echo "<td colspan='2'></td><td>{$disk['fsStatus']}</td><td></td>";
-  }
   echo "<td>".device_browse($disk)."</td>";
 }
 function array_offline($disk) {
@@ -231,32 +219,21 @@ function show_totals($text) {
   echo "<td></td>";
   if (strstr($text,"Array") && ($var['startMode']=="Normal")) {
     echo "<td>".my_scale($sum['fsSize']*1024,$unit)." $unit</td>";
-    switch ($display['text']) {
-    case 0:
-      $text1 = true; $text2 = true; break;
-    case 1: case 2:
-      $text1 = false; $text2 = false; break;
-    case 10: case 20:
-      $text1 = true; $text2 = false; break;
-    case 11: case 21:
-      $text1 = false; $text2 = true; break;
-    }
-    if ($text1) {
+    if ($display['text']%10==0) {
       echo "<td>".my_scale($sum['fsUsed']*1024,$unit)." $unit</td>";
     } else {
       $used = $sum['fsSize'] ? 100-round(100*$sum['fsFree']/$sum['fsSize']) : 0;
       echo "<td><div class='usage-disk'><span style='margin:0;width:$used%' class='".usage_color($used,false)."'><span>".my_scale($sum['fsUsed']*1024,$unit)." $unit</span></span></div></td>";
     }
-    if ($text2) {
+    if ($display['text']<10 ? $display['text']%10==0 : $display['text']%10!=0) {
       echo "<td>".my_scale($sum['fsFree']*1024,$unit)." $unit</td>";
     } else {
       $free = $sum['fsSize'] ? round(100*$sum['fsFree']/$sum['fsSize']) : 0;
       echo "<td><div class='usage-disk'><span style='margin:0;width:$free%' class='".usage_color($free,true)."'><span>".my_scale($sum['fsFree']*1024,$unit)." $unit</span></span></div></td>";
     }
     echo "<td></td>";
-  } else {
+  } else
     echo "<td colspan=4></td>";
-  }
   echo "</tr>";
 }
 function array_slots() {
