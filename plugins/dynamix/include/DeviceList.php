@@ -76,7 +76,7 @@ function device_desc($disk) {
 function assignment($disk) {
   global $var, $devs, $tmp;
   $out = "<form method='POST' name=\"{$disk['name']}Form\" action='/update.htm' target='progressFrame'><input type='hidden' name='changeDevice' value='Apply'>";
-  $out .= "<select style=\"max-width:none\" name=\"slotId.{$disk['idx']}\" onChange=\"{$disk['name']}Form.submit()\">";
+  $out .= "<select style=\"min-width:400px;max-width:400px\" name=\"slotId.{$disk['idx']}\" onChange=\"{$disk['name']}Form.submit()\">";
   $empty = ($disk['idSb']!="" ? "no device" : "unassigned");
   if ($disk['id']!="") {
     $out .= "<option value=\"{$disk['id']}\" selected>".device_desc($disk)."</option>";
@@ -242,7 +242,7 @@ function array_slots() {
   $max = max($var['MAX_ARRAYSZ'] - max($var['SYS_CACHE_SLOTS']-1, 0), 2);
   $out = "<form method='POST' action='/update.htm' target='progressFrame'>";
   $out .= "<input type='hidden' name='changeSlots' value='Apply'>";
-  $out .= "<select name='SYS_ARRAY_SLOTS' onChange='this.form.submit()'>";
+  $out .= "<select style=\"min-width:auto\" name='SYS_ARRAY_SLOTS' onChange='this.form.submit()'>";
   for ($n=$min; $n<=$max; $n++) {
     $selected = ($n == $var['SYS_ARRAY_SLOTS'])? " selected" : "";
     $out .= "<option value='$n'{$selected}>$n</option>";
@@ -256,7 +256,7 @@ function cache_slots() {
   $max = $var['MAX_DEVICES'] - max($var['SYS_ARRAY_SLOTS'], 2);
   $out = "<form method='POST' action='/update.htm' target='progressFrame'>";
   $out .= "<input type='hidden' name='changeSlots' value='Apply'>";
-  $out .= "<select name='SYS_CACHE_SLOTS' onChange='this.form.submit()'>";
+  $out .= "<select style=\"min-width:auto\" name='SYS_CACHE_SLOTS' onChange='this.form.submit()'>";
   for ($n=$min; $n<=$max; $n++) {
     $option = $n ? $n : "none";
     $selected = ($n == $var['SYS_CACHE_SLOTS'])? " selected" : "";
