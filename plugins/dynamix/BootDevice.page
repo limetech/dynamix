@@ -15,7 +15,7 @@ Title="Boot Device"
 ?>
 <script>
 function boot_status() {
-  $.post('/webGui/include/DeviceList.php',{path:'<?=$path?>',device:'flash',width:window.innerWidth,timer:timer},function(data) {
+  $.post('/webGui/include/DeviceList.php',{path:'<?=$path?>',device:'flash'},function(data) {
     if (data) $('#boot_device').html(data);
 <?if (($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)) && $var['fsState']=='Started'):?>
 <?if ($display['tabs']==0):?>
