@@ -15,11 +15,10 @@ Cond="strpos($disks[$name]['status'],'_NP')===false"
  */
 ?>
 <?
-$sheets = []; $n = 0;
-$on = exec("hdparm -C /dev/$dev|grep -Pom1 'active'");
 $date = date('Ymd-Hi');
-$sign = isset($disks[$name]) ? 'Device' : 'New';
-if ($sign=='New') {
+$sheets = []; $n = 0;
+$type = isset($disks[$name]) ? 'Device' : 'New';
+if ($type=='New') {
   $slot = true;
   $dev = $name;
   foreach ($devs as $sheet) {
@@ -39,6 +38,7 @@ if ($sign=='New') {
     $n++;
   }
 }
+$on   = exec("hdparm -C /dev/$dev|grep -Pom1 'active'");
 $end  = count($sheets)-1;
 $prev = $i>0 ? $sheets[$i-1] : $sheets[$end];
 $next = $i<$end ? $sheets[$i+1] : $sheets[0];
@@ -112,7 +112,7 @@ function saveSMART() {
   });
 }
 function testUpdate(init) {
-  $.post('/webGui/include/SmartInfo.php',{cmd:'update',port:'<?=$dev?>',name:'<?=$name?>',sign:'<?=$sign?>'},function(data) {
+  $.post('/webGui/include/SmartInfo.php',{cmd:'update',port:'<?=$dev?>',name:'<?=$name?>',type:'<?=$type?>'},function(data) {
     $('#test_result').html(data);
     if (data.indexOf('%')>=0) {
       if (!init) timers.tester = setTimeout(testUpdate, 3000);
@@ -162,7 +162,7 @@ function startLongTest() {
   }
 }
 <?if (count($sheets)>1):?>
-var ctrl = "<span class='status vhshift'><a href='/Main/<?=$sign?>?name=<?=$prev?>' title='previous device'><button type='button' style='margin-right:4px'><i class='fa fa-chevron-left'></i></button></a><a href='/Main/<?=$sign?>?name=<?=$next?>' title='next device'><button type='button'><i class='fa fa-chevron-right'></i></button></a></span>";
+var ctrl = "<span class='status vhshift'><a href='/Main/<?=$type?>?name=<?=$prev?>' title='previous device'><button type='button' style='margin-right:4px'><i class='fa fa-chevron-left'></i></button></a><a href='/Main/<?=$type?>?name=<?=$next?>' title='next device'><button type='button'><i class='fa fa-chevron-right'></i></button></a></span>";
 
 $(function() {
 <?if ($tabbed):?>

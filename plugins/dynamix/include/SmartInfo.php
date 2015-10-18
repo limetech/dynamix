@@ -86,7 +86,7 @@ case "stop":
   break;
 case "update":
   if (!exec("hdparm -C /dev/$port|grep -om1 active")) {
-    $cmd = $_POST['sign']=='New' ? "cmd=/webGui/scripts/hd_parm&arg1=up&arg2={$_POST['name']}" : "cmdSpinup={$_POST['name']}";
+    $cmd = $_POST['type']=='New' ? "cmd=/webGui/scripts/hd_parm&arg1=up&arg2={$_POST['name']}" : "cmdSpinup={$_POST['name']}";
     echo "<a href='/update.htm?$cmd' class='info' target='progressFrame'><input type='button' value='Spin Up'></a><span class='orange-text'><big>Unavailable - disk must be spun up</big></span>";
     break;
   }
