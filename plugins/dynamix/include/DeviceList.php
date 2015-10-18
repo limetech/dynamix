@@ -315,7 +315,6 @@ case 'cache':
   if ($var['fsState']=='Stopped') {
     foreach ($disks as $disk) {if ($disk['type']=='Cache') array_offline($disk);}
     echo "<tr class='tr_last'><td><img src='/webGui/images/sum.png' class='icon'>Slots:</td><td colspan='9'>".cache_slots()."</td><td></td></tr>";
-    echo "<tr><td colspan='10'></td><td></td></tr>";
   } else {
     foreach ($disks as $disk) {if ($disk['type']=='Cache') array_online($disk);}
     if ($display['total'] && $var['cacheSbNumDisks']>1) show_totals("Pool of ".my_word($var['cacheNumDevices'])." devices");
