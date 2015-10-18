@@ -18,7 +18,6 @@ $var   = parse_ini_file("state/var.ini");
 $devs  = parse_ini_file("state/devs.ini",true);
 $disks = parse_ini_file("state/disks.ini",true);
 $sum   = ['count'=>0, 'temp'=>0, 'fsSize'=>0, 'fsUsed'=>0, 'fsFree'=>0, 'numReads'=>0, 'numWrites'=>0, 'numErrors'=>0];
-$tmp   = '/tmp/screen_buffer';
 extract(parse_plugin_cfg('dynamix',true));
 
 function device_info($disk) {
@@ -58,7 +57,7 @@ function device_desc($disk) {
   return "{$disk['id']} - $size $unit ({$disk['device']})";
 }
 function assignment($disk) {
-  global $var, $devs, $tmp;
+  global $var, $devs;
   $out = "<form method='POST' name=\"{$disk['name']}Form\" action='/update.htm' target='progressFrame'><input type='hidden' name='changeDevice' value='Apply'>";
   $out .= "<select style=\"min-width:400px;max-width:400px\" name=\"slotId.{$disk['idx']}\" onChange=\"{$disk['name']}Form.submit()\">";
   $empty = ($disk['idSb']!="" ? "no device" : "unassigned");
@@ -68,9 +67,7 @@ function assignment($disk) {
   } else
     $out .= "<option value='' selected>$empty</option>";
   $disabled = ($var['slotsRemaining'] ? "" : " disabled");
-  foreach ($devs as $dev) {
-    if (!file_exists("$tmp_{$dev['device']}")) $out .= "<option value=\"{$dev['id']}\"$disabled>".device_desc($dev)."</option>";
-  }
+  foreach ($devs as $dev) {$out .= "<option value=\"{$dev['id']}\"$disabled>".device_desc($dev)."</option>";}
   return $out."</select></form>";
 }
 function fs_info($disk) {
