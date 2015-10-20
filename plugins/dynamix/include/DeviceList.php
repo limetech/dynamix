@@ -14,22 +14,22 @@
 require_once('Helpers.php');
 
 $path  = $_POST['path'];
-$var   = parse_ini_file("state/var.ini");
-$devs  = parse_ini_file("state/devs.ini",true);
-$disks = parse_ini_file("state/disks.ini",true);
+$var   = parse_ini_file('state/var.ini');
+$devs  = parse_ini_file('state/devs.ini',true);
+$disks = parse_ini_file('state/disks.ini',true);
 $sum   = ['count'=>0, 'temp'=>0, 'fsSize'=>0, 'fsUsed'=>0, 'fsFree'=>0, 'numReads'=>0, 'numWrites'=>0, 'numErrors'=>0];
 extract(parse_plugin_cfg('dynamix',true));
 
-function device_info($disk) {
+function device_info(&$disk) {
   global $path, $var;
   $name = $disk['name'];
   $type = $disk['type']=='Flash' || $disk['type']=='New' ? $disk['type'] : 'Device';
-  $action = strpos($disk['color'],'blink')===false ? "down" : "up";
+  $action = strpos($disk['color'],'blink')===false ? 'down' : 'up';
   if ($var['fsState']=='Started' && $type!='Flash') {
-    $cmd = $type=='New' ? "cmd=/webGui/scripts/hd_parm&arg1=$action&arg2=$name" : "cmdSpin$action=$name"; 
+    $cmd = $type=='New' ? "cmd=/webGui/scripts/hd_parm&arg1=$action&arg2=$name" : "cmdSpin$action=$name";
     $ctrl = "<a href='update.htm?$cmd' title='Click to spin $action device' class='none' target='progressFrame' onclick=\"$.removeCookie('one',{path:'/'});\"><i class='fa fa-sort-$action spacing'></i></a>";
   } else
-    $ctrl = "";
+    $ctrl = '';
   switch ($disk['color']) {
     case 'green-on': $help = 'Normal operation, device is active'; break;
     case 'green-blink': $help = 'Device is in standby mode (spun-down)'; break;
@@ -45,32 +45,32 @@ function device_info($disk) {
   $link = strpos($disk['status'], 'DISK_NP')===false ? "<a href='$path/$type?name=$name'>".my_disk($name)."</a>" : my_disk($name);
   return $status.$link;
 }
-function device_browse($disk) {
+function device_browse(&$disk) {
   global $path;
   if ($disk['fsStatus']=='Mounted') {
-    $dir = $disk['name']=="flash" ? "/boot" : "/mnt/{$disk['name']}";
+    $dir = $disk['name']=='flash' ? "/boot" : "/mnt/{$disk['name']}";
     return "<a href='$path/Browse?dir=$dir'><img src='/webGui/images/explore.png' title='Browse $dir'></a>";
   }
 }
-function device_desc($disk) {
+function device_desc(&$disk) {
   $size = my_scale($disk['size']*1024,$unit);
   return "{$disk['id']} - $size $unit ({$disk['device']})";
 }
-function assignment($disk) {
+function assignment(&$disk) {
   global $var, $devs;
   $out = "<form method='POST' name=\"{$disk['name']}Form\" action='/update.htm' target='progressFrame'><input type='hidden' name='changeDevice' value='Apply'>";
   $out .= "<select style=\"min-width:400px;max-width:400px\" name=\"slotId.{$disk['idx']}\" onChange=\"{$disk['name']}Form.submit()\">";
-  $empty = ($disk['idSb']!="" ? "no device" : "unassigned");
-  if ($disk['id']!="") {
+  $empty = ($disk['idSb']!='' ? 'no device' : 'unassigned');
+  if ($disk['id']!='') {
     $out .= "<option value=\"{$disk['id']}\" selected>".device_desc($disk)."</option>";
     $out .= "<option value=''>$empty</option>";
   } else
     $out .= "<option value='' selected>$empty</option>";
-  $disabled = ($var['slotsRemaining'] ? "" : " disabled");
+  $disabled = ($var['slotsRemaining'] ? '' : ' disabled');
   foreach ($devs as $dev) {$out .= "<option value=\"{$dev['id']}\"$disabled>".device_desc($dev)."</option>";}
-  return $out."</select></form>";
+  return "$out</select></form>";
 }
-function fs_info($disk) {
+function fs_info(&$disk) {
   global $display;
   if ($disk['name']=='parity' || $disk['fsStatus']=='-') {
     echo "<td colspan='5'></td>";
@@ -94,32 +94,32 @@ function fs_info($disk) {
     echo "<td colspan='2'></td><td>{$disk['fsStatus']}</td><td></td>";
   echo "<td>".device_browse($disk)."</td>";
 }
-function array_offline($disk) {
+function array_offline(&$disk) {
   echo "<tr>";
   switch ($disk['status']) {
-  case "DISK_NP":
-  case "DISK_OK_NP":
-  case "DISK_NP_DSBL":
+  case 'DISK_NP':
+  case 'DISK_OK_NP':
+  case 'DISK_NP_DSBL':
     echo "<td>".device_info($disk)."</td>";
     echo "<td>".assignment($disk)."</td>";
     echo "<td colspan='9'></td>";
     break;
-  case "DISK_OK":
-  case "DISK_INVALID":
-  case "DISK_DSBL":
-  case "DISK_DSBL_NEW":
-  case "DISK_NEW":
+  case 'DISK_OK':
+  case 'DISK_INVALID':
+  case 'DISK_DSBL':
+  case 'DISK_DSBL_NEW':
+  case 'DISK_NEW':
     echo "<td>".device_info($disk)."</td>";
     echo "<td>".assignment($disk)."</td>";
     echo "<td>".my_temp($disk['temp'])."</td>";
     echo "<td colspan='8'></td>";
     break;
-  case "DISK_NP_MISSING":
+  case 'DISK_NP_MISSING':
     echo "<td>".device_info($disk)."<span class='diskinfo'><em>Missing</em></span></td>";
     echo "<td>".assignment($disk)."<em>{$disk['idSb']} - ".my_scale($disk['sizeSb']*1024,$unit)." $unit</em></td>";
     echo "<td colspan='9'></td>";
     break;
-  case "DISK_WRONG":
+  case 'DISK_WRONG':
     echo "<td>".device_info($disk)."<span class='diskinfo'><em>Wrong</em></span></td>";
     echo "<td>".assignment($disk)."<em>{$disk['idSb']} - ".my_scale($disk['sizeSb']*1024,$unit)." $unit</em></td>";
     echo "<td>".my_temp($disk['temp'])."</td>";
@@ -128,7 +128,7 @@ function array_offline($disk) {
   }
   echo "</tr>";
 }
-function array_online($disk) {
+function array_online(&$disk) {
   global $sum;
   if (is_numeric($disk['temp'])) {
     $sum['count']++;
@@ -145,20 +145,20 @@ function array_online($disk) {
   }
   echo "<tr>";
   switch ($disk['status']) {
-  case "DISK_NP":
+  case 'DISK_NP':
 //  Suppress empty slots to keep device list short (make this configurable?)
 //  echo "<td>".device_info($disk)."</td>";
 //  echo "<td colspan='9'>Not installed</td>";
 //  echo "<td></td>";
     break;
-  case "DISK_OK_NP":
-  case "DISK_NP_DSBL":
+  case 'DISK_OK_NP':
+  case 'DISK_NP_DSBL':
     echo "<td>".device_info($disk)."</td>";
     echo "<td><em>Not installed</em></td>";
     echo "<td colspan='4'></td>";
     fs_info($disk);
     break;
-  case "DISK_DSBL":
+  case 'DISK_DSBL':
   default:
     echo "<td>".device_info($disk)."</td>";
     echo "<td>".device_desc($disk)."</td>";
@@ -178,10 +178,10 @@ function my_clock($time) {
   $mins = $time%60;
   return plus($days,'day',($hour|$mins)==0).plus($hour,'hour',$mins==0).plus($mins,'minute',true);
 }
-function read_disk($device, $item) {
+function read_disk(&$device, $item) {
   global $var;
   switch ($item) {
-  case 'color': 
+  case 'color':
     return exec("hdparm -C /dev/$device|grep -Po active") ? 'blue-on' : 'blue-blink';
   case 'temp':
     $smart = "/var/local/emhttp/smart/$device";
@@ -200,7 +200,7 @@ function show_totals($text) {
   echo "<td>".my_number($sum['numWrites'])."</td>";
   echo "<td>".my_number($sum['numErrors'])."</td>";
   echo "<td></td>";
-  if (strstr($text,"Array") && ($var['startMode']=="Normal")) {
+  if (strstr($text,'Array') && ($var['startMode']=='Normal')) {
     echo "<td>".my_scale($sum['fsSize']*1024,$unit)." $unit</td>";
     if ($display['text']%10==0) {
       echo "<td>".my_scale($sum['fsUsed']*1024,$unit)." $unit</td>";
@@ -227,7 +227,7 @@ function array_slots() {
   $out .= "<input type='hidden' name='changeSlots' value='Apply'>";
   $out .= "<select style='min-width:auto' name='SYS_ARRAY_SLOTS' onChange='this.form.submit()'>";
   for ($n=$min; $n<=$max; $n++) {
-    $selected = ($n == $var['SYS_ARRAY_SLOTS'])? " selected" : "";
+    $selected = ($n == $var['SYS_ARRAY_SLOTS'])? ' selected' : '';
     $out .= "<option value='$n'{$selected}>$n</option>";
   }
   $out .= "</select></form>";
@@ -241,8 +241,8 @@ function cache_slots() {
   $out .= "<input type='hidden' name='changeSlots' value='Apply'>";
   $out .= "<select style='min-width:auto' name='SYS_CACHE_SLOTS' onChange='this.form.submit()'>";
   for ($n=$min; $n<=$max; $n++) {
-    $option = $n ? $n : "none";
-    $selected = ($n == $var['SYS_CACHE_SLOTS'])? " selected" : "";
+    $option = $n ? $n : 'none';
+    $selected = ($n == $var['SYS_CACHE_SLOTS'])? ' selected' : '';
     $out .= "<option value='$n'{$selected}>$option</option>";
   }
   $out .= "</select></form>";
@@ -255,7 +255,7 @@ case 'array':
     echo "<tr class='tr_last'><td><img src='/webGui/images/sum.png' class='icon'>Slots:</td><td colspan='9'>".array_slots()."</td><td></td></tr>";
   } else {
     foreach ($disks as $disk) {if ($disk['type']=='Parity' || $disk['type']=='Data') array_online($disk);}
-    if ($display['total'] && $var['mdNumProtected']>1) show_totals("Array of ".my_word($var['mdNumDisks'])." devices");
+    if ($display['total'] && $var['mdNumProtected']>1) show_totals('Array of '.my_word($var['mdNumDisks']).' devices');
   }
   break;
 case 'flash':
@@ -277,7 +277,7 @@ case 'cache':
     echo "<tr class='tr_last'><td><img src='/webGui/images/sum.png' class='icon'>Slots:</td><td colspan='9'>".cache_slots()."</td><td></td></tr>";
   } else {
     foreach ($disks as $disk) {if ($disk['type']=='Cache') array_online($disk);}
-    if ($display['total'] && $var['cacheSbNumDisks']>1) show_totals("Pool of ".my_word($var['cacheNumDevices'])." devices");
+    if ($display['total'] && $var['cacheSbNumDisks']>1) show_totals('Pool of '.my_word($var['cacheNumDevices']).' devices');
   }
   break;
 case 'open':
