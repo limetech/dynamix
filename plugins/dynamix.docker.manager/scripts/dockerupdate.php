@@ -12,6 +12,9 @@
  */
 ?>
 <?
+exec("pgrep docker",$pid);
+if (count($pid)==1) exit(0);
+
 require_once("/usr/local/emhttp/plugins/dynamix.docker.manager/include/DockerClient.php");
 
 $docker = new DockerTemplates();

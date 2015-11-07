@@ -1,4 +1,4 @@
-#!/usr/bin/php
+#!/usr/bin/php -q
 <?PHP
 /* Copyright 2015, Bergware International.
  * Copyright 2015, Lime Technology
@@ -13,12 +13,10 @@
 ?>
 <?
 require_once('/usr/local/emhttp/webGui/include/Wrappers.php');
+exec("wget -qO /dev/null 127.0.0.1:$(lsof -lbnPi4 -sTCP:LISTEN|grep -Pom1 '^emhttp.*:\K[\d]+')/update.htm?cmdStatus=apply");
 
 $notify = "/usr/local/emhttp/webGui/scripts/notify";
 $plugin = "/usr/local/emhttp/plugins/dynamix.plugin.manager/scripts/plugin";
-
-exec("wget -qO /dev/null 127.0.0.1:$(lsof -lbnPi4 -sTCP:LISTEN|grep -Pom1 '^emhttp .*TCP[^\d]+\K\d+')/update.htm?cmdStatus=apply");
-
 $var    = parse_ini_file("/var/local/emhttp/var.ini");
 $unraid = parse_plugin_cfg("dynamix",true);
 $server = strtoupper($var['NAME']);
@@ -30,7 +28,7 @@ foreach (glob("/tmp/plugins/*.plg", GLOB_NOSORT) as $file) {
   $old = exec("$plugin version '/var/log/plugins/$plg'");
   unset($new);
   exec("$plugin version '$file'", $new, $error);
-  // Silently suppress bad download of PLG file
+  // silently suppress bad download of PLG file
   if ($error) continue;
   $new = $new[0];
   if (strcmp($new, $old) > 0) {

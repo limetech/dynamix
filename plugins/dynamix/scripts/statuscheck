@@ -1,4 +1,4 @@
-#!/usr/bin/php
+#!/usr/bin/php -q
 <?PHP
 /* Copyright 2015, Bergware International.
  * Copyright 2015, Lime Technology
@@ -13,22 +13,36 @@
 ?>
 <?
 require_once('/usr/local/emhttp/webGui/include/Wrappers.php');
+exec("wget -qO /dev/null 127.0.0.1:$(lsof -lbnPi4 -sTCP:LISTEN|grep -Pom1 '^emhttp.*:\K[\d]+')/update.htm?cmdStatus=apply");
+
+$notify = "/usr/local/emhttp/webGui/scripts/notify";
+$disks  = parse_ini_file("/var/local/emhttp/disks.ini",true);
+$var    = parse_ini_file("/var/local/emhttp/var.ini");
+$unraid = parse_plugin_cfg("dynamix",true);
+$output = $unraid['notify']['report'];
+$hot    = $unraid['display']['hot'];
+$max    = $unraid['display']['max'];
+$server = strtoupper($var['NAME']);
+$data   = array();
+$parity = false;
+$cache  = false;
+$error0 = 0;
+$error1 = 0;
+$error2 = 0;
+$error3 = 0;
 
 function plus($val, $word, $last) {
   return $val>0 ? (($val || $last) ? ($val.' '.$word.($val!=1?'s':'').($last ?'':', ')) : '') : '';
 }
-
 function my_temp($value) {
   global $unraid;
   if ($value=='*') return ' - standby';
   $unit = $unraid['display']['unit'];
   return ' - active '.($unit=='F' ? round(9/5*$value+32) : str_replace('.', $unraid['display']['number'][0], $value)).' '.$unit;
 }
-
 function my_disk($name) {
   return ucfirst(preg_replace('/^(disk|cache)([0-9]+)/','$1 $2',$name));
 }
-
 function my_scale($value, &$unit, $precision = NULL) {
   global $unraid;
   $scale = $unraid['display']['scale'];
@@ -46,7 +60,6 @@ function my_scale($value, &$unit, $precision = NULL) {
     return number_format($value, $precision===NULL ? (($value-intval($value)==0 || $value>=100) ? 0 : ($value>=10 ? 1 : 2)) : $precision, $number[0], ($value>=10000 ? $number[1] : ''));
   }
 }
-
 function my_check($time) {
   global $disks;
   if (!$time) return "unavailable (system reboot or log rotation)";
@@ -57,7 +70,6 @@ function my_check($time) {
   $secs = $hmss%60;
   return plus($days,'day',($hour|$mins|$secs)==0).plus($hour,'hour',($mins|$secs)==0).plus($mins,'minute',$secs==0).plus($secs,'second',true).". Average speed: ".(isset($disks['parity']['sizeSb'])?my_scale($disks['parity']['sizeSb']*1024/$time,$unit,1)." $unit/sec":"unknown");
 }
-
 function my_time($time) {
   global $unraid;
   $date = strftime($unraid['display']['date'].($unraid['display']['date']!='%c' ? ", {$unraid['display']['time']}" : ""), $time);
@@ -75,7 +87,6 @@ function my_time($time) {
     return "$date ($days days ago)";
   }
 }
-
 function my_clock($time) {
   if (!$time) return 'less than a minute';
   $days = floor($time/1440);
@@ -84,26 +95,7 @@ function my_clock($time) {
   return plus($days,'day',($hour|$mins)==0).plus($hour,'hour',$mins==0).plus($mins,'minute',true);
 }
 
-exec("wget -qO /dev/null 127.0.0.1:$(lsof -lbnPi4 -sTCP:LISTEN|grep -Pom1 '^emhttp.*:\K[\d]+')/update.htm?cmdStatus=apply");
-
-$disks  = parse_ini_file("/var/local/emhttp/disks.ini",true);
-$var    = parse_ini_file("/var/local/emhttp/var.ini");
-$unraid = parse_plugin_cfg("dynamix",true);
-
-$output = $unraid['notify']['report'];
-$hot    = $unraid['display']['hot'];
-$max    = $unraid['display']['max'];
-$server = strtoupper($var['NAME']);
-
-$data   = array();
-$parity = false;
-$cache  = false;
-$error0 = 0;
-$error1 = 0;
-$error2 = 0;
-$error3 = 0;
-
-// Generate report of individual disks
+// generate report of array devices
 foreach ($disks as $disk) {
   $name = $disk['name'];
   if ($name=='flash' || substr($disk['status'],-3)=='_NP') continue;
@@ -133,9 +125,9 @@ foreach ($disks as $disk) {
   $data[] = my_disk($name)." - $info".my_temp($temp).$fail.$status;
 }
 $size = count($data);
-$data[] = "";
 
-// Generate parity report
+// generate parity report
+$data[] = "";
 $mdResync = $var['mdResync'];
 if ($mdResync>0) {
   $mdResyncPos = $var['mdResyncPos'];
@@ -172,7 +164,7 @@ $warn = ($error0 || $error3) ? "alert" : (($error1 || $error2) ? "warning" : "no
 $stat = $warn=="normal" ? "[PASS]" : "[FAIL]";
 $info = "Array has $size disk".($size==1 ? "" : "s").($parity ? " ({$word}parity".($cache ? " & cache)" : ")") : ($cache ? " ({$word}cache)" : ""));
 $message = implode('\n', $data);
-exec("/usr/local/emhttp/webGui/scripts/notify -s \"Notice [$server] - array health report $stat\" -d \"$info\" -m \"$message\" -i \"$warn $output\"");
+exec("$notify -s \"Notice [$server] - array health report $stat\" -d \"$info\" -m \"$message\" -i \"$warn $output\"");
 
 exit(0);
 ?>

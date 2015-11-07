@@ -1,4 +1,4 @@
-Menu="Notifications:4"
+Menu="UNRAID-OS"
 Title="Archived Notifications"
 ---
 <?PHP
@@ -20,6 +20,15 @@ $path = "{$notify['path']}/archive/*.notify";
 $files = count(glob($path, GLOB_NOSORT));
 ?>
 <script>
+var rows = [];
+Array.prototype.remove = function() {
+  var val, a = arguments, L = a.length, ax;
+  while (L && this.length) {
+    val = a[--L];
+    while ((ax = this.indexOf(val)) !== -1) this.splice(ax, 1);
+  }
+  return this;
+};
 function archiveList(init) {
   $.post('/webGui/include/NotificationsArchive.php',{log:'<?=$path?>',date:'<?=$notify['date']?>',time:'<?=$notify['time']?>'},function(data) {
     if (data) $('#archive_list').html(data);
@@ -28,6 +37,8 @@ function archiveList(init) {
     } else {
       $('#archive_table').trigger('update',true);
     }
+    $('#archive_list .expand-child td').hide();
+    for (var i = 0; i < rows.length; i++) $('#archive_list .expand-child.row'+rows[i]+' td').show();
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
     setTimeout(archiveList,<?=max(abs($display['refresh']),30000)?>);
 <?endif;?>
@@ -35,6 +46,16 @@ function archiveList(init) {
 }
 function askConfirmation() {
   swal({title:"Are you sure?",text:"This will delete all notification files!",type:"warning",showCancelButton:true},function(){$.get('/webGui/include/DeleteLogFile.php',{log:'<?=$path?>'},function(){archiveList();});});
+}
+function openClose(row) {
+  var extra = '#archive_list .expand-child.row'+row+' td';
+  if ($(extra).is(":visible")) {
+    $(extra).hide();
+    rows.remove(row);
+  } else {
+    $(extra).show();
+    rows.push(row);
+  }
 }
 $(function(){
   archiveList(true);
