@@ -87,7 +87,7 @@ Spin down delay:</td>
   <?=mk_option($disk['spindownDelay'], "7",  "7 hours")?>
   <?=mk_option($disk['spindownDelay'], "8",  "8 hours")?>
   <?=mk_option($disk['spindownDelay'], "9",  "9 hours")?>
-  </select>
+  </select><span id="smart_selftest" class='orange-text'></span>
 
 <?if (($var['spinupGroups']=="yes")&&($disk['name']!="cache")):?>
 

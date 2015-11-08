@@ -21,8 +21,14 @@ function duration($h) {
   return " (".($age->y?"{$age->y}y, ":"").($age->m?"{$age->m}m, ":"").($age->d?"{$age->d}d, ":"")."{$age->h}h)";
 }
 
-$port = $_POST['port'];
+function spindownDelay($port) {
+  $disks = parse_ini_file("/var/local/emhttp/disks.ini",true);
+  foreach ($disks as $disk) {
+    if ($disk['device']==$port) { file_put_contents("/var/tmp/diskSpindownDelay.{$disk['idx']}", $disk['spindownDelay']); break; }
+  }
+}
 
+$port  = $_POST['port'];
 switch ($_POST['cmd']) {
 case "attributes":
   $unraid = parse_plugin_cfg("dynamix",true);
@@ -76,9 +82,11 @@ case "save":
   exec("smartctl -a /dev/$port >{$_SERVER['DOCUMENT_ROOT']}/{$_POST['file']}");
   break;
 case "short":
+  spindownDelay($port);
   exec("smartctl -t short /dev/$port");
   break;
 case "long":
+  spindownDelay($port);
   exec("smartctl -t long /dev/$port");
   break;
 case "stop":
@@ -92,7 +100,7 @@ case "update":
   }
   $progress = exec("smartctl -c /dev/$port|grep -Pom1 '\d+%'");
   if ($progress) {
-    echo "<big><i class='fa fa-spinner fa-pulse'></i> ".(100-substr($progress,0,-1))."% complete</big>";
+    echo "<big><i class='fa fa-spinner fa-pulse'></i> self-test in progress, ".(100-substr($progress,0,-1))."% complete</big>";
     break;
   }
   $result = trim(exec("smartctl -l selftest /dev/$port|grep -m1 '^# 1'|cut -c26-55"));

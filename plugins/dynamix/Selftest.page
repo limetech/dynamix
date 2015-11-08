@@ -32,16 +32,22 @@ if ($type=='New') {
   foreach ($disks as $sheet) {
     if ($sheet['name']=='flash' || strpos($sheet['status'],'_NP')) continue;
     $sheets[] = $sheet['name'];
-    if ($sheet['name']==$name) $i = $n;
+    if ($sheet['name']==$name) { $i = $n; $spindown = "diskSpindownDelay.{$sheet['idx']}"; $delay = $sheet['spindownDelay']; }
     $n++;
   }
 }
-$on   = exec("hdparm -C /dev/$dev|grep -Pom1 'active'");
+$live = exec("hdparm -C /dev/$dev|grep -Pom1 'active'");
 $end  = count($sheets)-1;
 $prev = $i>0 ? $sheets[$i-1] : $sheets[$end];
 $next = $i<$end ? $sheets[$i+1] : $sheets[0];
 $file = "$id-$date.txt";
 $zip  = str_replace(' ','_',strtolower($var['NAME']))."-smart-$date.zip";
+
+function spindownDelay() {
+  global $spindown, $delay;
+  $file = "/var/tmp/$spindown";
+  return file_exists($file) ? file_get_contents($file) : $delay;
+}
 ?>
 Download SMART report:
 : <input type='button' value='Download' onclick='saveSMART()'>
@@ -109,15 +115,24 @@ function testUpdate(init) {
   $.post('/webGui/include/SmartInfo.php',{cmd:'update',port:'<?=$dev?>',name:'<?=$name?>',type:'<?=$type?>'},function(data) {
     $('#test_result').html(data);
     if (data.indexOf('%')>=0) {
-      if (!init) timers.tester = setTimeout(testUpdate, 3000);
+      if ($('#smart_selftest').length) $('#smart_selftest').html('<i class="fa fa-camera"></i> S.M.A.R.T self-test in progress...');
+      if (!init) timers.testUpdate = setTimeout(testUpdate, 3000);
     } else {
+      if ($('#smart_selftest').length) $('#smart_selftest').html('');
       $('#short_test').val('Start');
       $('#long_test').val('Start');
-<?if ($on):?>
+<?if ($live):?>
       $('#short_test').removeAttr('disabled');
       $('#long_test').removeAttr('disabled');
 <?endif;?>
-      $.removeCookie('tester.<?=$dev?>',{path:'/'});
+      if (!init) {
+        $.removeCookie('test.<?=$dev?>',{path:'/'});
+<?if ($spindown):?>
+        $('select[name="<?=$spindown?>"]').val(<?=spindownDelay()?>);
+        $.get('/update.htm',{'<?=$spindown?>':<?=spindownDelay()?>,changeDisk:'apply'});
+        $.get('/webGui/include/DeleteLogFile.php',{log:'/var/tmp/<?=$spindown?>'});
+<?endif;?>
+      }
     }
   });
 }
@@ -135,24 +150,42 @@ function startShortTest() {
   if ($('#short_test').val()=='Start') {
     $('#short_test').val('Stop');
     $('#long_test').attr('disabled','disabled');
-    $.cookie('tester.<?=$dev?>','short',{path:'/'});
-    $.post('/webGui/include/SmartInfo.php',{cmd:'short',port:'<?=$dev?>'},function() {timers.tester = setTimeout(testUpdate,0);});
+    $.cookie('test.<?=$dev?>','short',{path:'/'});
+    $.post('/webGui/include/SmartInfo.php',{cmd:'short',port:'<?=$dev?>'},function(){timers.testUpdate = setTimeout(testUpdate,0);});
+<?if ($spindown):?>
+    $('select[name="<?=$spindown?>"]').val(0);
+    $.get('/update.htm',{'<?=$spindown?>':0,changeDisk:'apply'});
+<?endif;?>
   } else {
-    clearTimeout(timers.tester);
-    $.removeCookie('tester.<?=$dev?>',{path:'/'});
-    $.post('/webGui/include/SmartInfo.php',{cmd:'stop',port:'<?=$dev?>'}, function() {setTimeout(testUpdate,0);});
+    clearTimeout(timers.testUpdate);
+    $.removeCookie('test.<?=$dev?>',{path:'/'});
+    $.post('/webGui/include/SmartInfo.php',{cmd:'stop',port:'<?=$dev?>'},function(){setTimeout(testUpdate,0);});
+<?if ($spindown):?>
+    $('select[name="<?=$spindown?>"]').val(<?=spindownDelay()?>);
+    $.get('/update.htm',{'<?=$spindown?>':<?=spindownDelay()?>,changeDisk:'apply'});
+    $.get('/webGui/include/DeleteLogFile.php',{log:'/var/tmp/<?=$spindown?>'});
+<?endif;?>
   }
 }
 function startLongTest() {
   if ($('#long_test').val()=='Start') {
     $('#long_test').val('Stop');
     $('#short_test').attr('disabled','disabled');
-    $.cookie('tester.<?=$dev?>','long',{path:'/'});
-    $.post('/webGui/include/SmartInfo.php',{cmd:'long',port:'<?=$dev?>'},function(){timers.tester = setTimeout(testUpdate,0);});
+    $.cookie('test.<?=$dev?>','long',{path:'/'});
+    $.post('/webGui/include/SmartInfo.php',{cmd:'long',port:'<?=$dev?>'},function(){timers.testUpdate = setTimeout(testUpdate,0);});
+<?if ($spindown):?>
+    $('select[name="<?=$spindown?>"]').val(0);
+    $.get('/update.htm',{'<?=$spindown?>':0,changeDisk:'apply'});
+<?endif;?>
   } else {
-    clearTimeout(timers.tester);
-    $.removeCookie('tester.<?=$dev?>',{path:'/'});
-    $.post('/webGui/include/SmartInfo.php',{cmd:'stop',port:'<?=$dev?>'}, function() {setTimeout(testUpdate,0);});
+    clearTimeout(timers.testUpdate);
+    $.removeCookie('test.<?=$dev?>',{path:'/'});
+    $.post('/webGui/include/SmartInfo.php',{cmd:'stop',port:'<?=$dev?>'},function(){setTimeout(testUpdate,0);});
+<?if ($spindown):?>
+    $('select[name="<?=$spindown?>"]').val(<?=spindownDelay()?>);
+    $.get('/update.htm',{'<?=$spindown?>':<?=spindownDelay()?>,changeDisk:'apply'});
+    $.get('/webGui/include/DeleteLogFile.php',{log:'/var/tmp/<?=$spindown?>'});
+<?endif;?>
   }
 }
 <?if (count($sheets)>1):?>
@@ -170,14 +203,14 @@ $(function() {
 <?endif;?>
 
 $(function() {
-  var tester = $.cookie('tester.<?=$dev?>');
-  testUpdate(tester===undefined);
-  if (tester !== undefined) $('#'+tester+'_test').val('Stop').removeAttr('disabled');
-<?if ($on):?>
+  var smarttest = $.cookie('test.<?=$dev?>');
+  testUpdate(smarttest===undefined);
+  if (smarttest !== undefined) $('#'+smarttest+'_test').val('Stop').removeAttr('disabled');
+<?if ($live):?>
   $('#toggle_log').removeAttr('disabled');
   $('#toggle_error').removeAttr('disabled');
-  $.post('/webGui/include/SmartInfo.php',{cmd:'selftest',port:'<?=$dev?>'},function(data) {$('#selftest').html(data);});
-  $.post('/webGui/include/SmartInfo.php',{cmd:'errorlog',port:'<?=$dev?>'},function(data) {$('#errorlog').html(data);});
+  $.post('/webGui/include/SmartInfo.php',{cmd:'selftest',port:'<?=$dev?>'},function(data){$('#selftest').html(data);});
+  $.post('/webGui/include/SmartInfo.php',{cmd:'errorlog',port:'<?=$dev?>'},function(data){$('#errorlog').html(data);});
 <?endif;?>
 });
 </script>
