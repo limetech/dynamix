@@ -22,13 +22,13 @@ if ($type=='New') {
   $dev = $name;
   foreach ($devs as $sheet) {
     $sheets[] = $sheet['device'];
-    if ($sheet['device']==$name) {$i = $n; $id = $sheet['id'];}
+    if ($sheet['device']==$name) {$i = $n; $file = $sheet['id']."-$date.txt";}
     $n++;
   }
 } else {
   $disk = $disks[$name];
-  $dev = $disk['device'];
-  $id = $disk['device'];
+  $dev  = $disk['device'];
+  $file = $disk['id']."-$date.txt";
   foreach ($disks as $sheet) {
     if ($sheet['name']=='flash' || strpos($sheet['status'],'_NP')) continue;
     $sheets[] = $sheet['name'];
@@ -40,13 +40,12 @@ $live = exec("hdparm -C /dev/$dev|grep -Pom1 'active'");
 $end  = count($sheets)-1;
 $prev = $i>0 ? $sheets[$i-1] : $sheets[$end];
 $next = $i<$end ? $sheets[$i+1] : $sheets[0];
-$file = "$id-$date.txt";
 $zip  = str_replace(' ','_',strtolower($var['NAME']))."-smart-$date.zip";
 
 function spindownDelay() {
   global $spindown, $delay;
-  $file = "/var/tmp/$spindown";
-  return file_exists($file) ? file_get_contents($file) : $delay;
+  $tmp = "/var/tmp/$spindown";
+  return file_exists($tmp) ? file_get_contents($tmp) : $delay;
 }
 ?>
 Download SMART report:
