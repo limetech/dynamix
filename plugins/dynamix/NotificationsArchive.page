@@ -16,8 +16,7 @@ Title="Archived Notifications"
 ?>
 
 <?
-$path = "{$notify['path']}/archive/*.notify";
-$files = count(glob($path, GLOB_NOSORT));
+$files = count(glob("{$notify['path']}/archive/*.notify", GLOB_NOSORT));
 ?>
 <script>
 var rows = [];
@@ -30,7 +29,7 @@ Array.prototype.remove = function() {
   return this;
 };
 function archiveList(init) {
-  $.post('/webGui/include/NotificationsArchive.php',{log:'<?=$path?>',date:'<?=$notify['date']?>',time:'<?=$notify['time']?>'},function(data) {
+  $.get('/webGui/include/NotificationsArchive.php',function(data) {
     if (data) $('#archive_list').html(data);
     if (init) {
       $('#archive_table').tablesorter({headers:{5:{sorter:false}}});
@@ -45,7 +44,7 @@ function archiveList(init) {
   });
 }
 function askConfirmation() {
-  swal({title:"Are you sure?",text:"This will delete all notification files!",type:"warning",showCancelButton:true},function(){$.get('/webGui/include/DeleteLogFile.php',{log:'<?=$path?>'},function(){archiveList();});});
+  swal({title:"Are you sure?",text:"This will delete all notification files!",type:"warning",showCancelButton:true},function(){$.post('/webGui/include/DeleteLogFile.php',{log:'*.notify'},function(){archiveList();});});
 }
 function openClose(row) {
   var extra = '#archive_list .expand-child.row'+row+' td';
