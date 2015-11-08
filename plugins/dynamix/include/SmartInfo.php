@@ -81,6 +81,8 @@ case "identify":
 case "save":
   exec("smartctl -a /dev/$port >{$_SERVER['DOCUMENT_ROOT']}/{$_POST['file']}");
   break;
+case "delete":
+  @unlink("/var/tmp/{$_POST['file']}");
 case "short":
   spindownDelay($port);
   exec("smartctl -t short /dev/$port");
