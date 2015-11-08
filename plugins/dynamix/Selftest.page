@@ -115,7 +115,12 @@ function testUpdate(init) {
   $.post('/webGui/include/SmartInfo.php',{cmd:'update',port:'<?=$dev?>',name:'<?=$name?>',type:'<?=$type?>'},function(data) {
     $('#test_result').html(data);
     if (data.indexOf('%')>=0) {
-      if ($('#smart_selftest').length) $('#smart_selftest').html('<i class="fa fa-camera"></i> S.M.A.R.T self-test in progress...');
+      if ($('#smart_selftest').length) {
+<?if ($spindown):?>
+        $('select[name="<?=$spindown?>"]').prop('disabled',true);
+<?endif;?>
+        $('#smart_selftest').html('<i class="fa fa-camera"></i> S.M.A.R.T self-test in progress...');
+      }
       if (!init) timers.testUpdate = setTimeout(testUpdate, 3000);
     } else {
       if ($('#smart_selftest').length) $('#smart_selftest').html('');
@@ -128,7 +133,7 @@ function testUpdate(init) {
       if (!init) {
         $.removeCookie('test.<?=$dev?>',{path:'/'});
 <?if ($spindown):?>
-        $('select[name="<?=$spindown?>"]').val(<?=spindownDelay()?>);
+        $('select[name="<?=$spindown?>"]').val(<?=spindownDelay()?>).prop('disabled',false);
         $.get('/update.htm',{'<?=$spindown?>':<?=spindownDelay()?>,changeDisk:'apply'});
         $.get('/webGui/include/DeleteLogFile.php',{log:'/var/tmp/<?=$spindown?>'});
 <?endif;?>
@@ -153,7 +158,7 @@ function startShortTest() {
     $.cookie('test.<?=$dev?>','short',{path:'/'});
     $.post('/webGui/include/SmartInfo.php',{cmd:'short',port:'<?=$dev?>'},function(){timers.testUpdate = setTimeout(testUpdate,0);});
 <?if ($spindown):?>
-    $('select[name="<?=$spindown?>"]').val(0);
+    $('select[name="<?=$spindown?>"]').val(0).prop('disabled',true);
     $.get('/update.htm',{'<?=$spindown?>':0,changeDisk:'apply'});
 <?endif;?>
   } else {
@@ -161,7 +166,7 @@ function startShortTest() {
     $.removeCookie('test.<?=$dev?>',{path:'/'});
     $.post('/webGui/include/SmartInfo.php',{cmd:'stop',port:'<?=$dev?>'},function(){setTimeout(testUpdate,0);});
 <?if ($spindown):?>
-    $('select[name="<?=$spindown?>"]').val(<?=spindownDelay()?>);
+    $('select[name="<?=$spindown?>"]').val(<?=spindownDelay()?>).prop('disabled',false);
     $.get('/update.htm',{'<?=$spindown?>':<?=spindownDelay()?>,changeDisk:'apply'});
     $.get('/webGui/include/DeleteLogFile.php',{log:'/var/tmp/<?=$spindown?>'});
 <?endif;?>
@@ -174,7 +179,7 @@ function startLongTest() {
     $.cookie('test.<?=$dev?>','long',{path:'/'});
     $.post('/webGui/include/SmartInfo.php',{cmd:'long',port:'<?=$dev?>'},function(){timers.testUpdate = setTimeout(testUpdate,0);});
 <?if ($spindown):?>
-    $('select[name="<?=$spindown?>"]').val(0);
+    $('select[name="<?=$spindown?>"]').val(0).prop('disabled',true);
     $.get('/update.htm',{'<?=$spindown?>':0,changeDisk:'apply'});
 <?endif;?>
   } else {
@@ -182,7 +187,7 @@ function startLongTest() {
     $.removeCookie('test.<?=$dev?>',{path:'/'});
     $.post('/webGui/include/SmartInfo.php',{cmd:'stop',port:'<?=$dev?>'},function(){setTimeout(testUpdate,0);});
 <?if ($spindown):?>
-    $('select[name="<?=$spindown?>"]').val(<?=spindownDelay()?>);
+    $('select[name="<?=$spindown?>"]').val(<?=spindownDelay()?>).prop('disabled',false);
     $.get('/update.htm',{'<?=$spindown?>':<?=spindownDelay()?>,changeDisk:'apply'});
     $.get('/webGui/include/DeleteLogFile.php',{log:'/var/tmp/<?=$spindown?>'});
 <?endif;?>
