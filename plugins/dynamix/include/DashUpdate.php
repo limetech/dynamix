@@ -19,11 +19,16 @@ function my_insert(&$source,$string) {
 function my_smart(&$source,$name) {
   global $path;
   $thumb = 'good';
-  $saved = @parse_ini_file("/var/local/emhttp/monitor.ini",true);
-  $last = isset($saved["smart"]["$name.5"]) ? $saved["smart"]["$name.5"] : 0;
-  $smart = exec("grep -Pom1 '^  5.+ \K\d+$' /var/local/emhttp/smart/$name");
-  if (!$smart) $smart = 0;
-  if (($last == 0 && $smart > 0) || ($last > 0 && $smart > $last)) $thumb = 'bad';
+  $smart = exec("grep -Pom1 '^  5.+ \K\d+$' /var/local/emhttp/smart/$name 2>/dev/null");
+  if (empty($smart)) $smart = 0;
+  $ini = '/var/local/emhttp/monitor.ini';
+  if (file_exists($ini) && (time()-filemtime($ini)>=300)) {
+    $saved = parse_ini_file($ini,true);
+    $last = isset($saved["smart"]["$name.5"]) ? $saved["smart"]["$name.5"] : 0;
+    if ($smart>$last) $thumb = 'bad';
+  } else {
+    if ($smart>0) $thumb = 'bad';
+  }
   my_insert($source, "<a href=\"/Main/Device?name=$name\" onclick=\"$.cookie('one','tab2',{path:'/'})\" title=\"$smart reallocated sectors\"><img src=\"$path/$thumb.png\"></a>");
 }
 function my_usage(&$source,$used) {
