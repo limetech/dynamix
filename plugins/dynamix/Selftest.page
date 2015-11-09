@@ -154,7 +154,7 @@ function startShortTest() {
   if ($('#short_test').val()=='Start') {
     $('#short_test').val('Stop');
     $('#long_test').attr('disabled','disabled');
-    $.cookie('test.<?=$dev?>','short',{path:'/'});
+    $.cookie('test.<?=$dev?>','short',{path:'/',expires:365});
     $.post('/webGui/include/SmartInfo.php',{cmd:'short',port:'<?=$dev?>'},function(){timers.testUpdate = setTimeout(testUpdate,0);});
 <?if ($spindown):?>
     $('select[name="<?=$spindown?>"]').val(0).prop('disabled',true);
@@ -175,7 +175,7 @@ function startLongTest() {
   if ($('#long_test').val()=='Start') {
     $('#long_test').val('Stop');
     $('#short_test').attr('disabled','disabled');
-    $.cookie('test.<?=$dev?>','long',{path:'/'});
+    $.cookie('test.<?=$dev?>','long',{path:'/',expires:365});
     $.post('/webGui/include/SmartInfo.php',{cmd:'long',port:'<?=$dev?>'},function(){timers.testUpdate = setTimeout(testUpdate,0);});
 <?if ($spindown):?>
     $('select[name="<?=$spindown?>"]').val(0).prop('disabled',true);
