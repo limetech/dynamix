@@ -83,6 +83,7 @@ case "save":
   break;
 case "delete":
   @unlink("/var/tmp/{$_POST['file']}");
+  break;
 case "short":
   spindownDelay($port);
   exec("smartctl -t short /dev/$port");
