@@ -35,7 +35,7 @@ function disk_share_settings($protocol,$share) {
 }
 
 // Compute all disk shares
-if ($compute=='yes') foreach ($disks as $name => $disk) if ($disk['exportable']=='yes') exec("webGui/scripts/disk_size '$name' '/var/local/emhttp/$name.ssz2'");
+if ($compute=='yes') foreach ($disks as $name => $disk) if ($disk['exportable']=='yes') exec("webGui/scripts/disk_size \"$name\" \"ssz2\"");
 
 // Share size per disk
 $preserve = ($path==$prev || $compute=='yes');
@@ -49,7 +49,9 @@ foreach (glob("state/*.ssz2", GLOB_NOSORT) as $entry) {
 }
 
 // Build table
+$row = 0;
 foreach ($disks as $name => $disk) {
+  $row++;
   if ($disk['type']=='Flash') continue;
   if ($disk['fsColor']=='grey-off') continue;
   if ($disk['exportable']=='no') continue;
@@ -65,6 +67,7 @@ foreach ($disks as $name => $disk) {
   echo "<td>".disk_share_settings($var['shareSMBEnabled'], $sec[$name])."</td>";
   echo "<td>".disk_share_settings($var['shareNFSEnabled'], $sec_nfs[$name])."</td>";
   echo "<td>".disk_share_settings($var['shareAFPEnabled'], $sec_afp[$name])."</td>";
+  $cmd="/webGui/scripts/disk_size"."&arg1=".urlencode($name)."&arg2=ssz2";
   if (array_key_exists($name, $ssz2)) {
     echo "<td>".my_scale(($disk['fsSize'])*1024, $unit)." $unit</td>";
     echo "<td>".my_scale($disk['fsFree']*1024, $unit)." $unit</td>";
@@ -78,14 +81,13 @@ foreach ($disks as $name => $disk) {
         echo "<td></td>";
         echo "<td></td>";
         echo "<td></td>";
-        echo "<td>".my_scale($share_size*1024, $unit)." $unit</td>";
-        echo "<td>".my_scale($disk['fsFree']*1024, $unit)." $unit</td>";
-        echo "<td></td>";
+        echo "<td class='disk-$row-1'>".my_scale($share_size*1024, $unit)." $unit</td>";
+        echo "<td class='disk-$row-2'>".my_scale($disk['fsFree']*1024, $unit)." $unit</td>";
+        echo "<td><a href='/update.htm?cmd=$cmd' target='progressFrame' title='Recompute...' onclick='$(\".disk-$row-1\").html(\"Please wait...\");$(\".disk-$row-2\").html(\"\");'><i class='fa fa-refresh icon'></i></a></td>";
         echo "</tr>";
       }
     }
   } else {
-    $cmd="/webGui/scripts/disk_size&arg1=$name&arg2=/var/local/emhttp/$name.ssz2";
     echo "<td><a href='/update.htm?cmd=$cmd' target='progressFrame' onclick=\"$(this).text('Please wait...')\">Compute...</a></td>";
     echo "<td>".my_scale($disk['fsFree']*1024, $unit)." $unit</td>";
     echo "<td><a href='$path/Browse?dir=/mnt/$name'><img src='/webGui/images/explore.png' title='Browse /mnt/$name'></a></td>";
