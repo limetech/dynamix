@@ -35,7 +35,7 @@ function my_smart(&$source,$name,$page) {
     if ($title) $thumb = 'alert'; else $title = 'No errors reported';
   }
   $tab = $page=='New' ? 'tab2' : 'tab3';
-  my_insert($source, "<a href=\"/Main/$page?name=$name\" onclick=\"$.cookie('one','$tab',{path:'/'})\" title=\"$title\"><img src=\"$path/$thumb.png\"></a>");
+  my_insert($source, "<a href=\"/Dashboard/$page?name=$name\" onclick=\"$.cookie('one','$tab',{path:'/'})\" title=\"$title\"><img src=\"$path/$thumb.png\"></a>");
 }
 function my_usage(&$source,$used) {
   my_insert($source, $used ? "<div class='usage-disk all'><span style='width:$used'>$used</span></div>" : "-");
