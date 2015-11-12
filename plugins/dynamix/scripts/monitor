@@ -94,10 +94,11 @@ function check_temp($name,$temp,$text,$info) {
     }
   }
 }
-function check_smart($name,$text,$info) {
-  global $notify,$saved,$events,$server;
+function check_smart($name,$port,$text,$info) {
+  global $var,$notify,$saved,$events,$server;
   $codes = array();
-  exec("awk '$1~/^($events)$/{print $1,$10,$2,$9}' /var/local/emhttp/smart/$name", $codes);
+  $file = "/var/local/emhttp/smart/$name";
+  exec("awk '$1~/^($events)$/{print $1,$10,$2,$9}' $file 2>/dev/null", $codes);
   $item = 'smart';
   foreach ($codes as $code) {
     if (!$code) continue;
@@ -117,6 +118,8 @@ function check_smart($name,$text,$info) {
       }
     }
   }
+  $file .= '.ssa';
+  if (!file_exists($file) || (time()-filemtime($file)>=$var['poll_attributes'])) exec("smartctl -n standby -H /dev/$port|grep -Pom1 '(STANDBY|PASSED)'|tr -d '\n' > $file");
 }
 
 // check once a week for smart database updates
@@ -134,7 +137,7 @@ foreach ($disks as $disk) {
 // process disk temperature notifications
   check_temp($name,$temp,$text,$info);
 // process disk SMART notifications
-  check_smart($name,$text,$info);
+  check_smart($name,$disk['device'],$text,$info);
 // process disk operation notifications
   $warn = strtok($disk['color'],'-');
   $item = 'disk';
@@ -176,7 +179,7 @@ foreach ($devs as $dev) {
 // process disk temperature notifications
   check_temp($name,$temp,$text,$info);
 // process disk SMART notifications
-  check_smart($name,$text,$info);
+  check_smart($name,$dev['device'],$text,$info);
 }
 
 // report array read errors
@@ -251,7 +254,7 @@ if ($warn>=$high1) {
   if ($warn>$last) {
     exec("$notify -e \"Docker critical image disk utilization\" -s \"Alert [$server] - Docker image disk utilization of ${warn}%\" -d \"$info\" -i \"alert\"");
     $saved[$item][$name] = $warn;
-  } 
+  }
 } else if ($warn>=$high2) {
   if ($warn>$last) {
     exec("$notify -e \"Docker high image disk utilization\" -s \"Warning [$server] - Docker image disk utilization of ${warn}%\" -d \"$info\" -i \"warning\"");
@@ -266,13 +269,13 @@ if ($warn>=$high1) {
 
 // save new status
 if ($saved) {
-  $text = "";
+  $text = '';
   foreach ($saved as $item => $block) {
     if ($block) $text .= "[$item]\n";
     foreach ($block as $key => $value) $text .= "$key=\"$value\"\n";
   }
   if ($text) {
-    file_put_contents($ram, $text);
+    if ($text != @file_get_contents($ram)) file_put_contents($ram, $text);
     if (!file_exists($rom) || exec("diff -q $ram $rom")) file_put_contents($rom, $text);
   } else {
     @unlink($ram);

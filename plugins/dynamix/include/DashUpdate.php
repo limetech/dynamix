@@ -11,25 +11,30 @@
  */
 ?>
 <?
+require_once('Wrappers.php');
+
+$unraid = parse_plugin_cfg('dynamix',true);
+$events = $unraid['notify']['events'];
 $path = '/webGui/images';
 
 function my_insert(&$source,$string) {
   $source = substr_replace($source,$string,4,0);
 }
 function my_smart(&$source,$name) {
-  global $path;
-  $thumb = 'good';
-  $smart = exec("grep -Pom1 '^  5.+ \K\d+$' /var/local/emhttp/smart/$name 2>/dev/null");
-  if (empty($smart)) $smart = 0;
-  $ini = '/var/local/emhttp/monitor.ini';
-  if (file_exists($ini) && (time()-filemtime($ini)>=300)) {
-    $saved = parse_ini_file($ini,true);
-    $last = isset($saved["smart"]["$name.5"]) ? $saved["smart"]["$name.5"] : 0;
-    if ($smart>$last) $thumb = 'bad';
+  global $events,$path;
+  $title = ''; $thumb = 'good';
+  $file = "/var/local/emhttp/smart/$name";
+  if (@file_get_contents("$file.ssa")==='') {
+    $title = "S.M.A.R.T health-check failed"; $thumb = 'bad';
   } else {
-    if ($smart>0) $thumb = 'bad';
+    exec("awk '$1~/^($events)$/{print $10,$2}' $file 2>/dev/null", $codes);
+    foreach ($codes as $code) {
+      if (!$code) continue;
+      if ($code[0]!='0') $title .= ucfirst(strtolower(str_replace('_',' ',$code)))."\n";
+    }
+    if ($title) $thumb = 'alert'; else $title = 'No errors reported';
   }
-  my_insert($source, "<a href=\"/Main/Device?name=$name\" onclick=\"$.cookie('one','tab2',{path:'/'})\" title=\"$smart reallocated sectors\"><img src=\"$path/$thumb.png\"></a>");
+  my_insert($source, "<a href=\"/Main/Device?name=$name\" onclick=\"$.cookie('one','tab2',{path:'/'})\" title=\"$title\"><img src=\"$path/$thumb.png\"></a>");
 }
 function my_usage(&$source,$used) {
   my_insert($source, $used ? "<div class='usage-disk all'><span style='width:$used'>$used</span></div>" : "-");
