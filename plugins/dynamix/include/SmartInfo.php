@@ -13,12 +13,16 @@
 <?
 require_once('Wrappers.php');
 
-function duration($h) {
+function normalize($text) {
+  return "<td>".ucfirst(strtolower(str_replace('_',' ',$text)))."</td>";
+}
+
+function duration(&$hrs) {
   $time = ceil(time()/3600)*3600;
   $now = new DateTime("@$time");
-  $poh = new DateTime("@".($time-$h*3600));
+  $poh = new DateTime("@".($time-$hrs*3600));
   $age = date_diff($poh,$now);
-  return " (".($age->y?"{$age->y}y, ":"").($age->m?"{$age->m}m, ":"").($age->d?"{$age->d}d, ":"")."{$age->h}h)";
+  $hrs = "$hrs (".($age->y?"{$age->y}y, ":"").($age->m?"{$age->m}m, ":"").($age->d?"{$age->d}d, ":"")."{$age->h}h)";
 }
 
 function spindownDelay($port) {
@@ -45,10 +49,8 @@ case "attributes":
     else if (array_search($info[0], $temps)!==false) {
       if ($info[9]>=$max) $color = " class='red-text'"; else if ($info[9]>=$hot) $color = " class='orange-text'";
     }
-    echo "<tr{$color}>";
-    if ($info[0] == 9 && is_numeric($info[9])) $info[9] .= duration($info[9]);
-    foreach ($info as $field) echo "<td>".str_replace('_',' ',$field)."</td>";
-    echo "</tr>";
+    if ($info[0]==9 && is_numeric($info[9])) duration($info[9]);
+    echo "<tr{$color}>".implode('',array_map('normalize', $info))."</tr>";
   }
   break;
 case "capabilities":
