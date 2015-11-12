@@ -72,10 +72,10 @@ case "identify":
   exec("smartctl -H /dev/$port|grep 'result'|sed 's:self-assessment test result::'",$output);
   foreach ($output as $line) {
     if (!strlen($line)) continue;
-    $info = array_map('trim', explode(':', $line, 2));
-    if ($info[1]=='PASSED') $info[1] = "<span class='green-text'>Passed</span>";
-    if ($info[1]=='FAILED') $info[1] = "<span class='red-text'>Failed</span>";
-    echo "<tr><td>".preg_replace("/ is$/","",$info[0]).":</td><td>$info[1]</td></tr>";
+    list($title,$info) = array_map('trim', explode(':', $line, 2));
+    if ($info=='PASSED') $info = "<span class='green-text'>Passed</span>";
+    if ($info=='FAILED') $info = "<span class='red-text'>Failed</span>";
+    echo "<tr><td>".preg_replace("/ is$/","",$title).":</td><td>$info</td></tr>";
   }
   break;
 case "save":
