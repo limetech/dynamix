@@ -14,7 +14,9 @@
 require_once('Wrappers.php');
 
 function normalize($text) {
-  return "<td>".ucfirst(strtolower(str_replace('_',' ',$text)))."</td>";
+  $words = explode('_',$text);
+  foreach ($words as &$word) $word = $word==strtoupper($word) ? $word : preg_replace(array('/^(ct|cnt)$/','/^blk$/'),array('count','block'),strtolower($word));
+  return "<td>".ucfirst(implode(' ',$words))."</td>";
 }
 
 function duration(&$hrs) {

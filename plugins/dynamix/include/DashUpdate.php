@@ -17,6 +17,12 @@ $unraid = parse_plugin_cfg('dynamix',true);
 $events = $unraid['notify']['events'];
 $path = '/webGui/images';
 
+function normalize($text) {
+  list($count, $words) = explode(' ',$text);
+  $words = explode('_',$words);
+  foreach ($words as &$word) $word = $word==strtoupper($word) ? $word : preg_replace(array('/^(ct|cnt)$/','/^blk$/'),array('count','block'),strtolower($word));
+  return ucfirst(implode(' ',$words)).": $count\n";
+}
 function my_insert(&$source,$string) {
   $source = substr_replace($source,$string,4,0);
 }
@@ -29,8 +35,7 @@ function my_smart(&$source,$name,$page) {
   } else {
     exec("awk '$1~/^($events)$/{print $10,$2}' $file 2>/dev/null", $codes);
     foreach ($codes as $code) {
-      if (!$code) continue;
-      if ($code[0]!='0') $title .= ucfirst(strtolower(str_replace('_',' ',$code)))."\n";
+      if ($code && $code[0]!='0') $title .= normalize($code);
     }
     if ($title) $thumb = 'alert'; else $title = 'No errors reported';
   }
