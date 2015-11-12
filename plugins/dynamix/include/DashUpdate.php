@@ -20,7 +20,7 @@ $path = '/webGui/images';
 function my_insert(&$source,$string) {
   $source = substr_replace($source,$string,4,0);
 }
-function my_smart(&$source,$name) {
+function my_smart(&$source,$name,$page) {
   global $events,$path;
   $title = ''; $thumb = 'good';
   $file = "/var/local/emhttp/smart/$name";
@@ -34,7 +34,7 @@ function my_smart(&$source,$name) {
     }
     if ($title) $thumb = 'alert'; else $title = 'No errors reported';
   }
-  my_insert($source, "<a href=\"/Main/Device?name=$name\" onclick=\"$.cookie('one','tab2',{path:'/'})\" title=\"$title\"><img src=\"$path/$thumb.png\"></a>");
+  my_insert($source, "<a href=\"/Main/$page?name=$name\" onclick=\"$.cookie('one','tab2',{path:'/'})\" title=\"$title\"><img src=\"$path/$thumb.png\"></a>");
 }
 function my_usage(&$source,$used) {
   my_insert($source, $used ? "<div class='usage-disk all'><span style='width:$used'>$used</span></div>" : "-");
@@ -103,11 +103,16 @@ case 'disk':
       break;}
       $temp = $disk['temp'];
       if ($temp>=$_POST['hot']) my_insert($row5[$n],"<span class='heat-img'><img src='$path/".($temp>=$_POST['max']?'max':'hot').".png'></span><span class='heat-text' style='display:none'>".my_temp($temp,$_POST['unit'])."</span>");
-      if ($disk['device'] && !strpos($state,'blink')) my_smart($row6[$n],$disk['name']);
+      if ($disk['device'] && !strpos($state,'blink')) my_smart($row6[$n],$disk['name'],'Device');
       my_usage($row7[$n],($n>1 && $disk['fsStatus']=='Mounted')?(round((1-$disk['fsFree']/$disk['fsSize'])*100).'%'):'');
     }
   }
-  foreach ($devs as $dev) my_insert($row3[$i++],"<img src=$path/blue-on.png>");
+  foreach ($devs as $dev) {
+    $device = $dev['device'];
+    $state = exec("hdparm -C /dev/$device|grep -Po active") ? 'blue-on' : 'blue-blink';
+    if ($state=='blue-on') my_smart($row6[$i],$device,'New');
+    my_insert($row3[$i++],"<img src=$path/$state.png>");
+  }
   echo "<tr>".implode('',$row1)."</tr>";
   echo "<tr>".implode('',$row2)."</tr>";
   echo "<tr>".implode('',$row3)."</tr>";
@@ -154,8 +159,8 @@ case 'port':
 break;
 case 'parity':
   $var  = parse_ini_file("state/var.ini");
-  echo "<span class='orange p0'><strong>".($var['mdNumInvalid']==0 ? 'Parity-Check' : ($var['mdInvalidDisk']==0 ? 'Parity-Sync' : 'Data-Rebuild'))." in progress... Completed: ".number_format(($var['mdResyncPos']/($var['mdResync']/100+1)),0)." %.</strong></span>".
-    "<br><em>Elapsed time: ".my_clock(floor(($var['currTime']-$var['sbUpdated'])/60)).". Estimated finish: ".my_clock(round(((($var['mdResyncDt']*(($var['mdResync']-$var['mdResyncPos'])/($var['mdResyncDb']/100+1)))/100)/60),0))."</em>";
+  echo "<span class='orange p0'><strong>".($var['mdNumInvalid']==0 ? 'Parity-Check' : ($var['mdInvalidDisk']==0 ? 'Parity-Sync' : 'Data-Rebuild'))." in progress... Completed: ".number_format(($var['mdResyncPos']/($var['mdResync']/100+1)),0)." %.</strong></span>";
+  echo "<br><em>Elapsed time: ".my_clock(floor(($var['currTime']-$var['sbUpdated'])/60)).". Estimated finish: ".my_clock(round(((($var['mdResyncDt']*(($var['mdResync']-$var['mdResyncPos'])/($var['mdResyncDb']/100+1)))/100)/60),0))."</em>";
 break;
 case 'shares':
    $names = explode(',',$_POST['names']);
