@@ -13,16 +13,28 @@
 <?
 require_once('Wrappers.php');
 
-function duration($h) {
-  $time = ceil(time()/3600)*3600;
-  $now = new DateTime("@$time");
-  $poh = new DateTime("@".($time-$h*3600));
-  $age = date_diff($poh,$now);
-  return " (".($age->y?"{$age->y}y, ":"").($age->m?"{$age->m}m, ":"").($age->d?"{$age->d}d, ":"")."{$age->h}h)";
+function normalize($text) {
+  $words = explode('_',$text);
+  foreach ($words as &$word) $word = $word==strtoupper($word) ? $word : preg_replace(array('/^(ct|cnt)$/','/^blk$/'),array('count','block'),strtolower($word));
+  return "<td>".ucfirst(implode(' ',$words))."</td>";
 }
 
-$port = $_POST['port'];
+function duration(&$hrs) {
+  $time = ceil(time()/3600)*3600;
+  $now = new DateTime("@$time");
+  $poh = new DateTime("@".($time-$hrs*3600));
+  $age = date_diff($poh,$now);
+  $hrs = "$hrs (".($age->y?"{$age->y}y, ":"").($age->m?"{$age->m}m, ":"").($age->d?"{$age->d}d, ":"")."{$age->h}h)";
+}
 
+function spindownDelay($port) {
+  $disks = parse_ini_file("/var/local/emhttp/disks.ini",true);
+  foreach ($disks as $disk) {
+    if ($disk['device']==$port) { file_put_contents("/var/tmp/diskSpindownDelay.{$disk['idx']}", $disk['spindownDelay']); break; }
+  }
+}
+
+$port  = $_POST['port'];
 switch ($_POST['cmd']) {
 case "attributes":
   $unraid = parse_plugin_cfg("dynamix",true);
@@ -39,10 +51,8 @@ case "attributes":
     else if (array_search($info[0], $temps)!==false) {
       if ($info[9]>=$max) $color = " class='red-text'"; else if ($info[9]>=$hot) $color = " class='orange-text'";
     }
-    echo "<tr{$color}>";
-    if ($info[0] == 9 && is_numeric($info[9])) $info[9] .= duration($info[9]);
-    foreach ($info as $field) echo "<td>".str_replace('_',' ',$field)."</td>";
-    echo "</tr>";
+    if ($info[0]==9 && is_numeric($info[9])) duration($info[9]);
+    echo "<tr{$color}>".implode('',array_map('normalize', $info))."</tr>";
   }
   break;
 case "capabilities":
@@ -66,19 +76,24 @@ case "identify":
   exec("smartctl -H /dev/$port|grep 'result'|sed 's:self-assessment test result::'",$output);
   foreach ($output as $line) {
     if (!strlen($line)) continue;
-    $info = array_map('trim', explode(':', $line, 2));
-    if ($info[1]=='PASSED') $info[1] = "<span class='green-text'>Passed</span>";
-    if ($info[1]=='FAILED') $info[1] = "<span class='red-text'>Failed</span>";
-    echo "<tr><td>".preg_replace("/ is$/","",$info[0]).":</td><td>$info[1]</td></tr>";
+    list($title,$info) = array_map('trim', explode(':', $line, 2));
+    if ($info=='PASSED') $info = "<span class='green-text'>Passed</span>";
+    if ($info=='FAILED') $info = "<span class='red-text'>Failed</span>";
+    echo "<tr><td>".preg_replace("/ is$/","",$title).":</td><td>$info</td></tr>";
   }
   break;
 case "save":
   exec("smartctl -a /dev/$port >{$_SERVER['DOCUMENT_ROOT']}/{$_POST['file']}");
   break;
+case "delete":
+  @unlink("/var/tmp/{$_POST['file']}");
+  break;
 case "short":
+  spindownDelay($port);
   exec("smartctl -t short /dev/$port");
   break;
 case "long":
+  spindownDelay($port);
   exec("smartctl -t long /dev/$port");
   break;
 case "stop":
@@ -92,7 +107,7 @@ case "update":
   }
   $progress = exec("smartctl -c /dev/$port|grep -Pom1 '\d+%'");
   if ($progress) {
-    echo "<big><i class='fa fa-spinner fa-pulse'></i> ".(100-substr($progress,0,-1))."% complete</big>";
+    echo "<big><i class='fa fa-spinner fa-pulse'></i> self-test in progress, ".(100-substr($progress,0,-1))."% complete</big>";
     break;
   }
   $result = trim(exec("smartctl -l selftest /dev/$port|grep -m1 '^# 1'|cut -c26-55"));

@@ -7,11 +7,10 @@
 # uses the 'du' command, could take awhile.
 
 share="$1"
-output="$2"
+output="/var/local/emhttp/$share.$2"
 total=0;
 
 echo "Computing disk usage for $share..."
-
 rm -f "$output"
 
 function check {

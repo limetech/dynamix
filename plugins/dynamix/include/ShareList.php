@@ -41,7 +41,7 @@ function user_share_settings($protocol,$share) {
 }
 
 // Compute all user shares
-if ($compute=='yes') foreach ($shares as $name => $share) exec("webGui/scripts/share_size '$name' '/var/local/emhttp/$name.ssz1'");
+if ($compute=='yes') foreach ($shares as $name => $share) exec("webGui/scripts/share_size \"$name\" \"ssz1\"");
 
 // Share size per disk
 $preserve = ($path==$prev || $compute=='yes');
@@ -54,7 +54,9 @@ foreach (glob("state/*.ssz1", GLOB_NOSORT) as $entry) {
 }
 
 // Build table
+$row = 0;
 foreach ($shares as $name => $share) {
+  $row++;
   $ball = "/webGui/images/{$share['color']}.png";
   switch ($share['color']) {
     case 'green-on':  $help = 'All files protected'; break;
@@ -66,6 +68,7 @@ foreach ($shares as $name => $share) {
   echo "<td>".user_share_settings($var['shareSMBEnabled'], $sec[$name])."</td>";
   echo "<td>".user_share_settings($var['shareNFSEnabled'], $sec_nfs[$name])."</td>";
   echo "<td>".user_share_settings($var['shareAFPEnabled'], $sec_afp[$name])."</td>";
+  $cmd="/webGui/scripts/share_size"."&arg1=".urlencode($name)."&arg2=ssz1";
   if (array_key_exists($name, $ssz1)) {
     echo "<td>".my_scale($ssz1[$name]['total']*1024, $unit)." $unit</td>";
     echo "<td>".my_scale($share['free']*1024, $unit)." $unit</td>";
@@ -79,14 +82,13 @@ foreach ($shares as $name => $share) {
         echo "<td></td>";
         echo "<td></td>";
         echo "<td></td>";
-        echo "<td>".my_scale($disksize*1024, $unit)." $unit</td>";
-        echo "<td>".my_scale($disks[$diskname]['fsFree']*1024, $unit)." $unit</td>";
-        echo "<td></td>";
+        echo "<td class='share-$row-1'>".my_scale($disksize*1024, $unit)." $unit</td>";
+        echo "<td class='share-$row-2'>".my_scale($disks[$diskname]['fsFree']*1024, $unit)." $unit</td>";
+        echo "<td><a href='/update.htm?cmd=$cmd' target='progressFrame' title='Recompute...' onclick='$(\".share-$row-1\").html(\"Please wait...\");$(\".share-$row-2\").html(\"\");'><i class='fa fa-refresh icon'></i></a></td>";
         echo "</tr>";
       }
     }
   } else {
-    $cmd="/webGui/scripts/share_size"."&arg1=".urlencode($name)."&arg2=".urlencode("/var/local/emhttp/$name.ssz1");
     echo "<td><a href='/update.htm?cmd=$cmd' target='progressFrame' onclick=\"$(this).text('Please wait...')\">Compute...</a></td>";
     echo "<td>".my_scale($share['free']*1024, $unit)." $unit</td>";
     echo "<td><a href='$path/Browse?dir=/mnt/user/".urlencode($name)."'><img src='/webGui/images/explore.png' title='Browse /mnt/user/".urlencode($name)."'></a></td>";

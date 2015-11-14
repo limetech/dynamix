@@ -43,7 +43,7 @@ function parity_status() {
   $.post('/webGui/include/DeviceList.php',{path:'<?=$path?>',device:'parity'},function(data) {
     if (data) {$.each(data.split(';'),function(k,v) {if ($('#line'+k).length>0) $('#line'+k).html(v);});}
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
-<?if ($display['tabs']==0):?>
+<?if ($tabbed):?>
     if ($('#tab'+$('input[name$="tabs"]').length).is(':checked')) timer = setTimeout(parity_status,<?=abs($display['refresh'])?>);
 <?else:?>
     setTimeout(parity_status,<?=abs($display['refresh'])?>);
