@@ -133,10 +133,10 @@ $('.tabs').append("<span class='status vhshift'><input type='button' value='Refr
 <?        unset($time);
           exec("grep -A 1 -Po '(sync done. time=\K\d+|sync completion status: \K-?\d+)' /var/log/syslog|tail -2", $time);
           if (!count($time)) $time = array_fill(0,2,0);
-          if (count($time)==1) array_unshift($time,0); 
+          if (count($time)==1) array_unshift($time,0);
           if ($time[1]==0):
 ?>          <td>Last checked on <strong><?=my_time($var['sbSynced']).day_count($var['sbSynced'])?></strong>, finding <strong><?=$var['sbSyncErrs']?></strong> error<?=$var['sbSyncErrs']==1?'':'s'?>.
-            <br><small>Duration: <?=my_check($time[0])?></small>
+            <br><i class="fa fa-clock-o icon"></i><small>Duration: <?=my_check($time[0])?></small>
 <?        else:?>
             <td>Last check incomplete on <strong><?=my_time($var['sbSynced']).day_count($var['sbSynced'])?></strong>, finding <strong><?=$var['sbSyncErrs']?></strong> error<?=$var['sbSyncErrs']==1?'':'s'?>.
             <br><small>Error code: <?=my_error($time[1])?></small>

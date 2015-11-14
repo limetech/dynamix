@@ -54,7 +54,7 @@ function device_browse(&$disk) {
 }
 function device_desc(&$disk) {
   $size = my_scale($disk['size']*1024,$unit);
-  return "{$disk['id']} - $size $unit ({$disk['device']})";
+  return "<i class='fa fa-hdd-o icon'></i>{$disk['id']} - $size $unit ({$disk['device']})";
 }
 function assignment(&$disk) {
   global $var, $devs;
