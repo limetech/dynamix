@@ -95,3 +95,6 @@ foreach ($shares as $name => $share) {
     echo "</tr>";
   }
 }
+if ($row==0) {
+  echo "<tr><td colspan='8' style='text-align:center'><i class='fa fa-folder-open-o icon'></i>There are no exportable user shares</td></tr>";
+}
