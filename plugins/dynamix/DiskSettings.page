@@ -14,6 +14,31 @@ Icon="disk-settings.png"
  * all copies or substantial portions of the Software.
  */
 ?>
+<?
+require_once('/usr/local/emhttp/webGui/include/Preselect.php');
+$events = isset($var['smEvents']) ? explode('|', $var['smEvents']) : $numbers;
+?>
+<script>
+function prepareDiskSettings(form) {
+  var events = [];
+  for (var i=0; i < <?=count($preselect)?>; i++) {
+    if (form.elements['at'+i].checked) events.push(form.elements['at'+i].value);
+    form.elements['at'+i].disabled = true;
+  }
+  var custom = form.smCustom.value.trim();
+  var custom = custom.length ? custom.split(',') : [];
+  for (var i=0; i < custom.length; i++) events.push(custom[i].trim());
+  form.smEvents.value = events.join('|');
+}
+function setGlue(form) {
+  var glue = ['','','',',',',',',','/','',','];
+  form.smGlue.value = glue[form.smType.selectedIndex];
+}
+$(function() {
+  setGlue(document.smart_settings);
+});
+</script>
+
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
 Enable auto start:
 : <select name="startArray" size="1">
@@ -114,4 +139,58 @@ Tunable (md_sync_window):
 
 &nbsp;
 : <input type="submit" name="changeDisk" value="Apply"><input type="button" value="Done" onclick="done()">
+</form>
+
+<div id="title"><span class="left"><img src="/webGui/icons/smartchecks.png" class="icon">Global SMART Settings</span></div>
+
+<form markdown="1" name="smart_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareDiskSettings(this)">
+<input type="hidden" name="#file" value="dynamix/smartALL.cfg">
+<input type="hidden" name="#include" value="webGui/include/update.smart.php">
+<input type="hidden" name="smEvents" value="">
+<input type="hidden" name="smGlue" value="">
+Default SMART notification value:
+: <select name="smSelect" size="1">
+  <?=mk_option($var['smSelect'], "0", "Raw")?>
+  <?=mk_option($var['smSelect'], "1", "Normalized")?>
+  </select>
+
+Default SMART notification tolerance level:
+: <select name="smLevel" size="1">
+  <?=mk_option($var['smLevel'], "1.00", "Absolute")?>
+  <?=mk_option($var['smLevel'], "1.05", "5%")?>
+  <?=mk_option($var['smLevel'], "1.10", "10%")?>
+  <?=mk_option($var['smLevel'], "1.15", "15%")?>
+  <?=mk_option($var['smLevel'], "1.20", "20%")?>
+  <?=mk_option($var['smLevel'], "1.25", "25%")?>
+  <?=mk_option($var['smLevel'], "1.50", "50%")?>
+  </select>
+
+Default SMART controller type:
+: <select name="smType" size="1" onchange="setGlue(this.form)">
+  <?=mk_option($var['smType'], "", "Automatic")?>
+  <?=mk_option($var['smType'], "-d ata", "ATA")?>
+  <?=mk_option($var['smType'], "-d scsi", "SCSI")?>
+  <?=mk_option($var['smType'], "-d 3ware", "3Ware")?>
+  <?=mk_option($var['smType'], "-d aacraid", "AacRAID")?>
+  <?=mk_option($var['smType'], "-d areca", "Areca")?>
+  <?=mk_option($var['smType'], "-d hpt", "Highpoint")?>
+  <?=mk_option($var['smType'], "-d marvell", "Marvell")?>
+  <?=mk_option($var['smType'], "-d megaraid", "MegaRAID")?>
+  </select>
+
+Default SMART attribute notifications:
+: <input type="text" name="smCustom" value="<?=$var['smCustom']?>" class="narrow">Custom attributes (use comma to separate numbers)
+
+  <?for ($x = 0; $x < count($preselect); $x++):?>
+&nbsp;
+: <input type="checkbox" name="at<?=$x?>" value="<?=$preselect[$x]['code']?>"<?=in_array($preselect[$x]['code'],$events)?' checked':''?>><span style="display:inline-block;width:136px"><?=$preselect[$x]['code']?></span><?=$preselect[$x]['text']?>
+  <?endfor;?>
+
+> The user can enable or disable notifications for the given SMART attributes. It is recommended to keep the default, which is ALL selected attributes,
+> when certain attributes are not present on your hard disk or do not provide the correct information, these may be excluded.
+> In addition custom SMART attributes can be entered to generate notifications. Be careful in this selection,
+> it may cause an avalance of notifcations if inappropriate SMART attributes are chosen.
+
+<input type="submit" name="#default" value="Default">
+: <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
 </form>

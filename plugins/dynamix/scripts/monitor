@@ -12,24 +12,27 @@
  */
 ?>
 <?
-require_once('/usr/local/emhttp/webGui/include/Wrappers.php');
 exec("wget -qO /dev/null 127.0.0.1:$(lsof -lbnPi4 -sTCP:LISTEN|grep -Pom1 '^emhttp.*:\K[\d]+')/update.htm?cmdStatus=apply");
+
+$disks = parse_ini_file("/var/local/emhttp/disks.ini",true);
+$var   = parse_ini_file("/var/local/emhttp/var.ini");
+$devs  = parse_ini_file("/var/local/emhttp/devs.ini",true);
+
+require_once('/usr/local/emhttp/webGui/include/Wrappers.php');
+require_once('/usr/local/emhttp/webGui/include/Preselect.php');
+require_once('/usr/local/emhttp/webGui/include/CustomMerge.php');
 
 $notify = "/usr/local/emhttp/webGui/scripts/notify";
 $ram    = "/var/local/emhttp/monitor.ini";
 $rom    = "/boot/config/plugins/dynamix/monitor.ini";
-$disks  = parse_ini_file("/var/local/emhttp/disks.ini",true);
-$devs   = parse_ini_file("/var/local/emhttp/devs.ini",true);
-$var    = parse_ini_file("/var/local/emhttp/var.ini");
 $saved  = @parse_ini_file($ram,true);
 $unraid = parse_plugin_cfg("dynamix",true);
-$events = $unraid['notify']['events'];
 $max    = $unraid['display']['max'];
 $hot    = $unraid['display']['hot'];
 $high1  = $unraid['display']['critical'];
 $high2  = $unraid['display']['warning'];
 $server = strtoupper($var['NAME']);
-$errors = array();
+$errors = [];
 
 function plus($val,$word,$last) {
   return $val>0 ? (($val||$last) ? ($val.' '.$word.($val!=1?'s':'').($last ?'':', ')) : '') : '';
@@ -46,7 +49,7 @@ function my_scale($value,&$unit,$precision = NULL) {
   global $unraid;
   $scale = $unraid['display']['scale'];
   $number = $unraid['display']['number'];
-  $units = array('B','KB','MB','GB','TB','PB');
+  $units = ['B','KB','MB','GB','TB','PB'];
   if ($scale==0 && $precision===NULL) {
     $unit = '';
     return number_format($value, 0, $number[0], ($value>=10000 ? $number[1] : ''));
@@ -95,31 +98,66 @@ function check_temp($name,$temp,$text,$info) {
   }
 }
 function check_smart($name,$port,$text,$info) {
-  global $var,$notify,$saved,$events,$server;
-  $codes = array();
+  global $var,$disks,$notify,$saved,$server,$numbers;
+  $disk = &$disks[$name];
+  $select = isset($disk['smSelect']) ? $disk['smSelect'] : -1; if ($select==-1) $select = isset($all['smSelect']) ? $var['smSelect'] : 0;
+  $level = isset($disk['smLevel']) ? $disk['smLevel'] : -1; if ($level==-1) $level = isset($var['smLevel']) ? $var['smLevel'] : 1;
+  $events = isset($disk['smEvents']) ? explode('|',$disk['smEvents']) : (isset($var['smEvents']) ? explode('|',$var['smEvents']) : $numbers);
+  $type = isset($disk['smType']) ? $disk['smType'] : -1; if ($type==-1) $type = isset($var['smType']) ? $var['smType'] : '';
+  if ($type) {
+    $ports = [];
+    if (strlen($disk['smPort1'])) $ports[] = $disk['smPort1'];
+    if (strlen($disk['smPort2'])) $ports[] = $disk['smPort2'];
+    if (strlen($disk['smPort3'])) $ports[] = $disk['smPort3'];
+    if ($ports) {
+      $glue = isset($disk['smGlue']) ? $disk['smGlue'] : -1; if ($glue==-1) $glue = isset($var['smGlue']) ? $var['smGlue'] : ',';
+      $type .= ','.implode($glue,$ports);
+    }
+  }
   $file = "/var/local/emhttp/smart/$name";
-  exec("awk '$1~/^($events)$/{print $1,$10,$2,$9}' $file 2>/dev/null", $codes);
+  exec("awk 'NR>7{print $1,$2,$4,$6,$9,$10}' $file 2>/dev/null", $codes);
   $item = 'smart';
   foreach ($codes as $code) {
     if (!$code) continue;
-    list($id,$value,$type,$when) = explode(' ',$code);
-    $attr = "$name.$id";
-    $word = str_replace(array('_',' (-) '),array(' ',''),strtolower($type).' ('.strtolower($when).') ');
-    $last = isset($saved[$item][$attr]) ? $saved[$item][$attr] : 0;
-    if ($value>0) {
-      if ($value>$last) {
-        exec("$notify -e \"unRAID $text SMART health [$id]\" -s \"Warning [$server] - $word is $value\" -d \"$info\" -i \"warning\"");
-        $saved[$item][$attr] = $value;
+    list($id,$class,$value,$thres,$when,$raw) = explode(' ',$code);
+    $fail = strpos($when,'FAILING_NOW')!==false;
+    if (!$fail && !in_array($id,$events)) continue;
+    $word = str_replace(['_',' (-)'],[' ',''],strtolower("$class ($when)"));
+    switch ($select) {
+    case 0:
+      $attr = "$name.$id";
+      $last = isset($saved[$item][$attr]) ? $saved[$item][$attr]*$level : 0;
+      if ($raw>0 || $fail) {
+        if ($raw>$last) {
+          exec("$notify -e \"unRAID $text SMART health [$id]\" -s \"Warning [$server] - $word is $raw\" -d \"$info\" -i \"warning\"");
+          $saved[$item][$attr] = $raw;
+        }
+      } else {
+        if ($last>0) {
+          exec("$notify -e \"unRAID $text SMART message [$id]\" -s \"Notice [$server] - $word returned to normal value\" -d \"$info\"");
+          unset($saved[$item][$attr]);
+        }
       }
-    } else {
-      if ($last) {
-        exec("$notify -e \"unRAID $text SMART message [$id]\" -s \"Notice [$server] - $word returned to normal value\" -d \"$info\"");
-        unset($saved[$item][$attr]);
+      break;
+    case 1:
+      $attr = "$name.${id}n";
+      $last = isset($saved[$item][$attr]) ? $saved[$item][$attr] : 255;
+      if (($thres>0 && $value<=$thres*$level) || $fail) {
+        if ($value*($value>$thres?$level:1)<$last) {
+          exec("$notify -e \"unRAID $text SMART health [$id]\" -s \"Warning [$server] - $word is $value\" -d \"$info\" -i \"warning\"");
+          $saved[$item][$attr] = $value;
+        }
+      } else {
+        if ($last<255) {
+          exec("$notify -e \"unRAID $text SMART message [$id]\" -s \"Notice [$server] - $word returned to normal value\" -d \"$info\"");
+          unset($saved[$item][$attr]);
+        }
       }
+      break;
     }
   }
   $file .= '.ssa';
-  if (!file_exists($file) || (time()-filemtime($file)>=$var['poll_attributes'])) exec("smartctl -n standby -H /dev/$port|grep -Pom1 '(STANDBY|PASSED)'|tr -d '\n' > $file");
+  if (!file_exists($file) || (time()-filemtime($file)>=$var['poll_attributes'])) exec("smartctl -n standby -H $type /dev/$port|grep -Pom1 '^SMART.*: \K[A-Z]+'|tr -d '\n' > $file");
 }
 
 // check once a week for smart database updates
@@ -145,7 +183,7 @@ foreach ($disks as $disk) {
   switch ($warn) {
   case 'red':
     if ($warn!=$last) {
-      $status = strtolower(str_replace(array('NP_','_'),array('',' '),$disk['status']));
+      $status = strtolower(str_replace(['NP_','_'],['',' '],$disk['status']));
       exec("$notify -e \"unRAID $text error\" -s \"Alert [$server] - $text in error state ($status)\" -d \"$info\" -i \"alert\"");
       $saved[$item][$name] = $warn;
     }
