@@ -62,23 +62,41 @@ function my_scale($value,&$unit,$precision = NULL) {
     return number_format($value, $precision===NULL ? (($value-intval($value)==0 || $value>=100) ? 0 : ($value>=10 ? 1 : 2)) : $precision, $number[0], ($value>=10000 ? $number[1] : ''));
   }
 }
-function my_check($time) {
-  global $disks;
-  if (!$time) return "unavailable (system reboot or log rotation)";
+function my_check($time,$speed) {
+  if (!$time) return 'unavailable (no parity-check entries logged)';
   $days = floor($time/86400);
   $hmss = $time-$days*86400;
   $hour = floor($hmss/3600);
   $mins = $hmss/60%60;
   $secs = $hmss%60;
-  return plus($days,'day',($hour|$mins|$secs)==0).plus($hour,'hour',($mins|$secs)==0).plus($mins,'minute',$secs==0).plus($secs,'second',true)."<br>Average speed: ".(isset($disks['parity']['sizeSb']) ? my_scale($disks['parity']['sizeSb']*1024/$time,$unit,1)." $unit/sec" : "unknown");
+  return plus($days,'day',($hour|$mins|$secs)==0).plus($hour,'hour',($mins|$secs)==0).plus($mins,'minute',$secs==0).plus($secs,'second',true).". Average speed: $speed";
 }
-function my_error($code) {
-  switch ($code) {
-  case -4:
-    return "user abort";
-  default:
-    return $code;
+function read_write_parity_log($epoch) {
+  global $disks;
+  $log = '/boot/config/parity-checks.log';
+  $timestamp = date('M d H:i:s',$epoch);
+  if (file_exists($log)) {
+    $handle = fopen($log, 'r');
+    while (($line = fgets($handle)) !== false) {
+      if (strpos($line,$timestamp)!==false) break;
+    }
+    fclose($handle);
   }
+  if (empty($line)) {
+    exec("grep -Po '^$timestamp .*(sync done. \Ktime=\d+|sync completion \Kstatus: -?\d+)' /var/log/syslog", $rows);
+    $duration = 0; $speed = 0; $status = 0;
+    foreach ($rows as $row) {
+      if (strpos($row,'time=')!==false) {
+        $duration = substr($row,5);
+      } elseif (strpos($row,'status:')!==false) {
+        $status = substr($row,8);
+      }
+    }
+    if ($duration>0) $speed = isset($disks['parity']['sizeSb']) ? my_scale($disks['parity']['sizeSb']*1024/$duration,$unit,1)." $unit/s" : "Unknown";
+    $line = "$timestamp|$duration|$speed|$status";
+    file_put_contents($log,"$line\n",FILE_APPEND);
+  }
+  return $line;
 }
 function check_temp($name,$temp,$text,$info) {
   global $notify,$saved,$max,$hot,$server;
@@ -251,10 +269,9 @@ if ($var['mdResync']>0) {
   }
 } else {
   if ($last) {
-    exec("awk '/sync completion/ {gsub(\"(time=|sec)\",\"\",x);print x;print \$NF};{x=\$NF}' /var/log/syslog|tail -2", $time);
-    if (!count($time)) $time = array_fill(0,2,0);
-    $info = $time[1]==0 ? "Duration: ".my_check($time[0]) : "Error code: ".my_error($time[1]);
-    $level = ($time[1]==0 && $var['sbSyncErrs']==0) ? "normal" : "warning";
+    list($entry,$duration,$speed,$status) = explode('|', read_write_parity_log($var['sbSynced']));
+    $info = $status==0 ? "Duration: ".my_check($duration, $speed) : "Error code: $status";
+    $level = ($status==0 && $var['sbSyncErrs']==0) ? "normal" : "warning";
     exec("$notify -e \"unRAID $last\" -s \"Notice [$server] - $last finished ({$var['sbSyncErrs']} errors)\" -d \"$info\" -i \"$level\"");
     unset($saved[$item][$name]);
   }
