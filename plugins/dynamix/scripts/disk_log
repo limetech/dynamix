@@ -1,0 +1,8 @@
+#!/bin/bash
+dev=$1
+ata=$(ls -l /sys/dev/block|grep -m1 "$dev$"|grep -Po 'ata[\d]+')
+if [[ -n $ata ]]; then
+  exec grep -P "($dev|$ata(?!\d))" /var/log/syslog
+else
+  exec grep "$dev" /var/log/syslog
+fi
