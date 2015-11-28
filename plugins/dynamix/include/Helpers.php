@@ -84,23 +84,14 @@ function usage_color($limit,$free) {
     return 'greenbar';
   }
 }
-function my_check($time) {
-  global $disks;
-  if (!$time) return "unavailable (system reboot or log rotation)";
+function my_check($time,$speed) {
+  if (!$time) return 'unavailable (no parity-check entries logged)';
   $days = floor($time/86400);
   $hmss = $time-$days*86400;
   $hour = floor($hmss/3600);
   $mins = $hmss/60%60;
   $secs = $hmss%60;
-  return plus($days,'day',($hour|$mins|$secs)==0).plus($hour,'hour',($mins|$secs)==0).plus($mins,'minute',$secs==0).plus($secs,'second',true).". Average speed: ".(isset($disks['parity']['sizeSb'])?my_scale($disks['parity']['sizeSb']*1024/$time,$unit,1)." $unit/sec":"unknown");
-}
-function my_error($code) {
-  switch ($code) {
-  case -4:
-    return "<em>user abort</em>";
-  default:
-    return "<strong>$code</strong>";
-  }
+  return plus($days,'day',($hour|$mins|$secs)==0).plus($hour,'hour',($mins|$secs)==0).plus($mins,'minute',$secs==0).plus($secs,'second',true).". Average speed: $speed";
 }
 function mk_option($select, $value, $text, $extra = "") {
   return "<option value='$value'".($value==$select ? " selected" : "").(strlen($extra) ? " $extra" : "").">$text</option>";
@@ -136,6 +127,18 @@ function day_count($time) {
 }
 function plus($val, $word, $last) {
   return $val>0 ? (($val || $last) ? ($val.' '.$word.($val!=1?'s':'').($last ?'':', ')) : '') : '';
+}
+function read_parity_log($epoch) {
+  $log = '/boot/config/parity-checks.log';
+  if (file_exists($log)) {
+    $timestamp = date('M d H:i:s',$epoch);
+    $handle = fopen($log, 'r');
+    while (($line = fgets($handle)) !== false) {
+      if (strpos($line,$timestamp)!==false) break;
+    }
+    fclose($handle);
+  }
+  return $line ? $line : '0|0|0|0';
 }
 function urlencode_path($path) {
   return str_replace("%2F", "/", urlencode($path));
