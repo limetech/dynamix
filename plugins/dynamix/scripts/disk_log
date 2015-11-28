@@ -1,8 +1,9 @@
 #!/bin/bash
+app=$(basename $0)
 dev=$1
 ata=$(ls -l /sys/dev/block|grep -m1 "$dev$"|grep -Po 'ata[\d]+')
 if [[ -n $ata ]]; then
-  exec grep -P "($dev|$ata(?!\d))" /var/log/syslog
+  exec grep -P "($dev|$ata(?!\d)|!($app))" /var/log/syslog
 else
-  exec grep "$dev" /var/log/syslog
+  exec grep -P "($dev|!($app))" /var/log/syslog
 fi
