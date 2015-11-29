@@ -38,6 +38,7 @@ if (file_exists($log)) {
   $handle = fopen($log, 'r');
   while (($line = fgets($handle)) !== false) {
     list($date,$duration,$speed,$status) = explode('|',$line);
+    if ($speed==0) $speed = 'Unavailable';
     if ($duration>0||$status<>0) {echo "<tr><td>$date</td><td>".my_duration($duration)."</td><td>$speed</td><td>".($status==0?'OK':$status)."</td></tr>"; $row++;}
   }
   fclose($handle);
