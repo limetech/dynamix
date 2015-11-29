@@ -11,8 +11,8 @@
  */
 ?>
 <?
-require_once('include/Helpers.php');
-require_once('include/PageBuilder.php');
+require_once 'include/Helpers.php';
+require_once 'include/PageBuilder.php';
 
 // Extract the 'querystring'
 // variables provided by emhttp:
@@ -40,7 +40,7 @@ $sec_nfs = parse_ini_file('state/sec_nfs.ini',true);
 $sec_afp = parse_ini_file('state/sec_afp.ini',true);
 
 // Merge SMART settings
-require_once('include/CustomMerge.php');
+require_once 'include/CustomMerge.php';
 
 $site = [];
 $base = 'dynamix';

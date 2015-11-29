@@ -11,7 +11,7 @@
  */
 ?>
 <?
-require_once('Wrappers.php');
+require_once 'Wrappers.php';
 
 // Helper functions
 function my_scale($value, &$unit, $precision = NULL) {
