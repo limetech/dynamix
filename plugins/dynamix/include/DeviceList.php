@@ -20,6 +20,16 @@ $disks = parse_ini_file('state/disks.ini',true);
 $sum   = ['count'=>0, 'temp'=>0, 'fsSize'=>0, 'fsUsed'=>0, 'fsFree'=>0, 'numReads'=>0, 'numWrites'=>0, 'numErrors'=>0];
 extract(parse_plugin_cfg('dynamix',true));
 
+function in_parity_log($log,$timestamp) {
+  if (file_exists($log)) {
+    $handle = fopen($log, 'r');
+    while (($line = fgets($handle)) !== false) {
+      if (strpos($line,$timestamp)!==false) break;
+    }
+    fclose($handle);
+  }
+  return !empty($line);
+}
 function device_info(&$disk) {
   global $path, $var;
   $name = $disk['name'];
@@ -42,7 +52,7 @@ function device_info(&$disk) {
     case 'grey-off': $help = 'Device not present'; break;
   }
   $status = "$ctrl<a class='info nohand' onclick='return false'><img src='/webGui/images/{$disk['color']}.png' class='icon'><span>$help</span></a>";
-  $link = strpos($disk['status'], 'DISK_NP')===false ? "<a href='$path/$type?name=$name'>".my_disk($name)."</a>" : my_disk($name);
+  $link = strpos($disk['status'], 'DISK_NP')===false ? "<a href='$path/$type?name=$name' title='".my_disk($name)." Settings'>".my_disk($name)."</a>" : my_disk($name);
   return $status.$link;
 }
 function device_browse(&$disk) {
@@ -53,8 +63,10 @@ function device_browse(&$disk) {
   }
 }
 function device_desc(&$disk) {
+  global $var;
   $size = my_scale($disk['size']*1024,$unit);
-  return "<i class='fa fa-hdd-o icon'></i>{$disk['id']} - $size $unit ({$disk['device']})";
+  $log = $var['fsState']=='Started' ? "<a href=\"#\" title=\"Disk Log Information\" onclick=\"openBox('/webGui/scripts/disk_log&arg1={$disk['device']}','Disk Log Information',600,900,false);return false\"><i class=\"fa fa-hdd-o icon\"></i></a>" : "";
+  return  "$log{$disk['id']} - $size $unit ({$disk['device']})";
 }
 function assignment(&$disk) {
   global $var, $devs;
@@ -309,6 +321,22 @@ case 'parity':
     $data[] = my_clock(round(((($var['mdResyncDt']*(($var['mdResync']-$var['mdResyncPos'])/($var['mdResyncDb']/100+1)))/100)/60),0));
     $data[] = $var['sbSyncErrs'];
     echo implode(';',$data);
+  } else {
+    if ($var['sbSynced']==0) break;
+    $log = '/boot/config/parity-checks.log';
+    $timestamp = date('M d H:i:s',$var['sbSynced']);
+    if (in_parity_log($log,$timestamp)) break;
+    exec("grep -Po '^$timestamp .*(sync done. \Ktime=\d+|sync completion \Kstatus: -?\d+)' /var/log/syslog", $rows);
+    $duration = 0; $speed = 0; $status = 0;
+    foreach ($rows as $row) {
+      if (strpos($row,'time=')!==false) {
+        $duration = substr($row,5);
+      } elseif (strpos($row,'status:')!==false) {
+        $status = substr($row,8);
+      }
+    }
+    if ($duration>0) $speed = isset($disks['parity']['sizeSb']) ? my_scale($disks['parity']['sizeSb']*1024/$duration,$unit,1)." $unit/s" : "Unknown";
+    file_put_contents($log,"$timestamp|$duration|$speed|$status\n",FILE_APPEND);
   }
   break;
 }

@@ -39,7 +39,10 @@ $shares  = parse_ini_file('state/shares.ini',true);
 $sec_nfs = parse_ini_file('state/sec_nfs.ini',true);
 $sec_afp = parse_ini_file('state/sec_afp.ini',true);
 
-$site = array();
+// Merge SMART settings
+require_once('include/CustomMerge.php');
+
+$site = [];
 $base = 'dynamix';
 // Build the webGui pages first
 build_pages("$base/*.page");

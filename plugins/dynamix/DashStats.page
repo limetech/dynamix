@@ -37,7 +37,6 @@ if ($memory_maximum*1024 < $memory_installed) $memory_maximum = pow(2,ceil(log($
 function init_row($label) {
   echo "<tr><td>$label</td>".str_repeat("<td></td>",25)."</tr>";
 }
-
 function parity_status() {
   global $var,$disks;
   if ($disks['parity']['status']=='DISK_NP') {
@@ -49,15 +48,13 @@ function parity_status() {
     if ($var['sbSynced']==0) {
       echo "<tr><td><em>Parity has not been checked yet.<em></td><td id='parity'></td></tr>";
     } else {
-      unset($time);
-      exec("awk '/sync completion/ {gsub(\"(time=|sec)\",\"\",x);print x;print \$NF};{x=\$NF}' /var/log/syslog|tail -2", $time);
-      if (!count($time)) $time = array_fill(0,2,0);
-      if ($time[1]==0) {
+      list($entry,$duration,$speed,$status) = explode('|', read_parity_log($var['sbSynced']));
+      if ($status==0) {
         echo "<tr><td>Last checked on <strong>".my_time($var['sbSynced']).day_count($var['sbSynced'])."</strong>, finding <strong>{$var['sbSyncErrs']}</strong> error".($var['sbSyncErrs']==1?'.':'s.');
-        echo "<br><em>Duration: ".my_check($time[0])."</em></td><td id='parity'></td></tr>";
+        echo "<br><i class='fa fa-clock-o icon'></i><em>Duration: ".my_check($duration,$speed)."</em></td><td id='parity'></td></tr>";
       } else {
         echo "<tr><td>Last check incomplete on <strong>".my_time($var['sbSynced']).day_count($var['sbSynced'])."</strong>, finding <strong>{$var['sbSyncErrs']}</strong> error".($var['sbSyncErrs']==1?'.':'s.');
-        echo "<br><em>Error code: ".my_error($time[1])."</em></td><td id='parity'></td></tr>";
+        echo "<br><i class='fa fa-dot-circle-o icon'></i><em>Error code: $status</em></td><td id='parity'></td></tr>";
       }
     }
   } else {

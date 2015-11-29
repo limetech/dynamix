@@ -48,7 +48,7 @@ function parity_status() {
 <?else:?>
     setTimeout(parity_status,<?=abs($display['refresh'])?>);
 <?endif;?>
-    if (!data && $('#cancelButton').length>0 && $('#cancelButton').val()=='Cancel'){
+    if (!data && $('#cancelButton').length>0 && $('#cancelButton').val()=='Cancel') {
       $('#cancelButton').prop('type','button').val('Done').bind({click:function(){refresh();}});
       $('#cancelText').html('');
       $('#line4').html('completed');
@@ -59,7 +59,7 @@ function parity_status() {
 parity_status();
 
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
-<?if ($display['tabs']==0):?>
+<?if ($tabbed):?>
 $('#tab'+$('input[name$="tabs"]').length).bind({click:function() {clearTimeout(timer); parity_status(); tab0();}});
 <?endif;?>
 <?if (substr($var['fsState'],-3)=='ing'):?>
@@ -129,17 +129,14 @@ $('.tabs').append("<span class='status vhshift'><input type='button' value='Refr
 <?      else:?>
           <tr>
           <td></td>
-          <td></td>
-<?        unset($time);
-          exec("grep -A 1 -Po '(sync done. time=\K\d+|sync completion status: \K-?\d+)' /var/log/syslog|tail -2", $time);
-          if (!count($time)) $time = array_fill(0,2,0);
-          if (count($time)==1) array_unshift($time,0);
-          if ($time[1]==0):
+          <td><input type="button" value="History" onclick="openBox('/webGui/include/ParityHistory.php','Parity Check History',490,430,false)"></td>
+<?        list($entry,$duration,$speed,$status) = explode('|', read_parity_log($var['sbSynced']));
+          if ($status==0):
 ?>          <td>Last checked on <strong><?=my_time($var['sbSynced']).day_count($var['sbSynced'])?></strong>, finding <strong><?=$var['sbSyncErrs']?></strong> error<?=$var['sbSyncErrs']==1?'':'s'?>.
-            <br><i class="fa fa-clock-o icon"></i><small>Duration: <?=my_check($time[0])?></small>
+            <br><i class="fa fa-clock-o icon"></i><small>Duration: <?=my_check($duration,$speed)?></small>
 <?        else:?>
             <td>Last check incomplete on <strong><?=my_time($var['sbSynced']).day_count($var['sbSynced'])?></strong>, finding <strong><?=$var['sbSyncErrs']?></strong> error<?=$var['sbSyncErrs']==1?'':'s'?>.
-            <br><small>Error code: <?=my_error($time[1])?></small>
+            <br><i class="fa fa-dot-circle-o icon"></i><small>Error code: <?=$status?></small>
 <?        endif;?>
           </td></tr>
 <?      endif;

@@ -11,31 +11,32 @@
  */
 ?>
 <?
-require_once('Wrappers.php');
-
-$unraid = parse_plugin_cfg('dynamix',true);
-$events = $unraid['notify']['events'];
-$path = '/webGui/images';
-
-function normalize($text) {
-  list($count, $words) = explode(' ',$text);
-  $words = explode('_',$words);
-  foreach ($words as &$word) $word = $word==strtoupper($word) ? $word : preg_replace(array('/^(ct|cnt)$/','/^blk$/'),array('count','block'),strtolower($word));
-  return ucfirst(implode(' ',$words)).": $count\n";
+function normalize($type,$count) {
+  $words = explode('_',$type);
+  foreach ($words as &$word) $word = $word==strtoupper($word) ? $word : preg_replace(['/^(ct|cnt)$/','/^blk$/'],['count','block'],strtolower($word));
+  return ucfirst(implode(' ',$words)).": ".str_replace('_',' ',strtolower($count))."\n";
 }
 function my_insert(&$source,$string) {
   $source = substr_replace($source,$string,4,0);
 }
 function my_smart(&$source,$name,$page) {
-  global $events,$path;
-  $title = ''; $thumb = 'good';
-  $file = "/var/local/emhttp/smart/$name";
-  if (@file_get_contents("$file.ssa")==='') {
+  global $var,$disks,$path,$failed;
+  $disk   = &$disks[$name];
+  $select = isset($disk['smSelect']) ? $disk['smSelect'] : -1; if ($select==-1) $select = isset($var['smSelect']) ? $var['smSelect'] : 0;
+  $level  = isset($disk['smLevel']) ? $disk['smLevel'] : -1; if ($level==-1) $level = isset($var['smLevel']) ? $var['smLevel'] : 1;
+  $events = explode('|',isset($disk['smEvents']) ? $disk['smEvents'] : (isset($var['smEvents']) ? $var['smEvents'] : '5|187|188|197|198'));
+  $title  = ''; $thumb = 'good';
+  $file   = "state/smart/$name";
+  if (file_exists("$file.ssa") && in_array(file_get_contents("$file.ssa"),$failed)) {
     $title = "S.M.A.R.T health-check failed"; $thumb = 'bad';
   } else {
-    exec("awk '$1~/^($events)$/{print $10,$2}' $file 2>/dev/null", $codes);
+    exec("awk 'NR>7{print $1,$2,$4,$6,$9,$10}' $file 2>/dev/null", $codes);
     foreach ($codes as $code) {
-      if ($code && $code[0]!='0') $title .= normalize($code);
+      if (!$code) continue;
+      list($id,$class,$value,$thres,$when,$raw) = explode(' ',$code);
+      $fail = strpos($when,'FAILING_NOW')!==false;
+      if (!$fail && !in_array($id,$events)) continue;
+      if ($fail || ($select ? $thres>0 && $value<=$thres*$level : $raw>0)) $title .= normalize($class,$fail?$when:$raw);
     }
     if ($title) $thumb = 'alert'; else $title = 'No errors reported';
   }
@@ -64,18 +65,21 @@ function mhz($speed) {
 function rpm($speed) {
   return "$speed RPM";
 }
+$path   = '/webGui/images';
+$failed = ['FAILED','NOK'];
 switch ($_POST['cmd']) {
 case 'disk':
   $i = 2;
-  $disks = parse_ini_file("state/disks.ini",true);
-  $devs  = parse_ini_file("state/devs.ini",true);
-  $row1 = array_fill(0,26,"<td></td>"); my_insert($row1[0],"Active");
-  $row2 = array_fill(0,26,"<td></td>"); my_insert($row2[0],"Inactive");
-  $row3 = array_fill(0,26,"<td></td>"); my_insert($row3[0],"Unassigned");
-  $row4 = array_fill(0,26,"<td></td>"); my_insert($row4[0],"Faulty");
-  $row5 = array_fill(0,26,"<td></td>"); my_insert($row5[0],"Heat alarm");
-  $row6 = array_fill(0,26,"<td></td>"); my_insert($row6[0],"SMART status");
-  $row7 = array_fill(0,26,"<td></td>"); my_insert($row7[0],"Utilization");
+  $disks = parse_ini_file('state/disks.ini',true); $var = [];
+  $devs  = parse_ini_file('state/devs.ini',true);
+  require_once('CustomMerge.php');
+  $row1 = array_fill(0,26,'<td></td>'); my_insert($row1[0],'Active');
+  $row2 = array_fill(0,26,'<td></td>'); my_insert($row2[0],'Inactive');
+  $row3 = array_fill(0,26,'<td></td>'); my_insert($row3[0],'Unassigned');
+  $row4 = array_fill(0,26,'<td></td>'); my_insert($row4[0],'Faulty');
+  $row5 = array_fill(0,26,'<td></td>'); my_insert($row5[0],'Heat alarm');
+  $row6 = array_fill(0,26,'<td></td>'); my_insert($row6[0],'SMART status');
+  $row7 = array_fill(0,26,'<td></td>'); my_insert($row7[0],'Utilization');
   foreach ($disks as $disk) {
     $state = $disk['color'];
     $n = 0;
@@ -160,7 +164,7 @@ case 'port':
   break;
   case 'port': exec("ifconfig -s|awk '/^(bond|eth|lo)/{print $3\"#\"$7}'",$ports); break;
   case 'link': exec("ifconfig -s|awk '/^(bond|eth|lo)/{print \"Errors: \"$4\"<br>Drops: \"$5\"<br>Overruns: \"$6\"#Errors: \"$8\"<br>Drops: \"$9\"<br>Overruns: \"$10}'",$ports); break;
-  default: $ports = array();}
+  default: $ports = [];}
   echo implode('#',$ports);
 break;
 case 'parity':
@@ -173,7 +177,7 @@ case 'shares':
    switch ($_POST['com']) {
    case 'smb':
      exec("lsof /mnt/user /mnt/disk* 2>/dev/null|awk '/^smbd/ && $0!~/\.AppleD(B|ouble)/ && $5==\"REG\"'|awk -F/ '{print $4}'",$lsof);
-     $counts = array_count_values($lsof); $count = array();
+     $counts = array_count_values($lsof); $count = [];
      foreach ($names as $name) $count[] =  isset($counts[$name]) ? $counts[$name] : 0;
      echo implode('#',$count);
 	 break;

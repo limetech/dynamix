@@ -51,11 +51,10 @@ foreach (glob("state/*.ssz2", GLOB_NOSORT) as $entry) {
 // Build table
 $row = 0;
 foreach ($disks as $name => $disk) {
-  $row++;
   if ($disk['type']=='Flash') continue;
   if ($disk['fsColor']=='grey-off') continue;
   if ($disk['exportable']=='no') continue;
-  $export = true;
+  $row++;
   $ball = "/webGui/images/{$disk['fsColor']}.png";
   switch ($disk['fsColor']) {
     case 'green-on':  $help = 'All files protected'; break;
@@ -94,7 +93,7 @@ foreach ($disks as $name => $disk) {
     echo "</tr>";
   }
 }
-if (!isset($export)) {
-  echo "<tr><td colspan='8' style='text-align:center'>There are no exportable disk shares</td></tr>";
+if ($row==0) {
+  echo "<tr><td colspan='8' style='text-align:center'><i class='fa fa-folder-open-o icon'></i>There are no exportable disk shares</td></tr>";
 }
 ?>
