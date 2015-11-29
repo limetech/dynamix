@@ -30,7 +30,7 @@ function spindownDelay($port) {
   }
 }
 $disks = []; $var = [];
-require_once('CustomMerge.php');
+require_once 'CustomMerge.php';
 $name = isset($_POST['name']) ? $_POST['name'] : '';
 $port = isset($_POST['port']) ? $_POST['port'] : '';
 if ($name) {
@@ -49,10 +49,11 @@ if ($name) {
 }
 switch ($_POST['cmd']) {
 case "attributes":
-  require_once('Wrappers.php');
+  require_once 'Wrappers.php';
+  require_once 'Preselect.php';
   $select = isset($disk['smSelect']) ? $disk['smSelect'] : -1; if ($select==-1) $select = isset($var['smSelect']) ? $var['smSelect'] : 0;
   $level  = isset($disk['smLevel']) ? $disk['smLevel'] : -1; if ($level==-1) $level = isset($var['smLevel']) ? $var['smLevel'] : 1;
-  $events = explode('|',isset($disk['smEvents']) ? $disk['smEvents'] : (isset($var['smEvents']) ? $var['smEvents'] : '5|187|188|197|198'));
+  $events = isset($disk['smEvents']) ? explode('|',$disk['smEvents']) : (isset($var['smEvents']) ? explode('|',$var['smEvents']) : $numbers);
   $temps = [190,194];
   $unraid = parse_plugin_cfg('dynamix',true);
   $max = $unraid['display']['max'];
