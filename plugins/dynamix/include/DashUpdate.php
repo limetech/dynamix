@@ -20,11 +20,11 @@ function my_insert(&$source,$string) {
   $source = substr_replace($source,$string,4,0);
 }
 function my_smart(&$source,$name,$page) {
-  global $var,$disks,$path,$failed;
+  global $var,$disks,$path,$failed,$numbers;
   $disk   = &$disks[$name];
   $select = isset($disk['smSelect']) ? $disk['smSelect'] : -1; if ($select==-1) $select = isset($var['smSelect']) ? $var['smSelect'] : 0;
   $level  = isset($disk['smLevel']) ? $disk['smLevel'] : -1; if ($level==-1) $level = isset($var['smLevel']) ? $var['smLevel'] : 1;
-  $events = explode('|',isset($disk['smEvents']) ? $disk['smEvents'] : (isset($var['smEvents']) ? $var['smEvents'] : '5|187|188|197|198'));
+  $events = isset($disk['smEvents']) ? explode('|',$disk['smEvents']) : (isset($var['smEvents']) ? explode('|',$var['smEvents']) : $numbers);
   $title  = ''; $thumb = 'good';
   $file   = "state/smart/$name";
   if (file_exists("$file.ssa") && in_array(file_get_contents("$file.ssa"),$failed)) {
@@ -72,7 +72,8 @@ case 'disk':
   $i = 2;
   $disks = parse_ini_file('state/disks.ini',true); $var = [];
   $devs  = parse_ini_file('state/devs.ini',true);
-  require_once('CustomMerge.php');
+  require_once 'CustomMerge.php';
+  require_once 'Preselect.php';
   $row1 = array_fill(0,26,'<td></td>'); my_insert($row1[0],'Active');
   $row2 = array_fill(0,26,'<td></td>'); my_insert($row2[0],'Inactive');
   $row3 = array_fill(0,26,'<td></td>'); my_insert($row3[0],'Unassigned');

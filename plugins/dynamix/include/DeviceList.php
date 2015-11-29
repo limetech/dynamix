@@ -11,7 +11,7 @@
  */
 ?>
 <?
-require_once('Helpers.php');
+require_once 'Helpers.php';
 
 $path  = $_POST['path'];
 $var   = parse_ini_file('state/var.ini');

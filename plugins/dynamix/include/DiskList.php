@@ -11,7 +11,7 @@
  */
 ?>
 <?
-require_once('Helpers.php');
+require_once 'Helpers.php';
 
 $disks   = parse_ini_file('state/disks.ini',true);
 $var     = parse_ini_file('state/var.ini');

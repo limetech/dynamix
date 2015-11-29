@@ -44,7 +44,7 @@ div.Panel:hover{overflow:visible;z-index:10;}
 <?
 $allContainers = array();
 if ((pgrep('docker')!==false) && (empty($display['dashapps']) || $display['dashapps'] == 'icons' || $display['dashapps'] == 'docker')) {
-	require_once('/usr/local/emhttp/plugins/dynamix.docker.manager/include/DockerClient.php');
+	require_once '/usr/local/emhttp/plugins/dynamix.docker.manager/include/DockerClient.php';
 	$DockerClient    = new DockerClient();
 	$DockerUpdate    = new DockerUpdate();
 	$DockerTemplates = new DockerTemplates();
@@ -57,8 +57,8 @@ if ((pgrep('docker')!==false) && (empty($display['dashapps']) || $display['dasha
 
 $allVMs = array();
 if ((pgrep('libvirtd')!==false) && (empty($display['dashapps']) || $display['dashapps'] == 'icons' || $display['dashapps'] == 'vms')) {
-	require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt.php');
-	require_once('/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt_helpers.php');
+	require_once '/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt.php';
+	require_once '/usr/local/emhttp/plugins/dynamix.vm.manager/classes/libvirt_helpers.php';
 
 	$doms = $lv->get_domains();
 	if (is_array($doms)) {

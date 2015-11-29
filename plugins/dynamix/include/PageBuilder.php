@@ -11,7 +11,7 @@
  */
 ?>
 <?
-require_once('Markdown.php');
+require_once 'Markdown.php';
 
 function build_pages($pattern) {
   global $site;

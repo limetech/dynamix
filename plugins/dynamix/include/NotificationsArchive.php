@@ -11,7 +11,7 @@
  */
 ?>
 <?
-require_once('Wrappers.php');
+require_once 'Wrappers.php';
 
 $dynamix = parse_plugin_cfg('dynamix',true);
 $files = glob("{$dynamix['notify']['path']}/archive/*.notify", GLOB_NOSORT);

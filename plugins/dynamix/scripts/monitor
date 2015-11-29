@@ -18,9 +18,9 @@ $disks = parse_ini_file("/var/local/emhttp/disks.ini",true);
 $var   = parse_ini_file("/var/local/emhttp/var.ini");
 $devs  = parse_ini_file("/var/local/emhttp/devs.ini",true);
 
-require_once('/usr/local/emhttp/webGui/include/Wrappers.php');
-require_once('/usr/local/emhttp/webGui/include/Preselect.php');
-require_once('/usr/local/emhttp/webGui/include/CustomMerge.php');
+require_once '/usr/local/emhttp/webGui/include/Wrappers.php';
+require_once '/usr/local/emhttp/webGui/include/Preselect.php';
+require_once '/usr/local/emhttp/webGui/include/CustomMerge.php';
 
 $notify = "/usr/local/emhttp/webGui/scripts/notify";
 $ram    = "/var/local/emhttp/monitor.ini";

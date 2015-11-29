@@ -11,7 +11,7 @@
  */
 ?>
 <?
-require_once('Helpers.php');
+require_once 'Helpers.php';
 
 $shares  = parse_ini_file('state/shares.ini',true);
 $disks   = parse_ini_file('state/disks.ini',true);

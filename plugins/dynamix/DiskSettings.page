@@ -15,7 +15,7 @@ Icon="disk-settings.png"
  */
 ?>
 <?
-require_once('/usr/local/emhttp/webGui/include/Preselect.php');
+require_once '/usr/local/emhttp/webGui/include/Preselect.php';
 $events = isset($var['smEvents']) ? explode('|', $var['smEvents']) : $numbers;
 ?>
 <script>

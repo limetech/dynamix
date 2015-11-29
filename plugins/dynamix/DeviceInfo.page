@@ -15,7 +15,7 @@ Png="devicesettings.png"
  */
 ?>
 <?
-require_once('/usr/local/emhttp/webGui/include/Preselect.php');
+require_once '/usr/local/emhttp/webGui/include/Preselect.php';
 $disk = &$disks[$name];
 $events = isset($disk['smEvents']) ? explode('|',$disk['smEvents']) : (isset($var['smEvents']) ? explode('|',$var['smEvents']) : $numbers);
 ?>
