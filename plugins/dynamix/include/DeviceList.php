@@ -324,7 +324,7 @@ case 'parity':
   } else {
     if ($var['sbSynced']==0) break;
     $log = '/boot/config/parity-checks.log';
-    $timestamp = date('M d H:i:s',$var['sbSynced']);
+    $timestamp = date('M j H:i:s',$var['sbSynced']);
     if (in_parity_log($log,$timestamp)) break;
     exec("grep -Po '^$timestamp .*(sync done. \Ktime=\d+|sync completion \Kstatus: -?\d+)' /var/log/syslog", $rows);
     $duration = 0; $speed = 0; $status = 0;
