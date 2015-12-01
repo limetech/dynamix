@@ -74,7 +74,7 @@ function my_check($time,$speed) {
 function read_write_parity_log($epoch) {
   global $disks;
   $log = '/boot/config/parity-checks.log';
-  $timestamp = date('M d H:i:s',$epoch);
+  $timestamp = date('M j H:i:s',$epoch);
   if (file_exists($log)) {
     $handle = fopen($log, 'r');
     while (($line = fgets($handle)) !== false) {
