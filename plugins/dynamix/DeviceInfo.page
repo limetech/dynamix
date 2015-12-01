@@ -334,9 +334,10 @@ xfs_repair status:
 <div id="title"><span class="left"><img src="/webGui/icons/smartchecks.png" class="icon">SMART Settings</span></div>
 
 <form markdown="1" name="smart_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareDeviceInfo(this)">
-<input type="hidden" name="#file" value="dynamix/smartONE.cfg">
+<input type="hidden" name="#file" value="/boot/config/smart-one.cfg">
 <input type="hidden" name="#include" value="webGui/include/update.smart.php">
 <input type="hidden" name="#section" value="<?=$name?>">
+<input type="hidden" name="smEvents" value="">
 <input type="hidden" name="smGlue" value="<?=$var['smGlue']?>">
 SMART notification value:
 : <select name="smSelect" size="1">

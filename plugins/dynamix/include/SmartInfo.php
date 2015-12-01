@@ -149,7 +149,6 @@ case "selftest":
   echo shell_exec("smartctl -l selftest $type /dev/$port|awk 'NR>5'");
   break;
 case "errorlog":
-  file_put_contents('/tmp/test',"smartctl -l error $type /dev/$port");
   echo shell_exec("smartctl -l error $type /dev/$port|awk 'NR>5'");
   break;
 }
