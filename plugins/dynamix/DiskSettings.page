@@ -144,7 +144,7 @@ Tunable (md_sync_window):
 <div id="title"><span class="left"><img src="/webGui/icons/smartchecks.png" class="icon">Global SMART Settings</span></div>
 
 <form markdown="1" name="smart_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="prepareDiskSettings(this)">
-<input type="hidden" name="#file" value="dynamix/smartALL.cfg">
+<input type="hidden" name="#file" value="/boot/config/smart-all.cfg">
 <input type="hidden" name="#include" value="webGui/include/update.smart.php">
 <input type="hidden" name="smEvents" value="">
 <input type="hidden" name="smGlue" value="">
