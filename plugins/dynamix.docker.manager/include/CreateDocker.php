@@ -48,8 +48,6 @@ function trimLine($text){
 
 function pullImage($image) {
   if (! preg_match("/:[\w]*$/i", $image)) $image .= ":latest";
-  readfile("/usr/local/emhttp/plugins/dynamix.docker.manager/log.htm");
-  echo '<script>function add_to_id(m){$(".id:last").append(" "+m);}</script>';
   echo "<script>addLog('<fieldset style=\"margin-top:1px;\" class=\"CMD\"><legend>Pulling image: " . $image . "</legend><p class=\"logLine\" id=\"logBody\"></p></fieldset>');</script>";
   @flush();
 
@@ -273,6 +271,9 @@ if ($_POST){
     file_put_contents($filename, $postXML);
   }
 
+  readfile("/usr/local/emhttp/plugins/dynamix.docker.manager/log.htm");
+  @flush();
+
   // Pull image
   pullImage($Repository);
 
@@ -302,6 +303,9 @@ if ($_POST){
 
 
 if ($_GET['updateContainer']){
+  readfile("/usr/local/emhttp/plugins/dynamix.docker.manager/log.htm");
+  @flush();
+
   foreach ($_GET['ct'] as $value) {
     $Name = urldecode($value);
     $tmpl = $DockerTemplates->getUserTemplate($Name);
@@ -319,7 +323,6 @@ if ($_GET['updateContainer']){
     $Repository = $doc->getElementsByTagName( "Repository" )->item(0)->nodeValue;
     $Registry = $doc->getElementsByTagName( "Registry" )->item(0)->nodeValue;
 
-    readfile("/usr/local/emhttp/plugins/dynamix.docker.manager/log.htm");
     echo "<script>addLog('<p>Preparing to update: " . $Repository . "</p>');</script>";
     @flush();
 
@@ -341,7 +344,6 @@ if ($_GET['updateContainer']){
     list($cmd, $Name, $Repository) = xmlToCommand($doc->saveXML());
 
     // Pull image
-    flush();
     pullImage($Repository);
 
     $_GET['cmd'] = "/plugins/dynamix.docker.manager/scripts/docker rm -f $Name";
