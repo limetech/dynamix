@@ -36,7 +36,7 @@ if ($type=='New') {
     $n++;
   }
 }
-$live = exec("hdparm -C /dev/$dev|grep -Pom1 'active'");
+$live = exec("hdparm -C /dev/$dev|grep -Pom1 'active|unknown'");
 $end  = count($sheets)-1;
 $prev = $i>0 ? $sheets[$i-1] : $sheets[$end];
 $next = $i<$end ? $sheets[$i+1] : $sheets[0];

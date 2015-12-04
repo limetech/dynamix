@@ -124,11 +124,12 @@ function check_smart($name,$port,$text,$info) {
   $type = isset($disk['smType']) ? $disk['smType'] : -1; if ($type==-1) $type = isset($var['smType']) ? $var['smType'] : '';
   if ($type) {
     $ports = [];
-    if (strlen($disk['smPort1'])) $ports[] = $disk['smPort1'];
-    if (strlen($disk['smPort2'])) $ports[] = $disk['smPort2'];
-    if (strlen($disk['smPort3'])) $ports[] = $disk['smPort3'];
+    if (isset($disk['smDevice']) && strlen($disk['smDevice'])) $port = $disk['smDevice'];
+    if (isset($disk['smPort1']) && strlen($disk['smPort1'])) $ports[] = $disk['smPort1'];
+    if (isset($disk['smPort2']) && strlen($disk['smPort2'])) $ports[] = $disk['smPort2'];
+    if (isset($disk['smPort3']) && strlen($disk['smPort3'])) $ports[] = $disk['smPort3'];
     if ($ports) {
-      $glue = isset($disk['smGlue']) ? $disk['smGlue'] : -1; if ($glue==-1) $glue = isset($var['smGlue']) ? $var['smGlue'] : ',';
+      $glue = isset($disk['smGlue']) ? $disk['smGlue'] : ',';
       $type .= ','.implode($glue,$ports);
     }
   }

@@ -38,11 +38,12 @@ if ($name) {
   $type = isset($disk['smType']) ? $disk['smType'] : -1; if ($type==-1) $type = isset($var['smType']) ? $var['smType'] : '';
   if ($type) {
     $ports = [];
+    if (isset($disk['smDevice']) && strlen($disk['smDevice'])) $port = $disk['smDevice'];
     if (isset($disk['smPort1']) && strlen($disk['smPort1'])) $ports[] = $disk['smPort1'];
     if (isset($disk['smPort2']) && strlen($disk['smPort2'])) $ports[] = $disk['smPort2'];
     if (isset($disk['smPort3']) && strlen($disk['smPort3'])) $ports[] = $disk['smPort3'];
     if ($ports) {
-      $glue = isset($disk['smGlue']) ? $disk['smGlue'] : -1; if ($glue==-1) $glue = isset($var['smGlue']) ? $var['smGlue'] : ',';
+      $glue = isset($disk['smGlue']) ? $disk['smGlue'] : ',';
       $type .= ','.implode($glue,$ports);
     }
   }
@@ -59,6 +60,7 @@ case "attributes":
   $max = $unraid['display']['max'];
   $hot = $unraid['display']['hot'];
   exec("smartctl -A $type /dev/$port|awk 'NR>7'",$output);
+  $empty = true;
   foreach ($output as $line) {
     if (!$line) continue;
     $info = explode(' ', trim(preg_replace('/\s+/',' ',$line)), 10);
@@ -71,11 +73,14 @@ case "attributes":
     if ($info[8]=='-') $info[8] = 'Never';
     if ($info[0]==9 && is_numeric($info[9])) duration($info[9]);
     echo "<tr{$color}>".implode('',array_map('normalize', $info))."</tr>";
+    $empty = false;
   }
+  if ($empty) echo "<tr><td colspan='10' style='text-align:center'>Can not read attributes</td></tr>";
   break;
 case "capabilities":
   exec("smartctl -c $type /dev/$port|awk 'NR>5'",$output);
   $row = ['','',''];
+  $empty = true;
   foreach ($output as $line) {
     if (!$line) continue;
     $line = preg_replace('/^_/','__',preg_replace(['/__+/','/_ +_/'],'_',str_replace([chr(9),')','('],'_',$line)));
@@ -86,21 +91,27 @@ case "capabilities":
     if (substr($row[2],-1)=='.') {
       echo "<tr><td>${row[0]}</td><td>${row[1]}</td><td>${row[2]}</td></tr>";
       $row = ['','',''];
+      $empty = false;
     }
   }
+  if ($empty) echo "<tr><td colspan='3' style='text-align:center'>Can not read capabilities</td></tr>";
   break;
 case "identify":
   $passed = ['PASSED','OK'];
   $failed = ['FAILED','NOK'];
   exec("smartctl -i $type /dev/$port|awk 'NR>4'",$output);
   exec("smartctl -H $type /dev/$port|grep -Pom1 '^SMART.*: [A-Z]+'|sed 's:self-assessment test result::'",$output);
+  $empty = true;
   foreach ($output as $line) {
     if (!strlen($line)) continue;
+    if (strpos($line,'VALID ARGUMENTS')!==false) break;
     list($title,$info) = array_map('trim', explode(':', $line, 2));
     if (in_array($info,$passed)) $info = "<span class='green-text'>Passed</span>";
     if (in_array($info,$failed)) $info = "<span class='red-text'>Failed</span>";
     echo "<tr>".normalize(preg_replace('/ is:$/',':',"$title:"),' ')."<td>$info</td></tr>";
+    $empty = false;
   }
+  if ($empty) echo "<tr><td colspan='2' style='text-align:center'>Can not read identification</td></tr>";
   break;
 case "save":
   exec("smartctl -a $type /dev/$port >{$_SERVER['DOCUMENT_ROOT']}/{$_POST['file']}");
@@ -120,7 +131,7 @@ case "stop":
   exec("smartctl -X $type /dev/$port");
   break;
 case "update":
-  if (!exec("hdparm -C /dev/$port|grep -om1 active")) {
+  if (!exec("hdparm -C /dev/$port|grep -Pom1 'active|unknown'")) {
     $cmd = $_POST['type']=='New' ? "cmd=/webGui/scripts/hd_parm&arg1=up&arg2=$name" : "cmdSpinup=$name";
     echo "<a href='/update.htm?$cmd' class='info' target='progressFrame'><input type='button' value='Spin Up'></a><span class='orange-text'><big>Unavailable - disk must be spun up</big></span>";
     break;

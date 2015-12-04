@@ -15,7 +15,7 @@ Icon="disk-settings.png"
  */
 ?>
 <?
-require_once '/usr/local/emhttp/webGui/include/Preselect.php';
+require_once "$docroot/webGui/include/Preselect.php";
 $events = isset($var['smEvents']) ? explode('|', $var['smEvents']) : $numbers;
 ?>
 <script>
@@ -30,13 +30,9 @@ function prepareDiskSettings(form) {
   for (var i=0; i < custom.length; i++) events.push(custom[i].trim());
   form.smEvents.value = events.join('|');
 }
-function setGlue(form) {
-  var glue = ['','','',',',',',',','/','',','];
-  form.smGlue.value = glue[form.smType.selectedIndex];
+function setIndex(form) {
+  form.smIndex.value = form.smType.selectedIndex;
 }
-$(function() {
-  setGlue(document.smart_settings);
-});
 </script>
 
 <form markdown="1" method="POST" action="/update.htm" target="progressFrame">
@@ -147,7 +143,7 @@ Tunable (md_sync_window):
 <input type="hidden" name="#file" value="/boot/config/smart-all.cfg">
 <input type="hidden" name="#include" value="webGui/include/update.smart.php">
 <input type="hidden" name="smEvents" value="">
-<input type="hidden" name="smGlue" value="">
+<input type="hidden" name="smIndex" value="0">
 Default SMART notification value:
 : <select name="smSelect" size="1">
   <?=mk_option($var['smSelect'], "0", "Raw")?>
@@ -166,7 +162,7 @@ Default SMART notification tolerance level:
   </select>
 
 Default SMART controller type:
-: <select name="smType" size="1" onchange="setGlue(this.form)">
+: <select name="smType" size="1" onchange="setIndex(this.form)">
   <?=mk_option($var['smType'], "", "Automatic")?>
   <?=mk_option($var['smType'], "-d ata", "ATA")?>
   <?=mk_option($var['smType'], "-d scsi", "SCSI")?>

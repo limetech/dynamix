@@ -15,7 +15,7 @@ Png="devicesettings.png"
  */
 ?>
 <?
-require_once '/usr/local/emhttp/webGui/include/Preselect.php';
+require_once "$docroot/webGui/include/Preselect.php";
 $disk = &$disks[$name];
 $events = isset($disk['smEvents']) ? explode('|',$disk['smEvents']) : (isset($var['smEvents']) ? explode('|',$var['smEvents']) : $numbers);
 ?>
@@ -32,14 +32,34 @@ function prepareDeviceInfo(form) {
   form.smEvents.value = events.join('|');
 }
 function setGlue(form) {
-  var glue = ['<?=$var['smGlue']?>','','','',',',',',',','/','',','];
-  form.smGlue.value = glue[form.smType.selectedIndex];
-  $('select[name^="smPort"]').prop('disabled',form.smGlue.value=='');
+  var data = [{glue:'' ,more:0},
+              {glue:'' ,more:0},
+              {glue:'' ,more:0},
+              {glue:',',more:1,min1:0,max1:127},
+              {glue:',',more:3,min1:0,max1:127,min2:0,max2:127,min3:0,max3:127},
+              {glue:'/',more:2,min1:1,max1:128,min2:1,max2:8},
+              {glue:'/',more:3,min1:1,max1:4,min2:1,max2:128,min3:1,max3:4},
+              {glue:'' ,more:0},
+              {glue:',',more:1,min1:0,max1:127},
+             ];
+  var n = form.smType.selectedIndex > 0 ? form.smType.selectedIndex-1 : <?=isset($var['smIndex'])?$var['smIndex']:0?>;
+  var x = data[n]['more'];
+  for (var i=1; i <= x; i++) $('input[name="smPort'+i+'"]').attr('placeholder',data[n]['min'+i]+'..'+data[n]['max'+i]).show();
+  for (var i=x+1; i <= 3; i++) $('input[name="smPort'+i+'"]').val('').hide();
+  if (x > 0) {
+    $('#devtext').show();
+    $('input[name="smDevice"]').show();
+    $('#helptext').show();
+  } else {
+    $('#devtext').hide();
+    $('input[name="smDevice"]').val('').hide();
+    $('#helptext').hide();
+  }
 }
 $(function() {
   var form = document.smart_settings;
 <?if (!isset($disk['smType'])):?>
-  form.smType.value = -1;
+  form.smType.selectedIndex = 0;
 <?endif;?>
   setGlue(form);
 });
@@ -371,24 +391,10 @@ SMART controller type:
   <?=mk_option($disk['smType'], "-d marvell", "Marvell")?>
   <?=mk_option($disk['smType'], "-d megaraid", "MegaRAID")?>
   </select>
-  <select name="smPort1" size="1" style="min-width:auto">
-  <?=mk_option($disk['smPort1'], "", "")?>
-  <?for ($p=0; $p<10; $p++):?>
-  <?=mk_option($disk['smPort1'], strval($p), strval($p))?>
-  <?endfor;?>
-  </select>
-  <select name="smPort2" size="1" style="min-width:auto">
-  <?=mk_option($disk['smPort2'], "", "")?>
-  <?for ($p=0; $p<10; $p++):?>
-  <?=mk_option($disk['smPort2'], strval($p), strval($p))?>
-  <?endfor;?>
-  </select>
-  <select name="smPort3" size="1" style="min-width:auto">
-  <?=mk_option($disk['smPort3'], "", "")?>
-  <?for ($p=0; $p<10; $p++):?>
-  <?=mk_option($disk['smPort3'], strval($p), strval($p))?>
-  <?endfor;?>
-  </select>Port identifier (select as appropriate)
+  <input type="text" name="smPort1" maxlength="3" value="<?=$disk['smPort1']?>" style="display:none;width:32px">
+  <input type="text" name="smPort2" maxlength="3" value="<?=$disk['smPort2']?>" style="display:none;width:32px">
+  <input type="text" name="smPort3" maxlength="3" value="<?=$disk['smPort3']?>" style="display:none;width:32px"><span id="devtext" style="display:none;font-weight:bold">/dev/</span>
+  <input type="text" name="smDevice" value="<?=isset($disk['smDevice'])?$disk['smDevice']:''?>" style="display:none;width:32px" placeholder="<?=$disk['device']?>"><span id="helptext" style="display:none;font-style:italic">enter disk index and device name as applicable to your controller</span>
 
 SMART attribute notifications:
 : <input type="text" name="smCustom" value="<?=isset($disk['smCustom'])?$disk['smCustom']:$var['smCustom']?>" class="narrow">Custom attributes (use comma to separate numbers)
