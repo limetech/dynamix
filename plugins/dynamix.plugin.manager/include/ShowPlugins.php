@@ -11,9 +11,10 @@
  */
 ?>
 <?
-require_once('webGui/include/Markdown.php');
-require_once('plugins/dynamix.plugin.manager/include/PluginHelpers.php');
+require_once 'webGui/include/Markdown.php';
+require_once 'plugins/dynamix.plugin.manager/include/PluginHelpers.php';
 
+$current = parse_ini_file('/etc/unraid-version');
 foreach (glob("/var/log/plugins/*.plg", GLOB_NOSORT) as $plugin_link) {
 // only consider symlinks
   $plugin_file = @readlink($plugin_link);
@@ -50,9 +51,14 @@ foreach (glob("/var/log/plugins/*.plg", GLOB_NOSORT) as $plugin_link) {
     if (file_exists($filename)) {
       $latest = plugin("version", $filename);
       if ($latest && strcmp($latest, $version) > 0) {
-        $version_info .= "<br><span class='red-text'>{$latest}</span>";
-        $status_info = make_link("update", basename($plugin_file));
-        $changes_file = $filename;
+        $unRAID = plugin("unRAID", $filename);
+        if (empty($unRAID) || strcmp($current['version'], $unRAID) >= 0) {
+          $version_info .= "<br><span class='red-text'>{$latest}</span>";
+          $status_info = make_link("update", basename($plugin_file));
+          $changes_file = $filename;
+        } else {
+          $status_info = "up-to-date";
+        }
       } else {
         $status_info = "up-to-date";
       }
