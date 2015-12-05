@@ -150,6 +150,10 @@ Default SMART notification value:
   <?=mk_option($var['smSelect'], "1", "Normalized")?>
   </select>
 
+> SMART notifications are generated on either an increasing RAW value of the attribute, or a decreasing NORMALIZED value which reaches a predefined threshold set by the manufacturer.
+>
+> This section is used to set the global settings for all disks. It is possible to adjust settings for individual disks.
+
 Default SMART notification tolerance level:
 : <select name="smLevel" size="1">
   <?=mk_option($var['smLevel'], "1.00", "Absolute")?>
@@ -160,6 +164,10 @@ Default SMART notification tolerance level:
   <?=mk_option($var['smLevel'], "1.25", "25%")?>
   <?=mk_option($var['smLevel'], "1.50", "50%")?>
   </select>
+
+> A tolerance level may be given to prevent that small changes result in a notification. Setting a too high tolerance level may result in critical changes without a notification.
+>
+> This section is used to set the global settings for all disks. It is possible to adjust settings for individual disks.
 
 Default SMART controller type:
 : <select name="smType" size="1" onchange="setIndex(this.form)">
@@ -174,6 +182,11 @@ Default SMART controller type:
   <?=mk_option($var['smType'], "-d megaraid", "MegaRAID")?>
   </select>
 
+> By default automatic controller selection is done by smartctl to read the SMART information. Certain controllers however need specific settings for smartctl to work.
+> Use this setting to select your controller type and fill-in the specific disk index and device name for your situation. Use the manufacturer's documentation to find the relevant information.
+>
+> This section is used to set the global settings for all disks. It is possible to adjust settings for individual disks.
+
 Default SMART attribute notifications:
 : <input type="text" name="smCustom" value="<?=$var['smCustom']?>" class="narrow">Custom attributes (use comma to separate numbers)
 
@@ -186,6 +199,8 @@ Default SMART attribute notifications:
 > when certain attributes are not present on your hard disk or do not provide the correct information, these may be excluded.
 > In addition custom SMART attributes can be entered to generate notifications. Be careful in this selection,
 > it may cause an avalance of notifcations if inappropriate SMART attributes are chosen.
+>
+> This section is used to set the global settings for all disks. It is possible to adjust settings for individual disks.
 
 <input type="submit" name="#default" value="Default">
 : <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">

@@ -366,6 +366,10 @@ SMART notification value:
   <?=mk_option($disk['smSelect'], "1", "Normalized")?>
   </select>
 
+> SMART notifications are generated on either an increasing RAW value of the attribute, or a decreasing NORMALIZED value which reaches a predefined threshold set by the manufacturer.
+>
+> Each disk may have its own specific setting overruling the 'default' setting (see global SMART settings under Disk Settings).
+
 SMART notification tolerance level:
 : <select name="smLevel" size="1">
   <?=mk_option($disk['smLevel'], "-1", "Default")?>
@@ -377,6 +381,10 @@ SMART notification tolerance level:
   <?=mk_option($disk['smLevel'], "1.25", "25%")?>
   <?=mk_option($disk['smLevel'], "1.50", "50%")?>
   </select>
+
+> A tolerance level may be given to prevent that small changes result in a notification. Setting a too high tolerance level may result in critical changes without a notification.
+>
+> Each disk may have its own specific setting overruling the 'default' setting (see global SMART settings under Disk Settings).
 
 SMART controller type:
 : <select name="smType" size="1" onchange="setGlue(this.form)">
@@ -396,6 +404,11 @@ SMART controller type:
   <input type="text" name="smPort3" maxlength="3" value="<?=$disk['smPort3']?>" style="display:none;width:32px"><span id="devtext" style="display:none;font-weight:bold">/dev/</span>
   <input type="text" name="smDevice" value="<?=isset($disk['smDevice'])?$disk['smDevice']:''?>" style="display:none;width:32px" placeholder="<?=$disk['device']?>"><span id="helptext" style="display:none;font-style:italic">enter disk index and device name as applicable to your controller</span>
 
+> By default automatic controller selection is done by smartctl to read the SMART information. Certain controllers however need specific settings for smartctl to work.
+> Use this setting to select your controller type and fill-in the specific disk index and device name for your situation. Use the manufacturer's documentation to find the relevant information.
+>
+> Each disk may have its own specific setting overruling the 'default' setting (see global SMART settings under Disk Settings).
+
 SMART attribute notifications:
 : <input type="text" name="smCustom" value="<?=isset($disk['smCustom'])?$disk['smCustom']:$var['smCustom']?>" class="narrow">Custom attributes (use comma to separate numbers)
 
@@ -408,6 +421,8 @@ SMART attribute notifications:
 > when certain attributes are not present on your hard disk or do not provide the correct information, these may be excluded.
 > In addition custom SMART attributes can be entered to generate notifications. Be careful in this selection,
 > it may cause an avalance of notifcations if inappropriate SMART attributes are chosen.
+>
+> Each disk may have its own specific setting overruling the 'default' setting (see global SMART settings under Disk Settings).
 
 <input type="submit" name="#default" value="Default">
 : <input type="submit" name="#apply" value="Apply"><input type="button" value="Done" onclick="done()">
