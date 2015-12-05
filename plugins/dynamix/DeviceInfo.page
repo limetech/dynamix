@@ -36,11 +36,10 @@ function setGlue(form) {
               {glue:'' ,more:0},
               {glue:'' ,more:0},
               {glue:',',more:1,min1:0,max1:127},
-              {glue:',',more:3,min1:0,max1:127,min2:0,max2:127,min3:0,max3:127},
               {glue:'/',more:2,min1:1,max1:128,min2:1,max2:8},
+              {glue:',',more:1,min1:0,max1:127},
               {glue:'/',more:3,min1:1,max1:4,min2:1,max2:128,min3:1,max3:4},
               {glue:'' ,more:0},
-              {glue:',',more:1,min1:0,max1:127},
              ];
   var n = form.smType.selectedIndex > 0 ? form.smType.selectedIndex-1 : <?=isset($var['smIndex'])?$var['smIndex']:0?>;
   var x = data[n]['more'];
@@ -393,11 +392,10 @@ SMART controller type:
   <?=mk_option($disk['smType'], "-d ata", "ATA")?>
   <?=mk_option($disk['smType'], "-d scsi", "SCSI")?>
   <?=mk_option($disk['smType'], "-d 3ware", "3Ware")?>
-  <?=mk_option($disk['smType'], "-d aacraid", "AacRAID")?>
   <?=mk_option($disk['smType'], "-d areca", "Areca")?>
-  <?=mk_option($disk['smType'], "-d hpt", "Highpoint")?>
+  <?=mk_option($disk['smType'], "-d megaraid", "Avago")?>
+  <?=mk_option($disk['smType'], "-d hpt", "HighPoint")?>
   <?=mk_option($disk['smType'], "-d marvell", "Marvell")?>
-  <?=mk_option($disk['smType'], "-d megaraid", "MegaRAID")?>
   </select>
   <input type="text" name="smPort1" maxlength="3" value="<?=$disk['smPort1']?>" style="display:none;width:32px">
   <input type="text" name="smPort2" maxlength="3" value="<?=$disk['smPort2']?>" style="display:none;width:32px">

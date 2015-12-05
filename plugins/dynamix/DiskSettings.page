@@ -175,11 +175,10 @@ Default SMART controller type:
   <?=mk_option($var['smType'], "-d ata", "ATA")?>
   <?=mk_option($var['smType'], "-d scsi", "SCSI")?>
   <?=mk_option($var['smType'], "-d 3ware", "3Ware")?>
-  <?=mk_option($var['smType'], "-d aacraid", "AacRAID")?>
   <?=mk_option($var['smType'], "-d areca", "Areca")?>
-  <?=mk_option($var['smType'], "-d hpt", "Highpoint")?>
+  <?=mk_option($var['smType'], "-d megaraid", "Avago")?>
+  <?=mk_option($var['smType'], "-d hpt", "HighPoint")?>
   <?=mk_option($var['smType'], "-d marvell", "Marvell")?>
-  <?=mk_option($var['smType'], "-d megaraid", "MegaRAID")?>
   </select>
 
 > By default automatic controller selection is done by smartctl to read the SMART information. Certain controllers however need specific settings for smartctl to work.
