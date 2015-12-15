@@ -43,6 +43,17 @@ function user_share_settings($protocol,$share) {
 // Compute all user shares
 if ($compute=='yes') foreach ($shares as $name => $share) exec("webGui/scripts/share_size \"$name\" \"ssz1\"");
 
+// global shares include/exclude
+if ($var['shareUserInclude']) {
+  $myDisks = explode(',',$var['shareUserInclude']);
+} else {
+  $myDisks = array();
+  foreach ($disks as $disk) $myDisks[] = $disk['name'];
+}
+foreach (explode(',',$var['shareUserExclude']) as $disk) {
+  $index = array_search($disk,$myDisks);
+  if ($index !== false) array_splice($myDisks,$index,1);
+}
 // Share size per disk
 $preserve = ($path==$prev || $compute=='yes');
 $ssz1 = array();
@@ -74,11 +85,17 @@ foreach ($shares as $name => $share) {
     echo "<td>".my_scale($share['free']*1024, $unit)." $unit</td>";
     echo "<td><a href='$path/Browse?dir=/mnt/user/".urlencode($name)."'><img src='/webGui/images/explore.png' title='Browse /mnt/user/".urlencode($name)."'></a></td>";
     echo "</tr>";
-    foreach ($ssz1[$share['name']] as $diskname => $disksize) {
+    foreach ($ssz1[$name] as $diskname => $disksize) {
       if ($diskname!="total") {
-        echo "<tr class='share_status_size'>";
+        $myShares = $share['include'] ? explode(',',$share['include']) : $myDisks;
+        foreach (explode(',',$share['exclude']) as $disk) {
+          $index = array_search($disk,$myShares);
+          if ($index !== false) array_splice($myShares,$index,1);
+        }
+        $okay = in_array($diskname, $myShares);
+        echo "<tr class='share_status_size".($okay ? "'>" : " warning'>");
         echo "<td>".my_disk($diskname).":</td>";
-        echo "<td></td>";
+        echo "<td>".($okay ? "" : "<em>Share is outside the list of designated disks</em>")."</td>";
         echo "<td></td>";
         echo "<td></td>";
         echo "<td></td>";

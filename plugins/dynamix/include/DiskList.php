@@ -13,6 +13,7 @@
 <?
 require_once 'Helpers.php';
 
+$shares  = parse_ini_file('state/shares.ini',true);
 $disks   = parse_ini_file('state/disks.ini',true);
 $var     = parse_ini_file('state/var.ini');
 $sec     = parse_ini_file('state/sec.ini',true);
@@ -36,6 +37,18 @@ function disk_share_settings($protocol,$share) {
 
 // Compute all disk shares
 if ($compute=='yes') foreach ($disks as $name => $disk) if ($disk['exportable']=='yes') exec("webGui/scripts/disk_size \"$name\" \"ssz2\"");
+
+// global shares include/exclude
+if ($var['shareUserInclude']) {
+  $myDisks = explode(',',$var['shareUserInclude']);
+} else {
+  $myDisks = array();
+  foreach ($disks as $disk) $myDisks[] = $disk['name'];
+}
+foreach (explode(',',$var['shareUserExclude']) as $disk) {
+  $index = array_search($disk,$myDisks);
+  if ($index !== false) array_splice($myDisks,$index,1);
+}
 
 // Share size per disk
 $preserve = ($path==$prev || $compute=='yes');
@@ -72,15 +85,21 @@ foreach ($disks as $name => $disk) {
     echo "<td>".my_scale($disk['fsFree']*1024, $unit)." $unit</td>";
     echo "<td><a href='$path/Browse?dir=/mnt/$name'><img src='/webGui/images/explore.png' title='Browse /mnt/$name'></a></td>";
     echo "</tr>";
-    foreach ($ssz2[$name] as $share_name => $share_size) {
-      if ($share_name!="total") {
-        echo "<tr class='share_status_size'>";
-        echo "<td>$share_name:</td>";
+    foreach ($ssz2[$name] as $sharename => $sharesize) {
+      if ($sharename!="total") {
+        $myShares = $shares[$sharename]['include'] ? explode(',',$shares[$sharename]['include']) : $myDisks;
+        foreach (explode(',',$shares[$sharename]['exclude']) as $share) {
+          $index = array_search($share,$myShares);
+          if ($index !== false) array_splice($myShares,$index,1);
+        }
+        $okay = in_array($disk['name'], $myShares);
+        echo "<tr class='share_status_size".($okay ? "'>" : " warning'>");
+        echo "<td>$sharename:</td>";
+        echo "<td>".($okay ? "" : "<em>Share is outside the list of designated disks</em>")."</td>";
         echo "<td></td>";
         echo "<td></td>";
         echo "<td></td>";
-        echo "<td></td>";
-        echo "<td class='disk-$row-1'>".my_scale($share_size*1024, $unit)." $unit</td>";
+        echo "<td class='disk-$row-1'>".my_scale($sharesize*1024, $unit)." $unit</td>";
         echo "<td class='disk-$row-2'>".my_scale($disk['fsFree']*1024, $unit)." $unit</td>";
         echo "<td><a href='/update.htm?cmd=$cmd' target='progressFrame' title='Recompute...' onclick='$(\".disk-$row-1\").html(\"Please wait...\");$(\".disk-$row-2\").html(\"\");'><i class='fa fa-refresh icon'></i></a></td>";
         echo "</tr>";
