@@ -40,20 +40,22 @@ function user_share_settings($protocol,$share) {
   return '<em>'.ucfirst($share['security']).'</em>';
 }
 
+function globalInclude($name) {
+  global $var;
+  return substr($name,0,4)!='disk' || !$var['shareUserInclude'] || strpos($var['shareUserInclude'].',',"$name,")!==false;
+}
+
+function shareInclude($name) {
+  global $include;
+  return !$include || substr($name,0,4)!='disk' || strpos("$include,", "$name,")!==false;
+}
+
 // Compute all user shares
 if ($compute=='yes') foreach ($shares as $name => $share) exec("webGui/scripts/share_size \"$name\" \"ssz1\"");
 
 // global shares include/exclude
-if ($var['shareUserInclude']) {
-  $myDisks = explode(',',$var['shareUserInclude']);
-} else {
-  $myDisks = array();
-  foreach ($disks as $disk) $myDisks[] = $disk['name'];
-}
-foreach (explode(',',$var['shareUserExclude']) as $disk) {
-  $index = array_search($disk,$myDisks);
-  if ($index !== false) array_splice($myDisks,$index,1);
-}
+$myDisks = array_filter(array_diff(array_keys($disks), explode(',',$var['shareUserExclude'])), 'globalInclude');
+
 // Share size per disk
 $preserve = ($path==$prev || $compute=='yes');
 $ssz1 = array();
@@ -87,15 +89,11 @@ foreach ($shares as $name => $share) {
     echo "</tr>";
     foreach ($ssz1[$name] as $diskname => $disksize) {
       if ($diskname!="total") {
-        $myShares = $share['include'] ? explode(',',$share['include']) : $myDisks;
-        foreach (explode(',',$share['exclude']) as $disk) {
-          $index = array_search($disk,$myShares);
-          if ($index !== false) array_splice($myShares,$index,1);
-        }
-        $okay = in_array($diskname, $myShares);
-        echo "<tr class='share_status_size".($okay ? "'>" : " warning'>");
+        $include = $share['include'];
+        $inside = in_array($diskname, array_filter(array_diff($myDisks, explode(',',$share['exclude'])), 'shareInclude'));
+        echo "<tr class='share_status_size".($inside ? "'>" : " warning'>");
         echo "<td>".my_disk($diskname).":</td>";
-        echo "<td>".($okay ? "" : "<em>Share is outside the list of designated disks</em>")."</td>";
+        echo "<td>".($inside ? "" : "<em>Share is outside the list of designated disks</em>")."</td>";
         echo "<td></td>";
         echo "<td></td>";
         echo "<td></td>";
