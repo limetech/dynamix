@@ -83,12 +83,12 @@ foreach ($shares as $name => $share) {
   echo "<td>".user_share_settings($var['shareAFPEnabled'], $sec_afp[$name])."</td>";
   $cmd="/webGui/scripts/share_size"."&arg1=".urlencode($name)."&arg2=ssz1";
   if (array_key_exists($name, $ssz1)) {
-    echo "<td>".my_scale($ssz1[$name]['#total']*1024, $unit)." $unit</td>";
+    echo "<td>".my_scale($ssz1[$name]['total']*1024, $unit)." $unit</td>";
     echo "<td>".my_scale($share['free']*1024, $unit)." $unit</td>";
     echo "<td><a href='$path/Browse?dir=/mnt/user/".urlencode($name)."'><img src='/webGui/images/explore.png' title='Browse /mnt/user/".urlencode($name)."'></a></td>";
     echo "</tr>";
     foreach ($ssz1[$name] as $diskname => $disksize) {
-      if ($diskname=='#total') continue;
+      if ($diskname=='total') continue;
       $include = $share['include'];
       $inside = in_array($diskname, array_filter(array_diff($myDisks, explode(',',$share['exclude'])), 'shareInclude'));
       echo "<tr class='share_status_size".($inside ? "'>" : " warning'>");

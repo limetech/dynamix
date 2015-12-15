@@ -27,5 +27,5 @@ disks=$(ls -vd /mnt/disk*)
 for disk in $disks ; do
   check "$disk" "$share"
 done
-echo "#total=$total" >>"$output"
+echo "total=$total" >>"$output"
 echo "total disk usage: $total"

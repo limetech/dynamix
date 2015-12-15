@@ -87,7 +87,7 @@ foreach ($disks as $name => $disk) {
     echo "<td><a href='$path/Browse?dir=/mnt/$name'><img src='/webGui/images/explore.png' title='Browse /mnt/$name'></a></td>";
     echo "</tr>";
     foreach ($ssz2[$name] as $sharename => $sharesize) {
-      if ($sharename=='#total') continue;
+      if ($sharename=='total') continue;
       $include = $shares[$sharename]['include'];
       $inside = in_array($disk['name'], array_filter(array_diff($myDisks, explode(',',$shares[$sharename]['exclude'])), 'shareInclude'));
       echo "<tr class='share_status_size".($inside ? "'>" : " warning'>");
