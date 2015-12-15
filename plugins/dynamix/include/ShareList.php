@@ -42,7 +42,7 @@ function user_share_settings($protocol,$share) {
 
 function globalInclude($name) {
   global $var;
-  return substr($name,0,4)!='disk' || !$var['shareUserInclude'] || strpos($var['shareUserInclude'].',',"$name,")!==false;
+  return substr($name,0,4)!='disk' || !$var['shareUserInclude'] || strpos("{$var['shareUserInclude']},","$name,")!==false;
 }
 
 function shareInclude($name) {

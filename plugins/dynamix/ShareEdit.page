@@ -43,7 +43,7 @@ function shareEmpty($name) {
 
 function globalInclude($name) {
   global $var;
-  return substr($name,0,4)=='disk' && (!$var['shareUserInclude'] || strpos($var['shareUserInclude'].',',"$name,")!==false);
+  return substr($name,0,4)=='disk' && (!$var['shareUserInclude'] || strpos("{$var['shareUserInclude']},","$name,")!==false);
 }
 
 // global shares include/exclude
