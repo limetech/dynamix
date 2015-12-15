@@ -2,8 +2,5 @@
 app=$(basename $0)
 dev=$1
 ata=$(ls -n /sys/block/$dev|grep -Po 'ata\d+')
-if [[ -n $ata ]]; then
-  exec grep -P "$dev|$ata[.:]" /var/log/syslog|grep -v $app
-else
-  exec grep "$dev" /var/log/syslog|grep -v $app
-fi
+[[ -n $ata ]] && dev="$dev|$ata[.:]"
+exec grep -P "$dev" /var/log/syslog|grep -v $app
