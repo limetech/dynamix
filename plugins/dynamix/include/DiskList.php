@@ -87,20 +87,19 @@ foreach ($disks as $name => $disk) {
     echo "<td><a href='$path/Browse?dir=/mnt/$name'><img src='/webGui/images/explore.png' title='Browse /mnt/$name'></a></td>";
     echo "</tr>";
     foreach ($ssz2[$name] as $sharename => $sharesize) {
-      if ($sharename!="total") {
-        $include = $shares[$sharename]['include'];
-        $inside = in_array($disk['name'], array_filter(array_diff($myDisks, explode(',',$shares[$sharename]['exclude'])), 'shareInclude'));
-        echo "<tr class='share_status_size".($inside ? "'>" : " warning'>");
-        echo "<td>$sharename:</td>";
-        echo "<td>".($inside ? "" : "<em>Share is outside the list of designated disks</em>")."</td>";
-        echo "<td></td>";
-        echo "<td></td>";
-        echo "<td></td>";
-        echo "<td class='disk-$row-1'>".my_scale($sharesize*1024, $unit)." $unit</td>";
-        echo "<td class='disk-$row-2'>".my_scale($disk['fsFree']*1024, $unit)." $unit</td>";
-        echo "<td><a href='/update.htm?cmd=$cmd' target='progressFrame' title='Recompute...' onclick='$(\".disk-$row-1\").html(\"Please wait...\");$(\".disk-$row-2\").html(\"\");'><i class='fa fa-refresh icon'></i></a></td>";
-        echo "</tr>";
-      }
+      if ($sharename=='#total') continue;
+      $include = $shares[$sharename]['include'];
+      $inside = in_array($disk['name'], array_filter(array_diff($myDisks, explode(',',$shares[$sharename]['exclude'])), 'shareInclude'));
+      echo "<tr class='share_status_size".($inside ? "'>" : " warning'>");
+      echo "<td>$sharename:</td>";
+      echo "<td>".($inside ? "" : "<em>Share is outside the list of designated disks</em>")."</td>";
+      echo "<td></td>";
+      echo "<td></td>";
+      echo "<td></td>";
+      echo "<td class='disk-$row-1'>".my_scale($sharesize*1024, $unit)." $unit</td>";
+      echo "<td class='disk-$row-2'>".my_scale($disk['fsFree']*1024, $unit)." $unit</td>";
+      echo "<td><a href='/update.htm?cmd=$cmd' target='progressFrame' title='Recompute...' onclick='$(\".disk-$row-1\").html(\"Please wait...\");$(\".disk-$row-2\").html(\"\");'><i class='fa fa-refresh icon'></i></a></td>";
+      echo "</tr>";
     }
   } else {
     echo "<td><a href='/update.htm?cmd=$cmd' target='progressFrame' onclick=\"$(this).text('Please wait...')\">Compute...</a></td>";
