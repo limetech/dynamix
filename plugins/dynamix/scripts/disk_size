@@ -26,5 +26,5 @@ shares=$(ls -vd /mnt/user/*)
 for share in $shares; do
  [[ -d $share ]] && check "$(basename "$share")" "$disk"
 done
-echo "total=$total" >>"$output"
+echo "share.total=$total" >>"$output"
 echo "total disk usage: $total"
