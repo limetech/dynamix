@@ -193,8 +193,12 @@ Time format:
 
 Number format:
 : <select name="number" size="1">
-  <?=mk_option($display['number'], ".,", "American")?>
- <?=mk_option($display['number'], ",.", "European")?>
+  <?=mk_option($display['number'], ".,", "[D] dot : [G] comma")?>
+  <?=mk_option($display['number'], ". ", "[D] dot : [G] space")?>
+  <?=mk_option($display['number'], ".",  "[D] dot : [G] none")?>
+  <?=mk_option($display['number'], ",.", "[D] comma : [G] dot")?>
+  <?=mk_option($display['number'], ", ", "[D] comma : [G] space")?>
+  <?=mk_option($display['number'], ",",  "[D] comma : [G] none")?>
   </select>
 
 Number scaling:
