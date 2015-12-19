@@ -14,22 +14,23 @@
 require_once 'Wrappers.php';
 
 // Helper functions
-function my_scale($value, &$unit, $precision = NULL) {
+function my_scale($value, &$unit, $decimals = NULL) {
   global $display;
   $scale = $display['scale'];
   $number = $display['number'];
   $units = array('B','KB','MB','GB','TB','PB');
-  if ($scale==0 && $precision===NULL) {
+  if ($scale==0 && $decimals==NULL) {
+    $decimals = 0;
     $unit = '';
-    return number_format($value, 0, $number[0], ($value>=10000 ? $number[1] : ''));
   } else {
     $base = $value ? floor(log($value, 1000)) : 0;
     if ($scale>0 && $base>$scale) $base = $scale;
-    $value = round($value/pow(1000, $base), $precision===NULL ? 2 : $precision);
-    if ($value>=1000 && $scale<0) { $value = 1; $base++; }
+    $value /= pow(1000, $base);
+    if ($decimals==NULL) $decimals = $value>=100 ? 0 : ($value>=10 ? 1 : (round($value*100)%100==0 ? 0 : 2));
+    if ($scale<0 && round($value,$decimals)==1000) { $value = 1; $base++; }
     $unit = $units[$base];
-    return number_format($value, $precision===NULL ? (($value-intval($value)==0 || $value>=100) ? 0 : ($value>=10 ? 1 : 2)) : $precision, $number[0], ($value>=10000 ? $number[1] : ''));
   }
+  return number_format($value, $decimals, $number[0], $value>=10000 ? $number[1] : '');
 }
 function my_number($value) {
   global $display;
