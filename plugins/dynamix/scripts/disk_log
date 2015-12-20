@@ -1,6 +1,37 @@
-#!/bin/bash
-app=$(basename $0)
-dev=$1
-ata=$(ls -n /sys/block/$dev|grep -Po 'ata\d+')
-[[ -n $ata ]] && dev="$dev|$ata[.:]"
-exec grep -P "$dev" /var/log/syslog|grep -v $app
+#!/usr/bin/php -q
+<?PHP
+/* Copyright 2015, Bergware International.
+ * Copyright 2015, Lime Technology
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License version 2,
+ * as published by the Free Software Foundation.
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ */
+?>
+<?
+echo "<style>";
+echo "font.error {color:#D8000C;background-color:#FFBABA;}";
+echo "font.warn {color:#9F6000;background-color:#FEEFB3;}";
+echo "font.system {color:#00529B;background-color:#BDE5F8;}";
+echo "font.array {color:#4F8A10;background-color:#DFF2BF;}";
+echo "font.xs {padding:4px 8px;margin-right:12px;}";
+echo "</style>";
+echo "<center><font class='error xs'>Error</font><font class='warn xs'>Warning</font><font class='system xs'>System</font><font class='array xs'>Array</font></center>\n";
+
+require_once '/usr/local/emhttp/webGui/include/ColorCoding.php';
+
+$ata = exec("ls -n /sys/block/{$argv[1]}|grep -Po 'ata\d+'");
+$dev = $ata ? "${argv[1]}|${ata}[.:]" : $argv[1];
+
+exec("grep -P '$dev' /var/log/syslog", $lines);
+
+foreach ($lines as $line) {
+  if (strpos($line,'disk_log')!==false) continue;
+  $font = "font";
+  foreach ($match as $type) foreach ($type['text'] as $text) if (preg_match("/$text/i",$line)) {$font = "font class='{$type['class']}'"; break 2;}
+  echo "<$font>".htmlentities($line)."</font>\n";
+}
+?>

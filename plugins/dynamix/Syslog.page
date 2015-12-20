@@ -20,25 +20,6 @@ font.system {color:#00529B;background-color:#BDE5F8;}
 font.array {color:#4F8A10;background-color:#DFF2BF;}
 font.xs {font-size:small;padding:2px 0 2px 6px;margin-right:6px;}
 </style>
-<?
-$zip = str_replace(' ','_',strtolower($var['NAME']))."-syslog-".date('Ymd-Hi').".zip";
-
-$match = [['class' => 'warn',  'text' => [' acpi error ','preclear_disk',' acpi warning',' acpi exception','spurious','hpa','host protected area','invalid signature',' (soft|hard) resetting ',' failed[ ,]','\<errno=[^0]',' limiting speed to ',': replayed ','duplicate object',' checksum','warning','conflicts','kill','power failure','power is back']],
-          ['class' => 'error', 'text' => ['error','emask ','parity incorrect','fsck','invalid opcode: ','nobody cared','unknown boot option',' ata[0-9\. ]+: disabled',' dma disabled','kernel bug ','write protect is on','call trace','tainted','kernel:  \[','out[ _]of[ _]memory','killed','hpa detected: current [0-9]*055,']],
-          ['class' => 'system','text' => [' checksumming','get value of subfeature','linux version','mhz processor','cpu: intel','cpu[0-9]: intel','cpu: amd','cpu[0-9]: amd','kernel: processors: ','kernel: memory: ','kernel: smp: ','b highmem ',' lowmem ',' md: xor using','bogomips','kernel: console: ',' thermal zone',' adding [0-9]+k swap on ','kernel command line:','_sse','found.*chip','controller','version ','mouse|speaker|kbd port|aux port|ps\/2|keyboard','driver']],
-          ['class' => 'array', 'text' => [': unraid system','lime[ -]tech','key detected, registered',': unregistered',' mdcmd ',' md: ','super.dat ',': running, size:']]
-         ];
-
-$lines = @file('/var/log/syslog',FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);
-echo "<pre class='up'>";
-foreach ($lines as $line) {
-  $font = "font";
-  foreach ($match as $row) foreach ($row['text'] as $text) if (preg_match("/$text/i",$line)) {$font = "font class='{$row['class']}'"; break 2;}
-  echo "<$font>".htmlentities($line)."</font><br>";
-}
-echo "</pre>";
-?>
-<input type="button" value="Download" onclick="syslog()"><input type="button" value="Done" onclick="done()">
 <script>
 function cleanUp() {
   if (document.hasFocus()) {
@@ -68,5 +49,20 @@ function highlight(checked,line) {
     if (line=='A') $('font.array').toggleClass('array array-');
   }
 }
-$('.tabs').append("<span class='status vhshift'><font class='error xs'>Error:<input type='checkbox' onclick='highlight(this.checked,\"E\")' checked></font><font class='warn xs'>Warning:<input type='checkbox' onclick='highlight(this.checked,\"W\")' checked></font><font class='system xs'>System:<input type='checkbox' onclick='highlight(this.checked,\"S\")' checked></font><font class='array xs'>Array:<input type='checkbox' onclick='highlight(this.checked,\"A\")' checked></font><input type='button' value='Download' onclick='syslog()'></span>");
+$('.tabs').append("<span class='status vhshift'><font class='error xs'>Error<input type='checkbox' onclick='highlight(this.checked,\"E\")' checked></font><font class='warn xs'>Warning<input type='checkbox' onclick='highlight(this.checked,\"W\")' checked></font><font class='system xs'>System<input type='checkbox' onclick='highlight(this.checked,\"S\")' checked></font><font class='array xs'>Array<input type='checkbox' onclick='highlight(this.checked,\"A\")' checked></font><input type='button' value='Download' onclick='syslog()'></span>");
 </script>
+<?
+$zip = str_replace(' ','_',strtolower($var['NAME']))."-syslog-".date('Ymd-Hi').".zip";
+
+require_once 'webGui/include/ColorCoding.php';
+
+$lines = @file('/var/log/syslog',FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);
+echo "<pre class='up'>";
+foreach ($lines as $line) {
+  $font = "font";
+  foreach ($match as $type) foreach ($type['text'] as $text) if (preg_match("/$text/i",$line)) {$font = "font class='{$type['class']}'"; break 2;}
+  echo "<$font>".htmlentities($line)."</font><br>";
+}
+echo "</pre>";
+?>
+<input type="button" value="Download" onclick="syslog()"><input type="button" value="Done" onclick="done()">
