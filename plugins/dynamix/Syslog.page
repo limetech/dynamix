@@ -13,13 +13,6 @@ Title="System Log"
  * all copies or substantial portions of the Software.
  */
 ?>
-<style>
-font.error {color:#D8000C;background-color:#FFBABA;}
-font.warn {color:#9F6000;background-color:#FEEFB3;}
-font.system {color:#00529B;background-color:#BDE5F8;}
-font.array {color:#4F8A10;background-color:#DFF2BF;}
-font.xs {font-size:small;padding:2px 0 2px 6px;margin-right:6px;}
-</style>
 <script>
 function cleanUp() {
   if (document.hasFocus()) {
@@ -37,16 +30,12 @@ function syslog() {
   });
 }
 function highlight(checked,line) {
-  if (checked) {
-    if (line=='E') $('font.error-').toggleClass('error error-');
-    if (line=='W') $('font.warn-').toggleClass('warn warn-');
-    if (line=='S') $('font.system-').toggleClass('system system-');
-    if (line=='A') $('font.array-').toggleClass('array array-');
-  } else {
-    if (line=='E') $('font.error').toggleClass('error error-');
-    if (line=='W') $('font.warn').toggleClass('warn warn-');
-    if (line=='S') $('font.system').toggleClass('system system-');
-    if (line=='A') $('font.array').toggleClass('array array-');
+  var o = checked ? '-' : '';
+  switch (line) {
+    case 'E': $('font.error'+o).toggleClass('error error-'); break;
+    case 'W': $('font.warn'+o).toggleClass('warn warn-'); break;
+    case 'S': $('font.system'+o).toggleClass('system system-'); break;
+    case 'A': $('font.array'+o).toggleClass('array array-'); break;
   }
 }
 $('.tabs').append("<span class='status vhshift'><font class='error xs'>Error<input type='checkbox' onclick='highlight(this.checked,\"E\")' checked></font><font class='warn xs'>Warning<input type='checkbox' onclick='highlight(this.checked,\"W\")' checked></font><font class='system xs'>System<input type='checkbox' onclick='highlight(this.checked,\"S\")' checked></font><font class='array xs'>Array<input type='checkbox' onclick='highlight(this.checked,\"A\")' checked></font><input type='button' value='Download' onclick='syslog()'></span>");

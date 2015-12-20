@@ -166,6 +166,11 @@ table.share_status.m36 tr>td+td+td+td{width:8%;text-align:center;}
 table.share_status.m0{width:30%;}
 table.share_status.m0 tr>td+td+td{width:12%;text-align:center;}
 [name=arrayOps]{margin-top:12px;}
+font.error{color:#D8000C;background-color:#FFBABA;}
+font.warn{color:#9F6000;background-color:#FEEFB3;}
+font.system{color:#00529B;background-color:#BDE5F8;}
+font.array{color:#4F8A10;background-color:#DFF2BF;}
+font.xs{font-size:small;padding:2px 0 2px 6px;margin-right:6px;border-radius:4px;}
 span.heat-text{font-size:10px;color:#CC0000;}
 span.cpu-speed{display:block;color:#3B5998;}
 span.status{float:right;font-size:14px;margin-top:0px;padding-right:8px;}

@@ -12,13 +12,6 @@
  */
 ?>
 <?
-echo "<style>";
-echo "font.error {color:#D8000C;background-color:#FFBABA;}";
-echo "font.warn {color:#9F6000;background-color:#FEEFB3;}";
-echo "font.system {color:#00529B;background-color:#BDE5F8;}";
-echo "font.array {color:#4F8A10;background-color:#DFF2BF;}";
-echo "font.xs {padding:4px 8px;margin-right:12px;}";
-echo "</style>";
 echo "<center><font class='error xs'>Error</font><font class='warn xs'>Warning</font><font class='system xs'>System</font><font class='array xs'>Array</font></center>\n";
 
 require_once '/usr/local/emhttp/webGui/include/ColorCoding.php';
