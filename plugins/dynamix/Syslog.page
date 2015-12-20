@@ -13,11 +13,23 @@ Title="System Log"
  * all copies or substantial portions of the Software.
  */
 ?>
-
 <?
 $zip = str_replace(' ','_',strtolower($var['NAME']))."-syslog-".date('Ymd-Hi').".zip";
-echo "<pre class='up'>".shell_exec('cat /var/log/syslog')."</pre>";
+
+$errors = ['error', 'emask', 'parity incorrect', 'fsck?', 'invalid opcode: ', 'nobody cared', 'unknown boot option', 'kernel bug ', 'write protect is on', 'call trace', 'tainted', 'kernel:  [', 'killed', 'hpa detected: current', 'errno'];
+$warnings = ['acpi warning', 'acpi exception', 'spurious', 'hpa', 'host protected area', 'invalid signature', 'sort resetting', 'hard resetting', 'limiting speed to', ': replayed', 'duplicate object', 'disabled', 'warning', 'warning:', 'conflicts', 'kill', 'power failure', 'power is back', 'missing', 'incorrect'];
+
+function highlight($search,$text) {
+  foreach ($search as $highlight) if (stripos($text,$highlight)!==false) return true;
+  return false;
+}
+
+$lines = @file('/var/log/syslog', FILE_IGNORE_NEW_LINES|FILE_SKIP_EMPTY_LINES);
+echo "<pre class='up'>";
+foreach ($lines as $line) echo highlight($errors,$line) ? "<span class='failhide'>" : (highlight($warnings,$line) ? "<span class='warnhide'>" : '<span>')."$line</span><br>";
+echo "</pre>";
 ?>
+<input type="button" value="Download" onclick="syslog()"><input type="button" value="Done" onclick="done()">
 <script>
 function cleanUp() {
   if (document.hasFocus()) {
@@ -26,7 +38,7 @@ function cleanUp() {
   } else {
     setTimeout(cleanUp,4000);
   }
-}  
+}
 function syslog() {
   $('input[value="Download"]').val('Downloading...').prop('disabled',true);
   $.post('/webGui/include/Download.php',{cmd:'save',source:'/var/log/syslog',file:'<?=$zip?>'},function(zip) {
@@ -34,6 +46,14 @@ function syslog() {
     setTimeout(cleanUp,4000);
   });
 }
-$('.tabs').append("<span class='status vhshift'><input type='button' value='Download' onclick='syslog()'></span>");
+function highlight(checked) {
+  if (checked) {
+    $('.failhide').toggleClass('failed failhide');
+    $('.warnhide').toggleClass('warning warnhide');
+  } else {
+    $('.failed').toggleClass('failed failhide');
+    $('.warning').toggleClass('warning warnhide');
+  }
+}
+$('.tabs').append("<span class='status vhshift'><small>Highlight errors and warnings:</small><input type='checkbox' onclick='highlight(this.checked)'><input type='button' value='Download' onclick='syslog()'></span>");
 </script>
-<input type="button" value="Download" onclick="syslog()"><input type="button" value="Done" onclick="done()">
