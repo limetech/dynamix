@@ -34,7 +34,7 @@ echo "<pre class='up'>";
 foreach ($lines as $line) {
   $font = "font";
   foreach ($match as $row) foreach ($row['text'] as $text) if (preg_match("/$text/i",$line)) {$font = "font class='{$row['class']}'"; break 2;}
-  echo "<$font>$line</font><br>";
+  echo "<$font>".htmlentities($line)."</font><br>";
 }
 echo "</pre>";
 ?>
