@@ -12,7 +12,7 @@
  */
 ?>
 <?
-echo "<center><font class='error xs'>Error</font><font class='warn xs'>Warning</font><font class='system xs'>System</font><font class='array xs'>Array</font></center>\n";
+echo "<center><font class='error label'>Error</font><font class='warn label'>Warning</font><font class='system label'>System</font><font class='array label'>Array</font></center>\n";
 
 require_once '/usr/local/emhttp/webGui/include/ColorCoding.php';
 
