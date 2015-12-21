@@ -31,17 +31,17 @@ function syslog() {
 }
 function highlight(checked,line) {
   var o = checked ? '-' : '';
-  var n = ($('font.normal').css('display')=='none' && !checked) ? 'none' : '';
+  var n = ($('span.text').css('display')=='none' && !checked) ? 'none' : '';
   switch (line) {
-    case 'E': $('font.'+o+'error').css('display',n); $('font.error'+o).toggleClass('error -error error-'); break;
-    case 'W': $('font.'+o+'warn').css('display',n); $('font.warn'+o).toggleClass('warn -warn warn-'); break;
-    case 'S': $('font.'+o+'system').css('display',n); $('font.system'+o).toggleClass('system -system system-'); break;
-    case 'A': $('font.'+o+'array').css('display',n); $('font.array'+o).toggleClass('array -array array-'); break;
-    case 'N': $('font.normal,font.-error,font.-warn,font.-system,font.-array').css('display',checked ? 'none' : ''); break;
+    case 'E': $('span.'+o+'error').css('display',n); $('span.error'+o).toggleClass('error -error error-'); break;
+    case 'W': $('span.'+o+'warn').css('display',n); $('span.warn'+o).toggleClass('warn -warn warn-'); break;
+    case 'S': $('span.'+o+'system').css('display',n); $('span.system'+o).toggleClass('system -system system-'); break;
+    case 'A': $('span.'+o+'array').css('display',n); $('span.array'+o).toggleClass('array -array array-'); break;
+    case 'N': $('span.text,span[class^="-"]').css('display',checked ? 'none':''); break;
   }
-  $('font.label').show();
+  $('span.label').show();
 }
-$('.tabs').append("<span class='status vhshift'><font class='label'>Hide text<input type='checkbox' onclick='highlight(this.checked,\"N\")'></font><font class='error label'>Error<input type='checkbox' onclick='highlight(this.checked,\"E\")' checked></font><font class='warn label'>Warning<input type='checkbox' onclick='highlight(this.checked,\"W\")' checked></font><font class='system label'>System<input type='checkbox' onclick='highlight(this.checked,\"S\")' checked></font><font class='array label'>Array<input type='checkbox' onclick='highlight(this.checked,\"A\")' checked></font><input type='button' value='Download' onclick='syslog()'></span>");
+$('.tabs').append("<span class='status vhshift'><span class='lite label'>Hide text<input type='checkbox' onclick='highlight(this.checked,\"N\")'></span><span class='error label'>Error<input type='checkbox' onclick='highlight(this.checked,\"E\")' checked></span><span class='warn label'>Warning<input type='checkbox' onclick='highlight(this.checked,\"W\")' checked></span><span class='system label'>System<input type='checkbox' onclick='highlight(this.checked,\"S\")' checked></span><span class='array label'>Array<input type='checkbox' onclick='highlight(this.checked,\"A\")' checked></span><input type='button' value='Download' onclick='syslog()'></span>");
 </script>
 <?
 $zip = str_replace(' ','_',strtolower($var['NAME']))."-syslog-".date('Ymd-Hi').".zip";
@@ -50,9 +50,9 @@ require_once 'webGui/include/ColorCoding.php';
 
 echo "<pre class='up'>";
 foreach (file('/var/log/syslog') as $line) {
-  $font = "font class='normal'";
-  foreach ($match as $type) foreach ($type['text'] as $text) if (preg_match("/$text/i",$line)) {$font = "font class='{$type['class']}'"; break 2;}
-  echo "<$font>".htmlentities($line)."</font>";
+  $span = "span class='text'";
+  foreach ($match as $type) foreach ($type['text'] as $text) if (preg_match("/$text/i",$line)) {$span = "span class='{$type['class']}'"; break 2;}
+  echo "<$span>".htmlentities($line)."</span>";
 }
 echo "</pre>";
 ?>
