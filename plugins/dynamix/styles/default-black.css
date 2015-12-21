@@ -174,7 +174,7 @@ span.system{color:#00529B;background-color:#BDE5F8;display:block;width:100%;}
 span.array{color:#4F8A10;background-color:#DFF2BF;display:block;width:100%;}
 span.login{color:#D63301;background-color:#FFCCBA;display:block;width:100%;}
 span.lite{background-color:#101010;}
-span.label{font-size:small;padding:2px 0 2px 6px;margin-right:6px;border-radius:4px;display:inline;width:auto;}
+span.label{font-size:small;padding:2px 0 2px 6px;margin-right:6px;border-radius:4px;display:inline;width:auto;vertical-align:middle;}
 span.heat-text{font-size:10px;color:#CC0000;}
 span.cpu-speed{display:block;color:#3B5998;}
 span.status{float:right;font-size:14px;margin-top:0px;padding-right:8px;}
