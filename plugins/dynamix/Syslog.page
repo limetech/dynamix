@@ -41,7 +41,7 @@ function highlight(checked,line) {
   }
   $('font.xs').show();
 }
-$('.tabs').append("<span class='status vhshift'><font class='xs'>Hide text<input type='checkbox' onclick='highlight(this.checked,\"N\")'><font class='error xs'>Error<input type='checkbox' onclick='highlight(this.checked,\"E\")' checked></font><font class='warn xs'>Warning<input type='checkbox' onclick='highlight(this.checked,\"W\")' checked></font><font class='system xs'>System<input type='checkbox' onclick='highlight(this.checked,\"S\")' checked></font><font class='array xs'>Array<input type='checkbox' onclick='highlight(this.checked,\"A\")' checked></font><input type='button' value='Download' onclick='syslog()'></span>");
+$('.tabs').append("<span class='status vhshift'><font class='xs'>Hide text<input type='checkbox' onclick='highlight(this.checked,\"N\")'></font><font class='error xs'>Error<input type='checkbox' onclick='highlight(this.checked,\"E\")' checked></font><font class='warn xs'>Warning<input type='checkbox' onclick='highlight(this.checked,\"W\")' checked></font><font class='system xs'>System<input type='checkbox' onclick='highlight(this.checked,\"S\")' checked></font><font class='array xs'>Array<input type='checkbox' onclick='highlight(this.checked,\"A\")' checked></font><input type='button' value='Download' onclick='syslog()'></span>");
 </script>
 <?
 $zip = str_replace(' ','_',strtolower($var['NAME']))."-syslog-".date('Ymd-Hi').".zip";
