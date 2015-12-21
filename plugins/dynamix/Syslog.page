@@ -37,11 +37,12 @@ function highlight(checked,line) {
     case 'W': $('span.'+o+'warn').css('display',n); $('span.warn'+o).toggleClass('warn -warn warn-'); break;
     case 'S': $('span.'+o+'system').css('display',n); $('span.system'+o).toggleClass('system -system system-'); break;
     case 'A': $('span.'+o+'array').css('display',n); $('span.array'+o).toggleClass('array -array array-'); break;
+    case 'L': $('span.'+o+'login').css('display',n); $('span.login'+o).toggleClass('login -login login-'); break;
     case 'N': $('span.text,span[class^="-"]').css('display',checked ? 'none':''); break;
   }
   $('span.label').show();
 }
-$('.tabs').append("<span class='status vhshift'><span class='lite label'>Hide text<input type='checkbox' onclick='highlight(this.checked,\"N\")'></span><span class='error label'>Error<input type='checkbox' onclick='highlight(this.checked,\"E\")' checked></span><span class='warn label'>Warning<input type='checkbox' onclick='highlight(this.checked,\"W\")' checked></span><span class='system label'>System<input type='checkbox' onclick='highlight(this.checked,\"S\")' checked></span><span class='array label'>Array<input type='checkbox' onclick='highlight(this.checked,\"A\")' checked></span><input type='button' value='Download' onclick='syslog()'></span>");
+$('.tabs').append("<span class='status vhshift'><span class='lite label'>Hide text<input type='checkbox' onclick='highlight(this.checked,\"N\")'></span><span class='error label'>Error<input type='checkbox' onclick='highlight(this.checked,\"E\")' checked></span><span class='warn label'>Warning<input type='checkbox' onclick='highlight(this.checked,\"W\")' checked></span><span class='system label'>System<input type='checkbox' onclick='highlight(this.checked,\"S\")' checked></span><span class='array label'>Array<input type='checkbox' onclick='highlight(this.checked,\"A\")' checked></span><span class='login label'>Login<input type='checkbox' onclick='highlight(this.checked,\"L\")' checked></span><input type='button' value='Download' onclick='syslog()'></span>");
 </script>
 <?
 $zip = str_replace(' ','_',strtolower($var['NAME']))."-syslog-".date('Ymd-Hi').".zip";

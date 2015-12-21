@@ -170,6 +170,7 @@ span.error{color:#D8000C;background-color:#FFBABA;}
 span.warn{color:#9F6000;background-color:#FEEFB3;}
 span.system{color:#00529B;background-color:#BDE5F8;}
 span.array{color:#4F8A10;background-color:#DFF2BF;}
+span.login{color:#D63301;background-color:#FFCCBA;}
 span.lite{background-color:#E0E0E0;}
 span.label{font-size:small;padding:2px 0 2px 6px;margin-right:6px;border-radius:4px;}
 span.heat-text{font-size:10px;color:#CC0000;}

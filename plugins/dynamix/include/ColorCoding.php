@@ -16,8 +16,11 @@ $match =
 [['class' => 'text',
   'text'  => ['to the standard error','non[ -]fatal error','correct gpt errors']
  ],
+ ['class' => 'login',
+  'text'  => ['accepted password','failed password']
+ ],
  ['class' => 'warn',
-  'text'  => ['acpi error','preclear_disk','acpi warning','acpi exception','spurious','hpa','host protected area','invalid signature','(soft|hard) resetting ',' failed[ ,]','\<errno=[^0]','limiting speed to',': replayed','duplicate (object|error)',' checksum','warning','conflicts','kill','power is back','gpt:partition_entry','no floppy controller','accepted password']
+  'text'  => ['acpi error','preclear_disk','acpi warning','acpi exception','spurious','hpa','host protected area','invalid signature','(soft|hard) resetting ',' failed[ ,]','\<errno=[^0]','limiting speed to',': replayed','duplicate (object|error)',' checksum','warning','conflicts','kill','power is back','gpt:partition_entry','no floppy controller']
  ],
  ['class' => 'error',
   'text'  => ['error','emask ','parity incorrect','fsck\?','invalid opcode:','nobody cared','unknown boot option',' ata[0-9\. ]+: disabled','dma disabled','kernel bug ','write protect is on','call trace','tainted','kernel:  \[','out[ _]of[ _]memory','killed','hpa detected: current [0-9]*055,','power failure']
