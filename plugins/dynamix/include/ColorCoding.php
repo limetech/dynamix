@@ -14,10 +14,10 @@
 // Color coding for syslog and disk log
 $match =
 [['class' => 'text',
-  'text'  => ['to the standard error','non[ -]fatal error','correct gpt errors']
+  'text'  => ['to the standard error','non[ -]fatal error','correct gpt errors','logger: [|+ #-]']
  ],
  ['class' => 'login',
-  'text'  => ['accepted password','failed password']
+  'text'  => ['accepted password','failed password','sshd\[\d+\]:']
  ],
  ['class' => 'warn',
   'text'  => ['acpi error','preclear_disk','acpi warning','acpi exception','spurious','hpa','host protected area','invalid signature','(soft|hard) resetting ',' failed[ ,]','\<errno=[^0]','limiting speed to',': replayed','duplicate (object|error)',' checksum','warning','conflicts','kill','power is back','gpt:partition_entry','no floppy controller']
