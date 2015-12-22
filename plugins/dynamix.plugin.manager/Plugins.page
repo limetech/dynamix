@@ -38,8 +38,7 @@ $(function() {
       $('#plugin_list').css('height',s); 
       $('#plugin_table tbody tr:first-child td').each(function(){widths.push($(this).width());});
       $('#plugin_table thead tr th').each(function(i){$(this).css('width',widths[i]);});
-    } else {
-      $('#plugin_table thead,#plugin_table tbody').removeClass('fixed');
+      $('#plugin_table thead,#plugin_table tbody').addClass('fixed');
     }
     $('#plugin_table').tablesorter({headers:{0:{sorter:false},5:{sorter:false}}});
     $('.desc_readmore').readmore({maxHeight:58});
@@ -56,6 +55,6 @@ Click <strong><big>check for updates</big></strong> to check all plugins. This p
 </blockquote>
 
 <table class='tablesorter plugins shift' id='plugin_table'>
-<thead class="fixed"><tr><th></th><th>Plugin</th><th>Author</th><th>Version</th><th>Status</th><th></th></tr></thead>
-<tbody class="fixed" id="plugin_list"><tr><td></td><td colspan='4'><br><i class="fa fa-spinner fa-spin icon"></i><em>Please wait, retrieving plugin information ...</em></td><td></td><tr></tbody>
+<thead><tr><th></th><th>Plugin</th><th>Author</th><th>Version</th><th>Status</th><th></th></tr></thead>
+<tbody id="plugin_list"><tr><td></td><td colspan='4'><br><i class="fa fa-spinner fa-spin icon"></i><em>Please wait, retrieving plugin information ...</em></td><td></td><tr></tbody>
 </table>

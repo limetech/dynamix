@@ -54,7 +54,7 @@ img.stopped{opacity:0.3;}
 <div id="iframe-popup" style="display:none;-webkit-overflow-scrolling:touch;"></div>
 <span class="status" style="margin-top: -42px;"><input type="checkbox" class="advancedview"></span>
 <table class="tablesorter shift" id="docker_containers">
-	<thead class="fixed">
+	<thead>
 		<tr>
 			<th>&nbsp;</th>
 			<th>Application</th>
@@ -66,7 +66,7 @@ img.stopped{opacity:0.3;}
 			<th>Log</th>
 		</tr>
 	</thead>
-	<tbody class="fixed" id="docker_list">
+	<tbody id="docker_list">
 		<?
 		$all_containers = $docker->getDockerContainers();
 		if ( ! $all_containers) {
@@ -245,8 +245,7 @@ $(function() {
     $('#docker_list').css('height',s);
     $('#docker_containers tbody tr:first-child td').each(function(){widths.push($(this).width());});
     $('#docker_containers thead tr th').each(function(i){$(this).css('width',widths[i]);});
-  } else {
-    $('#docker_containers thead,#docker_containers tbody').removeClass('fixed');
+    $('#docker_containers thead,#docker_containers tbody').addClass('fixed');
   }
 
 	$('#docker_containers').tablesorter( {sortList: [[1,0]], headers: {0: {sorter: false }, 7: {sorter: false }}});

@@ -99,7 +99,7 @@ if ($action) {
 	echo "<script>clearHistory();</script>";
 	}
 	echo "<table class='tablesorter kvm' id='kvm_table'>
-            <thead class='fixed'>
+            <thead>
                <tr>
                   <th class='header'><i class='fa fa-th-list'></i></th>
                   <th class='header'>Name</th>
@@ -111,7 +111,7 @@ if ($action) {
                   <th class='header'>Log</th>
                </tr>
             </thead>
-            <tbody class='fixed' id='kvm_list'>";
+            <tbody id='kvm_list'>";
    //Get domain variables for each domain
    if ($libvirt_running == "yes")
 		$doms = $lv->get_domains();
@@ -643,8 +643,7 @@ $(function() {
      $('#kvm_list').css('height',s);
      $('#kvm_table tbody tr:first-child td').each(function(){widths.push($(this).width());});
      $('#kvm_table thead tr th').each(function(i){$(this).css('width',widths[i]);});
-   } else {
-     $('#kvm_table thead,#kvm_table tbody').removeClass('fixed');
+     $('#kvm_table thead,#kvm_table tbody').addClass('fixed');
    }
 
    context.init({ preventDoubleContext: false });
