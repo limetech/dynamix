@@ -13,7 +13,13 @@ Title="Page Map"
  * all copies or substantial portions of the Software.
  */
 ?>
-
+<script>
+$(function() {
+  $('div.up').css('height',Math.max($(window).height()-300,600));
+  $(window).bind('resize',function(){$('div.up').css('height',Math.max($(window).height()-300,600));});
+});
+</script>
+<div class='up'>
 <?
 function show_map($menu, $level) {
   $pages = find_pages( $menu);
@@ -33,9 +39,8 @@ function show_map($menu, $level) {
   }
   echo "</ul>";
 }
-echo "<div class='up'>";
 show_map("Tasks", 1);
 show_map("Buttons", 1);
-echo "</div>";
 ?>
+</div>
 <input type="button" value="Done" onclick="done()">

@@ -42,6 +42,10 @@ function highlight(checked,line) {
   }
   $('span.label').show();
 }
+$(function() {
+  $('pre.up').css('height',Math.max($(window).height()-300,600));
+  $(window).bind('resize',function(){$('pre.up').css('height',Math.max($(window).height()-300,600));});
+});
 $('.tabs').append("<span class='status vhshift'><span class='lite label'>Hide text<input type='checkbox' onclick='highlight(this.checked,\"N\")'></span><span class='error label'>Error<input type='checkbox' onclick='highlight(this.checked,\"E\")' checked></span><span class='warn label'>Warning<input type='checkbox' onclick='highlight(this.checked,\"W\")' checked></span><span class='system label'>System<input type='checkbox' onclick='highlight(this.checked,\"S\")' checked></span><span class='array label'>Array<input type='checkbox' onclick='highlight(this.checked,\"A\")' checked></span><span class='login label'>Login<input type='checkbox' onclick='highlight(this.checked,\"L\")' checked></span><input type='button' value='Download' onclick='syslog()'></span>");
 </script>
 <?

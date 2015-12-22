@@ -76,7 +76,7 @@ foreach (glob("/var/log/plugins/*.plg", GLOB_NOSORT) as $plugin_link) {
   $action = strpos($plugin_file, "/usr/local/emhttp/plugins") !== 0 ? make_link("remove", basename($plugin_file)) : "built-in";
 // write plugin information
   echo "<tr>";
-  echo "<td style='vertical-align:top'><p>{$link}</p></td>";
+  echo "<td style='vertical-align:top;width:64px'><p style='text-align:center'>{$link}</p></td>";
   echo "<td><span class='desc_readmore' style='display:block'>{$desc}</span></td>";
   echo "<td>{$author}</td>";
   echo "<td>{$version_info}</td>";

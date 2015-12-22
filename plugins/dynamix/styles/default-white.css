@@ -196,9 +196,9 @@ div.Panel{text-align:center;float:left;margin:0 30px 30px 12px;height:80px;}
 div.Panel .PanelText{padding-top:10px;}
 div.user-list{float:left;padding:10px;margin-right:10px;margin-bottom:24px;border:1px solid #D0D0D0;border-radius:5px;line-height:16px;background:-webkit-radial-gradient(#B0B0B0,#F0F0F0);background:linear-gradient(#B0B0B0,#F0F0F0);}
 div.user-list img{margin-bottom:12px;}
-div.up{margin-top:-20px;}
+div.up{margin-top:-20px;border:1px solid #D0D0D0;padding:4px 6px;overflow:auto;}
 pre.up{margin-top:-20px;}
-pre{border:1px solid #D0D0D0;font-family:bitstream;font-size:11px;padding:6px 12px;overflow:auto;}
+pre{border:1px solid #D0D0D0;font-family:bitstream;font-size:11px;padding:4px 6px;overflow:auto;}
 iframe#progressFrame{position:fixed;bottom:32px;left:0;margin:0;padding:8px 8px 0 8px;width:100%;height:12px;line-height:12px;border-style:none;overflow:hidden;font-family:bitstream;font-size:10px;color:#505050;white-space:nowrap;z-index:-10;}
 dl{margin:0;padding-left:12px;line-height:26px;}
 dt{clear:left;float:left;width:33%;font-weight:bold;}
