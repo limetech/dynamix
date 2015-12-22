@@ -16,7 +16,6 @@ Title="Page Map"
 <script>
 $(function() {
   $('div.up').css('height',Math.max($(window).height()-300,600));
-  $(window).bind('resize',function(){$('div.up').css('height',Math.max($(window).height()-300,600));});
 });
 </script>
 <div class='up'>

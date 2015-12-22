@@ -16,7 +16,6 @@ Title="Processes"
 <script>
 $(function() {
   $('pre.up').css('height',Math.max($(window).height()-300,600));
-  $(window).bind('resize',function(){$('pre.up').css('height',Math.max($(window).height()-300,600));});
 });
 </script>
 <?

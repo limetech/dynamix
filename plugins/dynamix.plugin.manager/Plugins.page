@@ -32,8 +32,9 @@ $(function() {
   var widths = [];
   $.get('/plugins/dynamix.plugin.manager/include/ShowPlugins.php',{stale:'<?=$tmp_stale?>'},function(data) {
     if (data) $('#plugin_list').html(data);
-    $('#plugin_list').css('height',Math.max($(window).height()-320,600));
-    $(window).bind('resize',function(){$('#plugin_list').css('height',Math.max($(window).height()-320,600));});
+    var h = $('#plugin_list').height();
+    var s = Math.max($(window).height()-320,600);
+    if (h>s) $('#plugin_list').css('height',s); else $('#plugin_table thead,#plugin_table tbody').removeClass('fixed');
     $('#plugin_table').tablesorter({headers:{0:{sorter:false},5:{sorter:false}}});
     $('.desc_readmore').readmore({maxHeight:58});
     $('#plugin_table tbody tr:first-child td').each(function(){widths.push($(this).width());});

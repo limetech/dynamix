@@ -33,6 +33,9 @@ function archiveList(init) {
   $.get('/webGui/include/NotificationsArchive.php',function(data) {
     if (data) $('#archive_list').html(data);
     if (init) {
+      var h = $('#archive_list').height();
+      var s = Math.max($(window).height()-320,600);
+      if (h>s) $('#archive_list').css('height',s); else $('#archive_table thead,#archive_table tbody').removeClass('fixed');
       $('#archive_table').tablesorter({headers:{5:{sorter:false}}});
     } else {
       $('#archive_table').trigger('update',true);
@@ -61,14 +64,12 @@ function openClose(row) {
 }
 $(function(){
   archiveList(true);
-  $('#archive_list').css('height',Math.max($(window).height()-320,600));
-  $(window).bind('resize',function(){$('#archive_list').css('height',Math.max($(window).height()-320,600));});
 });
 
 // Adjust the width of thead cells when window resizes
 </script>
 <table class="tablesorter left shift" id="archive_table">
-<thead class="fixed"><tr><th>Time</th><th>Event</th><th>Subject</th><th>Description</th><th>Importance</th><th><?if ($files):?><a href="#" onclick="askConfirmation();return false" title="Delete all notifications"><i class="fa fa-trash"></i></a><?endif;?></th></tr></thead>
+<thead class="fixed"><tr><th>Time</th><th>Event</th><th>Subject</th><th>Description</th><th>Importance</th><th style="text-align:right"><?if ($files):?><a href="#" onclick="askConfirmation();return false" title="Delete all notifications"><i class="fa fa-trash"></i></a><?endif;?></th></tr></thead>
 <tbody class="fixed" id="archive_list"></tbody>
 </table>
 <input type="button" value="Done" onclick="done()">
