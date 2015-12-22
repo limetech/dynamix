@@ -240,6 +240,7 @@ $(function() {
 
   var h = $('#docker_list').height();
   var s = Math.max($(window).height()-320,600);
+  var widths = [];
   if (h>s) {
     $('#docker_list').css('height',s);
     $('#docker_containers tbody tr:first-child td').each(function(){widths.push($(this).width());});

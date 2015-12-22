@@ -638,6 +638,7 @@ $(function() {
 
    var h = $('#kvm_list').height();
    var s = Math.max($(window).height()-320,600);
+   var widths = [];
    if (h>s) {
      $('#kvm_list').css('height',s);
      $('#kvm_table tbody tr:first-child td').each(function(){widths.push($(this).width());});
