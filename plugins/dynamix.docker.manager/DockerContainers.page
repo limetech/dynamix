@@ -240,7 +240,13 @@ $(function() {
 
   var h = $('#docker_list').height();
   var s = Math.max($(window).height()-320,600);
-  if (h>s) $('#docker_list').css('height',s); else $('#docker_containers thead,#docker_containers tbody').removeClass('fixed');
+  if (h>s) {
+    $('#docker_list').css('height',s);
+    $('#docker_containers tbody tr:first-child td').each(function(){widths.push($(this).width());});
+    $('#docker_containers thead tr th').each(function(i){$(this).css('width',widths[i]);});
+  } else {
+    $('#docker_containers thead,#docker_containers tbody').removeClass('fixed');
+  }
 
 	$('#docker_containers').tablesorter( {sortList: [[1,0]], headers: {0: {sorter: false }, 7: {sorter: false }}});
 	$('#docker_containers tr:even').addClass('odd');

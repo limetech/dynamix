@@ -35,13 +35,17 @@ function archiveList(init) {
     if (init) {
       var h = $('#archive_list').height();
       var s = Math.max($(window).height()-320,600);
-      if (h>s) $('#archive_list').css('height',s); else $('#archive_table thead,#archive_table tbody').removeClass('fixed');
+      if (h>s) {
+        $('#archive_list').css('height',s);
+        $('#archive_table tbody tr:first-child td').each(function(){widths.push($(this).width());});
+        $('#archive_table thead tr th').each(function(i){$(this).css('width',widths[i]);});
+      } else {
+        $('#archive_table thead,#archive_table tbody').removeClass('fixed');
+      }
       $('#archive_table').tablesorter({headers:{5:{sorter:false}}});
     } else {
       $('#archive_table').trigger('update',true);
     }
-    $('#archive_table tbody tr:first-child td').each(function(){widths.push($(this).width());});
-    $('#archive_table thead tr th').each(function(i){$(this).css('width',widths[i]);});
     $('#archive_list .expand-child td').hide();
     for (var i = 0; i < rows.length; i++) $('#archive_list .expand-child.row'+rows[i]+' td').show();
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>

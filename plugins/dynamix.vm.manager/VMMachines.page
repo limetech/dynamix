@@ -638,7 +638,13 @@ $(function() {
 
    var h = $('#kvm_list').height();
    var s = Math.max($(window).height()-320,600);
-   if (h>s) $('#kvm_list').css('height',s); else $('#kvm_table thead,#kvm_table tbody').removeClass('fixed');
+   if (h>s) {
+     $('#kvm_list').css('height',s);
+     $('#kvm_table tbody tr:first-child td').each(function(){widths.push($(this).width());});
+     $('#kvm_table thead tr th').each(function(i){$(this).css('width',widths[i]);});
+   } else {
+     $('#kvm_table thead,#kvm_table tbody').removeClass('fixed');
+   }
 
    context.init({ preventDoubleContext: false });
    <?=implode("\n\t", $contextMenus);?>
