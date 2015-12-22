@@ -15,10 +15,10 @@ Title="Processes"
 ?>
 <script>
 $(function() {
-  $('pre.up').css('height',Math.max($(window).height()-300,600));
+  $('pre.up').css('height',Math.max($(window).height()-300,600)).show();
 });
 </script>
 <?
-echo "<pre class='up'>".shell_exec('ps -ef')."</pre>";
+echo "<pre class='up' style='display:none'>".shell_exec('ps -ef')."</pre>";
 ?>
 <input type="button" value="Done" onclick="done()">

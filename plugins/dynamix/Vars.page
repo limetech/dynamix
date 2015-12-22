@@ -15,7 +15,7 @@ Title="Vars"
 ?>
 <script>
 $(function() {
-  $('pre.up').css('height',Math.max($(window).height()-300,600));
+  $('pre.up').css('height',Math.max($(window).height()-300,600)).show();
 });
 </script>
 <?
@@ -26,5 +26,5 @@ $text = '...';
 ksort($site);
 ksort($GLOBALS);
 ?>
-<pre class='up'><?print_r($GLOBALS);?></pre>
+<pre class='up' style='display:none'><?print_r($GLOBALS);?></pre>
 <input type="button" value="Done" onclick="done()">

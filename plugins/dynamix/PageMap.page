@@ -15,10 +15,10 @@ Title="Page Map"
 ?>
 <script>
 $(function() {
-  $('div.up').css('height',Math.max($(window).height()-300,600));
+  $('div.up').css('height',Math.max($(window).height()-300,600)).show();
 });
 </script>
-<div class='up'>
+<div class='up' style='display:none'>
 <?
 function show_map($menu, $level) {
   $pages = find_pages( $menu);

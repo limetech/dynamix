@@ -43,7 +43,7 @@ function highlight(checked,line) {
   $('span.label').show();
 }
 $(function() {
-  $('pre.up').css('height',Math.max($(window).height()-300,600));
+  $('pre.up').css('height',Math.max($(window).height()-300,600)).show();
 });
 $('.tabs').append("<span class='status'><span class='lite label'>Hide text<input type='checkbox' onclick='highlight(this.checked,\"N\")'></span><span class='error label'>Error<input type='checkbox' onclick='highlight(this.checked,\"E\")' checked></span><span class='warn label'>Warning<input type='checkbox' onclick='highlight(this.checked,\"W\")' checked></span><span class='system label'>System<input type='checkbox' onclick='highlight(this.checked,\"S\")' checked></span><span class='array label'>Array<input type='checkbox' onclick='highlight(this.checked,\"A\")' checked></span><span class='login label'>Login<input type='checkbox' onclick='highlight(this.checked,\"L\")' checked></span></span>");
 </script>
@@ -52,7 +52,7 @@ $zip = str_replace(' ','_',strtolower($var['NAME']))."-syslog-".date('Ymd-Hi')."
 
 require_once 'webGui/include/ColorCoding.php';
 
-echo "<pre class='up'>";
+echo "<pre class='up' style='display:none'>";
 foreach (file('/var/log/syslog') as $line) {
   $span = "span class='text'";
   foreach ($match as $type) foreach ($type['text'] as $text) if (preg_match("/$text/i",$line)) {$span = "span class='{$type['class']}'"; break 2;}
