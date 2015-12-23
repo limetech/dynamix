@@ -15,7 +15,7 @@ Title="Vars"
 ?>
 <script>
 $(function() {
-  $('pre.up').css('height',Math.max($(window).height()-300,600)).show();
+  $('pre.up').css('height',Math.max($(window).height()-300,400)).show();
 });
 </script>
 <?

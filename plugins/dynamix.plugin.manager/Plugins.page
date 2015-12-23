@@ -33,7 +33,7 @@ $(function() {
   $.get('/plugins/dynamix.plugin.manager/include/ShowPlugins.php',{stale:'<?=$tmp_stale?>'},function(data) {
     if (data) $('#plugin_list').html(data);
     var h = $('#plugin_list').height();
-    var s = Math.max($(window).height()-320,600);
+    var s = Math.max($(window).height()-320,400);
     if (h>s) {
       $('#plugin_list').css('height',s); 
       $('#plugin_table tbody tr:first-child td').each(function(){widths.push($(this).width());});
