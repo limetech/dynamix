@@ -636,8 +636,9 @@ $(function() {
       }, "json");
    });
 
+<?if ($display['resize']):?>
    var h = $('#kvm_list').height();
-   var s = Math.max(screen.height-400,380);
+   var s = Math.max(window.innerHeight-300,370);
    var widths = [];
    if (h>s) {
      $('#kvm_list').css('height',s);
@@ -645,6 +646,7 @@ $(function() {
      $('#kvm_table thead tr th').each(function(i){$(this).css('width',widths[i]);});
      $('#kvm_table thead,#kvm_table tbody').addClass('fixed');
    }
+<?endif;?>
 
    context.init({ preventDoubleContext: false });
    <?=implode("\n\t", $contextMenus);?>

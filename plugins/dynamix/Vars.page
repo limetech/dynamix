@@ -13,11 +13,13 @@ Title="Vars"
  * all copies or substantial portions of the Software.
  */
 ?>
+<?if ($display['resize']):?>
 <script>
 $(function() {
-  $('pre.up').css('height',Math.max(screen.height-380,380)).show();
+  $('pre.up').css('height',Math.max(window.innerHeight-280,370)).show();
 });
 </script>
+<?endif;?>
 <?
 foreach ($site as &$page) $page['text'] = '...';
 $myPage['text'] = '...';
@@ -25,6 +27,6 @@ $pages['Vars']['text'] = '...';
 $text = '...';
 ksort($site);
 ksort($GLOBALS);
+echo ($display['resize'] ? "<pre class='up' style='display:none'>" : "<pre class='up'>").print_r($GLOBALS,true)."</pre>";
 ?>
-<pre class='up' style='display:none'><?print_r($GLOBALS);?></pre>
 <input type="button" value="Done" onclick="done()">

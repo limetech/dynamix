@@ -33,14 +33,16 @@ function archiveList(init) {
   $.get('/webGui/include/NotificationsArchive.php',function(data) {
     if (data) $('#archive_list').html(data);
     if (init) {
+<?if ($display['resize']):?>
       var h = $('#archive_list').height();
-      var s = Math.max(screen.height-400,380);
+      var s = Math.max(window.innerHeight-300,370);
       if (h>s) {
         $('#archive_list').css('height',s);
         $('#archive_table tbody tr:first-child td').each(function(){widths.push($(this).width());});
         $('#archive_table thead tr th').each(function(i){$(this).css('width',widths[i]);});
         $('#archive_table thead,#archive_table tbody').addClass('fixed');
       }
+<?endif;?>
       $('#archive_table').tablesorter({headers:{5:{sorter:false}}});
     } else {
       $('#archive_table').trigger('update',true);

@@ -225,6 +225,12 @@ Page view:
   <?=mk_option($display['tabs'], "1", "Non-tabbed")?>
   </select>
 
+Listing height:
+: <select name="resize" size="1">
+  <?=mk_option($display['resize'], "0", "Automatic")?>
+  <?=mk_option($display['resize'], "1", "Fixed")?>
+  </select>
+
 Table view spacing:
 : <select name="view" size="1">
   <?=mk_option($display['view'], "", "Normal")?>
