@@ -637,7 +637,7 @@ $(function() {
    });
 
    var h = $('#kvm_list').height();
-   var s = Math.max($(window).height()-320,400);
+   var s = Math.max(screen.height-400,380);
    var widths = [];
    if (h>s) {
      $('#kvm_list').css('height',s);

@@ -34,7 +34,7 @@ function archiveList(init) {
     if (data) $('#archive_list').html(data);
     if (init) {
       var h = $('#archive_list').height();
-      var s = Math.max($(window).height()-320,400);
+      var s = Math.max(screen.height-400,380);
       if (h>s) {
         $('#archive_list').css('height',s);
         $('#archive_table tbody tr:first-child td').each(function(){widths.push($(this).width());});

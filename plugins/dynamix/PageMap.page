@@ -15,7 +15,7 @@ Title="Page Map"
 ?>
 <script>
 $(function() {
-  $('div.up').css('height',Math.max($(window).height()-300,400)).show();
+  $('div.up').css('height',Math.max(screen.height-380,380)).show();
 });
 </script>
 <div class='up' style='display:none'>
