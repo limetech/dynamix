@@ -48,7 +48,7 @@ function toggle(checked) {
   highlight(checked,'S');
   highlight(checked,'A');
   highlight(checked,'L');
-  $('span.label input[type=checkbox').not('.ctrl').prop('checked',checked);
+  $('span.label input[type=checkbox]').not('.ctrl').prop('checked',checked);
 }
 $(function() {
   $('pre.up').css('height',Math.max($(window).height()-300,600)).show();
