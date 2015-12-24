@@ -28,20 +28,25 @@ Array.prototype.remove = function() {
   }
   return this;
 };
+<?if ($display['resize']):?>
+function resize(bind) {
+  var width = [];
+  var h = $('#archive_list').height();
+  var s = Math.max(window.innerHeight-300,370);
+  if (h>s || bind) {
+    $('#archive_list').height(s);
+    $('#archive_table tbody tr:first-child td').each(function(){width.push($(this).width());});
+    $('#archive_table thead tr th').each(function(i){$(this).width(width[i]);});
+    if (!bind) $('#archive_table thead,#archive_table tbody').addClass('fixed');
+  }
+}
+<?endif;?>
 function archiveList(init) {
-  var widths = [];
   $.get('/webGui/include/NotificationsArchive.php',function(data) {
     if (data) $('#archive_list').html(data);
     if (init) {
 <?if ($display['resize']):?>
-      var h = $('#archive_list').height();
-      var s = Math.max(window.innerHeight-300,370);
-      if (h>s) {
-        $('#archive_list').css('height',s);
-        $('#archive_table tbody tr:first-child td').each(function(){widths.push($(this).width());});
-        $('#archive_table thead tr th').each(function(i){$(this).css('width',widths[i]);});
-        $('#archive_table thead,#archive_table tbody').addClass('fixed');
-      }
+      resize();
 <?endif;?>
       $('#archive_table').tablesorter({headers:{5:{sorter:false}}});
     } else {
@@ -69,6 +74,9 @@ function openClose(row) {
 }
 $(function(){
   archiveList(true);
+<?if ($display['resize']):?>
+  $(window).bind('resize',function(){resize(true);});
+<?endif;?>
 });
 
 // Adjust the width of thead cells when window resizes

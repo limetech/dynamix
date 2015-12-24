@@ -15,8 +15,12 @@ Title="Vars"
 ?>
 <?if ($display['resize']):?>
 <script>
+function resize() {
+  $('pre.up').height(Math.max(window.innerHeight-280,370)).show();
+}
 $(function() {
-  $('pre.up').css('height',Math.max(window.innerHeight-280,370)).show();
+  resize();
+  $(window).bind('resize',function(){resize();});
 });
 </script>
 <?endif;?>

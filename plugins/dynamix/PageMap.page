@@ -15,8 +15,12 @@ Title="Page Map"
 ?>
 <?if ($display['resize']):?>
 <script>
+function resize() {
+  $('div.up').height(Math.max(window.innerHeight-280,370)).show();
+}
 $(function() {
-  $('div.up').css('height',Math.max(window.innerHeight-280,370)).show();
+  resize();
+  $(window).bind('resize',function(){resize();});
 });
 </script>
 <?endif;?>
