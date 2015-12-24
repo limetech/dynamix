@@ -13,11 +13,11 @@
 <?
 // Preselected SMART codes for notifications
 $numbers   = [];
-$preselect = [['code' =>   5, 'text' => 'Reallocated sectors count'],
-              ['code' => 187, 'text' => 'Reported uncorrectable errors'],
-              ['code' => 188, 'text' => 'Command time-out'],
-              ['code' => 197, 'text' => 'Current pending sector count'],
-              ['code' => 198, 'text' => 'Uncorrectable sector count']];
+$preselect = [['code' =>   5, 'set' => true, 'text' => 'Reallocated sectors count'],
+              ['code' => 187, 'set' => true, 'text' => 'Reported uncorrectable errors'],
+              ['code' => 188, 'set' => false,'text' => 'Command time-out'],
+              ['code' => 197, 'set' => true, 'text' => 'Current pending sector count'],
+              ['code' => 198, 'set' => true, 'text' => 'Uncorrectable sector count']];
 
-for ($x = 0; $x < count($preselect); $x++) $numbers[] = $preselect[$x]['code'];
+for ($x = 0; $x < count($preselect); $x++) if ($preselect[$x]['set']) $numbers[] = $preselect[$x]['code'];
 ?>
