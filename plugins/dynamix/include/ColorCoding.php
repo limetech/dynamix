@@ -29,7 +29,7 @@ $match =
   'text'  => ['\b(checksumming|controller|driver|version|highmem|lowmem|bogomips)\b','throttling rate','get value of subfeature','[mg]hz processor','cpu\d*: (intel|amd)','kernel: (processors|memory|smp|console):','\bmd: xor using','thermal zone','adding \d+k swap on','kernel command line:','_sse','found.*chip','\b(mouse|speaker|kbd port|aux port|ps\/2|keyboard)\b']
  ],
  ['class' => 'array',
-  'text'  => ['\b(mdcmd|md:|super\.dat)\b',': (unraid system|unregistered|running, size:)','key detected, registered']
+  'text'  => [': (mdcmd|md|super\.dat|unraid system|unregistered|running, size)\b','key detected, registered']
  ]
 ];
 ?>
