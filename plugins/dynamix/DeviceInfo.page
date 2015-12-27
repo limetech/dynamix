@@ -394,7 +394,7 @@ xfs_repair status:
 <input type="hidden" name="smGlue" value="<?=$var['smGlue']?>">
 SMART notification value:
 : <select name="smSelect" size="1">
-  <?=mk_option($disk['smSelect'], "-1", "Default")?>
+  <?=mk_option($disk['smSelect'], "-1", "Use default")?>
   <?=mk_option($disk['smSelect'], "0", "Raw")?>
   <?=mk_option($disk['smSelect'], "1", "Normalized")?>
   </select>
@@ -405,7 +405,7 @@ SMART notification value:
 
 SMART notification tolerance level:
 : <select name="smLevel" size="1">
-  <?=mk_option($disk['smLevel'], "-1", "Default")?>
+  <?=mk_option($disk['smLevel'], "-1", "Use default")?>
   <?=mk_option($disk['smLevel'], "1.00", "Absolute")?>
   <?=mk_option($disk['smLevel'], "1.05", "5%")?>
   <?=mk_option($disk['smLevel'], "1.10", "10%")?>
@@ -421,7 +421,7 @@ SMART notification tolerance level:
 
 SMART controller type:
 : <select name="smType" size="1" onchange="setGlue(this.form)">
-  <?=mk_option($disk['smType'], "-1", "Default")?>
+  <?=mk_option($disk['smType'], "-1", "Use default")?>
   <?=mk_option($disk['smType'], "", "Automatic")?>
   <?=mk_option($disk['smType'], "-d ata", "ATA")?>
   <?=mk_option($disk['smType'], "-d scsi", "SCSI")?>
