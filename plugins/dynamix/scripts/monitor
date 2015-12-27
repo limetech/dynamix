@@ -184,6 +184,26 @@ function check_smart($name,$port,$text,$info) {
   $file .= '.ssa';
   if (!file_exists($file) || (time()-filemtime($file)>=$var['poll_attributes'])) exec("smartctl -n standby -H $type /dev/$port|grep -Pom1 '^SMART.*: \K[A-Z]+'|tr -d '\n' > $file");
 }
+function check_usage($name,$used,$text,$info) {
+  global $notify,$disks,$saved,$unraid,$server;
+  $disk = &$disks[$name];
+  $warning  = isset($disk['warning']) ? $disk['warning'] : $unraid['display']['warning'];
+  $critical = isset($disk['critical']) ? $disk['critical'] : $unraid['display']['critical'];
+  $warn = $used>=$critical ? 'alert' : ($used>=$warning ? 'warning' : '');
+  $item = 'used';
+  $last = isset($saved[$item][$name]) ? $saved[$item][$name] : 0;
+  if ($warn) {
+    if ($used>$last) {
+      exec("$notify -e \"unRAID $text disk utilization\" -s \"".ucfirst($warn)." [$server] - $text is ".($warn=='alert'?'low on space':'high on usage')." (${used}%)\" -d \"$info\" -i \"$warn\"");
+      $saved[$item][$name] = $used;
+    }
+  } else {
+    if ($last) {
+      exec("$notify -e \"unRAID $text message\" -s \"Notice [$server] - $text returned to normal utilization level\" -d \"$info\"");
+      unset($saved[$item][$name]);
+    }
+  }
+}
 
 // check once a week for smart database updates
 $smartDB = '/usr/share/smartmontools/drivedb.h.lastcheck';
@@ -194,13 +214,14 @@ if (!file_exists($smartDB) || (time()-filemtime($smartDB)>=$interval)) exec('/us
 foreach ($disks as $disk) {
   $name = $disk['name'];
   if ($name=='flash' || substr($disk['status'],-3)=='_NP') continue;
-  $temp = $disk['temp'];
   $text = my_disk($name).($name=='cache'||$name=='parity'?' disk':'');
   $info = !empty($disk['id']) ? "{$disk['id']} ({$disk['device']})" : "No device identification ({$disk['device']})";
 // process disk temperature notifications
-  check_temp($name,$temp,$text,$info);
+  check_temp($name,$disk['temp'],$text,$info);
 // process disk SMART notifications
   check_smart($name,$disk['device'],$text,$info);
+// process disk usage notifications
+  check_usage($name,($disk['fsSize']?round(100-$disk['fsFree']/$disk['fsSize']):0),$text,$info);
 // process disk operation notifications
   $warn = strtok($disk['color'],'-');
   $item = 'disk';

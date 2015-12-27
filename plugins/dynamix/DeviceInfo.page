@@ -25,6 +25,12 @@ function displayTemp($temp) {
 }
 ?>
 <script>
+function doDispatch(form,name) {
+  var fields = {};
+  fields['#cfg'] = "/boot/config/smart-one.cfg";
+  $(form).find('input[name^="'+name+'_"]').each(function(){fields[$(this).attr('name')] = $(this).val(); $(this).prop('disabled',true);});
+  $.post('/webGui/include/Dispatcher.php',fields);
+}
 function prepareDeviceInfo(form) {
   var events = [];
   for (var i=0; i < <?=count($preselect)?>; i++) {
@@ -69,7 +75,7 @@ $(function() {
 });
 </script>
 
-<form markdown="1" method="POST" action="/update.htm" target="progressFrame">
+<form markdown="1" method="POST" action="/update.htm" target="progressFrame" onsubmit="doDispatch(this,'<?=$name?>')">
 Name:
 : <big><?=my_disk($name)?></big>
 
@@ -123,7 +129,7 @@ File system type:
 
 <?endif;?>
 
-Spin down delay:</td>
+Spin down delay:
 : <select name="diskSpindownDelay.<?=$disk['idx']?>" size="1">
   <?=mk_option($disk['spindownDelay'], "-1", "Use default")?>
   <?=mk_option($disk['spindownDelay'], "0",  "Never")?>
@@ -140,6 +146,29 @@ Spin down delay:</td>
   <?=mk_option($disk['spindownDelay'], "8",  "8 hours")?>
   <?=mk_option($disk['spindownDelay'], "9",  "9 hours")?>
   </select><span id="smart_selftest" class='orange-text'></span>
+
+Warning disk utilization level (%):
+: <input type="number" min="0" max="99" name="<?=$name?>_warning" class="narrow" value="<?=isset($disk['warning'])?$disk['warning']:''?>" placeholder="<?=$display['warning']?>">
+
+> *Warning disk utilization* sets the warning threshold for this hard disk utilization. Exceeding this threshold will result in a warning notification.
+>
+> When the warning level is set equal or greater than the critical level, there will be only critical notifications (warnings are not existing).
+
+Critical disk utilization level (%):
+: <input type="number" min="0" max="100" name="<?=$name?>_critical" class="narrow" value="<?=isset($disk['critical'])?$disk['critical']:''?>" placeholder="<?=$display['critical']?>")>
+
+> *Critical disk utilization* sets the critical threshold for this hard disk utilization. Exceeding this threshold will result in an alert notification.
+
+Warning disk temperature threshold (&deg;<?=$display['unit']?>):
+: <input type="number" min="1" max="300" name="<?=$name?>_hotTemp" class="narrow" value="<?=isset($disk['hotTemp'])?displayTemp($disk['hotTemp']):''?>" placeholder="<?=displayTemp($display['hot'])?>">
+
+> *Warning disk temperature* sets the warning threshold for this hard disk temperature. Exceeding this threshold will result in a warning notification.
+
+Critical disk temperature threshold (&deg;<?=$display['unit']?>):
+: <input type="number" min="1" max="300" name="<?=$name?>_maxTemp" class="narrow" value="<?=isset($disk['maxTemp'])?displayTemp($disk['maxTemp']):''?>" placeholder="<?=displayTemp($display['max'])?>">
+
+> *Critical disk temperature* sets the critical threshold for this hard disk temperature. Exceeding this threshold will result in an alert notification.
+
 
 <?if (($var['spinupGroups']=="yes")&&($disk['name']!="cache")):?>
 
@@ -419,12 +448,6 @@ SMART attribute notifications:
 &nbsp;
 : <input type="checkbox" name="at<?=$x?>" value="<?=$preselect[$x]['code']?>"<?=in_array($preselect[$x]['code'],$events)?' checked':''?>><span style="display:inline-block;width:136px"><?=$preselect[$x]['code']?></span><?=$preselect[$x]['text']?>
   <?endfor;?>
-
-Warning disk temperature threshold (&deg;<?=$display['unit']?>):
-: <input type="number" min="1" max="300" name="hotTemp" style="width:32px" value="<?=isset($disk['hotTemp'])?displayTemp($disk['hotTemp']):''?>" placeholder="<?=displayTemp($display['hot'])?>">
-
-Critical disk temperature threshold (&deg;<?=$display['unit']?>):
-: <input type="number" min="1" max="300" name="maxTemp" style="width:32px" value="<?=isset($disk['maxTemp'])?displayTemp($disk['maxTemp']):''?>" placeholder="<?=displayTemp($display['max'])?>">
 
 > The user can enable or disable notifications for the given SMART attributes. It is recommended to keep the default, which is ALL selected attributes,
 > when certain attributes are not present on your hard disk or do not provide the correct information, these may be excluded.
