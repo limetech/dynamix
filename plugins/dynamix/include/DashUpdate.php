@@ -20,28 +20,28 @@ function my_insert(&$source,$string) {
   $source = substr_replace($source,$string,4,0);
 }
 function my_smart(&$source,$name,$page) {
-  global $var,$disks,$path,$failed,$numbers;
+  global $var,$disks,$path,$failed,$numbers,$saved;
   $disk   = &$disks[$name];
   $select = isset($disk['smSelect']) ? $disk['smSelect'] : -1; if ($select==-1) $select = isset($var['smSelect']) ? $var['smSelect'] : 0;
   $level  = isset($disk['smLevel']) ? $disk['smLevel'] : -1; if ($level==-1) $level = isset($var['smLevel']) ? $var['smLevel'] : 1;
   $events = isset($disk['smEvents']) ? explode('|',$disk['smEvents']) : (isset($var['smEvents']) ? explode('|',$var['smEvents']) : $numbers);
-  $title  = ''; $thumb = 'good';
+  $thumb = 'good';
   $file   = "state/smart/$name";
   if (file_exists("$file.ssa") && in_array(file_get_contents("$file.ssa"),$failed)) {
-    $title = "S.M.A.R.T health-check failed"; $thumb = 'bad';
+    $thumb = 'bad';
   } else {
-    exec("awk 'NR>7{print $1,$2,$4,$6,$9,$10}' $file 2>/dev/null", $codes);
-    foreach ($codes as $code) {
-      if (!$code) continue;
-      list($id,$class,$value,$thres,$when,$raw) = explode(' ',$code);
-      $fail = strpos($when,'FAILING_NOW')!==false;
-      if (!$fail && !in_array($id,$events)) continue;
-      if ($fail || ($select ? $thres>0 && $value<=$thres*$level : $raw>0)) $title .= normalize($class,$fail?$when:$raw);
+    if (empty($saved["smart"]["$name.ack"])) {
+      exec("awk 'NR>7{print $1,$2,$4,$6,$9,$10}' $file 2>/dev/null", $codes);
+      foreach ($codes as $code) {
+        if (!$code) continue;
+        list($id,$class,$value,$thres,$when,$raw) = explode(' ',$code);
+        $fail = strpos($when,'FAILING_NOW')!==false;
+        if (!$fail && !in_array($id,$events)) continue;
+        if ($fail || ($select ? $thres>0 && $value<=$thres*$level : $raw>0)) {$thumb = 'alert'; break;};
+      }
     }
-    if ($title) $thumb = 'alert'; else $title = 'No errors reported';
   }
-  $tab = $page=='New' ? 'tab2' : 'tab3';
-  my_insert($source, "<a href=\"/Dashboard/$page?name=$name\" onclick=\"$.cookie('one','$tab',{path:'/'})\" title=\"$title\"><img src=\"$path/$thumb.png\"></a>");
+  my_insert($source, "<span id='smart-$name' name='$page' class='$thumb'><img src=\"$path/$thumb.png\" onmouseover=\"this.style.cursor='pointer'\" title=\"Click to get context menu\"></span>");
 }
 function my_usage(&$source,$used) {
   my_insert($source, $used ? "<div class='usage-disk all'><span style='width:$used'>$used</span></div>" : "-");
@@ -70,8 +70,9 @@ $failed = ['FAILED','NOK'];
 switch ($_POST['cmd']) {
 case 'disk':
   $i = 2;
-  $disks = parse_ini_file('state/disks.ini',true); $var = [];
-  $devs  = parse_ini_file('state/devs.ini',true);
+  $disks = @parse_ini_file('state/disks.ini',true); $var = [];
+  $devs  = @parse_ini_file('state/devs.ini',true);
+  $saved = @parse_ini_file('state/monitor.ini',true);
   require_once 'CustomMerge.php';
   require_once 'Preselect.php';
   $row1 = array_fill(0,26,'<td></td>'); my_insert($row1[0],'Active');
@@ -96,7 +97,6 @@ case 'disk':
       if ($disk['name']!='cache') $disk['fsStatus']=='-';
     break;}
     if ($n>0) {
-      $good = true;
       switch ($state) {
       case 'grey-off':
       break; //ignore
@@ -112,11 +112,10 @@ case 'disk':
       break;
       default:
         my_insert($row4[$n],"<img src=$path/$state.png>");
-        $good = false;
       break;}
       $temp = $disk['temp'];
       if ($temp>=$_POST['hot']) my_insert($row5[$n],"<span class='heat-img'><img src='$path/".($temp>=$_POST['max']?'max':'hot').".png'></span><span class='heat-text' style='display:none'>".my_temp($temp,$_POST['unit'])."</span>");
-      if ($disk['device'] && !strpos($state,'blink') && $good) my_smart($row6[$n],$disk['name'],'Device');
+      if ($disk['device'] && !strpos($state,'blink')) my_smart($row6[$n],$disk['name'],'Device');
       my_usage($row7[$n],($n>1 && $disk['fsStatus']=='Mounted')?(round((1-$disk['fsFree']/$disk['fsSize'])*100).'%'):'');
     }
   }
