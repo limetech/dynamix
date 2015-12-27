@@ -27,8 +27,6 @@ $ram    = "/var/local/emhttp/monitor.ini";
 $rom    = "/boot/config/plugins/dynamix/monitor.ini";
 $saved  = @parse_ini_file($ram,true);
 $unraid = parse_plugin_cfg("dynamix",true);
-$max    = $unraid['display']['max'];
-$hot    = $unraid['display']['hot'];
 $high1  = $unraid['display']['critical'];
 $high2  = $unraid['display']['warning'];
 $server = strtoupper($var['NAME']);
@@ -99,7 +97,10 @@ function read_write_parity_log($epoch) {
   return $line;
 }
 function check_temp($name,$temp,$text,$info) {
-  global $notify,$saved,$max,$hot,$server;
+  global $notify,$disks,$saved,$unraid,$server;
+  $disk = &$disks[$name];
+  $hot  = isset($disk['hotTemp']) ? $disk['hotTemp'] : $unraid['display']['hot'];
+  $max  = isset($disk['maxTemp']) ? $disk['maxTemp'] : $unraid['display']['max'];
   $warn = $temp>=$max ? 'alert' : ($temp>=$hot ? 'warning' : '');
   $item = 'temp';
   $last = isset($saved[$item][$name]) ? $saved[$item][$name] : 0;

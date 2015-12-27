@@ -18,6 +18,11 @@ Png="devicesettings.png"
 require_once "$docroot/webGui/include/Preselect.php";
 $disk = &$disks[$name];
 $events = isset($disk['smEvents']) ? explode('|',$disk['smEvents']) : (isset($var['smEvents']) ? explode('|',$var['smEvents']) : $numbers);
+
+function displayTemp($temp) {
+  global $display;
+  return $display['unit']=='F' ? round(9/5*$temp)+32 : $temp;
+}
 ?>
 <script>
 function prepareDeviceInfo(form) {
@@ -414,6 +419,12 @@ SMART attribute notifications:
 &nbsp;
 : <input type="checkbox" name="at<?=$x?>" value="<?=$preselect[$x]['code']?>"<?=in_array($preselect[$x]['code'],$events)?' checked':''?>><span style="display:inline-block;width:136px"><?=$preselect[$x]['code']?></span><?=$preselect[$x]['text']?>
   <?endfor;?>
+
+Warning disk temperature threshold (&deg;<?=$display['unit']?>):
+: <input type="number" min="1" max="300" name="hotTemp" style="width:32px" value="<?=isset($disk['hotTemp'])?displayTemp($disk['hotTemp']):''?>" placeholder="<?=displayTemp($display['hot'])?>">
+
+Critical disk temperature threshold (&deg;<?=$display['unit']?>):
+: <input type="number" min="1" max="300" name="maxTemp" style="width:32px" value="<?=isset($disk['maxTemp'])?displayTemp($disk['maxTemp']):''?>" placeholder="<?=displayTemp($display['max'])?>">
 
 > The user can enable or disable notifications for the given SMART attributes. It is recommended to keep the default, which is ALL selected attributes,
 > when certain attributes are not present on your hard disk or do not provide the correct information, these may be excluded.
