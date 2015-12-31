@@ -186,6 +186,7 @@ function check_smart($name,$port,$text,$info) {
 }
 function check_usage($name,$used,$text,$info) {
   global $notify,$disks,$saved,$unraid,$server;
+  if ($used == -1) return;
   $disk = &$disks[$name];
   $warning  = !empty($disk['warning']) ? $disk['warning'] : $unraid['display']['warning'];
   $critical = !empty($disk['critical']) ? $disk['critical'] : $unraid['display']['critical'];
@@ -221,7 +222,7 @@ foreach ($disks as $disk) {
 // process disk SMART notifications
   check_smart($name,$disk['device'],$text,$info);
 // process disk usage notifications
-  check_usage($name,($disk['fsSize']?100-round(100*$disk['fsFree']/$disk['fsSize']):0),$text,$info);
+  check_usage($name,($disk['fsSize']?100-round(100*$disk['fsFree']/$disk['fsSize']):-1),$text,$info);
 // process disk operation notifications
   $warn = strtok($disk['color'],'-');
   $item = 'disk';
