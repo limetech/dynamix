@@ -25,10 +25,14 @@ function displayTemp($temp) {
 }
 ?>
 <script>
-function doDispatch(form,name) {
+function doDispatch(form) {
   var fields = {};
+<?if ($display['unit']=='F'):?>
+  if (form.<?=$name?>_hotTemp.value>0) form.<?=$name?>_hotTemp.value = Math.round((form.<?=$name?>_hotTemp.value-32)*5/9);
+  if (form.<?=$name?>_maxTemp.value>0) form.<?=$name?>_maxTemp.value = Math.round((form.<?=$name?>_maxTemp.value-32)*5/9);
+<?endif;?>
   fields['#cfg'] = "/boot/config/smart-one.cfg";
-  $(form).find('input[name^="'+name+'_"]').each(function(){fields[$(this).attr('name')] = $(this).val(); $(this).prop('disabled',true);});
+  $(form).find('input[name^="<?=$name?>_"]').each(function(){fields[$(this).attr('name')] = $(this).val(); $(this).prop('disabled',true);});
   $.post('/webGui/include/Dispatcher.php',fields);
 }
 function prepareDeviceInfo(form) {
@@ -75,7 +79,7 @@ $(function() {
 });
 </script>
 
-<form markdown="1" method="POST" action="/update.htm" target="progressFrame" onsubmit="doDispatch(this,'<?=$name?>')">
+<form markdown="1" method="POST" action="/update.htm" target="progressFrame" onsubmit="doDispatch(this)">
 Name:
 : <big><?=my_disk($name)?></big>
 
@@ -148,24 +152,24 @@ Spin down delay:
   </select><span id="smart_selftest" class='orange-text'></span>
 
 Warning disk utilization level (%):
-: <input type="number" min="0" max="99" name="<?=$name?>_warning" class="narrow" value="<?=isset($disk['warning'])?$disk['warning']:''?>" placeholder="<?=$display['warning']?>">
+: <input type="number" min="0" max="99" name="<?=$name?>_warning" class="narrow" value="<?=!empty($disk['warning'])?$disk['warning']:''?>" placeholder="<?=$display['warning']?>">
 
 > *Warning disk utilization* sets the warning threshold for this hard disk utilization. Exceeding this threshold will result in a warning notification.
 >
 > When the warning level is set equal or greater than the critical level, there will be only critical notifications (warnings are not existing).
 
 Critical disk utilization level (%):
-: <input type="number" min="0" max="100" name="<?=$name?>_critical" class="narrow" value="<?=isset($disk['critical'])?$disk['critical']:''?>" placeholder="<?=$display['critical']?>")>
+: <input type="number" min="0" max="100" name="<?=$name?>_critical" class="narrow" value="<?=!empty($disk['critical'])?$disk['critical']:''?>" placeholder="<?=$display['critical']?>")>
 
 > *Critical disk utilization* sets the critical threshold for this hard disk utilization. Exceeding this threshold will result in an alert notification.
 
 Warning disk temperature threshold (&deg;<?=$display['unit']?>):
-: <input type="number" min="1" max="300" name="<?=$name?>_hotTemp" class="narrow" value="<?=isset($disk['hotTemp'])?displayTemp($disk['hotTemp']):''?>" placeholder="<?=displayTemp($display['hot'])?>">
+: <input type="number" min="1" max="300" name="<?=$name?>_hotTemp" class="narrow" value="<?=!empty($disk['hotTemp'])?displayTemp($disk['hotTemp']):''?>" placeholder="<?=displayTemp($display['hot'])?>">
 
 > *Warning disk temperature* sets the warning threshold for this hard disk temperature. Exceeding this threshold will result in a warning notification.
 
 Critical disk temperature threshold (&deg;<?=$display['unit']?>):
-: <input type="number" min="1" max="300" name="<?=$name?>_maxTemp" class="narrow" value="<?=isset($disk['maxTemp'])?displayTemp($disk['maxTemp']):''?>" placeholder="<?=displayTemp($display['max'])?>">
+: <input type="number" min="1" max="300" name="<?=$name?>_maxTemp" class="narrow" value="<?=!empty($disk['maxTemp'])?displayTemp($disk['maxTemp']):''?>" placeholder="<?=displayTemp($display['max'])?>">
 
 > *Critical disk temperature* sets the critical threshold for this hard disk temperature. Exceeding this threshold will result in an alert notification.
 

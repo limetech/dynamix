@@ -26,6 +26,10 @@ function displayTemp($temp) {
 <script>
 function doDispatch(form) {
   var fields = {};
+<?if ($display['unit']=='F'):?>
+  form.display_hot.value = Math.round((form.display_hot.value-32)*5/9);
+  form.display_max.value = Math.round((form.display_max.value-32)*5/9);
+<?endif;?>
   fields['#cfg'] = "/boot/config/plugins/dynamix/dynamix.cfg";
   $(form).find('input[name^="display_"]').each(function(){fields[$(this).attr('name')] = $(this).val(); $(this).prop('disabled',true);});
   $.post('/webGui/include/Dispatcher.php',fields);
