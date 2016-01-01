@@ -66,10 +66,14 @@ $zip = str_replace(' ','_',strtolower($var['NAME']))."-syslog-".date('Ymd-Hi')."
 require_once 'webGui/include/ColorCoding.php';
 
 echo $display['resize'] ? "<pre class='up' style='display:none'>" : "<pre class='up'>";
-foreach (file('/var/log/syslog') as $line) {
-  $span = "span class='text'";
-  foreach ($match as $type) foreach ($type['text'] as $text) if (preg_match("/$text/i",$line)) {$span = "span class='{$type['class']}'"; break 2;}
-  echo "<$span>".htmlentities($line)."</span>";
+$logs = glob('/var/log/syslog*',GLOB_NOSORT);
+usort($logs, create_function('$a,$b', 'return filemtime($a)-filemtime($b);'));
+foreach ($logs as $log) {
+  foreach (file($log) as $line) {
+    $span = "span class='text'";
+    foreach ($match as $type) foreach ($type['text'] as $text) if (preg_match("/$text/i",$line)) {$span = "span class='{$type['class']}'"; break 2;}
+    echo "<$span>".htmlentities($line)."</span>";
+  }
 }
 echo "</pre>";
 ?>
