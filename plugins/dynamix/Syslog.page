@@ -13,6 +13,9 @@ Title="System Log"
  * all copies or substantial portions of the Software.
  */
 ?>
+<?
+$zip = str_replace(' ','_',strtolower($var['NAME']))."-syslog-".date('Ymd-Hi').".zip";
+?>
 <script>
 function cleanUp() {
   if (document.hasFocus()) {
@@ -62,7 +65,6 @@ $(function() {
 $('.tabs').append("<span class='status'><span class='lite label'>Text<input type='checkbox' class='ctrl' onclick='highlight(!this.checked,\"N\")' checked></span><span class='error label'>Error<input type='checkbox' onclick='highlight(this.checked,\"E\")' checked></span><span class='warn label'>Warning<input type='checkbox' onclick='highlight(this.checked,\"W\")' checked></span><span class='system label'>System<input type='checkbox' onclick='highlight(this.checked,\"S\")' checked></span><span class='array label'>Array<input type='checkbox' onclick='highlight(this.checked,\"A\")' checked></span><span class='login label'>Login<input type='checkbox' onclick='highlight(this.checked,\"L\")' checked></span><span class='lite label'><input type='checkbox' class='ctrl' onclick='toggle(this.checked)' checked></span></span>");
 </script>
 <?
-$zip = str_replace(' ','_',strtolower($var['NAME']))."-syslog-".date('Ymd-Hi').".zip";
 require_once 'webGui/include/ColorCoding.php';
 
 echo $display['resize'] ? "<pre class='up' style='display:none'>" : "<pre class='up'>";
