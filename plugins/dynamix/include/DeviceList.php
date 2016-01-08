@@ -20,6 +20,8 @@ $disks = parse_ini_file('state/disks.ini',true);
 $sum   = ['count'=>0, 'temp'=>0, 'fsSize'=>0, 'fsUsed'=>0, 'fsFree'=>0, 'numReads'=>0, 'numWrites'=>0, 'numErrors'=>0];
 extract(parse_plugin_cfg('dynamix',true));
 
+require_once 'CustomMerge.php';
+
 function in_parity_log($log,$timestamp) {
   if (file_exists($log)) {
     $handle = fopen($log, 'r');
@@ -94,13 +96,13 @@ function fs_info(&$disk) {
       echo "<td>".my_scale($disk['fsUsed']*1024,$unit)." $unit</td>";
     } else {
       $used = $disk['fsSize'] ? 100-round(100*$disk['fsFree']/$disk['fsSize']) : 0;
-      echo "<td><div class='usage-disk'><span style='margin:0;width:$used%' class='".usage_color($used,false)."'><span>".my_scale($disk['fsUsed']*1024,$unit)." $unit</span></span></div></td>";
+      echo "<td><div class='usage-disk'><span style='margin:0;width:$used%' class='".usage_color($disk,$used,false)."'><span>".my_scale($disk['fsUsed']*1024,$unit)." $unit</span></span></div></td>";
     }
     if ($display['text']<10 ? $display['text']%10==0 : $display['text']%10!=0) {
       echo "<td>".my_scale($disk['fsFree']*1024,$unit)." $unit</td>";
     } else {
       $free = $disk['fsSize'] ? round(100*$disk['fsFree']/$disk['fsSize']) : 0;
-      echo "<td><div class='usage-disk'><span style='margin:0;width:$free%' class='".usage_color($free,true)."'><span>".my_scale($disk['fsFree']*1024,$unit)." $unit</span></span></div></td>";
+      echo "<td><div class='usage-disk'><span style='margin:0;width:$free%' class='".usage_color($disk,$free,true)."'><span>".my_scale($disk['fsFree']*1024,$unit)." $unit</span></span></div></td>";
     }
   } else
     echo "<td colspan='2'></td><td>{$disk['fsStatus']}</td><td></td>";
@@ -218,13 +220,13 @@ function show_totals($text) {
       echo "<td>".my_scale($sum['fsUsed']*1024,$unit)." $unit</td>";
     } else {
       $used = $sum['fsSize'] ? 100-round(100*$sum['fsFree']/$sum['fsSize']) : 0;
-      echo "<td><div class='usage-disk'><span style='margin:0;width:$used%' class='".usage_color($used,false)."'><span>".my_scale($sum['fsUsed']*1024,$unit)." $unit</span></span></div></td>";
+      echo "<td><div class='usage-disk'><span style='margin:0;width:$used%' class='".usage_color($display,$used,false)."'><span>".my_scale($sum['fsUsed']*1024,$unit)." $unit</span></span></div></td>";
     }
     if ($display['text']<10 ? $display['text']%10==0 : $display['text']%10!=0) {
       echo "<td>".my_scale($sum['fsFree']*1024,$unit)." $unit</td>";
     } else {
       $free = $sum['fsSize'] ? round(100*$sum['fsFree']/$sum['fsSize']) : 0;
-      echo "<td><div class='usage-disk'><span style='margin:0;width:$free%' class='".usage_color($free,true)."'><span>".my_scale($sum['fsFree']*1024,$unit)." $unit</span></span></div></td>";
+      echo "<td><div class='usage-disk'><span style='margin:0;width:$free%' class='".usage_color($display,$free,true)."'><span>".my_scale($sum['fsFree']*1024,$unit)." $unit</span></span></div></td>";
     }
     echo "<td></td>";
   } else

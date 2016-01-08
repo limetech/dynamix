@@ -72,16 +72,18 @@ function my_usage() {
     echo "<div class='usage-bar'><span><center>".($var['fsState']=='Started'?'Maintenance':'off-line')."</center></span></div>";
   }
 }
-function usage_color($limit,$free) {
+function usage_color(&$disk,$limit,$free) {
   global $display;
   if ($display['text']==1 || intval($display['text']/10)==1) return '';
+  $critical = !empty($disk['critical']) ? $disk['critical'] : $display['critical'];
+  $warning = !empty($disk['warning']) ? $disk['warning'] : $display['warning'];
   if (!$free) {
-    if ($limit>=$display['critical']) return 'redbar';
-    if ($limit>=$display['warning']) return 'orangebar';
+    if ($limit>=$critical) return 'redbar';
+    if ($limit>=$warning) return 'orangebar';
     return 'greenbar';
   } else {
-    if ($limit<=100-$display['critical']) return 'redbar';
-    if ($limit<=100-$display['warning']) return 'orangebar';
+    if ($limit<=100-$critical) return 'redbar';
+    if ($limit<=100-$warning) return 'orangebar';
     return 'greenbar';
   }
 }
