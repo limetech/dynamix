@@ -49,22 +49,6 @@ function upload(remove) {
     window.onload = forceReload();
   }
 }
-function prepareDisplay(form) {
-  if (!form.critical.value | !form.warning.value) {
-    swal({title:"Missing value",text:"An empty percentage value is not allowed!",type:"error"});
-    return false;
-  }
-  if (form.warning.value>form.critical.value) {
-    swal({title:"Wrong value",text:"Warning percentage must be lower than Critical percentage!",type:"error"});
-    return false;
-  }
-  if (!form.number.value) form.number.value='.,';
-  if (form.unit.selectedIndex==1) {
-    form.hot.value = Math.round(5/9*(form.hot.value-32));
-    form.max.value = Math.round(5/9*(form.max.value-32));
-  }
-  return true;
-}
 function presetTime(form) {
   var system = form.date.selectedIndex==0;
   if (system) form.time.selectedIndex = 0;
@@ -139,9 +123,10 @@ $(function() {
 >
 > You can experiment with these settings as desired, they only affect visual properties.
 
-<form markdown="1" name="display_settings" method="POST" action="/update.php" target="progressFrame" onsubmit="return prepareDisplay(this)">
-<input type="hidden" name="#file" value="dynamix/dynamix.cfg"/>
-<input type="hidden" name="#section" value="display"/>
+<form markdown="1" name="display_settings" method="POST" action="/update.php" target="progressFrame">
+<input type="hidden" name="#file" value="dynamix/dynamix.cfg">
+<input type="hidden" name="#section" value="display">
+<input type="hidden" name="#include" value="/webGui/include/update.display.php">
 Date format:
 : <select name="date" size="1" onchange="presetTime(this.form)">
   <?=mk_option($display['date'], "%c", "System Setting")?>
@@ -192,6 +177,12 @@ Page view:
 : <select name="tabs" size="1">
   <?=mk_option($display['tabs'], "0", "Tabbed")?>
   <?=mk_option($display['tabs'], "1", "Non-tabbed")?>
+  </select>
+
+Placement of Users menu:
+: <select name="users" size="1">
+  <?=mk_option($display['users'], "Tasks:3", "Header")?>
+  <?=mk_option($display['users'], "UserPreferences", "Settings menu")?>
   </select>
 
 Listing height:
