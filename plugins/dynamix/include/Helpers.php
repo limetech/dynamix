@@ -56,7 +56,7 @@ function my_word($num) {
   return $num<count($words) ? $words[$num] : $num;
 }
 function my_usage() {
-  global $disks,$var;
+  global $disks,$var,$display;
   $arraysize=0;
   $arrayfree=0;
   foreach ($disks as $disk) {
@@ -67,7 +67,7 @@ function my_usage() {
   }
   if ($var['fsNumMounted']>0) {
     $used = $arraysize ? 100-round(100*$arrayfree/$arraysize) : 0;
-    echo "<div class='usage-bar'><span style='width:{$used}%' class='".usage_color($used,false)."'><span>{$used}%</span></span></div>";
+    echo "<div class='usage-bar'><span style='width:{$used}%' class='".usage_color($display,$used,false)."'><span>{$used}%</span></span></div>";
   } else {
     echo "<div class='usage-bar'><span><center>".($var['fsState']=='Started'?'Maintenance':'off-line')."</center></span></div>";
   }
