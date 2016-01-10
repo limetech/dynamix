@@ -74,6 +74,8 @@ function export_settings($protocol,$share) {
   return '<em>'.ucfirst($share['security']).'</em>';
 }
 ?>
+<link type="text/css" rel="stylesheet" href="/webGui/styles/context.standalone.css">
+<script src="/webGui/javascript/context.js"></script>
 <script>
 var timer2,timer30;
 
@@ -128,6 +130,18 @@ function update30() {
     if (data) $('#dash1').html(data);
     clearTimeout(timer2);
     timer2 = setTimeout(heatAlarm,2000);
+    $('[id^="smart-"]').each(function() {
+      var opts = [];
+      var id = '#'+$(this).attr('id');
+      var page = $(this).attr('name');
+      var view = $(this).attr('class');
+      var disk = id.substr(id.indexOf('-')+1);
+      opts.push({text:'Attributes',icon:'fa-sitemap',action:function(e){e.preventDefault();attributes(page,disk);}});
+      opts.push({text:'Capabilities',icon:'fa-user',action:function(e){e.preventDefault();capabilities(page,disk);}});
+      opts.push({text:'Identity',icon:'fa-home',action:function(e){e.preventDefault();identity(page,disk);}});
+      if (view == 'alert') opts.push({text:'Acknowledge',icon:'fa-check-square-o',action:function(e){e.preventDefault();acknowledge(disk);}});
+      context.attach(id,opts);
+    });
 <?if ($display['refresh']>0 || ($display['refresh']<0 && $var['mdResync']==0)):?>
     timer30 = setTimeout(update30,<?=max(abs($display['refresh']),30000)?>);
 <?endif;?>
@@ -149,6 +163,24 @@ function heatAlarm() {
   }
   timer2 = setTimeout(heatAlarm,2000);
 }
+function attributes(page,disk) {
+  var tab = page=='New' ? 'tab2' : 'tab3';
+  $.cookie('one',tab,{path:'/'});
+  location.replace('/Dashboard/'+page+'?name='+disk);
+}
+function capabilities(page,disk) {
+  var tab = page=='New' ? 'tab3' : 'tab4';
+  $.cookie('one',tab,{path:'/'});
+  location.replace('/Dashboard/'+page+'?name='+disk);
+}
+function identity(page,disk) {
+  var tab = page=='New' ? 'tab4' : 'tab5';
+  $.cookie('one',tab,{path:'/'});
+  location.replace('/Dashboard/'+page+'?name='+disk);
+}
+function acknowledge(disk) {
+  $.post('/webGui/include/Acknowledge.php',{disk:disk},function(data){clearTimeout(timer30);update30();});
+}
 $(function() {
   if ($.cookie('shareMode')!=null) { $('select[name="enter_share"] option')[$.cookie('shareMode')].selected = true; $('select[name="enter_share"]').change(); }
   if ($.cookie('viewMode')!=null) { $('select[name="enter_view"] option')[$.cookie('viewMode')].selected = true; $('select[name="enter_view"]').change(); }
@@ -158,6 +190,7 @@ $(function() {
 <?if ($display['refresh']==0 || ($display['refresh']<0 && $var['mdResync']>0)):?>
   $('.tabs').append("<span class='status vhshift'><input type='button' value='Refresh' onclick='refresh()'></span>");
 <?endif;?>
+  context.init({preventDoubleContext:false});
 });
 </script>
 

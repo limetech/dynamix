@@ -13,6 +13,12 @@
 <?
 require_once 'Markdown.php';
 
+function get_file_key($file,$entry) {
+  list($key, $default) = explode('=',$entry,2);
+  $var = @parse_ini_file($file);
+  return empty($var[$key]) ? $default : $var[$key];
+}
+
 function build_pages($pattern) {
   global $site;
   foreach (glob($pattern, GLOB_NOSORT) as $entry) {
@@ -32,6 +38,7 @@ function find_pages($item) {
   foreach ($site as $page) {
     if (empty($page['Menu'])) continue;
     $menu = strtok($page['Menu'], ' ');
+    if ($menu[0]=='/') $menu = get_file_key($menu,strtok(' '));
     while ($menu !== false) {
       $add = explode(':', $menu);
       $add[] = '';

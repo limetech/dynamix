@@ -40,8 +40,21 @@ function user_share_settings($protocol,$share) {
   return '<em>'.ucfirst($share['security']).'</em>';
 }
 
+function globalInclude($name) {
+  global $var;
+  return substr($name,0,4)!='disk' || !$var['shareUserInclude'] || strpos("{$var['shareUserInclude']},","$name,")!==false;
+}
+
+function shareInclude($name) {
+  global $include;
+  return !$include || substr($name,0,4)!='disk' || strpos("$include,", "$name,")!==false;
+}
+
 // Compute all user shares
 if ($compute=='yes') foreach ($shares as $name => $share) exec("webGui/scripts/share_size \"$name\" \"ssz1\"");
+
+// global shares include/exclude
+$myDisks = array_filter(array_diff(array_keys($disks), explode(',',$var['shareUserExclude'])), 'globalInclude');
 
 // Share size per disk
 $preserve = ($path==$prev || $compute=='yes');
@@ -70,23 +83,24 @@ foreach ($shares as $name => $share) {
   echo "<td>".user_share_settings($var['shareAFPEnabled'], $sec_afp[$name])."</td>";
   $cmd="/webGui/scripts/share_size"."&arg1=".urlencode($name)."&arg2=ssz1";
   if (array_key_exists($name, $ssz1)) {
-    echo "<td>".my_scale($ssz1[$name]['total']*1024, $unit)." $unit</td>";
+    echo "<td>".my_scale($ssz1[$name]['disk.total']*1024, $unit)." $unit</td>";
     echo "<td>".my_scale($share['free']*1024, $unit)." $unit</td>";
     echo "<td><a href='$path/Browse?dir=/mnt/user/".urlencode($name)."'><img src='/webGui/images/explore.png' title='Browse /mnt/user/".urlencode($name)."'></a></td>";
     echo "</tr>";
-    foreach ($ssz1[$share['name']] as $diskname => $disksize) {
-      if ($diskname!="total") {
-        echo "<tr class='share_status_size'>";
-        echo "<td>".my_disk($diskname).":</td>";
-        echo "<td></td>";
-        echo "<td></td>";
-        echo "<td></td>";
-        echo "<td></td>";
-        echo "<td class='share-$row-1'>".my_scale($disksize*1024, $unit)." $unit</td>";
-        echo "<td class='share-$row-2'>".my_scale($disks[$diskname]['fsFree']*1024, $unit)." $unit</td>";
-        echo "<td><a href='/update.htm?cmd=$cmd' target='progressFrame' title='Recompute...' onclick='$(\".share-$row-1\").html(\"Please wait...\");$(\".share-$row-2\").html(\"\");'><i class='fa fa-refresh icon'></i></a></td>";
-        echo "</tr>";
-      }
+    foreach ($ssz1[$name] as $diskname => $disksize) {
+      if ($diskname=='disk.total') continue;
+      $include = $share['include'];
+      $inside = in_array($diskname, array_filter(array_diff($myDisks, explode(',',$share['exclude'])), 'shareInclude'));
+      echo "<tr class='share_status_size".($inside ? "'>" : " warning'>");
+      echo "<td>".my_disk($diskname).":</td>";
+      echo "<td>".($inside ? "" : "<em>Share is outside the list of designated disks</em>")."</td>";
+      echo "<td></td>";
+      echo "<td></td>";
+      echo "<td></td>";
+      echo "<td class='share-$row-1'>".my_scale($disksize*1024, $unit)." $unit</td>";
+      echo "<td class='share-$row-2'>".my_scale($disks[$diskname]['fsFree']*1024, $unit)." $unit</td>";
+      echo "<td><a href='/update.htm?cmd=$cmd' target='progressFrame' title='Recompute...' onclick='$(\".share-$row-1\").html(\"Please wait...\");$(\".share-$row-2\").html(\"\");'><i class='fa fa-refresh icon'></i></a></td>";
+      echo "</tr>";
     }
   } else {
     echo "<td><a href='/update.htm?cmd=$cmd' target='progressFrame' onclick=\"$(this).text('Please wait...')\">Compute...</a></td>";

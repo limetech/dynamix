@@ -14,22 +14,23 @@
 require_once 'Wrappers.php';
 
 // Helper functions
-function my_scale($value, &$unit, $precision = NULL) {
+function my_scale($value, &$unit, $decimals = NULL) {
   global $display;
   $scale = $display['scale'];
   $number = $display['number'];
   $units = array('B','KB','MB','GB','TB','PB');
-  if ($scale==0 && $precision===NULL) {
+  if ($scale==0 && $decimals==NULL) {
+    $decimals = 0;
     $unit = '';
-    return number_format($value, 0, $number[0], ($value>=10000 ? $number[1] : ''));
   } else {
     $base = $value ? floor(log($value, 1000)) : 0;
     if ($scale>0 && $base>$scale) $base = $scale;
-    $value = round($value/pow(1000, $base), $precision===NULL ? 2 : $precision);
-    if ($value>=1000 && $scale<0) { $value = 1; $base++; }
+    $value /= pow(1000, $base);
+    if ($decimals==NULL) $decimals = $value>=100 ? 0 : ($value>=10 ? 1 : (round($value*100)%100==0 ? 0 : 2));
+    if ($scale<0 && round($value,$decimals)==1000) { $value = 1; $base++; }
     $unit = $units[$base];
-    return number_format($value, $precision===NULL ? (($value-intval($value)==0 || $value>=100) ? 0 : ($value>=10 ? 1 : 2)) : $precision, $number[0], ($value>=10000 ? $number[1] : ''));
   }
+  return number_format($value, $decimals, $number[0], $value>=10000 ? $number[1] : '');
 }
 function my_number($value) {
   global $display;
@@ -55,7 +56,7 @@ function my_word($num) {
   return $num<count($words) ? $words[$num] : $num;
 }
 function my_usage() {
-  global $disks,$var;
+  global $disks,$var,$display;
   $arraysize=0;
   $arrayfree=0;
   foreach ($disks as $disk) {
@@ -66,21 +67,23 @@ function my_usage() {
   }
   if ($var['fsNumMounted']>0) {
     $used = $arraysize ? 100-round(100*$arrayfree/$arraysize) : 0;
-    echo "<div class='usage-bar'><span style='width:{$used}%' class='".usage_color($used,false)."'><span>{$used}%</span></span></div>";
+    echo "<div class='usage-bar'><span style='width:{$used}%' class='".usage_color($display,$used,false)."'><span>{$used}%</span></span></div>";
   } else {
     echo "<div class='usage-bar'><span><center>".($var['fsState']=='Started'?'Maintenance':'off-line')."</center></span></div>";
   }
 }
-function usage_color($limit,$free) {
+function usage_color(&$disk,$limit,$free) {
   global $display;
   if ($display['text']==1 || intval($display['text']/10)==1) return '';
+  $critical = !empty($disk['critical']) ? $disk['critical'] : $display['critical'];
+  $warning = !empty($disk['warning']) ? $disk['warning'] : $display['warning'];
   if (!$free) {
-    if ($limit>=$display['critical']) return 'redbar';
-    if ($limit>=$display['warning']) return 'orangebar';
+    if ($limit>=$critical) return 'redbar';
+    if ($limit>=$warning) return 'orangebar';
     return 'greenbar';
   } else {
-    if ($limit<=100-$display['critical']) return 'redbar';
-    if ($limit<=100-$display['warning']) return 'orangebar';
+    if ($limit<=100-$critical) return 'redbar';
+    if ($limit<=100-$warning) return 'orangebar';
     return 'greenbar';
   }
 }
@@ -131,7 +134,7 @@ function plus($val, $word, $last) {
 function read_parity_log($epoch) {
   $log = '/boot/config/parity-checks.log';
   if (file_exists($log)) {
-    $timestamp = date('M j H:i:s',$epoch);
+    $timestamp = str_replace(['.0','.'],['  ',' '],date('M.d H:i:s',$epoch));
     $handle = fopen($log, 'r');
     while (($line = fgets($handle)) !== false) {
       if (strpos($line,$timestamp)!==false) break;

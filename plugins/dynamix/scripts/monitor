@@ -27,8 +27,6 @@ $ram    = "/var/local/emhttp/monitor.ini";
 $rom    = "/boot/config/plugins/dynamix/monitor.ini";
 $saved  = @parse_ini_file($ram,true);
 $unraid = parse_plugin_cfg("dynamix",true);
-$max    = $unraid['display']['max'];
-$hot    = $unraid['display']['hot'];
 $high1  = $unraid['display']['critical'];
 $high2  = $unraid['display']['warning'];
 $server = strtoupper($var['NAME']);
@@ -74,7 +72,7 @@ function my_check($time,$speed) {
 function read_write_parity_log($epoch) {
   global $disks;
   $log = '/boot/config/parity-checks.log';
-  $timestamp = date('M j H:i:s',$epoch);
+  $timestamp = str_replace(['.0','.'],['  ',' '],date('M.d H:i:s',$epoch));
   if (file_exists($log)) {
     $handle = fopen($log, 'r');
     while (($line = fgets($handle)) !== false) {
@@ -99,7 +97,10 @@ function read_write_parity_log($epoch) {
   return $line;
 }
 function check_temp($name,$temp,$text,$info) {
-  global $notify,$saved,$max,$hot,$server;
+  global $notify,$disks,$saved,$unraid,$server;
+  $disk = &$disks[$name];
+  $hot  = !empty($disk['hotTemp']) ? $disk['hotTemp'] : $unraid['display']['hot'];
+  $max  = !empty($disk['maxTemp']) ? $disk['maxTemp'] : $unraid['display']['max'];
   $warn = $temp>=$max ? 'alert' : ($temp>=$hot ? 'warning' : '');
   $item = 'temp';
   $last = isset($saved[$item][$name]) ? $saved[$item][$name] : 0;
@@ -124,11 +125,12 @@ function check_smart($name,$port,$text,$info) {
   $type = isset($disk['smType']) ? $disk['smType'] : -1; if ($type==-1) $type = isset($var['smType']) ? $var['smType'] : '';
   if ($type) {
     $ports = [];
-    if (strlen($disk['smPort1'])) $ports[] = $disk['smPort1'];
-    if (strlen($disk['smPort2'])) $ports[] = $disk['smPort2'];
-    if (strlen($disk['smPort3'])) $ports[] = $disk['smPort3'];
+    if (!empty($disk['smDevice'])) $port = $disk['smDevice'];
+    if (!empty($disk['smPort1'])) $ports[] = $disk['smPort1'];
+    if (!empty($disk['smPort2'])) $ports[] = $disk['smPort2'];
+    if (!empty($disk['smPort3'])) $ports[] = $disk['smPort3'];
     if ($ports) {
-      $glue = isset($disk['smGlue']) ? $disk['smGlue'] : -1; if ($glue==-1) $glue = isset($var['smGlue']) ? $var['smGlue'] : ',';
+      $glue = isset($disk['smGlue']) ? $disk['smGlue'] : ',';
       $type .= ','.implode($glue,$ports);
     }
   }
@@ -141,6 +143,7 @@ function check_smart($name,$port,$text,$info) {
     $fail = strpos($when,'FAILING_NOW')!==false;
     if (!$fail && !in_array($id,$events)) continue;
     $word = str_replace(['_',' (-)'],[' ',''],strtolower("$class ($when)"));
+    $ack = "$name.ack";
     switch ($select) {
     case 0:
       $attr = "$name.$id";
@@ -149,11 +152,13 @@ function check_smart($name,$port,$text,$info) {
         if ($raw>$last) {
           exec("$notify -e \"unRAID $text SMART health [$id]\" -s \"Warning [$server] - $word is $raw\" -d \"$info\" -i \"warning\"");
           $saved[$item][$attr] = $raw;
+          unset($saved[$item][$ack]);
         }
       } else {
         if ($last>0) {
           exec("$notify -e \"unRAID $text SMART message [$id]\" -s \"Notice [$server] - $word returned to normal value\" -d \"$info\"");
           unset($saved[$item][$attr]);
+          unset($saved[$item][$ack]);
         }
       }
       break;
@@ -164,11 +169,13 @@ function check_smart($name,$port,$text,$info) {
         if ($value*($value>$thres?$level:1)<$last) {
           exec("$notify -e \"unRAID $text SMART health [$id]\" -s \"Warning [$server] - $word is $value\" -d \"$info\" -i \"warning\"");
           $saved[$item][$attr] = $value;
+          unset($saved[$item][$ack]);
         }
       } else {
         if ($last<255) {
           exec("$notify -e \"unRAID $text SMART message [$id]\" -s \"Notice [$server] - $word returned to normal value\" -d \"$info\"");
           unset($saved[$item][$attr]);
+          unset($saved[$item][$ack]);
         }
       }
       break;
@@ -176,6 +183,27 @@ function check_smart($name,$port,$text,$info) {
   }
   $file .= '.ssa';
   if (!file_exists($file) || (time()-filemtime($file)>=$var['poll_attributes'])) exec("smartctl -n standby -H $type /dev/$port|grep -Pom1 '^SMART.*: \K[A-Z]+'|tr -d '\n' > $file");
+}
+function check_usage($name,$used,$text,$info) {
+  global $notify,$disks,$saved,$unraid,$server;
+  if ($used == -1) return;
+  $disk = &$disks[$name];
+  $warning  = !empty($disk['warning']) ? $disk['warning'] : $unraid['display']['warning'];
+  $critical = !empty($disk['critical']) ? $disk['critical'] : $unraid['display']['critical'];
+  $warn = $used>=$critical ? 'alert' : ($used>=$warning ? 'warning' : '');
+  $item = 'used';
+  $last = isset($saved[$item][$name]) ? $saved[$item][$name] : 0;
+  if ($warn) {
+    if ($used>$last) {
+      exec("$notify -e \"unRAID $text disk utilization\" -s \"".ucfirst($warn)." [$server] - $text is ".($warn=='alert'?'low on space':'high on usage')." (${used}%)\" -d \"$info\" -i \"$warn\"");
+      $saved[$item][$name] = $used;
+    }
+  } else {
+    if ($last) {
+      exec("$notify -e \"unRAID $text message\" -s \"Notice [$server] - $text returned to normal utilization level\" -d \"$info\"");
+      unset($saved[$item][$name]);
+    }
+  }
 }
 
 // check once a week for smart database updates
@@ -187,13 +215,14 @@ if (!file_exists($smartDB) || (time()-filemtime($smartDB)>=$interval)) exec('/us
 foreach ($disks as $disk) {
   $name = $disk['name'];
   if ($name=='flash' || substr($disk['status'],-3)=='_NP') continue;
-  $temp = $disk['temp'];
   $text = my_disk($name).($name=='cache'||$name=='parity'?' disk':'');
   $info = !empty($disk['id']) ? "{$disk['id']} ({$disk['device']})" : "No device identification ({$disk['device']})";
 // process disk temperature notifications
-  check_temp($name,$temp,$text,$info);
+  check_temp($name,$disk['temp'],$text,$info);
 // process disk SMART notifications
   check_smart($name,$disk['device'],$text,$info);
+// process disk usage notifications
+  check_usage($name,($disk['fsSize']?100-round(100*$disk['fsFree']/$disk['fsSize']):-1),$text,$info);
 // process disk operation notifications
   $warn = strtok($disk['color'],'-');
   $item = 'disk';

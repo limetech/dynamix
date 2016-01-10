@@ -53,5 +53,5 @@ $myPage = $site[basename($path)];
 $pageroot = "{$docroot}/".dirname($myPage['file']);
 
 // Giddyup
-require_once('include/DefaultPageLayout.php');
+require_once 'include/DefaultPageLayout.php';
 ?>
