@@ -180,7 +180,7 @@ Page view:
 
 Placement of Users menu:
 : <select name="users" size="1">
-  <?=mk_option($display['users'], "Tasks:3", "Header")?>
+  <?=mk_option($display['users'], "Tasks:3", "Header menu")?>
   <?=mk_option($display['users'], "UserPreferences", "Settings menu")?>
   </select>
 
