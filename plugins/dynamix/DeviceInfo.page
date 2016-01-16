@@ -151,7 +151,7 @@ Spin down delay:
   <?=mk_option($disk['spindownDelay'], "9",  "9 hours")?>
   </select><span id="smart_selftest" class='orange-text'></span>
 
-<?if ($disk['name'] != 'parity'):?>
+<?if ($name != 'parity'):?>
 Warning disk utilization level (%):
 : <input type="number" min="0" max="99" name="<?=$name?>_warning" class="narrow" value="<?=!empty($disk['warning'])?$disk['warning']:''?>" placeholder="<?=$display['warning']?>">
 
