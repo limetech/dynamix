@@ -14,10 +14,11 @@ case 'load':
 case 'save':
   exec("mkdir -p $path");
   if (isset($_POST['flash'])) @copy("$temp/$file", $_POST['flash']);
-  $result = @rename("$temp/$file", "$path/{$_POST['output']}.png");
+  exec("rm -f $path/banner*.png");
+  $result = @rename("$temp/$file", "$path/{$_POST['banner']}");
   break;
 case 'delete':
-  @unlink("$path/{$_POST['output']}.png");
+  @unlink("$path/$file");
   $result = true;
   break;
 case 'reset':
@@ -25,5 +26,5 @@ case 'reset':
   $result = @copy("$path/$file", "$path/{$_POST['output']}.png");
   break;
 }
-echo ($result ? '200 OK' : '500 Internal Error');
+echo ($result ? 'OK 200' : 'Internal Error 500');
 ?>
