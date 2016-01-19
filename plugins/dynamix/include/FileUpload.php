@@ -15,8 +15,7 @@ case 'save':
   exec("mkdir -p $path");
   if (isset($_POST['flash'])) @copy("$temp/$file", $_POST['flash']);
   $output = basename($_POST['output'],'.png');
-  $i = strpos($output,'!');
-  $prefix = $i===false ? $output : substr($output,0,$i);
+  $prefix = strtok($output, '!');
   exec("rm -f $path/$prefix*.png");
   $result = @rename("$temp/$file", "$path/$output.png");
   break;
