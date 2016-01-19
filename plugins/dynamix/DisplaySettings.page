@@ -27,6 +27,7 @@ i.top{position:absolute;padding-left:4px;cursor:pointer;}
 
 <script src="/webGui/javascript/jquery.filedrop.js"></script>
 <script>
+var path = '/boot/config/plugins/dynamix';
 var filename = '';
 
 function restore() {
@@ -35,16 +36,13 @@ function restore() {
   $('select[name="banner"]').trigger('change');
   filename = 'reset';
 }
-function upload(remove) {
-  // gets invoked when the user clicks APPLY, at this point image will be saved or deleted
-  var path = '/boot/config/plugins/dynamix';
-  if (remove || filename=='reset') {
-    document.display_settings.custom.value = '';
-    $.post("/webGui/include/FileUpload.php",{cmd:'delete',path:path,filename:'<?=$display['custom']?>'});
+function upload() {
+  // save or delete upload when APPLY is pressed
+  if (filename=='reset') {
+    $.post("/webGui/include/FileUpload.php",{cmd:'delete',path:path,filename:'banner*.png'});
   } else if (filename) {
-    var banner = 'banner'+new Date().getTime()+'.png';
-    document.display_settings.custom.value = banner;
-    $.post("/webGui/include/FileUpload.php",{cmd:'save',path:path,filename:filename,banner:banner});
+    var banner = 'banner!'+new Date().getTime()+'.png';
+    $.post("/webGui/include/FileUpload.php",{cmd:'save',path:path,filename:filename,output:banner});
   }
 }
 function presetTime(form) {
@@ -213,11 +211,10 @@ Show banner:
 
 <div id="custom" markdown="1" style="display:none">
 Custom banner:
-<input type="hidden" name="custom" value="<?=$display['custom']?>">
+<input type="hidden" name="#custom" value="">
 : <span id="dropbox">
-<?if ($display['custom'] && $display['custom']!='custom'):?>
-<?$banner = file_exists('/boot/config/plugins/dynamix/banner.png') ? 'banner.png' : $display['custom'];?>
-  <img src="/boot/config/plugins/dynamix/<?=$banner?>" width="330" height="30" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><?=$icon?>
+<?if (file_exists($custom_banner[0])):?>
+  <img src="<?=$custom_banner[0]?>" width="330" height="30" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><?=$icon?>
 <?else:?>
   <?=$void?>
 <?endif;?>

@@ -14,11 +14,14 @@ case 'load':
 case 'save':
   exec("mkdir -p $path");
   if (isset($_POST['flash'])) @copy("$temp/$file", $_POST['flash']);
-  exec("rm -f $path/banner*.png");
-  $result = @rename("$temp/$file", "$path/{$_POST['banner']}");
+  $output = basename($_POST['output'],'.png');
+  $i = strpos($output,'!');
+  $prefix = $i===false ? $output : substr($output,0,$i);
+  exec("rm -f $path/$prefix*.png");
+  $result = @rename("$temp/$file", "$path/$output.png");
   break;
 case 'delete':
-  @unlink("$path/$file");
+  exec("rm -f $path/$file");
   $result = true;
   break;
 case 'reset':
