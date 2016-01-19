@@ -30,7 +30,7 @@ case 'delete':
   @unlink("$docroot/$file");
   break;
 case 'diag':
-  exec("$docroot/webGui/scripts/diagnostics $docroot/$file");
+  exec("$docroot/webGui/scripts/diagnostics {$_POST['anonymize']} $docroot/$file");
   echo "/$file";
   break;
 }
