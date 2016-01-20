@@ -39,10 +39,9 @@ function restore() {
 function upload() {
   // save or delete upload when APPLY is pressed
   if (filename=='reset') {
-    $.post("/webGui/include/FileUpload.php",{cmd:'delete',path:path,filename:'banner*.png'});
+    $.post("/webGui/include/FileUpload.php",{cmd:'delete',path:path,filename:'banner.png'});
   } else if (filename) {
-    var banner = 'banner!'+new Date().getTime()+'.png';
-    $.post("/webGui/include/FileUpload.php",{cmd:'save',path:path,filename:filename,output:banner});
+    $.post("/webGui/include/FileUpload.php",{cmd:'save',path:path,filename:filename,output:'banner.png'});
   }
 }
 function presetTime(form) {
@@ -213,8 +212,8 @@ Show banner:
 Custom banner:
 <input type="hidden" name="#custom" value="">
 : <span id="dropbox">
-<?if (file_exists($custom_banner[0])):?>
-  <img src="<?=$custom_banner[0]?>" width="330" height="30" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><?=$icon?>
+<?if (file_exists('/boot/config/plugins/dynamix/banner.png')):?>
+  <img src="<?=autov('/boot/config/plugins/dynamix/banner.png')?>" width="330" height="30" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><?=$icon?>
 <?else:?>
   <?=$void?>
 <?endif;?>

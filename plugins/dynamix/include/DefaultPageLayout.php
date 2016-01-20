@@ -27,9 +27,8 @@
 
 <style>
 .inline_help{display:none;}
-<?$custom_banner = glob('/boot/config/plugins/dynamix/banner*.png',GLOB_NOSORT)?>
-<?if (file_exists($custom_banner[0])):?>
-#header.image{background-image:url(<?=$custom_banner[0]?>);}
+<?if (file_exists('/boot/config/plugins/dynamix/banner.png')):?>
+#header.image{background-image:url(<?=autov('/boot/config/plugins/dynamix/banner.png')?>);}
 <?else:?>
 #header.image{background-image:url(/webGui/images/banner.png);}
 <?endif?>

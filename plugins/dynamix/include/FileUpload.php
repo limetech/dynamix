@@ -14,10 +14,7 @@ case 'load':
 case 'save':
   exec("mkdir -p $path");
   if (isset($_POST['flash'])) @copy("$temp/$file", $_POST['flash']);
-  $output = basename($_POST['output'],'.png');
-  $prefix = strtok($output, '!');
-  exec("rm -f $path/$prefix*.png");
-  $result = @rename("$temp/$file", "$path/$output.png");
+  $result = @rename("$temp/$file", "$path/{$_POST['output']}");
   break;
 case 'delete':
   exec("rm -f $path/$file");

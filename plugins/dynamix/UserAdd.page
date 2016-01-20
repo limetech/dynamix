@@ -54,8 +54,7 @@ function checkUsername(form) {
     return false;
   }
   if (filename) {
-    var user = username+'!'+new Date().getTime()+'.png';
-    $.post("/webGui/include/FileUpload.php",{cmd:'save',path:path,filename:filename,output:user});
+    $.post("/webGui/include/FileUpload.php",{cmd:'save',path:path,filename:filename,output:username+'.png'});
   }
   return true;
 }
