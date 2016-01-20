@@ -212,8 +212,8 @@ Show banner:
 Custom banner:
 <input type="hidden" name="#custom" value="">
 : <span id="dropbox">
-<?if (file_exists('/boot/config/plugins/dynamix/banner.png')):?>
-  <img src="<?=autov('/boot/config/plugins/dynamix/banner.png')?>" width="330" height="30" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><?=$icon?>
+<?if (file_exists($banner)):?>
+  <img src="<?=autov($banner)?>" width="330" height="30" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><?=$icon?>
 <?else:?>
   <?=$void?>
 <?endif;?>
