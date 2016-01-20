@@ -8,7 +8,7 @@ switch ($cmd) {
 case 'load':
   if (isset($_POST['filedata'])) {
     exec("rm -f $temp/*.png");
-    $result = file_put_contents("$temp/$file", base64_decode(str_replace(array('data:image/png;base64,',' '),array('','+'),$_POST['filedata'])));
+    $result = file_put_contents("$temp/$file", base64_decode(str_replace(['data:image/png;base64,',' '],['','+'],$_POST['filedata'])));
   }
   break;
 case 'save':
