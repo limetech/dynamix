@@ -49,7 +49,7 @@ function restore() {
 function upload(remove) {
   // save or delete upload when APPLY is pressed
   if (remove || filename=='reset') {
-    $.post("/webGui/include/FileUpload.php",{cmd:'delete',path:path,filename:'<?=$name?>*.png'});
+    $.post("/webGui/include/FileUpload.php",{cmd:'delete',path:path,filename:'<?=$name?>.png'});
   } else if (filename) {
     $.post("/webGui/include/FileUpload.php",{cmd:'save',path:path,filename:filename,output:'<?=$name?>.png'});
   }
