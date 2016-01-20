@@ -21,6 +21,7 @@ Title="Edit User"
 <?endif;?>
 
 <?
+$user = "/boot/config/plugins/dynamix/users/$name.png";
 $void = "<img src='/webGui/images/user.png' width='48' height='48' id='image' onclick='$(&quot;#drop&quot;).click()' style='cursor:pointer' title='Click to select PNG file'>";
 $icon = "<i class='fa fa-trash top' title='Restore default image' onclick='restore()'></i>";
 ?>
@@ -117,8 +118,8 @@ Description:
 
 Custom image:
 : <span id="dropbox">
-<?if (file_exists("/boot/config/plugins/dynamix/users/$name.png")):?>
-  <img src="<?=autov("/boot/config/plugins/dynamix/users/$name.png")?>" id="image" width="48" height="48" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><?=$icon?>
+<?if (file_exists($user)):?>
+  <img src="<?=autov($user)?>" id="image" width="48" height="48" onclick="$('#drop').click()" style="cursor:pointer" title="Click to select PNG file"><?=$icon?>
 <?else:?>
   <?=$void?>
 <?endif;?>
