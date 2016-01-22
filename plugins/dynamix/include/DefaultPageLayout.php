@@ -24,14 +24,15 @@
 <link type="text/css" rel="stylesheet" href="/webGui/styles/jquery.sweetalert.css">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/default-{$display['theme']}.css")?>">
 <link type="text/css" rel="stylesheet" href="<?autov("/webGui/styles/dynamix-{$display['theme']}.css")?>">
-<?if (file_exists("/boot/config/plugins/dynamix/banner.png")):?>
-<link type="text/css" rel="stylesheet" href="/webGui/styles/custom-banner.css">
-<?else:?>
-<link type="text/css" rel="stylesheet" href="/webGui/styles/default-banner.css">
-<?endif?>
 
 <style>
 .inline_help{display:none;}
+<?$banner = '/boot/config/plugins/dynamix/banner.png';?>
+<?if (file_exists($banner)):?>
+#header.image{background-image:url(<?=autov($banner)?>);}
+<?else:?>
+#header.image{background-image:url(/webGui/images/banner.png);}
+<?endif?>
 </style>
 
 <script src="<?autov("/webGui/javascript/dynamix.js")?>"></script>
