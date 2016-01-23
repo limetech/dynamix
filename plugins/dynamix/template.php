@@ -14,11 +14,6 @@
 require_once 'include/Helpers.php';
 require_once 'include/PageBuilder.php';
 
-function psort(&$a) {
-  $x = array_search('plugins/dynamix',$a);
-  $t = $a[0]; $a[0] = $a[$x]; $a[$x] = $t;
-}
-
 // Extract the 'querystring'
 // variables provided by emhttp:
 //   path=<path>   page path, e.g., path=Main/Disk
@@ -47,11 +42,12 @@ $sec_afp = parse_ini_file('state/sec_afp.ini',true);
 // Merge SMART settings
 require_once 'include/CustomMerge.php';
 
-// Build webGui pages first and next all other plugins pages
+// Build webGui pages first, then plugins pages
 $site = [];
-$plugins = glob('plugins/*', GLOB_ONLYDIR+GLOB_NOSORT);
-psort($plugins);
-foreach ($plugins as $plugin) build_pages("$plugin/*.page");
+build_pages('webGui/*.page');
+foreach (glob('plugins/*', GLOB_ONLYDIR+GLOB_NOSORT) as $plugin) {
+  if ($plugin != 'plugins/dynamix') build_pages("$plugin/*.page");
+}
 
 // Here's the page we're rendering
 $myPage = $site[basename($path)];
