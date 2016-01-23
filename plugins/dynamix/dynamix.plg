@@ -8,7 +8,7 @@
 <!ENTITY pluginURL "https://raw.github.com/limetech/&name;/master/plugins/&name;/&name;.plg">
 ]>
 
-<PLUGIN name="&name;" author="&author;" version="&version;" unRAID="&unRAID;" pluginURL="&pluginURL;">
+<PLUGIN name="&name;" author="&author;" version="&version;" unRAID="&unRAID;" pluginURL="&pluginURL;" plugintype="system">
 
 <CHANGES>
 Dynamix webGui v&version;
@@ -20,29 +20,33 @@ on github.
 </CHANGES>
 
 <!-- Get from github as tarball. -->
-<FILE Name="/boot/config/plugins/&name;/&name;-&version;.tar.gz">
+<FILE Name="/boot/plugins/&name;-&version;.tar.gz">
 <URL>"https://github.com/limetech/&name;/archive/&version;.tar.gz"</URL>
 </FILE>
 
 <!-- The 'install' script. -->
 <FILE Run="/bin/bash">
 <INLINE>
-rm -r /tmp/plugins/&name;-&version; 2&gt;/dev/null
-tar -xf /boot/config/plugins/&name;/&name;-&version;.tar.gz -C /tmp/plugins
-mv /tmp/plugins/&name;-&version;/* /usr/local/emhttp 2&gt;/dev/null
+# Remove legacy plugin
+rm -f /boot/config/plugins/&name;/&name;.plg
+rm -f /boot/config/plugins/&name;/&name;-*.tar.gz
+
+rm -rf /tmp/plugins/&name;-&version;
+tar -xf /boot/plugins/&name;-&version;.tar.gz -C /tmp/plugins
+mv -f /tmp/plugins/&name;-&version;/* /usr/local/emhttp >/dev/null
 for Plugin in /tmp/plugins/&name;-&version;/plugins/* ; do
-  rm -r /usr/local/emhttp/plugins/$(basename $Plugin) 2&gt;/dev/null
-  mv $Plugin /usr/local/emhttp/plugins/$(basename $Plugin)
+  rm -rf /usr/local/emhttp/plugins/$(basename $Plugin)
+  mv -f $Plugin /usr/local/emhttp/plugins/$(basename $Plugin)
 done
-rm -r /tmp/plugins/&name;-&version;
-find /boot/config/plugins/&name; -type f -iname "*.tar.gz" ! -iname "&name;-&version;.tar.gz" -delete
+rm -rf /tmp/plugins/&name;-&version;
+find /boot/plugins -type f -iname "*.tar.gz" ! -iname "&name;-&version;.tar.gz" -delete
 </INLINE>
 </FILE>
 
 <!-- The 'remove' script. -->
 <FILE Run="/bin/bash" Method="remove">
 <INLINE>
-rm -r /boot/config/plugins/&name;/&name;-&version;.tar.gz 2&gt;/dev/null
+rm -rf /boot/plugins
 echo "*********************"
 echo "Please reboot server."
 echo "*********************"
