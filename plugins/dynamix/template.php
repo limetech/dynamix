@@ -45,7 +45,7 @@ require_once 'include/CustomMerge.php';
 // Build webGui pages first, then plugins pages
 $site = [];
 build_pages('webGui/*.page');
-foreach (glob('plugins/*', GLOB_ONLYDIR+GLOB_NOSORT) as $plugin) {
+foreach (glob('plugins/*', GLOB_ONLYDIR) as $plugin) {
   if ($plugin != 'plugins/dynamix') build_pages("$plugin/*.page");
 }
 
