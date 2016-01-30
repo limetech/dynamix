@@ -334,12 +334,12 @@ if (file_exists("/boot/config/docker.cfg")) {
 } else
   $info = "Docker image file not specified";
 
-if ($warn>=$high1) {
+if ($warn>=$high1 && $high1>0) {
   if ($warn>$last) {
     exec("$notify -e \"Docker critical image disk utilization\" -s \"Alert [$server] - Docker image disk utilization of ${warn}%\" -d \"$info\" -i \"alert\"");
     $saved[$item][$name] = $warn;
   }
-} else if ($warn>=$high2) {
+} else if ($warn>=$high2 && $high2>0) {
   if ($warn>$last) {
     exec("$notify -e \"Docker high image disk utilization\" -s \"Warning [$server] - Docker image disk utilization of ${warn}%\" -d \"$info\" -i \"warning\"");
     $saved[$item][$name] = $warn;
