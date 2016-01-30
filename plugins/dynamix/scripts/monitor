@@ -99,8 +99,8 @@ function read_write_parity_log($epoch) {
 function check_temp($name,$temp,$text,$info) {
   global $notify,$disks,$saved,$unraid,$server;
   $disk = &$disks[$name];
-  $hot  = !empty($disk['hotTemp']) ? $disk['hotTemp'] : $unraid['display']['hot'];
-  $max  = !empty($disk['maxTemp']) ? $disk['maxTemp'] : $unraid['display']['max'];
+  $hot  = strlen($disk['hotTemp']) ? $disk['hotTemp'] : $unraid['display']['hot'];
+  $max  = strlen($disk['maxTemp']) ? $disk['maxTemp'] : $unraid['display']['max'];
   $warn = $temp>=$max && $max>0 ? 'alert' : ($temp>=$hot && $hot>0 ? 'warning' : '');
   $item = 'temp';
   $last = isset($saved[$item][$name]) ? $saved[$item][$name] : 0;
@@ -188,8 +188,8 @@ function check_usage($name,$used,$text,$info) {
   global $notify,$disks,$saved,$unraid,$server;
   if ($used == -1) return;
   $disk = &$disks[$name];
-  $warning  = !empty($disk['warning']) ? $disk['warning'] : $unraid['display']['warning'];
-  $critical = !empty($disk['critical']) ? $disk['critical'] : $unraid['display']['critical'];
+  $warning  = strlen($disk['warning']) ? $disk['warning'] : $unraid['display']['warning'];
+  $critical = strlen($disk['critical']) ? $disk['critical'] : $unraid['display']['critical'];
   $warn = $used>=$critical && $critical>0 ? 'alert' : ($used>=$warning && $warning>0 ? 'warning' : '');
   $item = 'used';
   $last = isset($saved[$item][$name]) ? $saved[$item][$name] : 0;
