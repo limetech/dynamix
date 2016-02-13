@@ -194,7 +194,6 @@ case 'add':
   break;
 
 case 'get':
-  $output = array();
   $output = [];
   $json = [];
   $files = glob("$unread/*.notify", GLOB_NOSORT);
