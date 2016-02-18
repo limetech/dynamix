@@ -30,7 +30,7 @@ foreach (glob("/tmp/plugins/*.plg", GLOB_NOSORT) as $file) {
   $old = plugin('version', "/var/log/plugins/$plg");
   $new = plugin('version', $file);
   // silently suppress bad download of PLG file
-  if ($new !== false && version_compare($new, $old, '>')) {
+  if ($new !== false && strcmp($new, $old) > 0) {
     $unRAID = plugin('unRAID', $file);
     if ($unRAID === false || version_compare($current['version'], $unRAID, '>=')) {
       $name = basename($file, '.plg');
