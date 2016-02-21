@@ -324,8 +324,8 @@ if ($warn!="rw") {
 }
 
 // check docker image disk utilization
-$warn = exec("df /var/lib/docker|awk '/^\//{print $5*1}'");
-if ($warn) {
+system('mountpoint -q /var/lib/docker', $retval);
+if ($retval===0) {
   $item = 'system';
   $name = 'docker';
   $last = isset($saved[$item][$name]) ? $saved[$item][$name] : '';
@@ -335,6 +335,7 @@ if ($warn) {
   } else
     $info = "Docker image file not specified";
 
+  $warn = exec("df /var/lib/docker|awk '/^\//{print $5*1}'");
   if ($warn>=$high1 && $high1>0) {
     if ($warn>$last) {
       exec("$notify -e \"Docker critical image disk utilization\" -s \"Alert [$server] - Docker image disk utilization of ${warn}%\" -d \"$info\" -i \"alert\"");
