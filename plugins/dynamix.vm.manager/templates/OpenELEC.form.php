@@ -944,8 +944,6 @@ $(function() {
 		}, "json");
 	});
 
-	$("#form_content #btnCancel").click(done);
-
 
 	$("#form_content #btnDownload").click(function frmDownload() {
 		var $button = $("#form_content #btnDownload");

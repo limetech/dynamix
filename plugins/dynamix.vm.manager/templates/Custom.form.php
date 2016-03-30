@@ -931,8 +931,6 @@ $(function() {
 		}, "json");
 	});
 
-	$("#form_content #btnCancel").click(done);
-
 
 	// Fire events below once upon showing page
 	$("#form_content table[data-category]").each(function () {

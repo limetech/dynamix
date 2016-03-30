@@ -325,5 +325,9 @@ $(function() {
 			});
 		});
   	}).change(); // Fire now too
+
+	$("#form_content").on('click', '#btnCancel', function () {
+		done();
+	});
 });
 </script>

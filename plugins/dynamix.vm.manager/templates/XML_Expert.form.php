@@ -192,7 +192,5 @@ $(function() {
 			}
 		}, "json");
 	});
-
-	$("#form_content #btnCancel").click(done);
 });
 </script>
