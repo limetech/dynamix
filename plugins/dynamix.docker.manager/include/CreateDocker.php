@@ -853,7 +853,7 @@ table td{font-size:14px;vertical-align:bottom;text-align:left;}
         <tr class="inline_help" style="display: none">
           <td colspan="2">
             <blockquote class="inline_help">
-              <p>When you click on an application icon from the Docker Containers page, the WebUI option will link to the path in this field.  Use [IP} to identify the IP of your host and [PORT:####] replacing the #'s for your port.</p>
+              <p>When you click on an application icon from the Docker Containers page, the WebUI option will link to the path in this field.  Use [IP] to identify the IP of your host and [PORT:####] replacing the #'s for your port.</p>
             </blockquote>
           </td>
         </tr>
